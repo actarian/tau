@@ -1,0 +1,35 @@
+﻿{
+	"targets": {
+		"browser": {
+			"compile": [{
+				"input": "src/sass/tau.scss",
+				"output": "docs/css/tau.css",
+				"minify": false
+			}, {
+				"input": "src/js/tau.js",
+				"output": "docs/js/tau.js",
+				"minify": false
+			}],
+			"bundle": [{
+				"input": [
+					"node_modules/gsap/src/uncompressed/easing/EasePack.js",
+					"node_modules/gsap/src/uncompressed/TweenMax.js",
+					"node_modules/three/build/three.js",
+					"node_modules/three/examples/js/vr/WebVR.js",
+					"node_modules/three/examples/js/modifiers/SubdivisionModifier.js",
+					"node_modules/three/examples/js/loaders/OBJLoader.js",
+					"node_modules/three/examples/js/controls/OrbitControls.js"
+				],
+				"output": "docs/js/tau-vendors.js",
+				"minify": true
+			}]
+		}
+	},
+	"options": {
+		"tfs": false,
+		"server": {
+			"src": "./docs",
+			"port": 7777
+		}
+	}
+}
