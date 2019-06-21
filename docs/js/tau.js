@@ -289,7 +289,7 @@ function () {
       controls.minDistance = 100; // controls.maxPolarAngle = Math.PI / 2;
       // controls.minPolarAngle = Math.PI / 2;
 
-      camera.position.set(-47, 91, -90);
+      camera.position.set(60, 205, -73);
       controls.update();
       var orbit = this.orbit = new _orbit.default();
       var dragListener = this.dragListener = orbit.setDragListener(container); // raycaster
@@ -367,7 +367,7 @@ function () {
   }, {
     key: "addCamera",
     value: function addCamera() {
-      var camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, _const.ROOM_RADIUS * 2);
+      var camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, 2000);
       camera.zoom = 0.15;
       camera.target = new THREE.Vector3();
       return camera;
@@ -389,14 +389,21 @@ function () {
       scene.add(hemiLightHelper);
       */
 
-      var dirLight = new THREE.DirectionalLight(0xffffff, 1);
-      dirLight.color.setHSL(0.1, 1, 0.95);
-      dirLight.position.set(-30, 40, 30);
-      lights.add(dirLight);
-      var dirLight2 = new THREE.DirectionalLight(0xffffff, 1);
-      dirLight2.color.setHSL(0.1, 1, 0.95);
-      dirLight2.position.set(30, -40, -30);
-      lights.add(dirLight2);
+      var light1 = new THREE.PointLight(0xffffff, 0.8);
+      light1.position.set(-100, 100, 100);
+      lights.add(light1);
+      var light2 = new THREE.PointLight(0xffffff, 0.8);
+      light2.position.set(100, 100, 100);
+      lights.add(light2);
+      var light3 = new THREE.PointLight(0xffffff, 0.8);
+      light3.position.set(0, -100, -100);
+      lights.add(light3);
+      /*
+      const light4 = new THREE.PointLight(0xffffff, 0.8);
+      light4.position.set(50, -100, -50);
+      lights.add(light4);
+      */
+
       /*
       dirLight.castShadow = true;
       dirLight.shadow.mapSize.width = 2048;
@@ -419,8 +426,8 @@ function () {
       return lights;
     }
   }, {
-    key: "getBox",
-    value: function getBox(parent) {
+    key: "getBox_",
+    value: function getBox_(parent) {
       var geometry = new THREE.BoxGeometry(100, 100, 100);
       var material = new THREE.MeshBasicMaterial({
         color: 0xcccccc
@@ -430,8 +437,8 @@ function () {
       return cube;
     }
   }, {
-    key: "addBoxes",
-    value: function addBoxes(parent) {
+    key: "addBoxes_",
+    value: function addBoxes_(parent) {
       var boxes = new THREE.Group();
       boxes.visible = false;
       var box;
@@ -459,9 +466,38 @@ function () {
       return boxes;
     }
   }, {
+    key: "getBox",
+    value: function getBox(parent) {
+      var geometry = new THREE.BoxGeometry(30, 30, 500);
+      var material = new THREE.MeshBasicMaterial({
+        color: 0xceb7b8
+      }); // 0xcccccc
+
+      var cube = new THREE.Mesh(geometry, material);
+      parent.add(cube);
+      return cube;
+    }
+  }, {
+    key: "addBoxes",
+    value: function addBoxes(parent) {
+      var _this2 = this;
+
+      var group = new THREE.Group();
+      group.visible = false;
+      var boxes = new Array(12).fill(null).map(function (x, i) {
+        var box = _this2.getBox(group);
+
+        var r = Math.PI * 2 / 12 * i;
+        box.position.set(Math.cos(r) * 300, Math.sin(r) * 300, 0);
+        return box;
+      });
+      parent.add(group);
+      return group;
+    }
+  }, {
     key: "addTau",
     value: function addTau(parent) {
-      var _this2 = this;
+      var _this3 = this;
 
       var tau = new THREE.Group();
       /*
@@ -487,7 +523,7 @@ function () {
           if (child instanceof THREE.Mesh) {
             child.geometry.scale(0.7, 0.7, 0.7);
             child.geometry.translate(-70, 0, 0);
-            child.geometry.rotateY(Math.PI);
+            child.geometry.rotateY(Math.PI / 2); // child.geometry.rotateY(Math.PI);
 
             if (i === 0) {
               child.material = red;
@@ -505,10 +541,10 @@ function () {
           }
         });
 
-        _this2.addLogo(object); // object.material = material;
+        _this3.addLogo(object); // object.material = material;
+        // object.rotateZ(Math.PI / 8);
 
 
-        object.rotateZ(Math.PI / 8);
         console.log(object);
         tau.add(object);
       }, function (xhr) {// console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
@@ -521,10 +557,10 @@ function () {
   }, {
     key: "addLogo",
     value: function addLogo(parent) {
-      var geometry = new THREE.PlaneGeometry(32, 4, 3, 1);
+      var geometry = new THREE.PlaneGeometry(24, 3, 3, 1);
       geometry.rotateX(-Math.PI / 2);
-      geometry.rotateY(Math.PI);
-      geometry.translate(-30, 2.3, 0);
+      geometry.rotateY(Math.PI / 2);
+      geometry.translate(0, 2.2, -24);
       var logo = new THREE.Mesh(geometry, this.silver);
       parent.add(logo);
       return logo;
@@ -573,14 +609,15 @@ function () {
     key: "getRed",
     value: function getRed() {
       var material = new THREE.MeshStandardMaterial({
-        color: 0xff2222,
-        roughness: 0.1,
-        metalness: 0.2,
+        color: 0xe11e26,
+        roughness: 0.16,
+        metalness: 0.0,
         envMap: this.cubeCamera1.renderTarget.texture,
         // The refractionRatio must have value in the range 0 to 1.
         // The default value, very close to 1, give almost invisible glass.
         refractionRatio: 0,
-        reflectivity: 0.4,
+        reflectivity: 1,
+        // 0.4,
         side: THREE.DoubleSide
       });
       return material;
@@ -589,7 +626,8 @@ function () {
     key: "getClear",
     value: function getClear() {
       var material = new THREE.MeshPhysicalMaterial({
-        color: 0xc9d3da,
+        color: 0xe0e3e5,
+        // 0xc9d3da,
         roughness: 0.1,
         metalness: 0.9,
         clearCoat: 0.9,
@@ -785,11 +823,11 @@ function () {
   }, {
     key: "animate",
     value: function animate() {
-      var _this3 = this;
+      var _this4 = this;
 
       var renderer = this.renderer;
       renderer.setAnimationLoop(function () {
-        _this3.render();
+        _this4.render();
       });
     }
   }, {
@@ -797,7 +835,8 @@ function () {
     value: function render(delta) {
       var controls = this.controls;
       controls.update();
-      this.lights.rotation.set(this.lights.rotation.x + 0.001, this.lights.rotation.y + 0.001, 0);
+      this.lights.rotation.set(0, this.lights.rotation.y + 0.003, 0); // this.tau.rotation.set(Math.cos(this.count / 100) * Math.PI / 180 * 2, Math.cos(this.count / 100) * Math.PI / 180 * 2, 0);
+
       var renderer = this.renderer;
       var camera = this.camera;
       var scene = this.scene;
