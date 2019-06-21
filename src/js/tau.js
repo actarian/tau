@@ -56,7 +56,7 @@ class Tau {
 		// camera.target.z = ROOM_RADIUS;
 		camera.lookAt(camera.target);
 		const controls = this.controls = new THREE.OrbitControls(camera, renderer.domElement);
-		camera.position.set(-50, 80, 100);
+		camera.position.set(-40, 105, -78);
 		controls.update();
 		const orbit = this.orbit = new Orbit();
 		const dragListener = this.dragListener = orbit.setDragListener(container);
@@ -102,9 +102,9 @@ class Tau {
 	addRenderer() {
 		const renderer = new THREE.WebGLRenderer({
 			antialias: true,
-			localClippingEnabled: true,
+			// localClippingEnabled: true,
 			// logarithmicDepthBuffer: true,
-			premultipliedAlpha: true,
+			// premultipliedAlpha: true,
 			alpha: true,
 		});
 		this.renderer = renderer;
@@ -210,7 +210,7 @@ class Tau {
 	addTau(parent) {
 		const tau = new THREE.Group();
 		/*
-		const texture = new THREE.TextureLoader().load('img/matcap.jpg');
+		const texture = new THREE.loader().load('img/matcap.jpg');
 		const material = new THREE.MeshMatcapMaterial({
 			color: 0xffffff,
 			matcap: texture,
@@ -218,9 +218,11 @@ class Tau {
 			opacity: 1,
 		});
 		*/
-		const texture = this.getEnvMap();
-		const clear = this.clear = this.getClear(texture);
-		const red = this.getRed(texture);
+		// const texture = this.getEnvMap();
+		this.getCubeCamera();
+		const clear = this.clear = this.getClear();
+		const silver = this.silver = this.getSilver();
+		const red = this.red = this.getRed();
 		const loader = new THREE.OBJLoader();
 		loader.load('models/tau-marin_senzaspatole_low.obj',
 			(object) => {
@@ -245,6 +247,7 @@ class Tau {
 						*/
 					}
 				});
+				this.addLogo(object);
 				// object.material = material;
 				object.rotateZ(Math.PI / 8);
 				console.log(object);
@@ -259,6 +262,27 @@ class Tau {
 		);
 		parent.add(tau);
 		return tau;
+	}
+
+	addLogo(parent) {
+		const geometry = new THREE.PlaneGeometry(32, 4, 3, 1);
+		geometry.rotateX(-Math.PI / 2);
+		geometry.rotateY(Math.PI);
+		geometry.translate(-30, 2.4, 0);
+		const logo = new THREE.Mesh(geometry, this.silver);
+		parent.add(logo);
+		return logo;
+	}
+
+	getCubeCamera() {
+		const cubeCamera0 = this.cubeCamera0 = new THREE.CubeCamera(0.01, 1000, 512);
+		cubeCamera0.renderTarget.texture.generateMipmaps = true;
+		cubeCamera0.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
+		this.scene.add(cubeCamera0);
+		const cubeCamera1 = this.cubeCamera1 = new THREE.CubeCamera(0.01, 1000, 512);
+		cubeCamera1.renderTarget.texture.generateMipmaps = true;
+		cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
+		this.scene.add(cubeCamera1);
 	}
 
 	getEnvMap() {
@@ -293,45 +317,29 @@ class Tau {
 		return texture;
 	}
 
-	getRed(envMap) {
+	getRed() {
 		const material = new THREE.MeshStandardMaterial({
 			color: 0xff2222,
 			roughness: 0.1,
 			metalness: 0.2,
-			envMap: envMap,
+			envMap: this.cubeCamera1.renderTarget.texture,
 			// The refractionRatio must have value in the range 0 to 1.
 			// The default value, very close to 1, give almost invisible glass.
-			refractionRatio: 0.1,
-			reflectivity: 0.2,
+			refractionRatio: 0,
+			reflectivity: 0.4,
 			side: THREE.DoubleSide,
 		});
 		return material;
 	}
 
-	/**
-	 *  Creates the material to use on the models.  This is a MeshBasicMaterial with
-	 *  the skybox as an environment map.  The base color, which is blended with the
-	 *  environment map, is taken from the current color selection.
-	 */
-	getClear(envMap) {
-
-		const cubeCamera0 = this.cubeCamera0 = new THREE.CubeCamera(0.01, 1000, 512);
-		cubeCamera0.renderTarget.texture.generateMipmaps = true;
-		cubeCamera0.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
-		this.scene.add(cubeCamera0);
-
-		const cubeCamera1 = this.cubeCamera1 = new THREE.CubeCamera(0.01, 1000, 512);
-		cubeCamera1.renderTarget.texture.generateMipmaps = true;
-		cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
-		this.scene.add(cubeCamera1);
-
+	getClear() {
 		const material = new THREE.MeshPhysicalMaterial({
 			color: 0xc9d3da,
 			roughness: 0.1,
 			metalness: 0.9,
 			clearCoat: 0.9,
 			clearCoatRoughness: 0.1,
-			envMap: cubeCamera1.renderTarget.texture,
+			envMap: this.cubeCamera1.renderTarget.texture,
 			// The refractionRatio must have value in the range 0 to 1.
 			// The default value, very close to 1, give almost invisible glass.
 			refractionRatio: 0.99,
@@ -349,6 +357,34 @@ class Tau {
 		return material;
 	}
 
+	getSilver() {
+		const loader = new THREE.TextureLoader();
+		const texture = loader.load('img/logo.jpg');
+		const material = new THREE.MeshStandardMaterial({
+			color: 0xaaaaaa,
+			alphaMap: texture,
+			lightMap: texture,
+			roughness: 0.3,
+			metalness: 0.9,
+			/*
+			clearCoat: 0.9,
+			clearCoatRoughness: 0.1,
+			*/
+			envMap: this.cubeCamera1.renderTarget.texture,
+			// The refractionRatio must have value in the range 0 to 1.
+			// The default value, very close to 1, give almost invisible glass.
+			refractionRatio: 0.0,
+			reflectivity: 0.99,
+			// wireframe: true,
+			alphaTest: 0.5, // if transparent is false
+			transparent: false,
+			// transparent: false,
+			// opacity: 1,
+			side: THREE.DoubleSide,
+		});
+		return material;
+	}
+
 	updateCubeCamera() {
 		if (this.tau.child) {
 			const renderer = this.renderer;
@@ -362,9 +398,13 @@ class Tau {
 			this.boxes.visible = true;
 			if (count % 2 === 0) {
 				this.clear.envMap = cubeCamera0.renderTarget.texture;
+				this.silver.envMap = cubeCamera0.renderTarget.texture;
+				this.red.envMap = cubeCamera0.renderTarget.texture;
 				cubeCamera1.update(renderer, scene);
 			} else {
 				this.clear.envMap = cubeCamera1.renderTarget.texture;
+				this.silver.envMap = cubeCamera1.renderTarget.texture;
+				this.red.envMap = cubeCamera1.renderTarget.texture;
 				cubeCamera0.update(renderer, scene);
 			}
 			this.count = count + 1;
@@ -444,6 +484,7 @@ class Tau {
 			this.controllers.setText('up');
 			return;
 		}
+		console.log(this.camera.position);
 		this.mousedown = false;
 	}
 
@@ -523,8 +564,8 @@ class Tau {
 
 const tau = new Tau();
 /*
-const textureLoader = new THREE.TextureLoader();
-textureLoader.load('img/panorama-sm/panorama-01.jpg', (texture) => {
+const loader = new THREE.loader();
+loader.load('img/panorama-sm/panorama-01.jpg', (texture) => {
 	texture.mapping = THREE.UVMapping;
 	var options = {
 		resolution: 1024,
