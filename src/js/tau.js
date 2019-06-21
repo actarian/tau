@@ -5,9 +5,12 @@ import { ROOM_RADIUS, TEST_ENABLED } from './three/const';
 import InteractiveMesh from './three/interactive.mesh';
 import Orbit from './three/orbit';
 
+const COLORS = [0xFFFFFF, 0xFC4445, 0xFEEE6, 0x55BCC9, 0x97CAEF, 0xCAFAFE];
+
 class Tau {
 
 	constructor() {
+		this.colorIndex = 0;
 		this.count = 0;
 		this.mouse = { x: 0, y: 0 };
 		this.parallax = { x: 0, y: 0 };
@@ -68,6 +71,32 @@ class Tau {
 		this.debugSave.addEventListener('click', this.onSave, false);
 		this.section.classList.add('init');
 		this.onWindowResize();
+		this.updateBackgroundColor();
+	}
+
+	updateBackgroundColor() {
+		this.colorIndex++;
+		this.colorIndex = this.colorIndex % COLORS.length;
+		const color = COLORS[this.colorIndex];
+		/*
+		const r = Math.floor(Math.random() * 255);
+		const g = Math.floor(Math.random() * 255);
+		const b = Math.floor(Math.random() * 255);
+		*/
+		TweenMax.to(this.renderer.domElement, 0.7, {
+			backgroundColor: color, // `rgba(${r},${g},${b},1)`,
+			delay: 3,
+			ease: Power2.easeInOut,
+			onUpdate: () => {
+				this.boxes.children.forEach(x => {
+					x.material.color.setHex(color);
+					x.material.needsUpdate = true;
+				});
+			},
+			onComplete: () => {
+				this.updateBackgroundColor();
+			}
+		});
 	}
 
 	addRenderer() {
@@ -80,8 +109,9 @@ class Tau {
 		});
 		this.renderer = renderer;
 		// renderer.shadowMap.enabled = true;
-		renderer.setClearColor(0xffffff, 1);
-		renderer.setPixelRatio(2); // window.devicePixelRatio);
+		renderer.setClearColor(0xffffff, 0);
+		// renderer.setPixelRatio(window.devicePixelRatio);
+		renderer.setPixelRatio(1.5);
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		// container.innerHTML = '';
 		this.container.appendChild(renderer.domElement);
@@ -97,7 +127,8 @@ class Tau {
 	}
 
 	addCamera() {
-		const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, ROOM_RADIUS * 2);
+		const camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, ROOM_RADIUS * 2);
+		camera.zoom = 0.15;
 		camera.target = new THREE.Vector3();
 		return camera;
 	}
@@ -121,7 +152,7 @@ class Tau {
 
 		const dirLight2 = new THREE.DirectionalLight(0xffffff, 1);
 		dirLight2.color.setHSL(0.1, 1, 0.95);
-		dirLight2.position.set(30, 40, -30);
+		dirLight2.position.set(30, -40, -30);
 		scene.add(dirLight2);
 		/*
 		dirLight.castShadow = true;
@@ -143,7 +174,7 @@ class Tau {
 
 	getBox(parent) {
 		var geometry = new THREE.BoxGeometry(100, 100, 100);
-		var material = new THREE.MeshBasicMaterial({ color: 0x6293a9 });
+		var material = new THREE.MeshBasicMaterial({ color: 0xcccccc });
 		var cube = new THREE.Mesh(geometry, material);
 		parent.add(cube);
 		return cube;
@@ -151,6 +182,7 @@ class Tau {
 
 	addBoxes(parent) {
 		const boxes = new THREE.Group();
+		boxes.visible = false;
 
 		let box;
 
@@ -294,7 +326,7 @@ class Tau {
 		this.scene.add(cubeCamera1);
 
 		const material = new THREE.MeshPhysicalMaterial({
-			color: 0xabcbe4,
+			color: 0xc9d3da,
 			roughness: 0.1,
 			metalness: 0.9,
 			clearCoat: 0.9,
@@ -325,6 +357,7 @@ class Tau {
 			const count = this.count,
 				cubeCamera0 = this.cubeCamera0,
 				cubeCamera1 = this.cubeCamera1;
+			renderer.setClearColor(0xffffff, 1);
 			this.tau.child.visible = false;
 			this.boxes.visible = true;
 			if (count % 2 === 0) {
@@ -337,6 +370,7 @@ class Tau {
 			this.count = count + 1;
 			this.tau.child.visible = true;
 			this.boxes.visible = false;
+			renderer.setClearColor(0xffffff, 0);
 		}
 	}
 

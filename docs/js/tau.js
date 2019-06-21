@@ -219,12 +219,15 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+var COLORS = [0xFFFFFF, 0xFC4445, 0xFEEE6, 0x55BCC9, 0x97CAEF, 0xCAFAFE];
+
 var Tau =
 /*#__PURE__*/
 function () {
   function Tau() {
     _classCallCheck(this, Tau);
 
+    this.colorIndex = 0;
     this.count = 0;
     this.mouse = {
       x: 0,
@@ -297,6 +300,37 @@ function () {
       this.debugSave.addEventListener('click', this.onSave, false);
       this.section.classList.add('init');
       this.onWindowResize();
+      this.updateBackgroundColor();
+    }
+  }, {
+    key: "updateBackgroundColor",
+    value: function updateBackgroundColor() {
+      var _this = this;
+
+      this.colorIndex++;
+      this.colorIndex = this.colorIndex % COLORS.length;
+      var color = COLORS[this.colorIndex];
+      /*
+      const r = Math.floor(Math.random() * 255);
+      const g = Math.floor(Math.random() * 255);
+      const b = Math.floor(Math.random() * 255);
+      */
+
+      TweenMax.to(this.renderer.domElement, 0.7, {
+        backgroundColor: color,
+        // `rgba(${r},${g},${b},1)`,
+        delay: 3,
+        ease: Power2.easeInOut,
+        onUpdate: function onUpdate() {
+          _this.boxes.children.forEach(function (x) {
+            x.material.color.setHex(color);
+            x.material.needsUpdate = true;
+          });
+        },
+        onComplete: function onComplete() {
+          _this.updateBackgroundColor();
+        }
+      });
     }
   }, {
     key: "addRenderer",
@@ -310,9 +344,9 @@ function () {
       });
       this.renderer = renderer; // renderer.shadowMap.enabled = true;
 
-      renderer.setClearColor(0xffffff, 1);
-      renderer.setPixelRatio(2); // window.devicePixelRatio);
+      renderer.setClearColor(0xffffff, 0); // renderer.setPixelRatio(window.devicePixelRatio);
 
+      renderer.setPixelRatio(1.5);
       renderer.setSize(window.innerWidth, window.innerHeight); // container.innerHTML = '';
 
       this.container.appendChild(renderer.domElement);
@@ -330,7 +364,8 @@ function () {
   }, {
     key: "addCamera",
     value: function addCamera() {
-      var camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, _const.ROOM_RADIUS * 2);
+      var camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, _const.ROOM_RADIUS * 2);
+      camera.zoom = 0.15;
       camera.target = new THREE.Vector3();
       return camera;
     }
@@ -355,7 +390,7 @@ function () {
       scene.add(dirLight);
       var dirLight2 = new THREE.DirectionalLight(0xffffff, 1);
       dirLight2.color.setHSL(0.1, 1, 0.95);
-      dirLight2.position.set(30, 40, -30);
+      dirLight2.position.set(30, -40, -30);
       scene.add(dirLight2);
       /*
       dirLight.castShadow = true;
@@ -380,7 +415,7 @@ function () {
     value: function getBox(parent) {
       var geometry = new THREE.BoxGeometry(100, 100, 100);
       var material = new THREE.MeshBasicMaterial({
-        color: 0x6293a9
+        color: 0xcccccc
       });
       var cube = new THREE.Mesh(geometry, material);
       parent.add(cube);
@@ -390,6 +425,7 @@ function () {
     key: "addBoxes",
     value: function addBoxes(parent) {
       var boxes = new THREE.Group();
+      boxes.visible = false;
       var box;
 
       for (var i = 0; i < 12; i++) {
@@ -529,7 +565,7 @@ function () {
       cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
       this.scene.add(cubeCamera1);
       var material = new THREE.MeshPhysicalMaterial({
-        color: 0xabcbe4,
+        color: 0xc9d3da,
         roughness: 0.1,
         metalness: 0.9,
         clearCoat: 0.9,
@@ -564,6 +600,7 @@ function () {
         var count = this.count,
             cubeCamera0 = this.cubeCamera0,
             cubeCamera1 = this.cubeCamera1;
+        renderer.setClearColor(0xffffff, 1);
         this.tau.child.visible = false;
         this.boxes.visible = true;
 
@@ -578,6 +615,7 @@ function () {
         this.count = count + 1;
         this.tau.child.visible = true;
         this.boxes.visible = false;
+        renderer.setClearColor(0xffffff, 0);
       }
     } // events
 
@@ -687,11 +725,11 @@ function () {
   }, {
     key: "animate",
     value: function animate() {
-      var _this = this;
+      var _this2 = this;
 
       var renderer = this.renderer;
       renderer.setAnimationLoop(function () {
-        _this.render();
+        _this2.render();
       });
     }
   }, {
