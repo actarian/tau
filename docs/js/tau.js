@@ -285,7 +285,11 @@ function () {
 
       camera.lookAt(camera.target);
       var controls = this.controls = new THREE.OrbitControls(camera, renderer.domElement);
-      camera.position.set(-40, 105, -78);
+      controls.maxDistance = 250;
+      controls.minDistance = 100; // controls.maxPolarAngle = Math.PI / 2;
+      // controls.minPolarAngle = Math.PI / 2;
+
+      camera.position.set(-47, 91, -90);
       controls.update();
       var orbit = this.orbit = new _orbit.default();
       var dragListener = this.dragListener = orbit.setDragListener(container); // raycaster
@@ -299,8 +303,7 @@ function () {
       this.container.addEventListener('mouseup', this.onMouseUp, false);
       this.debugSave.addEventListener('click', this.onSave, false);
       this.section.classList.add('init');
-      this.onWindowResize();
-      this.updateBackgroundColor();
+      this.onWindowResize(); // this.updateBackgroundColor();
     }
   }, {
     key: "updateBackgroundColor",
@@ -372,6 +375,7 @@ function () {
   }, {
     key: "addLights",
     value: function addLights(scene) {
+      var lights = new THREE.Group();
       /*
       const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
       hemiLight.color.setHSL(0.6, 1, 0.6);
@@ -384,14 +388,15 @@ function () {
       const hemiLightHelper = new THREE.HemisphereLightHelper(hemiLight, 10);
       scene.add(hemiLightHelper);
       */
+
       var dirLight = new THREE.DirectionalLight(0xffffff, 1);
       dirLight.color.setHSL(0.1, 1, 0.95);
       dirLight.position.set(-30, 40, 30);
-      scene.add(dirLight);
+      lights.add(dirLight);
       var dirLight2 = new THREE.DirectionalLight(0xffffff, 1);
       dirLight2.color.setHSL(0.1, 1, 0.95);
       dirLight2.position.set(30, -40, -30);
-      scene.add(dirLight2);
+      lights.add(dirLight2);
       /*
       dirLight.castShadow = true;
       dirLight.shadow.mapSize.width = 2048;
@@ -409,6 +414,9 @@ function () {
       const dirLightHelper = new THREE.DirectionalLightHelper(dirLight, 10);
       scene.add(dirLightHelper);
       */
+
+      scene.add(lights);
+      return lights;
     }
   }, {
     key: "getBox",
@@ -516,7 +524,7 @@ function () {
       var geometry = new THREE.PlaneGeometry(32, 4, 3, 1);
       geometry.rotateX(-Math.PI / 2);
       geometry.rotateY(Math.PI);
-      geometry.translate(-30, 2.4, 0);
+      geometry.translate(-30, 2.3, 0);
       var logo = new THREE.Mesh(geometry, this.silver);
       parent.add(logo);
       return logo;
@@ -789,6 +797,7 @@ function () {
     value: function render(delta) {
       var controls = this.controls;
       controls.update();
+      this.lights.rotation.set(this.lights.rotation.x + 0.001, this.lights.rotation.y + 0.001, 0);
       var renderer = this.renderer;
       var camera = this.camera;
       var scene = this.scene;

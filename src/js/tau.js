@@ -56,7 +56,11 @@ class Tau {
 		// camera.target.z = ROOM_RADIUS;
 		camera.lookAt(camera.target);
 		const controls = this.controls = new THREE.OrbitControls(camera, renderer.domElement);
-		camera.position.set(-40, 105, -78);
+		controls.maxDistance = 250;
+		controls.minDistance = 100;
+		// controls.maxPolarAngle = Math.PI / 2;
+		// controls.minPolarAngle = Math.PI / 2;
+		camera.position.set(-47, 91, -90);
 		controls.update();
 		const orbit = this.orbit = new Orbit();
 		const dragListener = this.dragListener = orbit.setDragListener(container);
@@ -71,7 +75,7 @@ class Tau {
 		this.debugSave.addEventListener('click', this.onSave, false);
 		this.section.classList.add('init');
 		this.onWindowResize();
-		this.updateBackgroundColor();
+		// this.updateBackgroundColor();
 	}
 
 	updateBackgroundColor() {
@@ -134,6 +138,7 @@ class Tau {
 	}
 
 	addLights(scene) {
+		const lights = new THREE.Group();
 		/*
 		const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
 		hemiLight.color.setHSL(0.6, 1, 0.6);
@@ -148,12 +153,12 @@ class Tau {
 		const dirLight = new THREE.DirectionalLight(0xffffff, 1);
 		dirLight.color.setHSL(0.1, 1, 0.95);
 		dirLight.position.set(-30, 40, 30);
-		scene.add(dirLight);
+		lights.add(dirLight);
 
 		const dirLight2 = new THREE.DirectionalLight(0xffffff, 1);
 		dirLight2.color.setHSL(0.1, 1, 0.95);
 		dirLight2.position.set(30, -40, -30);
-		scene.add(dirLight2);
+		lights.add(dirLight2);
 		/*
 		dirLight.castShadow = true;
 		dirLight.shadow.mapSize.width = 2048;
@@ -170,6 +175,8 @@ class Tau {
 		const dirLightHelper = new THREE.DirectionalLightHelper(dirLight, 10);
 		scene.add(dirLightHelper);
 		*/
+		scene.add(lights);
+		return lights;
 	}
 
 	getBox(parent) {
@@ -268,7 +275,7 @@ class Tau {
 		const geometry = new THREE.PlaneGeometry(32, 4, 3, 1);
 		geometry.rotateX(-Math.PI / 2);
 		geometry.rotateY(Math.PI);
-		geometry.translate(-30, 2.4, 0);
+		geometry.translate(-30, 2.3, 0);
 		const logo = new THREE.Mesh(geometry, this.silver);
 		parent.add(logo);
 		return logo;
@@ -519,6 +526,7 @@ class Tau {
 	render(delta) {
 		const controls = this.controls;
 		controls.update();
+		this.lights.rotation.set(this.lights.rotation.x + 0.001, this.lights.rotation.y + 0.001, 0);
 		const renderer = this.renderer;
 		const camera = this.camera;
 		const scene = this.scene;
