@@ -55,8 +55,10 @@ class Tau {
 		const addons = this.addons = this.addSpheres(scene);
 		const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
 			const tau = this.tau = this.addTau(scene, texture);
+			this.tweenTau();
 		});
 		const renderer = this.renderer = this.addRenderer();
+		/*
 		// camera.target.z = ROOM_RADIUS;
 		// camera.lookAt(camera.target);
 		const controls = this.controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -65,21 +67,25 @@ class Tau {
 		// controls.maxPolarAngle = Math.PI / 2;
 		// controls.minPolarAngle = Math.PI / 2;
 		// camera.position.set(60, 205, -73);
-		// camera.position.set(0, 50, 100);
+        // camera.position.set(0, 50, 100);
 		camera.position.set(6.3, 4.5, 111.5);
 		camera.position.multiplyScalar(1.5);
 		controls.update();
+        */
+		camera.position.set(0, 0, 150);
 		const orbit = this.orbit = new Orbit();
 		const dragListener = this.dragListener = orbit.setDragListener(container);
 		// raycaster
 		const raycaster = this.raycaster = new THREE.Raycaster();
 		window.addEventListener('resize', this.onWindowResize, false);
+		/*
 		window.addEventListener('keydown', this.onKeyDown, false);
 		document.addEventListener('mousemove', this.onMouseMove, false);
 		document.addEventListener('wheel', this.onMouseWheel, false);
 		this.container.addEventListener('mousedown', this.onMouseDown, false);
 		this.container.addEventListener('mouseup', this.onMouseUp, false);
-		this.debugSave.addEventListener('click', this.onSave, false);
+        this.debugSave.addEventListener('click', this.onSave, false);
+        */
 		this.section.classList.add('init');
 		this.onWindowResize();
 		// this.updateBackgroundColor();
@@ -332,6 +338,33 @@ class Tau {
 		);
 		parent.add(tau);
 		return tau;
+	}
+
+	tweenTau() {
+		const rotations = [
+            [Math.PI / 4, Math.PI / 4, Math.PI / 4],
+            [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4],
+            [0, 0, Math.PI / 2],
+            [Math.PI / 2, 0, 0],
+            [Math.PI / 4, Math.PI / 4, 0],
+            [0, -Math.PI / 2, Math.PI / 16]
+        ];
+		const tau = this.tau;
+		let ri = tau.ri !== undefined ? tau.ri : -1;
+		ri++;
+		ri = ri % rotations.length;
+		tau.ri = ri;
+		console.log(tau, ri);
+		const rotation = rotations[ri];
+		TweenMax.to(this.tau.rotation, 0.7, {
+			x: rotation[0],
+			y: rotation[1],
+			z: rotation[2],
+			delay: 4,
+			onComplete: () => {
+				this.tweenTau();
+			}
+		});
 	}
 
 	addLogo(parent) {
@@ -653,7 +686,9 @@ class Tau {
 
 	render(delta) {
 		const controls = this.controls;
-		controls.update();
+		if (controls) {
+			controls.update();
+		}
 		// this.lights.rotation.set(0, this.lights.rotation.y + 0.003, 0);
 		// this.tau.rotation.set(Math.cos(this.count / 100) * Math.PI / 180 * 2, Math.cos(this.count / 100) * Math.PI / 180 * 2, 0);
 		const renderer = this.renderer;

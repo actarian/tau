@@ -286,31 +286,40 @@ function () {
       var addons = this.addons = this.addSpheres(scene);
       var hdr = this.hdr = this.getEnvMap(function (texture, textureData) {
         var tau = _this.tau = _this.addTau(scene, texture);
-      });
-      var renderer = this.renderer = this.addRenderer(); // camera.target.z = ROOM_RADIUS;
-      // camera.lookAt(camera.target);
 
-      var controls = this.controls = new THREE.OrbitControls(camera, renderer.domElement);
+        _this.tweenTau();
+      });
+      var renderer = this.renderer = this.addRenderer();
+      /*
+      // camera.target.z = ROOM_RADIUS;
+      // camera.lookAt(camera.target);
+      const controls = this.controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.maxDistance = 250;
-      controls.minDistance = 100; // controls.maxPolarAngle = Math.PI / 2;
+      controls.minDistance = 100;
+      // controls.maxPolarAngle = Math.PI / 2;
       // controls.minPolarAngle = Math.PI / 2;
       // camera.position.set(60, 205, -73);
-      // camera.position.set(0, 50, 100);
-
+            // camera.position.set(0, 50, 100);
       camera.position.set(6.3, 4.5, 111.5);
       camera.position.multiplyScalar(1.5);
       controls.update();
+            */
+
+      camera.position.set(0, 0, 150);
       var orbit = this.orbit = new _orbit.default();
       var dragListener = this.dragListener = orbit.setDragListener(container); // raycaster
 
       var raycaster = this.raycaster = new THREE.Raycaster();
       window.addEventListener('resize', this.onWindowResize, false);
+      /*
       window.addEventListener('keydown', this.onKeyDown, false);
       document.addEventListener('mousemove', this.onMouseMove, false);
       document.addEventListener('wheel', this.onMouseWheel, false);
       this.container.addEventListener('mousedown', this.onMouseDown, false);
       this.container.addEventListener('mouseup', this.onMouseUp, false);
-      this.debugSave.addEventListener('click', this.onSave, false);
+            this.debugSave.addEventListener('click', this.onSave, false);
+            */
+
       this.section.classList.add('init');
       this.onWindowResize(); // this.updateBackgroundColor();
     }
@@ -580,6 +589,29 @@ function () {
       return tau;
     }
   }, {
+    key: "tweenTau",
+    value: function tweenTau() {
+      var _this4 = this;
+
+      var rotations = [[Math.PI / 4, Math.PI / 4, Math.PI / 4], [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4], [0, 0, Math.PI / 2], [Math.PI / 2, 0, 0], [Math.PI / 4, Math.PI / 4, 0], [0, -Math.PI / 2, Math.PI / 16]];
+      var tau = this.tau;
+      var ri = tau.ri !== undefined ? tau.ri : -1;
+      ri++;
+      ri = ri % rotations.length;
+      tau.ri = ri;
+      console.log(tau, ri);
+      var rotation = rotations[ri];
+      TweenMax.to(this.tau.rotation, 0.7, {
+        x: rotation[0],
+        y: rotation[1],
+        z: rotation[2],
+        delay: 4,
+        onComplete: function onComplete() {
+          _this4.tweenTau();
+        }
+      });
+    }
+  }, {
     key: "addLogo",
     value: function addLogo(parent) {
       var geometry = new THREE.PlaneGeometry(24, 3, 3, 1);
@@ -624,7 +656,7 @@ function () {
   }, {
     key: "getEnvMap",
     value: function getEnvMap(callback) {
-      var _this4 = this;
+      var _this5 = this;
 
       var loader = new THREE.TextureLoader().load('img/hdr-04.jpg', function (source, textureData) {
         // source.encoding = THREE.sRGBEncoding;
@@ -638,7 +670,7 @@ function () {
 
         var cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options); // pngBackground = cubemapGenerator.renderTarget;
 
-        var texture = cubemapGenerator.update(_this4.renderer);
+        var texture = cubemapGenerator.update(_this5.renderer);
         /*
         var pmremGenerator = new THREE.PMREMGenerator( cubeMapTexture );
         pmremGenerator.update( renderer );
@@ -675,7 +707,7 @@ function () {
   }, {
     key: "getHDRMap",
     value: function getHDRMap(callback) {
-      var _this5 = this;
+      var _this6 = this;
 
       var type = THREE.UnsignedByteType; // const type = THREE.FloatType;
 
@@ -699,8 +731,8 @@ function () {
         var cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, {
           resolution: 512
         });
-        _this5.renderer.toneMappingExposure = 2.0;
-        var texture = cubemapGenerator.update(_this5.renderer);
+        _this6.renderer.toneMappingExposure = 2.0;
+        var texture = cubemapGenerator.update(_this6.renderer);
         source.dispose();
 
         if (typeof callback === 'function') {
@@ -919,19 +951,23 @@ function () {
   }, {
     key: "animate",
     value: function animate() {
-      var _this6 = this;
+      var _this7 = this;
 
       var renderer = this.renderer;
       renderer.setAnimationLoop(function () {
-        _this6.render();
+        _this7.render();
       });
     }
   }, {
     key: "render",
     value: function render(delta) {
       var controls = this.controls;
-      controls.update(); // this.lights.rotation.set(0, this.lights.rotation.y + 0.003, 0);
+
+      if (controls) {
+        controls.update();
+      } // this.lights.rotation.set(0, this.lights.rotation.y + 0.003, 0);
       // this.tau.rotation.set(Math.cos(this.count / 100) * Math.PI / 180 * 2, Math.cos(this.count / 100) * Math.PI / 180 * 2, 0);
+
 
       var renderer = this.renderer;
       var camera = this.camera;
