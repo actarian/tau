@@ -63,6 +63,7 @@ class Tau {
 		// camera.position.set(60, 205, -73);
 		// camera.position.set(0, 50, 100);
 		camera.position.set(6.3, 4.5, 111.5);
+		camera.position.multiplyScalar(1.5);
 		controls.update();
 		const orbit = this.orbit = new Orbit();
 		const dragListener = this.dragListener = orbit.setDragListener(container);
@@ -258,12 +259,12 @@ class Tau {
 						if (i === 0) {
 							child.material = red;
 						} else if (i === 1) {
-							child.material = blue;
-							tau.child = child;
-						} else if (i === 2) {
 							child.material = green;
+						} else if (i === 2) {
+							child.material = blue;
 						} else if (i === 3) {
 							child.material = clear;
+							tau.child = child;
 						}
 						i++;
 						/*
