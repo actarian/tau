@@ -54,13 +54,15 @@ class Tau {
 		const tau = this.tau = this.addTau(scene);
 		const renderer = this.renderer = this.addRenderer();
 		// camera.target.z = ROOM_RADIUS;
-		camera.lookAt(camera.target);
+		// camera.lookAt(camera.target);
 		const controls = this.controls = new THREE.OrbitControls(camera, renderer.domElement);
 		controls.maxDistance = 250;
 		controls.minDistance = 100;
 		// controls.maxPolarAngle = Math.PI / 2;
 		// controls.minPolarAngle = Math.PI / 2;
-		camera.position.set(60, 205, -73);
+		// camera.position.set(60, 205, -73);
+		// camera.position.set(0, 50, 100);
+		camera.position.set(6.3, 4.5, 111.5);
 		controls.update();
 		const orbit = this.orbit = new Orbit();
 		const dragListener = this.dragListener = orbit.setDragListener(container);
@@ -150,20 +152,28 @@ class Tau {
 		const hemiLightHelper = new THREE.HemisphereLightHelper(hemiLight, 10);
 		scene.add(hemiLightHelper);
 		*/
-		const light1 = new THREE.PointLight(0xffffff, 0.8);
-		light1.position.set(-100, 100, 100);
+		const light1 = new THREE.DirectionalLight(0xffffff, 0.9);
+		light1.position.set(-60, 5, 50);
 		lights.add(light1);
 
-		const light2 = new THREE.PointLight(0xffffff, 0.8);
-		light2.position.set(100, 100, 100);
+		const light2 = new THREE.DirectionalLight(0xffffff, 0.9);
+		light2.position.set(0, 30, 0);
 		lights.add(light2);
 
-		const light3 = new THREE.PointLight(0xffffff, 0.8);
-		light3.position.set(0, -100, -100);
+		const light3 = new THREE.DirectionalLight(0xffffff, 0.9);
+		light3.position.set(60, 5, -50);
 		lights.add(light3);
 
 		/*
-		const light4 = new THREE.PointLight(0xffffff, 0.8);
+		const geometry = new THREE.BoxGeometry(2, 2, 2);
+		const material = new THREE.MeshBasicMaterial({ color: 0xafb3bc });
+		const cube = new THREE.Mesh(geometry, material);
+		cube.position.set(0, 2, 0);
+		this.scene.add(cube);
+		*/
+
+		/*
+		const light4 = new THREE.DirectionalLight(0xffffff, 0.8);
 		light4.position.set(50, -100, -50);
 		lights.add(light4);
 		*/
@@ -188,45 +198,10 @@ class Tau {
 		return lights;
 	}
 
-	getBox_(parent) {
-		var geometry = new THREE.BoxGeometry(100, 100, 100);
-		var material = new THREE.MeshBasicMaterial({ color: 0xcccccc });
-		var cube = new THREE.Mesh(geometry, material);
-		parent.add(cube);
-		return cube;
-	}
-
-	addBoxes_(parent) {
-		const boxes = new THREE.Group();
-		boxes.visible = false;
-
-		let box;
-
-		for (let i = 0; i < 12; i++) {
-			box = this.getBox(boxes);
-			const r = Math.PI * 2 / 12 * i;
-			box.position.set(Math.cos(r) * 300, 300, Math.sin(r) * 300);
-		}
-
-		for (let i = 0; i < 12; i++) {
-			box = this.getBox(boxes);
-			const r = Math.PI * 2 / 12 * i;
-			box.position.set(Math.cos(r) * 300, -300, Math.sin(r) * 300);
-		}
-
-		/*
-		box = this.getBox(boxes);
-		box.position.set(0, -300, 0);
-		*/
-
-		parent.add(boxes);
-		return boxes;
-	}
-
 	getBox(parent) {
-		var geometry = new THREE.BoxGeometry(30, 30, 500);
-		var material = new THREE.MeshBasicMaterial({ color: 0xceb7b8 }); // 0xcccccc
-		var cube = new THREE.Mesh(geometry, material);
+		const geometry = new THREE.BoxGeometry(600, 30, 30);
+		const material = new THREE.MeshBasicMaterial({ color: 0xafb3bc });
+		const cube = new THREE.Mesh(geometry, material);
 		parent.add(cube);
 		return cube;
 	}
@@ -238,7 +213,7 @@ class Tau {
 		const boxes = new Array(12).fill(null).map((x, i) => {
 			const box = this.getBox(group);
 			const r = Math.PI * 2 / 12 * i;
-			box.position.set(Math.cos(r) * 300, Math.sin(r) * 300, 0);
+			box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
 			return box;
 		});
 
@@ -262,22 +237,33 @@ class Tau {
 		const clear = this.clear = this.getClear();
 		const silver = this.silver = this.getSilver();
 		const red = this.red = this.getRed();
+		const blue = this.blue = this.getBlue();
+		const green = this.green = this.getGreen();
 		const loader = new THREE.OBJLoader();
-		loader.load('models/tau-marin_senzaspatole_low.obj',
+		loader.load('models/scalare-33-b/scalare-33-b.obj',
 			(object) => {
 				let i = 0;
 				object.traverse((child) => {
 					// console.log(child);
 					if (child instanceof THREE.Mesh) {
-						child.geometry.scale(0.7, 0.7, 0.7);
-						child.geometry.translate(-70, 0, 0);
-						child.geometry.rotateY(Math.PI / 2);
+						// child.geometry.computeVertexNormals(true);
+						child.geometry.scale(150, 150, 150);
+						child.geometry.rotateX(-Math.PI / 2);
+						// child.geometry.rotateY(Math.PI);
+						// child.geometry.rotateZ(Math.PI);
+						// child.geometry.scale(0.7, 0.7, 0.7);
+						// child.geometry.translate(-70, 0, 0);
+						// child.geometry.rotateY(Math.PI / 2);
 						// child.geometry.rotateY(Math.PI);
 						if (i === 0) {
 							child.material = red;
-						} else {
-							child.material = clear;
+						} else if (i === 1) {
+							child.material = blue;
 							tau.child = child;
+						} else if (i === 2) {
+							child.material = green;
+						} else if (i === 3) {
+							child.material = clear;
 						}
 						i++;
 						/*
@@ -307,8 +293,9 @@ class Tau {
 	addLogo(parent) {
 		const geometry = new THREE.PlaneGeometry(24, 3, 3, 1);
 		geometry.rotateX(-Math.PI / 2);
-		geometry.rotateY(Math.PI / 2);
-		geometry.translate(0, 2.2, -24);
+		geometry.translate(20, 2, 0);
+		geometry.rotateY(Math.PI);
+		// geometry.translate(0, 2.2, -24);
 		const logo = new THREE.Mesh(geometry, this.silver);
 		parent.add(logo);
 		return logo;
@@ -357,16 +344,39 @@ class Tau {
 		return texture;
 	}
 
+	getBlue() {
+		const material = new THREE.MeshStandardMaterial({
+			color: 0x0000ff,
+			// emissive: 0x000066,
+			roughness: 0.0,
+			metalness: 0.0,
+			side: THREE.DoubleSide,
+		});
+		return material;
+	}
+
+	getGreen() {
+		const material = new THREE.MeshStandardMaterial({
+			color: 0x00ff00,
+			// emissive: 0x006600,
+			roughness: 0.0,
+			metalness: 0.0,
+			side: THREE.DoubleSide,
+		});
+		return material;
+	}
+
 	getRed() {
 		const material = new THREE.MeshStandardMaterial({
 			color: 0xe11e26,
-			roughness: 0.16,
-			metalness: 0.0,
+			emissive: 0x4f0300,
+			roughness: 0.2,
+			metalness: 0.2,
 			envMap: this.cubeCamera1.renderTarget.texture,
+			envMapIntensity: 0.4,
 			// The refractionRatio must have value in the range 0 to 1.
 			// The default value, very close to 1, give almost invisible glass.
 			refractionRatio: 0,
-			reflectivity: 1, // 0.4,
 			side: THREE.DoubleSide,
 		});
 		return material;
@@ -375,18 +385,18 @@ class Tau {
 	getClear() {
 		const material = new THREE.MeshPhysicalMaterial({
 			color: 0xe0e3e5, // 0xc9d3da,
-			roughness: 0.1,
-			metalness: 0.9,
-			clearCoat: 0.9,
-			clearCoatRoughness: 0.1,
+			roughness: 0.0,
+			metalness: 1.0,
+			reflectivity: 1.0,
+			clearCoat: 1.0,
+			clearCoatRoughness: 1.0,
 			envMap: this.cubeCamera1.renderTarget.texture,
 			// The refractionRatio must have value in the range 0 to 1.
 			// The default value, very close to 1, give almost invisible glass.
 			refractionRatio: 0.99,
-			reflectivity: 0.99,
 			// wireframe: true,
 			transparent: true,
-			opacity: 0.55,
+			opacity: 0.5,
 			/*
 			side: THREE.DoubleSide,
 			*/
@@ -403,9 +413,8 @@ class Tau {
 		const material = new THREE.MeshStandardMaterial({
 			color: 0xaaaaaa,
 			alphaMap: texture,
-			lightMap: texture,
-			roughness: 0.3,
-			metalness: 0.9,
+			roughness: 0.0,
+			metalness: 0.99,
 			/*
 			clearCoat: 0.9,
 			clearCoatRoughness: 0.1,
@@ -559,7 +568,7 @@ class Tau {
 	render(delta) {
 		const controls = this.controls;
 		controls.update();
-		this.lights.rotation.set(0, this.lights.rotation.y + 0.003, 0);
+		// this.lights.rotation.set(0, this.lights.rotation.y + 0.003, 0);
 		// this.tau.rotation.set(Math.cos(this.count / 100) * Math.PI / 180 * 2, Math.cos(this.count / 100) * Math.PI / 180 * 2, 0);
 		const renderer = this.renderer;
 		const camera = this.camera;
@@ -609,7 +618,7 @@ const tau = new Tau();
 const loader = new THREE.loader();
 loader.load('img/panorama-sm/panorama-01.jpg', (texture) => {
 	texture.mapping = THREE.UVMapping;
-	var options = {
+	const options = {
 		resolution: 1024,
 		generateMipmaps: true,
 		minFilter: THREE.LinearMipMapLinearFilter,
