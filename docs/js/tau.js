@@ -219,6 +219,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+var USE_CUBE_CAMERA = true;
 var COLORS = [0xFFFFFF, 0xFC4445, 0xFEEE6, 0x55BCC9, 0x97CAEF, 0xCAFAFE];
 
 var Tau =
@@ -261,6 +262,8 @@ function () {
   _createClass(Tau, [{
     key: "init",
     value: function init() {
+      var _this = this;
+
       var body = this.body = document.querySelector('body');
       var section = this.section = document.querySelector('.tau');
       var container = this.container = section.querySelector('.tau__container');
@@ -278,9 +281,12 @@ function () {
 
       var scene = this.scene = this.addScene();
       var camera = this.camera = this.addCamera();
-      var lights = this.lights = this.addLights(scene);
-      var boxes = this.boxes = this.addBoxes(scene);
-      var tau = this.tau = this.addTau(scene);
+      var lights = this.lights = this.addLights(scene); // const addons = this.addons = this.addBoxes(scene);
+
+      var addons = this.addons = this.addSpheres(scene);
+      var hdr = this.hdr = this.getEnvMap(function (texture, textureData) {
+        var tau = _this.tau = _this.addTau(scene, texture);
+      });
       var renderer = this.renderer = this.addRenderer(); // camera.target.z = ROOM_RADIUS;
       // camera.lookAt(camera.target);
 
@@ -311,7 +317,7 @@ function () {
   }, {
     key: "updateBackgroundColor",
     value: function updateBackgroundColor() {
-      var _this = this;
+      var _this2 = this;
 
       this.colorIndex++;
       this.colorIndex = this.colorIndex % COLORS.length;
@@ -328,13 +334,13 @@ function () {
         delay: 3,
         ease: Power2.easeInOut,
         onUpdate: function onUpdate() {
-          _this.boxes.children.forEach(function (x) {
+          _this2.addons.children.forEach(function (x) {
             x.material.color.setHex(color);
             x.material.needsUpdate = true;
           });
         },
         onComplete: function onComplete() {
-          _this.updateBackgroundColor();
+          _this2.updateBackgroundColor();
         }
       });
     }
@@ -379,28 +385,26 @@ function () {
     key: "addLights",
     value: function addLights(scene) {
       var lights = new THREE.Group();
-      /*
-      const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
-      hemiLight.color.setHSL(0.6, 1, 0.6);
-      hemiLight.groundColor.setHSL(0.095, 1, 0.75);
-      hemiLight.position.set(0, 50, 0);
+      var hemiLight = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.6);
+      hemiLight.position.set(0, 0, 0);
       scene.add(hemiLight);
-      */
-
       /*
       const hemiLightHelper = new THREE.HemisphereLightHelper(hemiLight, 10);
       scene.add(hemiLightHelper);
       */
 
-      var light1 = new THREE.DirectionalLight(0xffffff, 0.9);
-      light1.position.set(-60, 5, 50);
+      var light1 = new THREE.DirectionalLight(0xffffff, 1);
+      light1.position.set(-50, 100, 0);
       lights.add(light1);
-      var light2 = new THREE.DirectionalLight(0xffffff, 0.9);
+      /*
+      const light2 = new THREE.DirectionalLight(0xffffff, 0.9);
       light2.position.set(0, 30, 0);
       lights.add(light2);
-      var light3 = new THREE.DirectionalLight(0xffffff, 0.9);
+      	const light3 = new THREE.DirectionalLight(0xffffff, 0.9);
       light3.position.set(60, 5, -50);
       lights.add(light3);
+            */
+
       /*
       const geometry = new THREE.BoxGeometry(2, 2, 2);
       const material = new THREE.MeshBasicMaterial({ color: 0xafb3bc });
@@ -437,8 +441,8 @@ function () {
       return lights;
     }
   }, {
-    key: "getBox",
-    value: function getBox(parent) {
+    key: "addBox",
+    value: function addBox(parent) {
       var geometry = new THREE.BoxGeometry(600, 30, 30);
       var material = new THREE.MeshBasicMaterial({
         color: 0xafb3bc
@@ -450,12 +454,12 @@ function () {
   }, {
     key: "addBoxes",
     value: function addBoxes(parent) {
-      var _this2 = this;
+      var _this3 = this;
 
       var group = new THREE.Group();
-      group.visible = false;
+      group.visible = true;
       var boxes = new Array(12).fill(null).map(function (x, i) {
-        var box = _this2.getBox(group);
+        var box = _this3.addBox(group);
 
         var r = Math.PI * 2 / 12 * i;
         box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
@@ -465,10 +469,32 @@ function () {
       return group;
     }
   }, {
+    key: "addSpheres",
+    value: function addSpheres(parent) {
+      var group = new THREE.Group();
+      group.visible = false;
+      var icosahedron = new THREE.IcosahedronGeometry(300, 1);
+      var geometry = new THREE.Geometry();
+      icosahedron.vertices.forEach(function (v, i) {
+        var sphereGeometry = new THREE.SphereGeometry(30, 12, 12);
+        sphereGeometry.translate(v.x, v.y, v.z);
+        geometry.merge(sphereGeometry);
+        sphereGeometry.dispose();
+      });
+      icosahedron.dispose();
+      var material = new THREE.MeshBasicMaterial({
+        color: 0x9196a1
+      });
+      var bufferGeometry = new THREE.BufferGeometry().fromGeometry(geometry);
+      geometry.dispose();
+      var spheres_ = new THREE.Mesh(bufferGeometry, material);
+      group.add(spheres_);
+      parent.add(group);
+      return group;
+    }
+  }, {
     key: "addTau",
-    value: function addTau(parent) {
-      var _this3 = this;
-
+    value: function addTau(parent, texture) {
       var tau = new THREE.Group();
       /*
       const texture = new THREE.loader().load('img/matcap.jpg');
@@ -481,50 +507,68 @@ function () {
       */
       // const texture = this.getEnvMap();
 
-      this.getCubeCamera();
-      var clear = this.clear = this.getClear();
-      var silver = this.silver = this.getSilver();
-      var red = this.red = this.getRed();
+      this.getCubeCamera(); // const texture = this.cubeCamera1.renderTarget.texture;
+
+      var clear = this.clear = this.getClear(texture);
+      var silver = this.silver = this.getSilver(texture);
+      var red = this.red = this.getRed(texture);
       var blue = this.blue = this.getBlue();
       var green = this.green = this.getGreen();
       var loader = new THREE.OBJLoader();
-      loader.load('models/scalare-33-b/scalare-33-b.obj', function (object) {
+      loader.load('models/tau-marin_2.obj', // 'models/scalare-33-b/scalare-33-b.obj',
+      function (object) {
         var i = 0;
         object.traverse(function (child) {
           // console.log(child);
           if (child instanceof THREE.Mesh) {
+            child.geometry.scale(10, 10, 10); // child.geometry.rotateX(-Math.PI / 2);
             // child.geometry.computeVertexNormals(true);
-            child.geometry.scale(150, 150, 150);
-            child.geometry.rotateX(-Math.PI / 2); // child.geometry.rotateY(Math.PI);
-            // child.geometry.rotateZ(Math.PI);
-            // child.geometry.scale(0.7, 0.7, 0.7);
-            // child.geometry.translate(-70, 0, 0);
-            // child.geometry.rotateY(Math.PI / 2);
-            // child.geometry.rotateY(Math.PI);
+            // child.geometry.computeTangents();
+
+            THREE.BufferGeometryUtils.computeTangents(child.geometry);
 
             if (i === 0) {
               child.material = red;
             } else if (i === 1) {
-              child.material = green;
-            } else if (i === 2) {
-              child.material = blue;
-            } else if (i === 3) {
               child.material = clear;
-              tau.child = child;
+              tau.body = child;
+            } else if (i === 2) {
+              child.material = clear;
+              tau.body = child;
+            } else if (i === 3) {
+              child.material = silver;
+            } else if (i === 4) {
+              child.material = silver;
+            } else if (i === 5) {
+              child.material = silver;
+            } else if (i === 6) {
+              child.material = green;
+            } else if (i === 7) {
+              child.material = blue;
             }
 
             i++;
             /*
-            const geometry = new THREE.Geometry().fromBufferGeometry(child.geometry);
-            geometry.scale(0.01, 0.01, 0.01);
-            child.geometry = new THREE.BufferGeometry().fromGeometry(geometry);
-            */
+            child.geometry.scale(150, 150, 150);
+            child.geometry.rotateX(-Math.PI / 2);
+            // child.geometry.computeVertexNormals(true);
+            // child.geometry.computeTangents();
+            THREE.BufferGeometryUtils.computeTangents(child.geometry);
+            if (i === 0) {
+            	child.material = red;
+            } else if (i === 1) {
+            	child.material = green;
+            } else if (i === 2) {
+            	child.material = blue;
+            } else if (i === 3) {
+            	child.material = clear;
+            	tau.body = child;
+                              }
+                              */
           }
-        });
-
-        _this3.addLogo(object); // object.material = material;
+        }); // this.addLogo(object);
+        // object.material = material;
         // object.rotateZ(Math.PI / 8);
-
 
         console.log(object);
         tau.add(object);
@@ -550,76 +594,153 @@ function () {
   }, {
     key: "getCubeCamera",
     value: function getCubeCamera() {
-      var cubeCamera0 = this.cubeCamera0 = new THREE.CubeCamera(0.01, 1000, 512);
-      cubeCamera0.renderTarget.texture.generateMipmaps = true;
-      cubeCamera0.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
-      this.scene.add(cubeCamera0);
-      var cubeCamera1 = this.cubeCamera1 = new THREE.CubeCamera(0.01, 1000, 512);
-      cubeCamera1.renderTarget.texture.generateMipmaps = true;
-      cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
-      this.scene.add(cubeCamera1);
+      if (USE_CUBE_CAMERA) {
+        var cubeCamera0 = this.cubeCamera0 = new THREE.CubeCamera(0.01, 1000, 512);
+        cubeCamera0.renderTarget.texture.generateMipmaps = true;
+        cubeCamera0.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
+        this.scene.add(cubeCamera0);
+        var cubeCamera1 = this.cubeCamera1 = new THREE.CubeCamera(0.01, 1000, 512);
+        cubeCamera1.renderTarget.texture.generateMipmaps = true;
+        cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
+        this.scene.add(cubeCamera1);
+      }
     }
   }, {
-    key: "getEnvMap",
-    value: function getEnvMap() {
+    key: "getEnvMap_",
+    value: function getEnvMap_(callback) {
       var textures = ['img/cubemaps/lights/', 'img/cubemaps/park/', 'img/cubemaps/pond/', 'img/cubemaps/lake/', 'img/cubemaps/square/'];
       var index = 0;
       var urls = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg']; // const texture = THREE.ImageUtils.loadTextureCube(urls, new THREE.CubeRefractionMapping(), render);
 
-      var texture = new THREE.CubeTextureLoader().setPath(textures[index]).load(urls);
-      texture.mapping = THREE.CubeRefractionMapping; // texture.render = render;
+      var loader = new THREE.CubeTextureLoader().setPath(textures[index]).load(urls, function (texture, textureData) {
+        texture.mapping = THREE.CubeRefractionMapping;
 
-      /*
-      // Note that the second parameter has been set to new THREE.CubeRefractionMapping().  This
-      // is essential for making refraction work when this texture is used as an environment map
-      // on an object -- and it doesn't stop the texture from working on theskybox.
-      const shader = THREE.ShaderLib[ 'cube' ]; // contains the required shaders
-      shader.uniforms[ 'tCube' ].value = texture; // data for the shaders
-      const material = new THREE.ShaderMaterial({
-      	// A ShaderMaterial uses custom vertex and fragment shaders.
-      	fragmentShader: shader.fragmentShader,
-      	vertexShader: shader.vertexShader,
-      	uniforms: shader.uniforms,  // the texture is part of this object
-      	depthWrite: false,
-      	side: THREE.BackSide
+        if (typeof callback === 'function') {
+          callback(texture, textureData);
+        }
       });
-      */
+      return loader;
+    }
+  }, {
+    key: "getEnvMap",
+    value: function getEnvMap(callback) {
+      var _this4 = this;
 
-      return texture;
+      var loader = new THREE.TextureLoader().load('img/hdr-04.jpg', function (source, textureData) {
+        // source.encoding = THREE.sRGBEncoding;
+        source.mapping = THREE.UVMapping;
+        var options = {
+          resolution: 1024,
+          generateMipmaps: true,
+          minFilter: THREE.LinearMipMapLinearFilter,
+          magFilter: THREE.LinearFilter
+        }; // this.scene.background = new THREE.CubemapGenerator(this.renderer).fromEquirectangular(source, options);
+
+        var cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options); // pngBackground = cubemapGenerator.renderTarget;
+
+        var texture = cubemapGenerator.update(_this4.renderer);
+        /*
+        var pmremGenerator = new THREE.PMREMGenerator( cubeMapTexture );
+        pmremGenerator.update( renderer );
+        var pmremCubeUVPacker = new THREE.PMREMCubeUVPacker( pmremGenerator.cubeLods );
+        pmremCubeUVPacker.update( renderer );
+        pngCubeRenderTarget = pmremCubeUVPacker.CubeUVRenderTarget;
+        */
+
+        source.dispose();
+        /*
+        pmremGenerator.dispose();
+        pmremCubeUVPacker.dispose();
+        */
+
+        texture.mapping = THREE.CubeReflectionMapping;
+        texture.mapping = THREE.CubeRefractionMapping;
+        /*
+        texture.minFilter = THREE.NearestFilter;
+        texture.magFilter = THREE.NearestFilter;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        */
+        // texture.generateMipmaps = false;
+        // texture.flipY = true;
+        // this.renderer.toneMappingExposure = 2.0;
+
+        if (typeof callback === 'function') {
+          callback(texture);
+        }
+      }); //
+
+      return loader;
+    }
+  }, {
+    key: "getHDRMap",
+    value: function getHDRMap(callback) {
+      var _this5 = this;
+
+      var type = THREE.UnsignedByteType; // const type = THREE.FloatType;
+
+      var loader = new THREE.RGBELoader().setType(type).load('img/hdr/studio_small_02_1k.hdr', function (source, sourceData) {
+        switch (type) {
+          case THREE.UnsignedByteType:
+            source.encoding = THREE.RGBEEncoding;
+            source.minFilter = THREE.NearestFilter;
+            source.magFilter = THREE.NearestFilter;
+            break;
+
+          case THREE.FloatType:
+            source.encoding = THREE.LinearEncoding;
+            source.minFilter = THREE.LinearFilter;
+            source.magFilter = THREE.LinearFilter;
+            break;
+        }
+
+        source.generateMipmaps = false;
+        source.flipY = true;
+        var cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, {
+          resolution: 512
+        });
+        _this5.renderer.toneMappingExposure = 2.0;
+        var texture = cubemapGenerator.update(_this5.renderer);
+        source.dispose();
+
+        if (typeof callback === 'function') {
+          callback(texture);
+        }
+      }); //
+
+      return loader;
     }
   }, {
     key: "getBlue",
-    value: function getBlue() {
+    value: function getBlue(texture) {
       var material = new THREE.MeshStandardMaterial({
-        color: 0x0000ff,
+        color: 0x0007d8,
         // emissive: 0x000066,
-        roughness: 0.0,
-        metalness: 0.0,
-        side: THREE.DoubleSide
+        roughness: 0.3,
+        metalness: 0.0
       });
       return material;
     }
   }, {
     key: "getGreen",
-    value: function getGreen() {
+    value: function getGreen(texture) {
       var material = new THREE.MeshStandardMaterial({
-        color: 0x00ff00,
+        color: 0x00d84d,
         // emissive: 0x006600,
-        roughness: 0.0,
-        metalness: 0.0,
-        side: THREE.DoubleSide
+        roughness: 0.3,
+        metalness: 0.0
       });
       return material;
     }
   }, {
     key: "getRed",
-    value: function getRed() {
+    value: function getRed(texture) {
       var material = new THREE.MeshStandardMaterial({
         color: 0xe11e26,
         emissive: 0x4f0300,
         roughness: 0.2,
         metalness: 0.2,
-        envMap: this.cubeCamera1.renderTarget.texture,
+        envMap: texture,
         envMapIntensity: 0.4,
         // The refractionRatio must have value in the range 0 to 1.
         // The default value, very close to 1, give almost invisible glass.
@@ -630,60 +751,30 @@ function () {
     }
   }, {
     key: "getClear",
-    value: function getClear() {
-      var material = new THREE.MeshPhysicalMaterial({
-        color: 0xe0e3e5,
-        // 0xc9d3da,
-        roughness: 0.0,
-        metalness: 1.0,
-        reflectivity: 1.0,
-        clearCoat: 1.0,
-        clearCoatRoughness: 1.0,
-        envMap: this.cubeCamera1.renderTarget.texture,
-        // The refractionRatio must have value in the range 0 to 1.
-        // The default value, very close to 1, give almost invisible glass.
+    value: function getClear(texture) {
+      var material = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
         refractionRatio: 0.99,
-        // wireframe: true,
+        reflectivity: 0.99,
+        envMap: texture,
+        envMapIntensity: 2.0,
         transparent: true,
-        opacity: 0.5
-        /*
-        side: THREE.DoubleSide,
-        */
+        opacity: 0.3,
+        side: THREE.DoubleSide // blending: THREE.AdditiveBlending,
 
       });
-
-      if (false) {
-        material.reflectivity = 0.5; // determines the fraction of light that is transmitted
-      }
-
       return material;
     }
   }, {
     key: "getSilver",
-    value: function getSilver() {
-      var loader = new THREE.TextureLoader();
-      var texture = loader.load('img/logo.jpg');
+    value: function getSilver(texture) {
       var material = new THREE.MeshStandardMaterial({
         color: 0xaaaaaa,
-        alphaMap: texture,
-        roughness: 0.0,
+        roughness: 0.2,
         metalness: 0.99,
-
-        /*
-        clearCoat: 0.9,
-        clearCoatRoughness: 0.1,
-        */
-        envMap: this.cubeCamera1.renderTarget.texture,
-        // The refractionRatio must have value in the range 0 to 1.
-        // The default value, very close to 1, give almost invisible glass.
+        envMap: texture,
         refractionRatio: 0.0,
-        reflectivity: 0.99,
-        // wireframe: true,
-        alphaTest: 0.5,
-        // if transparent is false
-        transparent: false,
-        // transparent: false,
-        // opacity: 1,
+        reflectivity: 0.9,
         side: THREE.DoubleSide
       });
       return material;
@@ -691,7 +782,7 @@ function () {
   }, {
     key: "updateCubeCamera",
     value: function updateCubeCamera() {
-      if (this.tau.child) {
+      if (USE_CUBE_CAMERA && this.tau && this.tau.body) {
         var renderer = this.renderer;
         var scene = this.scene; // pingpong
 
@@ -699,8 +790,8 @@ function () {
             cubeCamera0 = this.cubeCamera0,
             cubeCamera1 = this.cubeCamera1;
         renderer.setClearColor(0xffffff, 1);
-        this.tau.child.visible = false;
-        this.boxes.visible = true;
+        this.tau.body.visible = false;
+        this.addons.visible = true;
 
         if (count % 2 === 0) {
           this.clear.envMap = cubeCamera0.renderTarget.texture;
@@ -715,8 +806,8 @@ function () {
         }
 
         this.count = count + 1;
-        this.tau.child.visible = true;
-        this.boxes.visible = false;
+        this.tau.body.visible = true;
+        this.addons.visible = false;
         renderer.setClearColor(0xffffff, 0);
       }
     } // events
@@ -828,11 +919,11 @@ function () {
   }, {
     key: "animate",
     value: function animate() {
-      var _this4 = this;
+      var _this6 = this;
 
       var renderer = this.renderer;
       renderer.setAnimationLoop(function () {
-        _this4.render();
+        _this6.render();
       });
     }
   }, {

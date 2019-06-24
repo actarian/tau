@@ -5,6 +5,7 @@ import { ROOM_RADIUS, TEST_ENABLED } from './three/const';
 import InteractiveMesh from './three/interactive.mesh';
 import Orbit from './three/orbit';
 
+const USE_CUBE_CAMERA = true;
 const COLORS = [0xFFFFFF, 0xFC4445, 0xFEEE6, 0x55BCC9, 0x97CAEF, 0xCAFAFE];
 
 class Tau {
@@ -50,8 +51,11 @@ class Tau {
 		const scene = this.scene = this.addScene();
 		const camera = this.camera = this.addCamera();
 		const lights = this.lights = this.addLights(scene);
-		const boxes = this.boxes = this.addBoxes(scene);
-		const tau = this.tau = this.addTau(scene);
+		// const addons = this.addons = this.addBoxes(scene);
+		const addons = this.addons = this.addSpheres(scene);
+		const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
+			const tau = this.tau = this.addTau(scene, texture);
+		});
 		const renderer = this.renderer = this.addRenderer();
 		// camera.target.z = ROOM_RADIUS;
 		// camera.lookAt(camera.target);
@@ -95,7 +99,7 @@ class Tau {
 			delay: 3,
 			ease: Power2.easeInOut,
 			onUpdate: () => {
-				this.boxes.children.forEach(x => {
+				this.addons.children.forEach(x => {
 					x.material.color.setHex(color);
 					x.material.needsUpdate = true;
 				});
@@ -142,21 +146,20 @@ class Tau {
 
 	addLights(scene) {
 		const lights = new THREE.Group();
-		/*
-		const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
-		hemiLight.color.setHSL(0.6, 1, 0.6);
-		hemiLight.groundColor.setHSL(0.095, 1, 0.75);
-		hemiLight.position.set(0, 50, 0);
+
+		const hemiLight = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.6);
+		hemiLight.position.set(0, 0, 0);
 		scene.add(hemiLight);
-		*/
+
 		/*
 		const hemiLightHelper = new THREE.HemisphereLightHelper(hemiLight, 10);
 		scene.add(hemiLightHelper);
 		*/
-		const light1 = new THREE.DirectionalLight(0xffffff, 0.9);
-		light1.position.set(-60, 5, 50);
+		const light1 = new THREE.DirectionalLight(0xffffff, 1);
+		light1.position.set(-50, 100, 0);
 		lights.add(light1);
 
+		/*
 		const light2 = new THREE.DirectionalLight(0xffffff, 0.9);
 		light2.position.set(0, 30, 0);
 		lights.add(light2);
@@ -164,6 +167,7 @@ class Tau {
 		const light3 = new THREE.DirectionalLight(0xffffff, 0.9);
 		light3.position.set(60, 5, -50);
 		lights.add(light3);
+        */
 
 		/*
 		const geometry = new THREE.BoxGeometry(2, 2, 2);
@@ -199,7 +203,7 @@ class Tau {
 		return lights;
 	}
 
-	getBox(parent) {
+	addBox(parent) {
 		const geometry = new THREE.BoxGeometry(600, 30, 30);
 		const material = new THREE.MeshBasicMaterial({ color: 0xafb3bc });
 		const cube = new THREE.Mesh(geometry, material);
@@ -209,20 +213,39 @@ class Tau {
 
 	addBoxes(parent) {
 		const group = new THREE.Group();
-		group.visible = false;
-
+		group.visible = true;
 		const boxes = new Array(12).fill(null).map((x, i) => {
-			const box = this.getBox(group);
+			const box = this.addBox(group);
 			const r = Math.PI * 2 / 12 * i;
 			box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
 			return box;
 		});
-
 		parent.add(group);
 		return group;
 	}
 
-	addTau(parent) {
+	addSpheres(parent) {
+		const group = new THREE.Group();
+		group.visible = false;
+		const icosahedron = new THREE.IcosahedronGeometry(300, 1);
+		const geometry = new THREE.Geometry();
+		icosahedron.vertices.forEach((v, i) => {
+			const sphereGeometry = new THREE.SphereGeometry(30, 12, 12);
+			sphereGeometry.translate(v.x, v.y, v.z);
+			geometry.merge(sphereGeometry);
+			sphereGeometry.dispose();
+		});
+		icosahedron.dispose();
+		const material = new THREE.MeshBasicMaterial({ color: 0x9196a1 });
+		const bufferGeometry = new THREE.BufferGeometry().fromGeometry(geometry);
+		geometry.dispose();
+		const spheres_ = new THREE.Mesh(bufferGeometry, material);
+		group.add(spheres_);
+		parent.add(group);
+		return group;
+	}
+
+	addTau(parent, texture) {
 		const tau = new THREE.Group();
 		/*
 		const texture = new THREE.loader().load('img/matcap.jpg');
@@ -235,27 +258,52 @@ class Tau {
 		*/
 		// const texture = this.getEnvMap();
 		this.getCubeCamera();
-		const clear = this.clear = this.getClear();
-		const silver = this.silver = this.getSilver();
-		const red = this.red = this.getRed();
+		// const texture = this.cubeCamera1.renderTarget.texture;
+		const clear = this.clear = this.getClear(texture);
+		const silver = this.silver = this.getSilver(texture);
+		const red = this.red = this.getRed(texture);
 		const blue = this.blue = this.getBlue();
 		const green = this.green = this.getGreen();
 		const loader = new THREE.OBJLoader();
-		loader.load('models/scalare-33-b/scalare-33-b.obj',
+		loader.load(
+			'models/tau-marin_2.obj',
+			// 'models/scalare-33-b/scalare-33-b.obj',
 			(object) => {
 				let i = 0;
 				object.traverse((child) => {
 					// console.log(child);
 					if (child instanceof THREE.Mesh) {
+						child.geometry.scale(10, 10, 10);
+						// child.geometry.rotateX(-Math.PI / 2);
 						// child.geometry.computeVertexNormals(true);
+						// child.geometry.computeTangents();
+						THREE.BufferGeometryUtils.computeTangents(child.geometry);
+						if (i === 0) {
+							child.material = red;
+						} else if (i === 1) {
+							child.material = clear;
+							tau.body = child;
+						} else if (i === 2) {
+							child.material = clear;
+							tau.body = child;
+						} else if (i === 3) {
+							child.material = silver;
+						} else if (i === 4) {
+							child.material = silver;
+						} else if (i === 5) {
+							child.material = silver;
+						} else if (i === 6) {
+							child.material = green;
+						} else if (i === 7) {
+							child.material = blue;
+						}
+						i++;
+						/*
 						child.geometry.scale(150, 150, 150);
 						child.geometry.rotateX(-Math.PI / 2);
-						// child.geometry.rotateY(Math.PI);
-						// child.geometry.rotateZ(Math.PI);
-						// child.geometry.scale(0.7, 0.7, 0.7);
-						// child.geometry.translate(-70, 0, 0);
-						// child.geometry.rotateY(Math.PI / 2);
-						// child.geometry.rotateY(Math.PI);
+						// child.geometry.computeVertexNormals(true);
+						// child.geometry.computeTangents();
+						THREE.BufferGeometryUtils.computeTangents(child.geometry);
 						if (i === 0) {
 							child.material = red;
 						} else if (i === 1) {
@@ -264,17 +312,12 @@ class Tau {
 							child.material = blue;
 						} else if (i === 3) {
 							child.material = clear;
-							tau.child = child;
-						}
-						i++;
-						/*
-						const geometry = new THREE.Geometry().fromBufferGeometry(child.geometry);
-						geometry.scale(0.01, 0.01, 0.01);
-						child.geometry = new THREE.BufferGeometry().fromGeometry(geometry);
-						*/
+							tau.body = child;
+                        }
+                        */
 					}
 				});
-				this.addLogo(object);
+				// this.addLogo(object);
 				// object.material = material;
 				// object.rotateZ(Math.PI / 8);
 				console.log(object);
@@ -303,17 +346,19 @@ class Tau {
 	}
 
 	getCubeCamera() {
-		const cubeCamera0 = this.cubeCamera0 = new THREE.CubeCamera(0.01, 1000, 512);
-		cubeCamera0.renderTarget.texture.generateMipmaps = true;
-		cubeCamera0.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
-		this.scene.add(cubeCamera0);
-		const cubeCamera1 = this.cubeCamera1 = new THREE.CubeCamera(0.01, 1000, 512);
-		cubeCamera1.renderTarget.texture.generateMipmaps = true;
-		cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
-		this.scene.add(cubeCamera1);
+		if (USE_CUBE_CAMERA) {
+			const cubeCamera0 = this.cubeCamera0 = new THREE.CubeCamera(0.01, 1000, 512);
+			cubeCamera0.renderTarget.texture.generateMipmaps = true;
+			cubeCamera0.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
+			this.scene.add(cubeCamera0);
+			const cubeCamera1 = this.cubeCamera1 = new THREE.CubeCamera(0.01, 1000, 512);
+			cubeCamera1.renderTarget.texture.generateMipmaps = true;
+			cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
+			this.scene.add(cubeCamera1);
+		}
 	}
 
-	getEnvMap() {
+	getEnvMap_(callback) {
 		const textures = [
 			'img/cubemaps/lights/',
 			'img/cubemaps/park/',
@@ -324,56 +369,120 @@ class Tau {
 		const index = 0;
 		const urls = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg'];
 		// const texture = THREE.ImageUtils.loadTextureCube(urls, new THREE.CubeRefractionMapping(), render);
-		const texture = new THREE.CubeTextureLoader().setPath(textures[index]).load(urls);
-		texture.mapping = THREE.CubeRefractionMapping;
-		// texture.render = render;
-		/*
-		// Note that the second parameter has been set to new THREE.CubeRefractionMapping().  This
-		// is essential for making refraction work when this texture is used as an environment map
-		// on an object -- and it doesn't stop the texture from working on theskybox.
-		const shader = THREE.ShaderLib[ 'cube' ]; // contains the required shaders
-		shader.uniforms[ 'tCube' ].value = texture; // data for the shaders
-		const material = new THREE.ShaderMaterial({
-			// A ShaderMaterial uses custom vertex and fragment shaders.
-			fragmentShader: shader.fragmentShader,
-			vertexShader: shader.vertexShader,
-			uniforms: shader.uniforms,  // the texture is part of this object
-			depthWrite: false,
-			side: THREE.BackSide
+		const loader = new THREE.CubeTextureLoader().setPath(textures[index]).load(urls, (texture, textureData) => {
+			texture.mapping = THREE.CubeRefractionMapping;
+			if (typeof callback === 'function') {
+				callback(texture, textureData);
+			}
 		});
-		*/
-		return texture;
+		return loader;
 	}
 
-	getBlue() {
+	getEnvMap(callback) {
+		const loader = new THREE.TextureLoader().load('img/hdr-04.jpg', (source, textureData) => {
+			// source.encoding = THREE.sRGBEncoding;
+			source.mapping = THREE.UVMapping;
+			const options = {
+				resolution: 1024,
+				generateMipmaps: true,
+				minFilter: THREE.LinearMipMapLinearFilter,
+				magFilter: THREE.LinearFilter
+			};
+			// this.scene.background = new THREE.CubemapGenerator(this.renderer).fromEquirectangular(source, options);
+			const cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options);
+			// pngBackground = cubemapGenerator.renderTarget;
+			const texture = cubemapGenerator.update(this.renderer);
+			/*
+			var pmremGenerator = new THREE.PMREMGenerator( cubeMapTexture );
+			pmremGenerator.update( renderer );
+			var pmremCubeUVPacker = new THREE.PMREMCubeUVPacker( pmremGenerator.cubeLods );
+			pmremCubeUVPacker.update( renderer );
+			pngCubeRenderTarget = pmremCubeUVPacker.CubeUVRenderTarget;
+			*/
+			source.dispose();
+			/*
+			pmremGenerator.dispose();
+			pmremCubeUVPacker.dispose();
+			*/
+			texture.mapping = THREE.CubeReflectionMapping;
+			texture.mapping = THREE.CubeRefractionMapping;
+			/*
+			texture.minFilter = THREE.NearestFilter;
+			texture.magFilter = THREE.NearestFilter;
+			texture.minFilter = THREE.LinearFilter;
+			texture.magFilter = THREE.LinearFilter;
+			*/
+			// texture.generateMipmaps = false;
+			// texture.flipY = true;
+			// this.renderer.toneMappingExposure = 2.0;
+			if (typeof callback === 'function') {
+				callback(texture);
+			}
+		});
+		//
+		return loader;
+	}
+
+	getHDRMap(callback) {
+		const type = THREE.UnsignedByteType;
+		// const type = THREE.FloatType;
+		const loader = new THREE.RGBELoader().setType(type).load('img/hdr/studio_small_02_1k.hdr', (source, sourceData) => {
+			switch (type) {
+				case THREE.UnsignedByteType:
+					source.encoding = THREE.RGBEEncoding;
+					source.minFilter = THREE.NearestFilter;
+					source.magFilter = THREE.NearestFilter;
+					break;
+				case THREE.FloatType:
+					source.encoding = THREE.LinearEncoding;
+					source.minFilter = THREE.LinearFilter;
+					source.magFilter = THREE.LinearFilter;
+					break;
+			}
+			source.generateMipmaps = false;
+			source.flipY = true;
+
+			const cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, { resolution: 512 });
+			this.renderer.toneMappingExposure = 2.0;
+			const texture = cubemapGenerator.update(this.renderer);
+
+			source.dispose();
+
+			if (typeof callback === 'function') {
+				callback(texture);
+			}
+		});
+		//
+		return loader;
+	}
+
+	getBlue(texture) {
 		const material = new THREE.MeshStandardMaterial({
-			color: 0x0000ff,
+			color: 0x0007d8,
 			// emissive: 0x000066,
-			roughness: 0.0,
+			roughness: 0.3,
 			metalness: 0.0,
-			side: THREE.DoubleSide,
 		});
 		return material;
 	}
 
-	getGreen() {
+	getGreen(texture) {
 		const material = new THREE.MeshStandardMaterial({
-			color: 0x00ff00,
+			color: 0x00d84d,
 			// emissive: 0x006600,
-			roughness: 0.0,
+			roughness: 0.3,
 			metalness: 0.0,
-			side: THREE.DoubleSide,
 		});
 		return material;
 	}
 
-	getRed() {
+	getRed(texture) {
 		const material = new THREE.MeshStandardMaterial({
 			color: 0xe11e26,
 			emissive: 0x4f0300,
 			roughness: 0.2,
 			metalness: 0.2,
-			envMap: this.cubeCamera1.renderTarget.texture,
+			envMap: texture,
 			envMapIntensity: 0.4,
 			// The refractionRatio must have value in the range 0 to 1.
 			// The default value, very close to 1, give almost invisible glass.
@@ -383,60 +492,36 @@ class Tau {
 		return material;
 	}
 
-	getClear() {
-		const material = new THREE.MeshPhysicalMaterial({
-			color: 0xe0e3e5, // 0xc9d3da,
-			roughness: 0.0,
-			metalness: 1.0,
-			reflectivity: 1.0,
-			clearCoat: 1.0,
-			clearCoatRoughness: 1.0,
-			envMap: this.cubeCamera1.renderTarget.texture,
-			// The refractionRatio must have value in the range 0 to 1.
-			// The default value, very close to 1, give almost invisible glass.
+	getClear(texture) {
+		const material = new THREE.MeshBasicMaterial({
+			color: 0xffffff,
 			refractionRatio: 0.99,
-			// wireframe: true,
+			reflectivity: 0.99,
+			envMap: texture,
+			envMapIntensity: 2.0,
 			transparent: true,
-			opacity: 0.5,
-			/*
+			opacity: 0.3,
 			side: THREE.DoubleSide,
-			*/
+			// blending: THREE.AdditiveBlending,
 		});
-		if (false) {
-			material.reflectivity = 0.5; // determines the fraction of light that is transmitted
-		}
 		return material;
 	}
 
-	getSilver() {
-		const loader = new THREE.TextureLoader();
-		const texture = loader.load('img/logo.jpg');
+	getSilver(texture) {
 		const material = new THREE.MeshStandardMaterial({
 			color: 0xaaaaaa,
-			alphaMap: texture,
-			roughness: 0.0,
+			roughness: 0.2,
 			metalness: 0.99,
-			/*
-			clearCoat: 0.9,
-			clearCoatRoughness: 0.1,
-			*/
-			envMap: this.cubeCamera1.renderTarget.texture,
-			// The refractionRatio must have value in the range 0 to 1.
-			// The default value, very close to 1, give almost invisible glass.
+			envMap: texture,
 			refractionRatio: 0.0,
-			reflectivity: 0.99,
-			// wireframe: true,
-			alphaTest: 0.5, // if transparent is false
-			transparent: false,
-			// transparent: false,
-			// opacity: 1,
+			reflectivity: 0.9,
 			side: THREE.DoubleSide,
 		});
 		return material;
 	}
 
 	updateCubeCamera() {
-		if (this.tau.child) {
+		if (USE_CUBE_CAMERA && this.tau && this.tau.body) {
 			const renderer = this.renderer;
 			const scene = this.scene;
 			// pingpong
@@ -444,8 +529,8 @@ class Tau {
 				cubeCamera0 = this.cubeCamera0,
 				cubeCamera1 = this.cubeCamera1;
 			renderer.setClearColor(0xffffff, 1);
-			this.tau.child.visible = false;
-			this.boxes.visible = true;
+			this.tau.body.visible = false;
+			this.addons.visible = true;
 			if (count % 2 === 0) {
 				this.clear.envMap = cubeCamera0.renderTarget.texture;
 				this.silver.envMap = cubeCamera0.renderTarget.texture;
@@ -458,8 +543,8 @@ class Tau {
 				cubeCamera0.update(renderer, scene);
 			}
 			this.count = count + 1;
-			this.tau.child.visible = true;
-			this.boxes.visible = false;
+			this.tau.body.visible = true;
+			this.addons.visible = false;
 			renderer.setClearColor(0xffffff, 0);
 		}
 	}
