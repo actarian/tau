@@ -1,6 +1,20 @@
 /* jshint esversion: 6 */
 /* global window, document, TweenMax, THREE, WEBVR */
 
+/*
+"src/js/math/SimplexNoise.js",
+"node_modules/three/examples/js/postprocessing/EffectComposer.js",
+"node_modules/three/examples/js/postprocessing/RenderPass.js",
+"node_modules/three/examples/js/postprocessing/ShaderPass.js",
+"node_modules/three/examples/js/postprocessing/SAOPass.js",
+"node_modules/three/examples/js/postprocessing/SSAOPass.js",
+"node_modules/three/examples/js/shaders/CopyShader.js",
+"node_modules/three/examples/js/shaders/SAOShader.js",
+"node_modules/three/examples/js/shaders/SSAOShader.js",
+"node_modules/three/examples/js/shaders/DepthLimitedBlurShader.js",
+"node_modules/three/examples/js/shaders/UnpackDepthRGBAShader.js"
+*/
+
 import { TEST_ENABLED } from './three/const';
 import InteractiveMesh from './three/interactive.mesh';
 
@@ -54,28 +68,13 @@ class Tau {
 		const addons = this.addons = this.addSpheres(scene);
 		this.getCubeCamera();
 		const texture = this.cubeCamera1.renderTarget.texture;
-
 		// const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
 		const tau = this.tau = this.addTau(scene, texture);
 		// const lights = this.lights = this.addLights(tau);
 		this.tweenTau();
 		// });
 		const renderer = this.renderer = this.addRenderer();
-		/*
-		// camera.target.z = ROOM_RADIUS;
-		// camera.lookAt(camera.target);
-		const controls = this.controls = new THREE.OrbitControls(camera, renderer.domElement);
-		controls.maxDistance = 250;
-		controls.minDistance = 100;
-		// controls.maxPolarAngle = Math.PI / 2;
-		// controls.minPolarAngle = Math.PI / 2;
-		// camera.position.set(60, 205, -73);
-        // camera.position.set(0, 50, 100);
-		camera.position.set(6.3, 4.5, 111.5);
-		camera.position.multiplyScalar(1.5);
-		controls.update();
-        */
-		camera.position.set(0, 0, 150);
+		// const composer = this.composer = this.addComposer();
 		/*
 		const orbit = this.orbit = new Orbit();
 		const dragListener = this.dragListener = orbit.setDragListener(container);
@@ -133,7 +132,7 @@ class Tau {
 		// renderer.shadowMap.enabled = true;
 		renderer.setClearColor(0xffffff, 0);
 		// renderer.setPixelRatio(window.devicePixelRatio);
-		renderer.setPixelRatio(1.5);
+		renderer.setPixelRatio(Math.max(window.devicePixelRatio, 1.5));
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		/*
 		renderer.shadowMap.enabled = true;
@@ -154,9 +153,58 @@ class Tau {
 
 	addCamera() {
 		const camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, 2000);
-		camera.zoom = 0.25;
+		camera.zoom = 0.15;
 		camera.target = new THREE.Vector3();
+		camera.position.set(0, 0, 150);
+		/*
+		// camera.target.z = ROOM_RADIUS;
+		// camera.lookAt(camera.target);
+		const controls = this.controls = new THREE.OrbitControls(camera, renderer.domElement);
+		controls.maxDistance = 250;
+		controls.minDistance = 100;
+		// controls.maxPolarAngle = Math.PI / 2;
+		// controls.minPolarAngle = Math.PI / 2;
+		// camera.position.set(60, 205, -73);
+        // camera.position.set(0, 50, 100);
+		camera.position.set(6.3, 4.5, 111.5);
+		camera.position.multiplyScalar(1.5);
+		controls.update();
+        */
+
 		return camera;
+	}
+
+	addComposer_() {
+		const renderer = this.renderer,
+			scene = this.scene,
+			camera = this.camera;
+		const composer = new THREE.EffectComposer(renderer);
+		const renderPass = new THREE.RenderPass(scene, camera);
+		composer.addPass(renderPass);
+		const saoPass = new THREE.SAOPass(scene, camera, false, true);
+		saoPass.output = THREE.SAOPass.OUTPUT.Default;
+		saoPass.saoBias = 0.5;
+		saoPass.saoIntensity = 0.18;
+		saoPass.saoScale = 1;
+		saoPass.saoKernelRadius = 100;
+		saoPass.saoMinResolution = 0;
+		saoPass.saoBlur = true;
+		saoPass.saoBlurRadius = 8;
+		saoPass.saoBlurStdDev = 4;
+		saoPass.saoBlurDepthCutoff = 0.01;
+		composer.addPass(saoPass);
+		return composer;
+	}
+
+	addComposer() {
+		const renderer = this.renderer,
+			scene = this.scene,
+			camera = this.camera;
+		const composer = new THREE.EffectComposer(renderer);
+		const ssaoPass = new THREE.SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
+		ssaoPass.kernelRadius = 16;
+		composer.addPass(ssaoPass);
+		return composer;
 	}
 
 	addLights(parent) {
@@ -295,13 +343,14 @@ class Tau {
 		const green = this.green = this.getGreen();
 		const loader = new THREE.OBJLoader();
 		loader.load(
-			'models/tau-marin_2.obj',
+			'models/tau-marin_4.obj',
 			// 'models/scalare-33-b/scalare-33-b.obj',
 			(object) => {
 				let i = 0;
 				object.traverse((child) => {
 					// console.log(child);
 					if (child instanceof THREE.Mesh) {
+						// console.log(child);
 						/*
 						child.castShadow = true;
 						child.receiveShadow = true;
@@ -317,17 +366,11 @@ class Tau {
 							child.material = clear;
 							tau.body = child;
 						} else if (i === 2) {
-							child.material = clear;
+							child.material = silver;
 							tau.body = child;
 						} else if (i === 3) {
-							child.material = silver;
-						} else if (i === 4) {
-							child.material = silver;
-						} else if (i === 5) {
-							child.material = silver;
-						} else if (i === 6) {
 							child.material = green;
-						} else if (i === 7) {
+						} else if (i === 4) {
 							child.material = blue;
 						}
 						i++;
@@ -517,8 +560,12 @@ class Tau {
 	}
 
 	getBlue(texture) {
+		const lightMap = new THREE.TextureLoader().load('img/lightMap.jpg');
 		const material = new THREE.MeshStandardMaterial({
-			color: 0x0007d8,
+			color: 0x0007d8, // 0x0007d8,
+			// map: lightMap,
+			normalMap: lightMap,
+			metalnessMap: lightMap,
 			// emissive: 0x000066,
 			roughness: 0.3,
 			metalness: 0.0,
@@ -615,17 +662,23 @@ class Tau {
 		try {
 			const container = this.container,
 				renderer = this.renderer,
-				camera = this.camera;
+				camera = this.camera,
+				composer = this.composer;
 			const size = this.size;
 			size.width = container.offsetWidth;
 			size.height = container.offsetHeight;
-			size.aspect = size.width / size.height;
+			const w = size.width;
+			const h = size.height;
+			size.aspect = w / h;
 			if (renderer) {
-				renderer.setSize(size.width, size.height);
+				renderer.setSize(w, h);
 			}
 			if (camera) {
-				camera.aspect = size.width / size.height;
+				camera.aspect = w / h;
 				camera.updateProjectionMatrix();
+			}
+			if (composer) {
+				composer.setSize(w, h);
 			}
 		} catch (error) {
 			this.debugInfo.innerHTML = error;
@@ -711,6 +764,10 @@ class Tau {
 		renderer.setAnimationLoop(() => {
 			this.render();
 		});
+		const composer = this.composer;
+		if (composer) {
+			composer.render();
+		}
 	}
 
 	render(delta) {

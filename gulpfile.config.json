@@ -22,6 +22,7 @@
 					"node_modules/three/examples/js/loaders/EquirectangularToCubeGenerator.js",
 					"node_modules/three/examples/js/loaders/RGBELoader.js",
 					"node_modules/three/examples/js/utils/BufferGeometryUtils.js"
+
 				],
 				"output": "docs/js/tau-vendors.js",
 				"minify": true

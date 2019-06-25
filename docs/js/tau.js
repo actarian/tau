@@ -85,23 +85,8 @@ function () {
 
       this.tweenTau(); // });
 
-      var renderer = this.renderer = this.addRenderer();
-      /*
-      // camera.target.z = ROOM_RADIUS;
-      // camera.lookAt(camera.target);
-      const controls = this.controls = new THREE.OrbitControls(camera, renderer.domElement);
-      controls.maxDistance = 250;
-      controls.minDistance = 100;
-      // controls.maxPolarAngle = Math.PI / 2;
-      // controls.minPolarAngle = Math.PI / 2;
-      // camera.position.set(60, 205, -73);
-            // camera.position.set(0, 50, 100);
-      camera.position.set(6.3, 4.5, 111.5);
-      camera.position.multiplyScalar(1.5);
-      controls.update();
-            */
+      var renderer = this.renderer = this.addRenderer(); // const composer = this.composer = this.addComposer();
 
-      camera.position.set(0, 0, 150);
       /*
       const orbit = this.orbit = new Orbit();
       const dragListener = this.dragListener = orbit.setDragListener(container);
@@ -166,7 +151,7 @@ function () {
 
       renderer.setClearColor(0xffffff, 0); // renderer.setPixelRatio(window.devicePixelRatio);
 
-      renderer.setPixelRatio(1.5);
+      renderer.setPixelRatio(Math.max(window.devicePixelRatio, 1.5));
       renderer.setSize(window.innerWidth, window.innerHeight);
       /*
       renderer.shadowMap.enabled = true;
@@ -190,9 +175,60 @@ function () {
     key: "addCamera",
     value: function addCamera() {
       var camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, 2000);
-      camera.zoom = 0.25;
+      camera.zoom = 0.15;
       camera.target = new THREE.Vector3();
+      camera.position.set(0, 0, 150);
+      /*
+      // camera.target.z = ROOM_RADIUS;
+      // camera.lookAt(camera.target);
+      const controls = this.controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.maxDistance = 250;
+      controls.minDistance = 100;
+      // controls.maxPolarAngle = Math.PI / 2;
+      // controls.minPolarAngle = Math.PI / 2;
+      // camera.position.set(60, 205, -73);
+            // camera.position.set(0, 50, 100);
+      camera.position.set(6.3, 4.5, 111.5);
+      camera.position.multiplyScalar(1.5);
+      controls.update();
+            */
+
       return camera;
+    }
+  }, {
+    key: "addComposer_",
+    value: function addComposer_() {
+      var renderer = this.renderer,
+          scene = this.scene,
+          camera = this.camera;
+      var composer = new THREE.EffectComposer(renderer);
+      var renderPass = new THREE.RenderPass(scene, camera);
+      composer.addPass(renderPass);
+      var saoPass = new THREE.SAOPass(scene, camera, false, true);
+      saoPass.output = THREE.SAOPass.OUTPUT.Default;
+      saoPass.saoBias = 0.5;
+      saoPass.saoIntensity = 0.18;
+      saoPass.saoScale = 1;
+      saoPass.saoKernelRadius = 100;
+      saoPass.saoMinResolution = 0;
+      saoPass.saoBlur = true;
+      saoPass.saoBlurRadius = 8;
+      saoPass.saoBlurStdDev = 4;
+      saoPass.saoBlurDepthCutoff = 0.01;
+      composer.addPass(saoPass);
+      return composer;
+    }
+  }, {
+    key: "addComposer",
+    value: function addComposer() {
+      var renderer = this.renderer,
+          scene = this.scene,
+          camera = this.camera;
+      var composer = new THREE.EffectComposer(renderer);
+      var ssaoPass = new THREE.SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
+      ssaoPass.kernelRadius = 16;
+      composer.addPass(ssaoPass);
+      return composer;
     }
   }, {
     key: "addLights",
@@ -347,12 +383,14 @@ function () {
       var blue = this.blue = this.getBlue();
       var green = this.green = this.getGreen();
       var loader = new THREE.OBJLoader();
-      loader.load('models/tau-marin_2.obj', // 'models/scalare-33-b/scalare-33-b.obj',
+      loader.load('models/tau-marin_4.obj', // 'models/scalare-33-b/scalare-33-b.obj',
       function (object) {
         var i = 0;
         object.traverse(function (child) {
           // console.log(child);
           if (child instanceof THREE.Mesh) {
+            // console.log(child);
+
             /*
             child.castShadow = true;
             child.receiveShadow = true;
@@ -368,17 +406,11 @@ function () {
               child.material = clear;
               tau.body = child;
             } else if (i === 2) {
-              child.material = clear;
+              child.material = silver;
               tau.body = child;
             } else if (i === 3) {
-              child.material = silver;
-            } else if (i === 4) {
-              child.material = silver;
-            } else if (i === 5) {
-              child.material = silver;
-            } else if (i === 6) {
               child.material = green;
-            } else if (i === 7) {
+            } else if (i === 4) {
               child.material = blue;
             }
 
@@ -571,8 +603,13 @@ function () {
   }, {
     key: "getBlue",
     value: function getBlue(texture) {
+      var lightMap = new THREE.TextureLoader().load('img/lightMap.jpg');
       var material = new THREE.MeshStandardMaterial({
         color: 0x0007d8,
+        // 0x0007d8,
+        // map: lightMap,
+        normalMap: lightMap,
+        metalnessMap: lightMap,
         // emissive: 0x000066,
         roughness: 0.3,
         metalness: 0.0
@@ -676,19 +713,26 @@ function () {
       try {
         var container = this.container,
             renderer = this.renderer,
-            camera = this.camera;
+            camera = this.camera,
+            composer = this.composer;
         var size = this.size;
         size.width = container.offsetWidth;
         size.height = container.offsetHeight;
-        size.aspect = size.width / size.height;
+        var w = size.width;
+        var h = size.height;
+        size.aspect = w / h;
 
         if (renderer) {
-          renderer.setSize(size.width, size.height);
+          renderer.setSize(w, h);
         }
 
         if (camera) {
-          camera.aspect = size.width / size.height;
+          camera.aspect = w / h;
           camera.updateProjectionMatrix();
+        }
+
+        if (composer) {
+          composer.setSize(w, h);
         }
       } catch (error) {
         this.debugInfo.innerHTML = error;
@@ -785,6 +829,11 @@ function () {
       renderer.setAnimationLoop(function () {
         _this6.render();
       });
+      var composer = this.composer;
+
+      if (composer) {
+        composer.render();
+      }
     }
   }, {
     key: "render",
