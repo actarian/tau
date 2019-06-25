@@ -1,9 +1,8 @@
 /* jshint esversion: 6 */
 /* global window, document, TweenMax, THREE, WEBVR */
 
-import { ROOM_RADIUS, TEST_ENABLED } from './three/const';
+import { TEST_ENABLED } from './three/const';
 import InteractiveMesh from './three/interactive.mesh';
-import Orbit from './three/orbit';
 
 const USE_CUBE_CAMERA = true;
 const COLORS = [0xFFFFFF, 0xFC4445, 0xFEEE6, 0x55BCC9, 0x97CAEF, 0xCAFAFE];
@@ -53,10 +52,14 @@ class Tau {
 		const lights = this.lights = this.addLights(scene);
 		// const addons = this.addons = this.addBoxes(scene);
 		const addons = this.addons = this.addSpheres(scene);
-		const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
-			const tau = this.tau = this.addTau(scene, texture);
-			this.tweenTau();
-		});
+		this.getCubeCamera();
+		const texture = this.cubeCamera1.renderTarget.texture;
+
+		// const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
+		const tau = this.tau = this.addTau(scene, texture);
+		// const lights = this.lights = this.addLights(tau);
+		this.tweenTau();
+		// });
 		const renderer = this.renderer = this.addRenderer();
 		/*
 		// camera.target.z = ROOM_RADIUS;
@@ -73,10 +76,12 @@ class Tau {
 		controls.update();
         */
 		camera.position.set(0, 0, 150);
+		/*
 		const orbit = this.orbit = new Orbit();
 		const dragListener = this.dragListener = orbit.setDragListener(container);
 		// raycaster
 		const raycaster = this.raycaster = new THREE.Raycaster();
+		*/
 		window.addEventListener('resize', this.onWindowResize, false);
 		/*
 		window.addEventListener('keydown', this.onKeyDown, false);
@@ -130,6 +135,10 @@ class Tau {
 		// renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.setPixelRatio(1.5);
 		renderer.setSize(window.innerWidth, window.innerHeight);
+		/*
+		renderer.shadowMap.enabled = true;
+		renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+		*/
 		// container.innerHTML = '';
 		this.container.appendChild(renderer.domElement);
 		return renderer;
@@ -145,48 +154,64 @@ class Tau {
 
 	addCamera() {
 		const camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, 2000);
-		camera.zoom = 0.15;
+		camera.zoom = 0.25;
 		camera.target = new THREE.Vector3();
 		return camera;
 	}
 
-	addLights(scene) {
+	addLights(parent) {
 		const lights = new THREE.Group();
 
-		const hemiLight = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.6);
-		hemiLight.position.set(0, 0, 0);
-		scene.add(hemiLight);
-
+		const light0 = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.9);
+		light0.position.set(0, 10, 0);
+		lights.add(light0);
 		/*
-		const hemiLightHelper = new THREE.HemisphereLightHelper(hemiLight, 10);
-		scene.add(hemiLightHelper);
+		const helper0 = new THREE.HemisphereLightHelper(light0, 10, 0x888888);
+		lights.add(helper0);
 		*/
-		const light1 = new THREE.DirectionalLight(0xffffff, 1);
-		light1.position.set(-50, 100, 0);
+
+		const light1 = new THREE.DirectionalLight(0xffffff, 1.4);
+		light1.position.set(0, 0, -50);
 		lights.add(light1);
 
 		/*
-		const light2 = new THREE.DirectionalLight(0xffffff, 0.9);
-		light2.position.set(0, 30, 0);
-		lights.add(light2);
-
-		const light3 = new THREE.DirectionalLight(0xffffff, 0.9);
-		light3.position.set(60, 5, -50);
-		lights.add(light3);
-        */
-
+		const light1 = new THREE.DirectionalLight(0xffffff, 2);
+		light1.position.set(-50, 50, -50);
+		lights.add(light1);
+		*/
 		/*
-		const geometry = new THREE.BoxGeometry(2, 2, 2);
-		const material = new THREE.MeshBasicMaterial({ color: 0xafb3bc });
-		const cube = new THREE.Mesh(geometry, material);
-		cube.position.set(0, 2, 0);
-		this.scene.add(cube);
+		const helper1 = new THREE.DirectionalLightHelper(light1, 10, 0x888888);
+		lights.add(helper1);
 		*/
 
 		/*
-		const light4 = new THREE.DirectionalLight(0xffffff, 0.8);
-		light4.position.set(50, -100, -50);
+		const light2 = new THREE.DirectionalLight(0xffffff, 2);
+		light2.position.set(50, 50, 50);
+		lights.add(light2);
+		*/
+		/*
+		const helper2 = new THREE.DirectionalLightHelper(light2, 10, 0x888888);
+		lights.add(helper2);
+		*/
+
+		/*
+		const light3 = new THREE.PointLight(0xffffff, 1);
+		light3.position.set(-50, 50, 50);
+		lights.add(light3);
+		*/
+		/*
+		const helper3 = new THREE.DirectionalLightHelper(light3, 10, 0x888888);
+		lights.add(helper3);
+		*/
+
+		/*
+		const light4 = new THREE.PointLight(0xffffff, 1);
+		light4.position.set(50, 50, -50);
 		lights.add(light4);
+		*/
+		/*
+		const helper4 = new THREE.DirectionalLightHelper(light4, 10, 0x888888);
+		lights.add(helper4);
 		*/
 
 		/*
@@ -203,9 +228,9 @@ class Tau {
 		*/
 		/*
 		const dirLightHelper = new THREE.DirectionalLightHelper(dirLight, 10);
-		scene.add(dirLightHelper);
+		parent.add(dirLightHelper);
 		*/
-		scene.add(lights);
+		parent.add(lights);
 		return lights;
 	}
 
@@ -233,7 +258,7 @@ class Tau {
 	addSpheres(parent) {
 		const group = new THREE.Group();
 		group.visible = false;
-		const icosahedron = new THREE.IcosahedronGeometry(300, 1);
+		const icosahedron = new THREE.IcosahedronGeometry(200, 1);
 		const geometry = new THREE.Geometry();
 		icosahedron.vertices.forEach((v, i) => {
 			const sphereGeometry = new THREE.SphereGeometry(30, 12, 12);
@@ -263,8 +288,6 @@ class Tau {
 		});
 		*/
 		// const texture = this.getEnvMap();
-		this.getCubeCamera();
-		// const texture = this.cubeCamera1.renderTarget.texture;
 		const clear = this.clear = this.getClear(texture);
 		const silver = this.silver = this.getSilver(texture);
 		const red = this.red = this.getRed(texture);
@@ -279,11 +302,15 @@ class Tau {
 				object.traverse((child) => {
 					// console.log(child);
 					if (child instanceof THREE.Mesh) {
+						/*
+						child.castShadow = true;
+						child.receiveShadow = true;
+						*/
 						child.geometry.scale(10, 10, 10);
 						// child.geometry.rotateX(-Math.PI / 2);
 						// child.geometry.computeVertexNormals(true);
 						// child.geometry.computeTangents();
-						THREE.BufferGeometryUtils.computeTangents(child.geometry);
+						// THREE.BufferGeometryUtils.computeTangents(child.geometry);
 						if (i === 0) {
 							child.material = red;
 						} else if (i === 1) {
@@ -380,11 +407,11 @@ class Tau {
 
 	getCubeCamera() {
 		if (USE_CUBE_CAMERA) {
-			const cubeCamera0 = this.cubeCamera0 = new THREE.CubeCamera(0.01, 1000, 512);
+			const cubeCamera0 = this.cubeCamera0 = new THREE.CubeCamera(0.01, 1000, 256);
 			cubeCamera0.renderTarget.texture.generateMipmaps = true;
 			cubeCamera0.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
 			this.scene.add(cubeCamera0);
-			const cubeCamera1 = this.cubeCamera1 = new THREE.CubeCamera(0.01, 1000, 512);
+			const cubeCamera1 = this.cubeCamera1 = new THREE.CubeCamera(0.01, 1000, 256);
 			cubeCamera1.renderTarget.texture.generateMipmaps = true;
 			cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
 			this.scene.add(cubeCamera1);
@@ -529,9 +556,9 @@ class Tau {
 		const material = new THREE.MeshBasicMaterial({
 			color: 0xffffff,
 			refractionRatio: 0.99,
-			reflectivity: 0.99,
+			// reflectivity: 0.99,
 			envMap: texture,
-			envMapIntensity: 2.0,
+			// envMapIntensity: 2.0,
 			transparent: true,
 			opacity: 0.3,
 			side: THREE.DoubleSide,
@@ -542,12 +569,12 @@ class Tau {
 
 	getSilver(texture) {
 		const material = new THREE.MeshStandardMaterial({
-			color: 0xaaaaaa,
-			roughness: 0.2,
-			metalness: 0.99,
-			envMap: texture,
-			refractionRatio: 0.0,
-			reflectivity: 0.9,
+			color: 0x999999,
+			roughness: 0.5,
+			metalness: 0.9,
+			// envMap: texture,
+			// refractionRatio: 0.0,
+			// reflectivity: 0.9,
 			side: THREE.DoubleSide,
 		});
 		return material;
@@ -668,11 +695,13 @@ class Tau {
 	}
 
 	onSave(event) {
+		/*
 		try {
 			this.view.orientation = this.orbit.getOrientation();
 		} catch (error) {
 			this.debugInfo.innerHTML = error;
 		}
+		*/
 	}
 
 	// animation
@@ -696,20 +725,6 @@ class Tau {
 		const scene = this.scene;
 		this.updateCubeCamera();
 		renderer.render(scene, camera);
-	}
-
-	updateCamera() {
-		const orbit = this.orbit;
-		const camera = this.camera;
-		orbit.update();
-		camera.target.x = ROOM_RADIUS * Math.sin(orbit.phi) * Math.cos(orbit.theta);
-		camera.target.y = ROOM_RADIUS * Math.cos(orbit.phi);
-		camera.target.z = ROOM_RADIUS * Math.sin(orbit.phi) * Math.sin(orbit.theta);
-		camera.lookAt(camera.target);
-		/*
-		// distortion
-		camera.position.copy( camera.target ).negate();
-		*/
 	}
 
 	// utils

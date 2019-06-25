@@ -1,213 +1,9 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-/* jshint esversion: 6 */
-
-/* global window, document, TweenMax, ThreeJs */
-var DragListener =
-/*#__PURE__*/
-function () {
-  function DragListener(target, downCallback, moveCallback, upCallback) {
-    _classCallCheck(this, DragListener);
-
-    this.target = target || document;
-
-    this.downCallback = downCallback || function (e) {
-      console.log('DragListener.downCallback not setted', e);
-    };
-
-    this.moveCallback = moveCallback || function (e) {
-      console.log('DragListener.moveCallback not setted', e);
-    };
-
-    this.upCallback = upCallback || function (e) {
-      console.log('DragListener.upCallback not setted', e);
-    };
-
-    this.dragging = false;
-    this.init();
-  }
-
-  _createClass(DragListener, [{
-    key: "init",
-    value: function init() {
-      this.onMouseDown = this.onMouseDown.bind(this);
-      this.onMouseMove = this.onMouseMove.bind(this);
-      this.onMouseUp = this.onMouseUp.bind(this);
-      this.onTouchStart = this.onTouchStart.bind(this);
-      this.onTouchMove = this.onTouchMove.bind(this);
-      this.onTouchEnd = this.onTouchEnd.bind(this);
-      this.target.addEventListener('mousedown', this.onMouseDown, false);
-      this.target.addEventListener('touchstart', this.onTouchStart, false);
-    }
-  }, {
-    key: "onDown",
-    value: function onDown(down) {
-      this.down = down; // this.position ? { x: down.x - this.position.x, y: down.y - this.position.y } : down;
-
-      this.strength = {
-        x: 0,
-        y: 0
-      };
-      this.distance = this.distance || {
-        x: 0,
-        y: 0
-      };
-      this.speed = {
-        x: 0,
-        y: 0
-      };
-      this.downCallback(this);
-    }
-  }, {
-    key: "onDrag",
-    value: function onDrag(position) {
-      this.dragging = this.down !== undefined;
-      var target = this.target;
-      var distance = {
-        x: position.x - this.down.x,
-        y: position.y - this.down.y
-      };
-      var strength = {
-        x: distance.x / window.innerWidth * 2,
-        y: distance.y / window.innerHeight * 2
-      };
-      var speed = {
-        x: this.speed.x + (strength.x - this.strength.x) * 0.1,
-        y: this.speed.y + (strength.y - this.strength.y) * 0.1
-      };
-      this.position = position;
-      this.distance = distance;
-      this.strength = strength;
-      this.speed = speed;
-      this.moveCallback({
-        position: position,
-        distance: distance,
-        strength: strength,
-        speed: speed,
-        target: target
-      });
-    }
-  }, {
-    key: "onUp",
-    value: function onUp() {
-      this.down = undefined;
-      this.dragging = false;
-      this.upCallback(this);
-    }
-  }, {
-    key: "onMouseDown",
-    value: function onMouseDown(e) {
-      this.target.removeEventListener('touchstart', this.onTouchStart);
-      this.onDown({
-        x: e.clientX,
-        y: e.clientY
-      });
-      this.addMouseListeners();
-    }
-  }, {
-    key: "onMouseMove",
-    value: function onMouseMove(e) {
-      this.onDrag({
-        x: e.clientX,
-        y: e.clientY
-      });
-    }
-  }, {
-    key: "onMouseUp",
-    value: function onMouseUp(e) {
-      this.removeMouseListeners();
-      /*
-      this.onDrag({
-      	x: e.clientX,
-      	y: e.clientY
-      });
-      */
-
-      this.onUp();
-    }
-  }, {
-    key: "onTouchStart",
-    value: function onTouchStart(e) {
-      this.target.removeEventListener('mousedown', this.onMouseDown);
-
-      if (e.touches.length > 1) {
-        e.preventDefault();
-        this.onDown({
-          x: e.touches[0].pageX,
-          y: e.touches[0].pageY
-        });
-        this.addTouchListeners();
-      }
-    }
-  }, {
-    key: "onTouchMove",
-    value: function onTouchMove(e) {
-      if (e.touches.length > 0) {
-        e.preventDefault();
-        this.onDrag({
-          x: e.touches[0].pageX,
-          y: e.touches[0].pageY
-        });
-      }
-    }
-  }, {
-    key: "onTouchEnd",
-    value: function onTouchEnd(e) {
-      this.removeTouchListeners();
-      this.onDrag(this.position);
-      this.onUp();
-    }
-  }, {
-    key: "addMouseListeners",
-    value: function addMouseListeners() {
-      document.addEventListener('mousemove', this.onMouseMove, false);
-      document.addEventListener('mouseup', this.onMouseUp, false);
-    }
-  }, {
-    key: "addTouchListeners",
-    value: function addTouchListeners() {
-      document.addEventListener('touchend', this.onTouchEnd, false);
-      document.addEventListener('touchmove', this.onTouchMove, false);
-    }
-  }, {
-    key: "removeMouseListeners",
-    value: function removeMouseListeners() {
-      document.removeEventListener('mousemove', this.onMouseMove);
-      document.removeEventListener('mouseup', this.onMouseUp);
-    }
-  }, {
-    key: "removeTouchListeners",
-    value: function removeTouchListeners() {
-      document.removeEventListener('touchend', this.onTouchEnd);
-      document.removeEventListener('touchmove', this.onTouchMove);
-    }
-  }]);
-
-  return DragListener;
-}();
-
-exports.default = DragListener;
-
-},{}],2:[function(require,module,exports){
-"use strict";
-
 var _const = require("./three/const");
 
 var _interactive = _interopRequireDefault(require("./three/interactive.mesh"));
-
-var _orbit = _interopRequireDefault(require("./three/orbit"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -262,8 +58,6 @@ function () {
   _createClass(Tau, [{
     key: "init",
     value: function init() {
-      var _this = this;
-
       var body = this.body = document.querySelector('body');
       var section = this.section = document.querySelector('.tau');
       var container = this.container = section.querySelector('.tau__container');
@@ -284,11 +78,13 @@ function () {
       var lights = this.lights = this.addLights(scene); // const addons = this.addons = this.addBoxes(scene);
 
       var addons = this.addons = this.addSpheres(scene);
-      var hdr = this.hdr = this.getEnvMap(function (texture, textureData) {
-        var tau = _this.tau = _this.addTau(scene, texture);
+      this.getCubeCamera();
+      var texture = this.cubeCamera1.renderTarget.texture; // const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
 
-        _this.tweenTau();
-      });
+      var tau = this.tau = this.addTau(scene, texture); // const lights = this.lights = this.addLights(tau);
+
+      this.tweenTau(); // });
+
       var renderer = this.renderer = this.addRenderer();
       /*
       // camera.target.z = ROOM_RADIUS;
@@ -306,10 +102,13 @@ function () {
             */
 
       camera.position.set(0, 0, 150);
-      var orbit = this.orbit = new _orbit.default();
-      var dragListener = this.dragListener = orbit.setDragListener(container); // raycaster
+      /*
+      const orbit = this.orbit = new Orbit();
+      const dragListener = this.dragListener = orbit.setDragListener(container);
+      // raycaster
+      const raycaster = this.raycaster = new THREE.Raycaster();
+      */
 
-      var raycaster = this.raycaster = new THREE.Raycaster();
       window.addEventListener('resize', this.onWindowResize, false);
       /*
       window.addEventListener('keydown', this.onKeyDown, false);
@@ -326,7 +125,7 @@ function () {
   }, {
     key: "updateBackgroundColor",
     value: function updateBackgroundColor() {
-      var _this2 = this;
+      var _this = this;
 
       this.colorIndex++;
       this.colorIndex = this.colorIndex % COLORS.length;
@@ -343,13 +142,13 @@ function () {
         delay: 3,
         ease: Power2.easeInOut,
         onUpdate: function onUpdate() {
-          _this2.addons.children.forEach(function (x) {
+          _this.addons.children.forEach(function (x) {
             x.material.color.setHex(color);
             x.material.needsUpdate = true;
           });
         },
         onComplete: function onComplete() {
-          _this2.updateBackgroundColor();
+          _this.updateBackgroundColor();
         }
       });
     }
@@ -368,7 +167,12 @@ function () {
       renderer.setClearColor(0xffffff, 0); // renderer.setPixelRatio(window.devicePixelRatio);
 
       renderer.setPixelRatio(1.5);
-      renderer.setSize(window.innerWidth, window.innerHeight); // container.innerHTML = '';
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      /*
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+      */
+      // container.innerHTML = '';
 
       this.container.appendChild(renderer.domElement);
       return renderer;
@@ -386,46 +190,67 @@ function () {
     key: "addCamera",
     value: function addCamera() {
       var camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, 2000);
-      camera.zoom = 0.15;
+      camera.zoom = 0.25;
       camera.target = new THREE.Vector3();
       return camera;
     }
   }, {
     key: "addLights",
-    value: function addLights(scene) {
+    value: function addLights(parent) {
       var lights = new THREE.Group();
-      var hemiLight = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.6);
-      hemiLight.position.set(0, 0, 0);
-      scene.add(hemiLight);
+      var light0 = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.9);
+      light0.position.set(0, 10, 0);
+      lights.add(light0);
       /*
-      const hemiLightHelper = new THREE.HemisphereLightHelper(hemiLight, 10);
-      scene.add(hemiLightHelper);
+      const helper0 = new THREE.HemisphereLightHelper(light0, 10, 0x888888);
+      lights.add(helper0);
       */
 
-      var light1 = new THREE.DirectionalLight(0xffffff, 1);
-      light1.position.set(-50, 100, 0);
+      var light1 = new THREE.DirectionalLight(0xffffff, 1.4);
+      light1.position.set(0, 0, -50);
       lights.add(light1);
       /*
-      const light2 = new THREE.DirectionalLight(0xffffff, 0.9);
-      light2.position.set(0, 30, 0);
-      lights.add(light2);
-      	const light3 = new THREE.DirectionalLight(0xffffff, 0.9);
-      light3.position.set(60, 5, -50);
-      lights.add(light3);
-            */
-
-      /*
-      const geometry = new THREE.BoxGeometry(2, 2, 2);
-      const material = new THREE.MeshBasicMaterial({ color: 0xafb3bc });
-      const cube = new THREE.Mesh(geometry, material);
-      cube.position.set(0, 2, 0);
-      this.scene.add(cube);
+      const light1 = new THREE.DirectionalLight(0xffffff, 2);
+      light1.position.set(-50, 50, -50);
+      lights.add(light1);
       */
 
       /*
-      const light4 = new THREE.DirectionalLight(0xffffff, 0.8);
-      light4.position.set(50, -100, -50);
+      const helper1 = new THREE.DirectionalLightHelper(light1, 10, 0x888888);
+      lights.add(helper1);
+      */
+
+      /*
+      const light2 = new THREE.DirectionalLight(0xffffff, 2);
+      light2.position.set(50, 50, 50);
+      lights.add(light2);
+      */
+
+      /*
+      const helper2 = new THREE.DirectionalLightHelper(light2, 10, 0x888888);
+      lights.add(helper2);
+      */
+
+      /*
+      const light3 = new THREE.PointLight(0xffffff, 1);
+      light3.position.set(-50, 50, 50);
+      lights.add(light3);
+      */
+
+      /*
+      const helper3 = new THREE.DirectionalLightHelper(light3, 10, 0x888888);
+      lights.add(helper3);
+      */
+
+      /*
+      const light4 = new THREE.PointLight(0xffffff, 1);
+      light4.position.set(50, 50, -50);
       lights.add(light4);
+      */
+
+      /*
+      const helper4 = new THREE.DirectionalLightHelper(light4, 10, 0x888888);
+      lights.add(helper4);
       */
 
       /*
@@ -443,10 +268,10 @@ function () {
 
       /*
       const dirLightHelper = new THREE.DirectionalLightHelper(dirLight, 10);
-      scene.add(dirLightHelper);
+      parent.add(dirLightHelper);
       */
 
-      scene.add(lights);
+      parent.add(lights);
       return lights;
     }
   }, {
@@ -463,12 +288,12 @@ function () {
   }, {
     key: "addBoxes",
     value: function addBoxes(parent) {
-      var _this3 = this;
+      var _this2 = this;
 
       var group = new THREE.Group();
       group.visible = true;
       var boxes = new Array(12).fill(null).map(function (x, i) {
-        var box = _this3.addBox(group);
+        var box = _this2.addBox(group);
 
         var r = Math.PI * 2 / 12 * i;
         box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
@@ -482,7 +307,7 @@ function () {
     value: function addSpheres(parent) {
       var group = new THREE.Group();
       group.visible = false;
-      var icosahedron = new THREE.IcosahedronGeometry(300, 1);
+      var icosahedron = new THREE.IcosahedronGeometry(200, 1);
       var geometry = new THREE.Geometry();
       icosahedron.vertices.forEach(function (v, i) {
         var sphereGeometry = new THREE.SphereGeometry(30, 12, 12);
@@ -516,8 +341,6 @@ function () {
       */
       // const texture = this.getEnvMap();
 
-      this.getCubeCamera(); // const texture = this.cubeCamera1.renderTarget.texture;
-
       var clear = this.clear = this.getClear(texture);
       var silver = this.silver = this.getSilver(texture);
       var red = this.red = this.getRed(texture);
@@ -530,11 +353,14 @@ function () {
         object.traverse(function (child) {
           // console.log(child);
           if (child instanceof THREE.Mesh) {
+            /*
+            child.castShadow = true;
+            child.receiveShadow = true;
+            */
             child.geometry.scale(10, 10, 10); // child.geometry.rotateX(-Math.PI / 2);
             // child.geometry.computeVertexNormals(true);
             // child.geometry.computeTangents();
-
-            THREE.BufferGeometryUtils.computeTangents(child.geometry);
+            // THREE.BufferGeometryUtils.computeTangents(child.geometry);
 
             if (i === 0) {
               child.material = red;
@@ -591,7 +417,7 @@ function () {
   }, {
     key: "tweenTau",
     value: function tweenTau() {
-      var _this4 = this;
+      var _this3 = this;
 
       var rotations = [[Math.PI / 4, Math.PI / 4, Math.PI / 4], [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4], [0, 0, Math.PI / 2], [Math.PI / 2, 0, 0], [Math.PI / 4, Math.PI / 4, 0], [0, -Math.PI / 2, Math.PI / 16]];
       var tau = this.tau;
@@ -607,7 +433,7 @@ function () {
         z: rotation[2],
         delay: 4,
         onComplete: function onComplete() {
-          _this4.tweenTau();
+          _this3.tweenTau();
         }
       });
     }
@@ -627,11 +453,11 @@ function () {
     key: "getCubeCamera",
     value: function getCubeCamera() {
       if (USE_CUBE_CAMERA) {
-        var cubeCamera0 = this.cubeCamera0 = new THREE.CubeCamera(0.01, 1000, 512);
+        var cubeCamera0 = this.cubeCamera0 = new THREE.CubeCamera(0.01, 1000, 256);
         cubeCamera0.renderTarget.texture.generateMipmaps = true;
         cubeCamera0.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
         this.scene.add(cubeCamera0);
-        var cubeCamera1 = this.cubeCamera1 = new THREE.CubeCamera(0.01, 1000, 512);
+        var cubeCamera1 = this.cubeCamera1 = new THREE.CubeCamera(0.01, 1000, 256);
         cubeCamera1.renderTarget.texture.generateMipmaps = true;
         cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
         this.scene.add(cubeCamera1);
@@ -656,7 +482,7 @@ function () {
   }, {
     key: "getEnvMap",
     value: function getEnvMap(callback) {
-      var _this5 = this;
+      var _this4 = this;
 
       var loader = new THREE.TextureLoader().load('img/hdr-04.jpg', function (source, textureData) {
         // source.encoding = THREE.sRGBEncoding;
@@ -670,7 +496,7 @@ function () {
 
         var cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options); // pngBackground = cubemapGenerator.renderTarget;
 
-        var texture = cubemapGenerator.update(_this5.renderer);
+        var texture = cubemapGenerator.update(_this4.renderer);
         /*
         var pmremGenerator = new THREE.PMREMGenerator( cubeMapTexture );
         pmremGenerator.update( renderer );
@@ -707,7 +533,7 @@ function () {
   }, {
     key: "getHDRMap",
     value: function getHDRMap(callback) {
-      var _this6 = this;
+      var _this5 = this;
 
       var type = THREE.UnsignedByteType; // const type = THREE.FloatType;
 
@@ -731,8 +557,8 @@ function () {
         var cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, {
           resolution: 512
         });
-        _this6.renderer.toneMappingExposure = 2.0;
-        var texture = cubemapGenerator.update(_this6.renderer);
+        _this5.renderer.toneMappingExposure = 2.0;
+        var texture = cubemapGenerator.update(_this5.renderer);
         source.dispose();
 
         if (typeof callback === 'function') {
@@ -787,9 +613,9 @@ function () {
       var material = new THREE.MeshBasicMaterial({
         color: 0xffffff,
         refractionRatio: 0.99,
-        reflectivity: 0.99,
+        // reflectivity: 0.99,
         envMap: texture,
-        envMapIntensity: 2.0,
+        // envMapIntensity: 2.0,
         transparent: true,
         opacity: 0.3,
         side: THREE.DoubleSide // blending: THREE.AdditiveBlending,
@@ -801,12 +627,12 @@ function () {
     key: "getSilver",
     value: function getSilver(texture) {
       var material = new THREE.MeshStandardMaterial({
-        color: 0xaaaaaa,
-        roughness: 0.2,
-        metalness: 0.99,
-        envMap: texture,
-        refractionRatio: 0.0,
-        reflectivity: 0.9,
+        color: 0x999999,
+        roughness: 0.5,
+        metalness: 0.9,
+        // envMap: texture,
+        // refractionRatio: 0.0,
+        // reflectivity: 0.9,
         side: THREE.DoubleSide
       });
       return material;
@@ -940,22 +766,24 @@ function () {
     }
   }, {
     key: "onSave",
-    value: function onSave(event) {
-      try {
-        this.view.orientation = this.orbit.getOrientation();
-      } catch (error) {
-        this.debugInfo.innerHTML = error;
-      }
-    } // animation
+    value: function onSave(event) {}
+    /*
+    try {
+    	this.view.orientation = this.orbit.getOrientation();
+    } catch (error) {
+    	this.debugInfo.innerHTML = error;
+    }
+    */
+    // animation
 
   }, {
     key: "animate",
     value: function animate() {
-      var _this7 = this;
+      var _this6 = this;
 
       var renderer = this.renderer;
       renderer.setAnimationLoop(function () {
-        _this7.render();
+        _this6.render();
       });
     }
   }, {
@@ -974,21 +802,6 @@ function () {
       var scene = this.scene;
       this.updateCubeCamera();
       renderer.render(scene, camera);
-    }
-  }, {
-    key: "updateCamera",
-    value: function updateCamera() {
-      var orbit = this.orbit;
-      var camera = this.camera;
-      orbit.update();
-      camera.target.x = _const.ROOM_RADIUS * Math.sin(orbit.phi) * Math.cos(orbit.theta);
-      camera.target.y = _const.ROOM_RADIUS * Math.cos(orbit.phi);
-      camera.target.z = _const.ROOM_RADIUS * Math.sin(orbit.phi) * Math.sin(orbit.theta);
-      camera.lookAt(camera.target);
-      /*
-      // distortion
-      camera.position.copy( camera.target ).negate();
-      */
     } // utils
 
   }, {
@@ -1040,7 +853,7 @@ loader.load('img/panorama-sm/panorama-01.jpg', (texture) => {
 
 tau.animate();
 
-},{"./three/const":3,"./three/interactive.mesh":5,"./three/orbit":6}],3:[function(require,module,exports){
+},{"./three/const":2,"./three/interactive.mesh":4}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1090,7 +903,7 @@ THREE.Euler.prototype.add = function (euler) {
   return this;
 };
 
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1184,7 +997,7 @@ function (_THREE$Mesh) {
 
 exports.default = EmittableMesh;
 
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1307,126 +1120,5 @@ function (_EmittableMesh) {
 exports.default = InteractiveMesh;
 InteractiveMesh.items = [];
 
-},{"./emittable.mesh":4}],6:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _drag = _interopRequireDefault(require("../shared/drag.listener"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Orbit =
-/*#__PURE__*/
-function () {
-  function Orbit() {
-    _classCallCheck(this, Orbit);
-
-    this.longitude = 0;
-    this.latitude = 0;
-    this.direction = 1; // this.speed = 1;
-
-    this.inertia = new THREE.Vector2();
-    this.set(0, 0);
-  }
-
-  _createClass(Orbit, [{
-    key: "setOrientation",
-    value: function setOrientation(orientation) {
-      if (orientation) {
-        this.set(orientation.longitude, orientation.latitude);
-      }
-    }
-  }, {
-    key: "getOrientation",
-    value: function getOrientation() {
-      return {
-        latitude: this.latitude,
-        longitude: this.longitude
-      };
-    }
-  }, {
-    key: "setDragListener",
-    value: function setDragListener(container) {
-      var _this = this;
-
-      var longitude, latitude;
-      var dragListener = new _drag.default(this.container, function (event) {
-        longitude = _this.longitude;
-        latitude = _this.latitude;
-      }, function (event) {
-        var direction = event.distance.x ? event.distance.x / Math.abs(event.distance.x) * -1 : 1;
-        _this.direction = direction;
-        var lon = longitude - event.distance.x * 0.1;
-        var lat = latitude + event.distance.y * 0.1;
-
-        _this.setInertia(lon, lat);
-
-        _this.set(lon, lat); // console.log('longitude', this.longitude, 'latitude', this.latitude, 'direction', this.direction);
-
-      }, function (event) {// this.speed = Math.abs(event.strength.x) * 100;
-        // console.log('speed', this.speed);
-      });
-
-      dragListener.move = function () {};
-
-      this.dragListener = dragListener;
-      return dragListener;
-    }
-  }, {
-    key: "set",
-    value: function set(longitude, latitude) {
-      latitude = Math.max(-80, Math.min(80, latitude));
-      var phi = THREE.Math.degToRad(90 - latitude);
-      var theta = THREE.Math.degToRad(longitude);
-      this.longitude = longitude;
-      this.latitude = latitude;
-      this.phi = phi;
-      this.theta = theta;
-    }
-  }, {
-    key: "setInertia",
-    value: function setInertia(longitude, latitude) {
-      var inertia = this.inertia;
-      inertia.x = (longitude - this.longitude) * 1;
-      inertia.y = (latitude - this.latitude) * 1;
-      this.inertia = inertia; // console.log(this.inertia);
-    }
-  }, {
-    key: "updateInertia",
-    value: function updateInertia() {
-      var inertia = this.inertia;
-      inertia.multiplyScalar(0.95);
-      this.inertia = inertia;
-      /*
-      let speed = this.speed;
-      speed = Math.max(1, speed * 0.95);
-      this.speed = speed;
-      */
-    }
-  }, {
-    key: "update",
-    value: function update() {
-      if (this.dragListener && !this.dragListener.dragging) {
-        this.set(this.longitude + this.inertia.x, this.latitude + this.inertia.y);
-        this.updateInertia();
-      }
-    }
-  }]);
-
-  return Orbit;
-}();
-
-exports.default = Orbit;
-
-},{"../shared/drag.listener":1}]},{},[2]);
+},{"./emittable.mesh":3}]},{},[1]);
 //# sourceMappingURL=tau.js.map
