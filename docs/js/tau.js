@@ -74,8 +74,7 @@ function () {
       this.onSave = this.onSave.bind(this); //
 
       var scene = this.scene = this.addScene();
-      var camera = this.camera = this.addCamera();
-      var lights = this.lights = this.addLights(scene); // const addons = this.addons = this.addBoxes(scene);
+      var camera = this.camera = this.addCamera(); // const addons = this.addons = this.addBoxes(scene);
 
       var addons = this.addons = this.addSpheres(scene);
       this.getCubeCamera();
@@ -83,6 +82,7 @@ function () {
 
       var tau = this.tau = this.addTau(scene, texture); // const lights = this.lights = this.addLights(tau);
 
+      var lights = this.lights = this.addLights(scene);
       this.tweenTau(); // });
 
       var renderer = this.renderer = this.addRenderer(); // const composer = this.composer = this.addComposer();
@@ -147,16 +147,12 @@ function () {
         // premultipliedAlpha: true,
         alpha: true
       });
-      this.renderer = renderer; // renderer.shadowMap.enabled = true;
-
+      this.renderer = renderer;
       renderer.setClearColor(0xffffff, 0); // renderer.setPixelRatio(window.devicePixelRatio);
 
       renderer.setPixelRatio(Math.max(window.devicePixelRatio, 1.5));
       renderer.setSize(window.innerWidth, window.innerHeight);
-      /*
-      renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
-      */
       // container.innerHTML = '';
 
       this.container.appendChild(renderer.domElement);
@@ -234,7 +230,7 @@ function () {
     key: "addLights",
     value: function addLights(parent) {
       var lights = new THREE.Group();
-      var light0 = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.9);
+      var light0 = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.8);
       light0.position.set(0, 10, 0);
       lights.add(light0);
       /*
@@ -242,15 +238,17 @@ function () {
       lights.add(helper0);
       */
 
-      var light1 = new THREE.DirectionalLight(0xffffff, 1.4);
-      light1.position.set(0, 0, -50);
-      lights.add(light1);
+      var light1 = new THREE.DirectionalLight(0xffffff, 0.8);
+      light1.position.set(0, 0, 50);
       /*
-      const light1 = new THREE.DirectionalLight(0xffffff, 2);
-      light1.position.set(-50, 50, -50);
-      lights.add(light1);
+      light1.castShadow = true;
+      light1.shadow.camera.near = 0.5; // default
+      light1.shadow.camera.far = 500; // default
+      light1.shadow.mapSize.width = 1024;
+      light1.shadow.mapSize.height = 1024;
       */
 
+      lights.add(light1);
       /*
       const helper1 = new THREE.DirectionalLightHelper(light1, 10, 0x888888);
       lights.add(helper1);
@@ -383,21 +381,23 @@ function () {
       var blue = this.blue = this.getBlue();
       var green = this.green = this.getGreen();
       var loader = new THREE.OBJLoader();
-      loader.load('models/tau-marin_4.obj', // 'models/scalare-33-b/scalare-33-b.obj',
+      loader.load('models/tau-marin_5.obj', // 'models/scalare-33-b/scalare-33-b.obj',
       function (object) {
         var i = 0;
         object.traverse(function (child) {
           // console.log(child);
           if (child instanceof THREE.Mesh) {
             // console.log(child);
-
+            // child.geometry.rotateX(-Math.PI / 2);
+            child.geometry.scale(10, 10, 10);
+            child.geometry.computeFaceNormals();
+            child.geometry.computeVertexNormals(true);
             /*
             child.castShadow = true;
             child.receiveShadow = true;
             */
-            child.geometry.scale(10, 10, 10); // child.geometry.rotateX(-Math.PI / 2);
-            // child.geometry.computeVertexNormals(true);
             // child.geometry.computeTangents();
+            // THREE.BufferGeometryUtils.mergeVertices(child.geometry);
             // THREE.BufferGeometryUtils.computeTangents(child.geometry);
 
             if (i === 0) {
@@ -463,7 +463,7 @@ function () {
         x: rotation[0],
         y: rotation[1],
         z: rotation[2],
-        delay: 4,
+        delay: 1,
         onComplete: function onComplete() {
           _this3.tweenTau();
         }
@@ -603,15 +603,15 @@ function () {
   }, {
     key: "getBlue",
     value: function getBlue(texture) {
-      var lightMap = new THREE.TextureLoader().load('img/lightMap.jpg');
+      // const lightMap = new THREE.TextureLoader().load('img/scalare-33-blue-lightmap.jpg');
       var material = new THREE.MeshStandardMaterial({
         color: 0x0007d8,
         // 0x0007d8,
         // map: lightMap,
-        normalMap: lightMap,
-        metalnessMap: lightMap,
+        // normalMap: lightMap,
+        // metalnessMap: lightMap,
         // emissive: 0x000066,
-        roughness: 0.3,
+        roughness: 0.9,
         metalness: 0.0
       });
       return material;
@@ -619,10 +619,14 @@ function () {
   }, {
     key: "getGreen",
     value: function getGreen(texture) {
+      // const lightMap = new THREE.TextureLoader().load('img/scalare-33-green-lightmap.jpg');
       var material = new THREE.MeshStandardMaterial({
         color: 0x00d84d,
+        // map: lightMap,
+        // normalMap: lightMap,
+        // metalnessMap: lightMap,
         // emissive: 0x006600,
-        roughness: 0.3,
+        roughness: 0.9,
         metalness: 0.0
       });
       return material;
@@ -632,31 +636,15 @@ function () {
     value: function getRed(texture) {
       var material = new THREE.MeshStandardMaterial({
         color: 0xe11e26,
-        emissive: 0x4f0300,
+        // emissive: 0x4f0300,
         roughness: 0.2,
         metalness: 0.2,
-        envMap: texture,
-        envMapIntensity: 0.4,
+        // envMap: texture,
+        // envMapIntensity: 0.4,
         // The refractionRatio must have value in the range 0 to 1.
         // The default value, very close to 1, give almost invisible glass.
-        refractionRatio: 0,
+        // refractionRatio: 0,
         side: THREE.DoubleSide
-      });
-      return material;
-    }
-  }, {
-    key: "getClear",
-    value: function getClear(texture) {
-      var material = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        refractionRatio: 0.99,
-        // reflectivity: 0.99,
-        envMap: texture,
-        // envMapIntensity: 2.0,
-        transparent: true,
-        opacity: 0.3,
-        side: THREE.DoubleSide // blending: THREE.AdditiveBlending,
-
       });
       return material;
     }
@@ -675,6 +663,23 @@ function () {
       return material;
     }
   }, {
+    key: "getClear",
+    value: function getClear(texture) {
+      var material = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        refractionRatio: 0.99,
+        // reflectivity: 0.99,
+        envMap: texture,
+        // envMapIntensity: 2.0,
+        transparent: true,
+        opacity: 0.3,
+        side: THREE.DoubleSide // blending: THREE.AdditiveBlending,
+
+      }); // material.vertexTangents = true;
+
+      return material;
+    }
+  }, {
     key: "updateCubeCamera",
     value: function updateCubeCamera() {
       if (USE_CUBE_CAMERA && this.tau && this.tau.body) {
@@ -684,25 +689,26 @@ function () {
         var count = this.count,
             cubeCamera0 = this.cubeCamera0,
             cubeCamera1 = this.cubeCamera1;
-        renderer.setClearColor(0xffffff, 1);
+        renderer.setClearColor(0xfefefe, 1);
         this.tau.body.visible = false;
-        this.addons.visible = true;
+        this.addons.visible = true; // renderer.shadowMap.enabled = false;
 
         if (count % 2 === 0) {
-          this.clear.envMap = cubeCamera0.renderTarget.texture;
-          this.silver.envMap = cubeCamera0.renderTarget.texture;
-          this.red.envMap = cubeCamera0.renderTarget.texture;
+          this.clear.envMap = cubeCamera0.renderTarget.texture; // this.silver.envMap = cubeCamera0.renderTarget.texture;
+          // this.red.envMap = cubeCamera0.renderTarget.texture;
+
           cubeCamera1.update(renderer, scene);
         } else {
-          this.clear.envMap = cubeCamera1.renderTarget.texture;
-          this.silver.envMap = cubeCamera1.renderTarget.texture;
-          this.red.envMap = cubeCamera1.renderTarget.texture;
+          this.clear.envMap = cubeCamera1.renderTarget.texture; // this.silver.envMap = cubeCamera1.renderTarget.texture;
+          // this.red.envMap = cubeCamera1.renderTarget.texture;
+
           cubeCamera0.update(renderer, scene);
         }
 
         this.count = count + 1;
         this.tau.body.visible = true;
-        this.addons.visible = false;
+        this.addons.visible = false; // renderer.shadowMap.enabled = true;
+
         renderer.setClearColor(0xffffff, 0);
       }
     } // events
