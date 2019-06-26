@@ -68,6 +68,7 @@ class Tau {
 		this.getCubeCamera();
 		const texture = this.cubeCamera1.renderTarget.texture;
 		// const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
+		// this.addText('Scalare 33', scene);
 		const tau = this.tau = this.addTau(scene, texture);
 		// const lights = this.lights = this.addLights(tau);
 		const lights = this.lights = this.addLights(scene);
@@ -199,9 +200,9 @@ class Tau {
 
 	addCamera() {
 		const camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, 2000);
-		camera.zoom = 0.15;
+		camera.position.set(0, 0, 40);
 		camera.target = new THREE.Vector3();
-		camera.position.set(0, 0, 150);
+		camera.zoom = 0.6;
 		/*
 		// camera.target.z = ROOM_RADIUS;
 		// camera.lookAt(camera.target);
@@ -329,6 +330,39 @@ class Tau {
 		return lights;
 	}
 
+	addText(message, parent) {
+		const loader = new THREE.FontLoader();
+		loader.load('fonts/helvetiker_regular.typeface.json', (font) => {
+			this.font = font;
+			const material = new THREE.MeshBasicMaterial({
+				color: 0xe11e26,
+				// transparent: true,
+				// opacity: 1,
+				// side: THREE.DoubleSide
+			});
+			this.fontMaterial = material;
+			const text = this.setText(message, parent);
+		});
+	}
+
+	setText(message, parent) {
+		message = message || 'Scalare 33';
+		if (this.text) {
+			this.text.parent.remove(this.text);
+			this.text.geometry.dispose();
+		}
+		const shapes = this.font.generateShapes(message, 0.5);
+		const geometry = new THREE.ShapeBufferGeometry(shapes);
+		geometry.computeBoundingBox();
+		const x = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+		geometry.translate(x, 0, 0);
+		const text = new THREE.Mesh(geometry, this.fontMaterial);
+		text.position.set(0, 0, -10);
+		this.text = text;
+		parent.add(text);
+		return text;
+	}
+
 	addBox(parent) {
 		const geometry = new THREE.BoxGeometry(600, 30, 30);
 		const material = new THREE.MeshBasicMaterial({ color: 0xafb3bc });
@@ -375,14 +409,12 @@ class Tau {
 				let i = 0;
 				object.traverse((child) => {
 					if (child instanceof THREE.Mesh) {
-						child.geometry.scale(10, 10, 10);
-						// child.geometry.computeTangents();
+						// child.geometry.scale(10, 10, 10);
 						// THREE.BufferGeometryUtils.mergeVertices(child.geometry);
 						// THREE.BufferGeometryUtils.computeTangents(child.geometry);
-						/*
-						child.geometry.computeFaceNormals();
-						child.geometry.computeVertexNormals(true);
-						*/
+						// child.geometry.computeFaceNormals();
+						// child.geometry.computeVertexNormals(true);
+						// child.geometry.computeTangents();
 						if (i === 0) {
 							child.geometry.computeFaceNormals();
 							child.geometry.computeVertexNormals(true);
@@ -478,11 +510,15 @@ class Tau {
 		if (USE_CUBE_CAMERA) {
 			const cubeCamera0 = this.cubeCamera0 = new THREE.CubeCamera(0.01, 1000, 512);
 			cubeCamera0.renderTarget.texture.mapping = THREE.CubeRefractionMapping;
+			// cubeCamera0.renderTarget.texture.mapping = THREE.CubeUVRefractionMapping;
+			// cubeCamera0.renderTarget.texture.mapping = THREE.EquirectangularRefractionMapping;
 			cubeCamera0.renderTarget.texture.generateMipmaps = true;
 			cubeCamera0.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
 			this.scene.add(cubeCamera0);
 			const cubeCamera1 = this.cubeCamera1 = new THREE.CubeCamera(0.01, 1000, 512);
-			cubeCamera0.renderTarget.texture.mapping = THREE.CubeRefractionMapping;
+			cubeCamera1.renderTarget.texture.mapping = THREE.CubeRefractionMapping;
+			// cubeCamera1.renderTarget.texture.mapping = THREE.CubeUVRefractionMapping;
+			// cubeCamera1.renderTarget.texture.mapping = THREE.EquirectangularRefractionMapping;
 			cubeCamera1.renderTarget.texture.generateMipmaps = true;
 			cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
 			this.scene.add(cubeCamera1);

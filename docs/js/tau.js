@@ -2996,6 +2996,7 @@ function () {
       var addons = this.addons = this.addSpheres(scene);
       this.getCubeCamera();
       var texture = this.cubeCamera1.renderTarget.texture; // const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
+      // this.addText('Scalare 33', scene);
 
       var tau = this.tau = this.addTau(scene, texture); // const lights = this.lights = this.addLights(tau);
 
@@ -3147,9 +3148,9 @@ function () {
     key: "addCamera",
     value: function addCamera() {
       var camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, 2000);
-      camera.zoom = 0.15;
+      camera.position.set(0, 0, 40);
       camera.target = new THREE.Vector3();
-      camera.position.set(0, 0, 150);
+      camera.zoom = 0.6;
       /*
       // camera.target.z = ROOM_RADIUS;
       // camera.lookAt(camera.target);
@@ -3285,6 +3286,46 @@ function () {
       return lights;
     }
   }, {
+    key: "addText",
+    value: function addText(message, parent) {
+      var _this3 = this;
+
+      var loader = new THREE.FontLoader();
+      loader.load('fonts/helvetiker_regular.typeface.json', function (font) {
+        _this3.font = font;
+        var material = new THREE.MeshBasicMaterial({
+          color: 0xe11e26 // transparent: true,
+          // opacity: 1,
+          // side: THREE.DoubleSide
+
+        });
+        _this3.fontMaterial = material;
+
+        var text = _this3.setText(message, parent);
+      });
+    }
+  }, {
+    key: "setText",
+    value: function setText(message, parent) {
+      message = message || 'Scalare 33';
+
+      if (this.text) {
+        this.text.parent.remove(this.text);
+        this.text.geometry.dispose();
+      }
+
+      var shapes = this.font.generateShapes(message, 0.5);
+      var geometry = new THREE.ShapeBufferGeometry(shapes);
+      geometry.computeBoundingBox();
+      var x = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+      geometry.translate(x, 0, 0);
+      var text = new THREE.Mesh(geometry, this.fontMaterial);
+      text.position.set(0, 0, -10);
+      this.text = text;
+      parent.add(text);
+      return text;
+    }
+  }, {
     key: "addBox",
     value: function addBox(parent) {
       var geometry = new THREE.BoxGeometry(600, 30, 30);
@@ -3298,12 +3339,12 @@ function () {
   }, {
     key: "addBoxes",
     value: function addBoxes(parent) {
-      var _this3 = this;
+      var _this4 = this;
 
       var group = new THREE.Group();
       group.visible = true;
       var boxes = new Array(12).fill(null).map(function (x, i) {
-        var box = _this3.addBox(group);
+        var box = _this4.addBox(group);
 
         var r = Math.PI * 2 / 12 * i;
         box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
@@ -3338,15 +3379,12 @@ function () {
         var i = 0;
         object.traverse(function (child) {
           if (child instanceof THREE.Mesh) {
-            child.geometry.scale(10, 10, 10); // child.geometry.computeTangents();
+            // child.geometry.scale(10, 10, 10);
             // THREE.BufferGeometryUtils.mergeVertices(child.geometry);
             // THREE.BufferGeometryUtils.computeTangents(child.geometry);
-
-            /*
-            child.geometry.computeFaceNormals();
-            child.geometry.computeVertexNormals(true);
-            */
-
+            // child.geometry.computeFaceNormals();
+            // child.geometry.computeVertexNormals(true);
+            // child.geometry.computeTangents();
             if (i === 0) {
               child.geometry.computeFaceNormals();
               child.geometry.computeVertexNormals(true);
@@ -3399,7 +3437,7 @@ function () {
   }, {
     key: "tweenTau",
     value: function tweenTau() {
-      var _this4 = this;
+      var _this5 = this;
 
       var rotations = [[Math.PI / 4, Math.PI / 4, Math.PI / 4], [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4], [0, 0, Math.PI / 2], [Math.PI / 2, 0, 0], [Math.PI / 4, Math.PI / 4, 0], [0, -Math.PI / 2, Math.PI / 16]];
       var tau = this.tau;
@@ -3415,7 +3453,7 @@ function () {
         z: rotation[2],
         delay: 2,
         onComplete: function onComplete() {
-          _this4.tweenTau();
+          _this5.tweenTau();
         }
       });
     }
@@ -3436,12 +3474,16 @@ function () {
     value: function getCubeCamera() {
       if (USE_CUBE_CAMERA) {
         var cubeCamera0 = this.cubeCamera0 = new THREE.CubeCamera(0.01, 1000, 512);
-        cubeCamera0.renderTarget.texture.mapping = THREE.CubeRefractionMapping;
+        cubeCamera0.renderTarget.texture.mapping = THREE.CubeRefractionMapping; // cubeCamera0.renderTarget.texture.mapping = THREE.CubeUVRefractionMapping;
+        // cubeCamera0.renderTarget.texture.mapping = THREE.EquirectangularRefractionMapping;
+
         cubeCamera0.renderTarget.texture.generateMipmaps = true;
         cubeCamera0.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
         this.scene.add(cubeCamera0);
         var cubeCamera1 = this.cubeCamera1 = new THREE.CubeCamera(0.01, 1000, 512);
-        cubeCamera0.renderTarget.texture.mapping = THREE.CubeRefractionMapping;
+        cubeCamera1.renderTarget.texture.mapping = THREE.CubeRefractionMapping; // cubeCamera1.renderTarget.texture.mapping = THREE.CubeUVRefractionMapping;
+        // cubeCamera1.renderTarget.texture.mapping = THREE.EquirectangularRefractionMapping;
+
         cubeCamera1.renderTarget.texture.generateMipmaps = true;
         cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
         this.scene.add(cubeCamera1);
@@ -3466,7 +3508,7 @@ function () {
   }, {
     key: "getEnvMap",
     value: function getEnvMap(callback) {
-      var _this5 = this;
+      var _this6 = this;
 
       var loader = new THREE.TextureLoader().load('img/hdr-04.jpg', function (source, textureData) {
         // source.encoding = THREE.sRGBEncoding;
@@ -3480,7 +3522,7 @@ function () {
 
         var cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options); // pngBackground = cubemapGenerator.renderTarget;
 
-        var texture = cubemapGenerator.update(_this5.renderer);
+        var texture = cubemapGenerator.update(_this6.renderer);
         /*
         var pmremGenerator = new THREE.PMREMGenerator( cubeMapTexture );
         pmremGenerator.update( renderer );
@@ -3517,7 +3559,7 @@ function () {
   }, {
     key: "getHDRMap",
     value: function getHDRMap(callback) {
-      var _this6 = this;
+      var _this7 = this;
 
       var type = THREE.UnsignedByteType; // const type = THREE.FloatType;
 
@@ -3541,8 +3583,8 @@ function () {
         var cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, {
           resolution: 512
         });
-        _this6.renderer.toneMappingExposure = 2.0;
-        var texture = cubemapGenerator.update(_this6.renderer);
+        _this7.renderer.toneMappingExposure = 2.0;
+        var texture = cubemapGenerator.update(_this7.renderer);
         source.dispose();
 
         if (typeof callback === 'function') {
@@ -3820,11 +3862,11 @@ function () {
   }, {
     key: "animate",
     value: function animate() {
-      var _this7 = this;
+      var _this8 = this;
 
       var renderer = this.renderer;
       renderer.setAnimationLoop(function () {
-        _this7.render();
+        _this8.render();
       });
       var composer = this.composer;
 
