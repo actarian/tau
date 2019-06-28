@@ -2977,9 +2977,9 @@ function () {
     value: function init() {
       var body = this.body = document.querySelector('body');
       var section = this.section = document.querySelector('.tau');
-      var container = this.container = section.querySelector('.tau__container');
-      var debugInfo = this.debugInfo = section.querySelector('.debug__info');
-      var debugSave = this.debugSave = section.querySelector('.debug__save'); // Dom.detect(body);
+      var container = this.container = section.querySelector('.tau__container'); // const debugInfo = this.debugInfo = section.querySelector('.debug__info');
+      // const debugSave = this.debugSave = section.querySelector('.debug__save');
+      // Dom.detect(body);
       // body.classList.add('ready');
 
       this.onWindowResize = this.onWindowResize.bind(this);
@@ -3019,8 +3019,8 @@ function () {
       document.addEventListener('wheel', this.onMouseWheel, false);
       this.container.addEventListener('mousedown', this.onMouseDown, false);
       this.container.addEventListener('mouseup', this.onMouseUp, false);
-            this.debugSave.addEventListener('click', this.onSave, false);
             */
+      // this.debugSave.addEventListener('click', this.onSave, false);
 
       this.section.classList.add('init');
       this.onWindowResize(); // this.updateBackgroundColor();
@@ -3082,6 +3082,10 @@ function () {
         return folder;
       });
       gui.add(materials, 'zoom', 0.1, 1.0, 0.01).onFinishChange(onChange);
+      var callback = {
+        snapshot: this.onSave
+      };
+      gui.add(callback, 'snapshot');
       return gui;
     }
   }, {
@@ -3122,6 +3126,7 @@ function () {
         // localClippingEnabled: true,
         // logarithmicDepthBuffer: true,
         // premultipliedAlpha: true,
+        // preserveDrawingBuffer: true, // !!! REMOVE IN PRODUCTION
         alpha: true
       });
       this.renderer = renderer;
@@ -3849,16 +3854,31 @@ function () {
     }
   }, {
     key: "onSave",
-    value: function onSave(event) {}
-    /*
-    try {
-    	this.view.orientation = this.orbit.getOrientation();
-    } catch (error) {
-    	this.debugInfo.innerHTML = error;
-    }
-    */
-    // animation
+    value: function onSave(event) {
+      this.save = true;
+    } // animation
 
+  }, {
+    key: "render",
+    value: function render(delta) {
+      var controls = this.controls;
+      var renderer = this.renderer;
+      var camera = this.camera;
+      var scene = this.scene;
+
+      if (!this.saving) {
+        if (controls) {
+          controls.update();
+        } // this.lights.rotation.set(0, this.lights.rotation.y + 0.003, 0);
+        // this.tau.rotation.set(Math.cos(this.count / 100) * Math.PI / 180 * 2, Math.cos(this.count / 100) * Math.PI / 180 * 2, 0);
+
+
+        this.updateCubeCamera();
+        renderer.render(scene, camera);
+      }
+
+      this.checkForScreenshot(renderer);
+    }
   }, {
     key: "animate",
     value: function animate() {
@@ -3873,25 +3893,75 @@ function () {
       if (composer) {
         composer.render();
       }
-    }
-  }, {
-    key: "render",
-    value: function render(delta) {
-      var controls = this.controls;
-
-      if (controls) {
-        controls.update();
-      } // this.lights.rotation.set(0, this.lights.rotation.y + 0.003, 0);
-      // this.tau.rotation.set(Math.cos(this.count / 100) * Math.PI / 180 * 2, Math.cos(this.count / 100) * Math.PI / 180 * 2, 0);
-
-
-      var renderer = this.renderer;
-      var camera = this.camera;
-      var scene = this.scene;
-      this.updateCubeCamera();
-      renderer.render(scene, camera);
     } // utils
 
+  }, {
+    key: "checkForScreenshot",
+    value: function checkForScreenshot(renderer) {
+      if (this.save) {
+        this.save = false;
+        this.saving = true; // renderer.preserveDrawingBuffer = true;
+
+        var dataUrl = renderer.domElement.toDataURL('image/png', 0.92); // console.log('dataUrl', dataUrl);
+
+        this.saveImage(dataUrl); // renderer.preserveDrawingBuffer = false;
+
+        this.saving = false;
+        /*
+        this.dataUrlToImage(dataUrl).then((image) => {
+        	this.saveImage(image);
+        	// renderer.preserveDrawingBuffer = false;
+        	this.saving = false;
+        }, (error) => {
+        	console.log(error);
+        	// renderer.preserveDrawingBuffer = false;
+        	this.saving = false;
+                 });
+                 */
+      }
+    }
+  }, {
+    key: "dataUrlToImage",
+    value: function dataUrlToImage(URL) {
+      return new Promise(function (resolve, reject) {
+        if (!URL) {
+          return reject();
+        }
+
+        var image = new Image();
+
+        image.onload = function () {
+          resolve(image);
+        };
+
+        image.onerror = function (error) {
+          reject(error);
+        };
+
+        image.src = URL;
+      });
+    }
+  }, {
+    key: "saveImage",
+    value: function saveImage(image) {
+      var filename = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'snapshot.png';
+
+      // console.log('saveImage', image);
+      if (!image) {
+        console.error('Console.save: No picture');
+        return;
+      } // const blob = image; // new Blob(image, { type: 'image/png' });
+
+
+      var event = document.createEvent('MouseEvents');
+      var anchor = document.createElement('a');
+      anchor.download = filename;
+      anchor.href = image; // window.URL.createObjectURL(blob);
+      // anchor.dataset.downloadurl = ['image/png', anchor.download, anchor.href].join(':');
+
+      event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+      anchor.dispatchEvent(event);
+    }
   }, {
     key: "saveData",
     value: function saveData(data) {
