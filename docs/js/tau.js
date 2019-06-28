@@ -3003,8 +3003,8 @@ function () {
       var lights = this.lights = this.addLights(scene);
       this.tweenTau(); // });
 
-      var renderer = this.renderer = this.addRenderer(); // const composer = this.composer = this.addComposer();
-
+      var renderer = this.renderer = this.addRenderer();
+      var composer = this.composer = this.addComposer();
       /*
       const orbit = this.orbit = new Orbit();
       const dragListener = this.dragListener = orbit.setDragListener(container);
@@ -3176,9 +3176,9 @@ function () {
   }, {
     key: "addComposer_",
     value: function addComposer_() {
-      var renderer = this.renderer,
-          scene = this.scene,
-          camera = this.camera;
+      var renderer = this.renderer;
+      var scene = this.scene;
+      var camera = this.camera;
       var composer = new THREE.EffectComposer(renderer);
       var renderPass = new THREE.RenderPass(scene, camera);
       composer.addPass(renderPass);
@@ -3197,15 +3197,28 @@ function () {
       return composer;
     }
   }, {
-    key: "addComposer",
-    value: function addComposer() {
-      var renderer = this.renderer,
-          scene = this.scene,
-          camera = this.camera;
+    key: "addComposer__",
+    value: function addComposer__() {
+      var renderer = this.renderer;
+      var scene = this.scene;
+      var camera = this.camera;
       var composer = new THREE.EffectComposer(renderer);
       var ssaoPass = new THREE.SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
       ssaoPass.kernelRadius = 16;
       composer.addPass(ssaoPass);
+      return composer;
+    }
+  }, {
+    key: "addComposer",
+    value: function addComposer() {
+      var renderer = this.renderer;
+      var scene = this.scene;
+      var camera = this.camera;
+      var composer = new THREE.EffectComposer(renderer);
+      var renderPass = new THREE.RenderPass(scene, camera);
+      composer.addPass(renderPass);
+      var shaderPass = new THREE.ShaderPass(THREE.ShadowShader);
+      composer.addPass(shaderPass);
       return composer;
     }
   }, {
@@ -3875,6 +3888,11 @@ function () {
 
         this.updateCubeCamera();
         renderer.render(scene, camera);
+        var composer = this.composer;
+
+        if (composer) {
+          composer.render();
+        }
       }
 
       this.checkForScreenshot(renderer);
@@ -3888,11 +3906,6 @@ function () {
       renderer.setAnimationLoop(function () {
         _this8.render();
       });
-      var composer = this.composer;
-
-      if (composer) {
-        composer.render();
-      }
     } // utils
 
   }, {
@@ -3992,6 +4005,30 @@ function () {
   return Tau;
 }();
 
+THREE.SepiaShader = {
+  uniforms: {
+    tDiffuse: {
+      value: null
+    },
+    amount: {
+      value: 1.0
+    }
+  },
+  vertexShader: "\n\t\tvarying vec2 vUv;\n\t\tvoid main() {\n\t\t\tvUv = uv;\n\t\t\tgl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n\t\t}\n\t",
+  fragmentShader: "\n\t\tuniform float amount;\n\t\tuniform sampler2D tDiffuse;\n\t\tvarying vec2 vUv;\n\t\tvoid main() {\n\t\t\tvec4 color = texture2D(tDiffuse, vUv);\n\t\t\tvec3 c = color.rgb;\n\t\t\tcolor.r = dot( c, vec3( 1.0 - 0.607 * amount, 0.769 * amount, 0.189 * amount ) );\n\t\t\tcolor.g = dot( c, vec3( 0.349 * amount, 1.0 - 0.314 * amount, 0.168 * amount ) );\n\t\t\tcolor.b = dot( c, vec3( 0.272 * amount, 0.534 * amount, 1.0 - 0.869 * amount ) );\n\t\t\tgl_FragColor = vec4(min(vec3(1.0), color.rgb), color.a);\n\t\t}\n\t"
+};
+THREE.ShadowShader = {
+  uniforms: {
+    tDiffuse: {
+      value: null
+    },
+    amount: {
+      value: 1.0
+    }
+  },
+  vertexShader: "\n\t\tvarying vec2 vUv;\n\t\tvoid main() {\n\t\t\tvUv = uv;\n\t\t\tgl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n\t\t}\n\t",
+  fragmentShader: "\n\t\tuniform float amount;\n\t\tuniform sampler2D tDiffuse;\n\t\tvarying vec2 vUv;\n\n\t\tconst int blurSize = 20;\n\t\tconst int horizontalPass = 1;\t// 0 or 1 to indicate vertical or horizontal pass\n\t\tconst float sigma = 5.0;\t\t// The sigma value for the gaussian function: higher value means more blur\n\t\t\t\t\t\t\t\t\t\t// A good value for 9x9 is around 3 to 5\n\t\t\t\t\t\t\t\t\t\t// A good value for 7x7 is around 2.5 to 4\n\t\t\t\t\t\t\t\t\t\t// A good value for 5x5 is around 2 to 3.5\n\t\t\t\t\t\t\t\t\t\t// ... play around with this based on what you need :)\n\t\tconst vec2 texOffset = vec2(0.001, 0.001);\n\t\tconst float PI = 3.14159265;\n\n\t\tconst float MAX_ITERATIONS = 100.0;\n\n\t\tvec4 gaussian(sampler2D texture, vec2 p) {\n  \t\t\tfloat numBlurPixelsPerSide = float(blurSize / 2);\n  \t\t\t// Incremental Gaussian Coefficent Calculation (See GPU Gems 3 pp. 877 - 889)\n  \t\t\tvec3 incrementalGaussian;\n  \t\t\tincrementalGaussian.x = 1.0 / (sqrt(2.0 * PI) * sigma);\n  \t\t\tincrementalGaussian.y = exp(-0.5 / (sigma * sigma));\n  \t\t\tincrementalGaussian.z = incrementalGaussian.y * incrementalGaussian.y;\n\n  \t\t\tvec4 avgValue = vec4(0.0, 0.0, 0.0, 0.0);\n  \t\t\tfloat coefficientSum = 0.0;\n\n  \t\t\t// Take the central sample first...\n  \t\t\tavgValue += texture2D(texture, p) * incrementalGaussian.x;\n  \t\t\tcoefficientSum += incrementalGaussian.x;\n  \t\t\tincrementalGaussian.xy *= incrementalGaussian.yz;\n\n\t\t\t// Go through the remaining 8 vertical samples (4 on each side of the center)\n  \t\t\tfor (float i = 1.0; i <= MAX_ITERATIONS; i+= 1.0) {\n\t\t\t\tif (i >= numBlurPixelsPerSide) {\n\t\t\t\t\tbreak;\n\t\t\t\t}\n    \t\t\tavgValue += texture2D(texture, p - i * texOffset) * incrementalGaussian.x;\n    \t\t\tavgValue += texture2D(texture, p + i * texOffset) * incrementalGaussian.x;\n    \t\t\tcoefficientSum += 2.0 * incrementalGaussian.x;\n    \t\t\tincrementalGaussian.xy *= incrementalGaussian.yz;\n  \t\t\t}\n\n\t\t\treturn avgValue / coefficientSum;\n\t\t}\n\n\t\tvoid main() {\n\t\t\tvec4 color = texture2D(tDiffuse, vUv);\n\n\t\t\tvec4 shadow = gaussian(tDiffuse, vec2(vUv.x - 0.01, vUv.y + 0.01));\n\t\t\t// vec4 shadow = texture2D(tDiffuse, vec2(vUv.x - 0.01, vUv.y + 0.01));\n\t\t\tshadow.r = shadow.g = shadow.b = 0.0;\n\t\t\tshadow.a *= 0.15;\n\n\t\t\tgl_FragColor = vec4(min(vec3(1.0), shadow.rgb + color.rgb), color.a + shadow.a);\n\t\t}\n\t"
+};
 var tau = new Tau();
 /*
 const loader = new THREE.loader();

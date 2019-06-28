@@ -21,7 +21,19 @@
 					"node_modules/three/examples/js/controls/OrbitControls.js",
 					"node_modules/three/examples/js/loaders/EquirectangularToCubeGenerator.js",
 					"node_modules/three/examples/js/loaders/RGBELoader.js",
-					"node_modules/three/examples/js/utils/BufferGeometryUtils.js"
+					"node_modules/three/examples/js/utils/BufferGeometryUtils.js",
+
+					"src/js/math/SimplexNoise.js",
+					"node_modules/three/examples/js/postprocessing/EffectComposer.js",
+					"node_modules/three/examples/js/postprocessing/RenderPass.js",
+					"node_modules/three/examples/js/postprocessing/ShaderPass.js",
+					"node_modules/three/examples/js/postprocessing/SAOPass.js",
+					"node_modules/three/examples/js/postprocessing/SSAOPass.js",
+					"node_modules/three/examples/js/shaders/CopyShader.js",
+					"node_modules/three/examples/js/shaders/SAOShader.js",
+					"node_modules/three/examples/js/shaders/SSAOShader.js",
+					"node_modules/three/examples/js/shaders/DepthLimitedBlurShader.js",
+					"node_modules/three/examples/js/shaders/UnpackDepthRGBAShader.js"
 
 				],
 				"output": "docs/js/tau-vendors.js",

@@ -14,6 +14,7 @@
 "node_modules/three/examples/js/shaders/DepthLimitedBlurShader.js",
 "node_modules/three/examples/js/shaders/UnpackDepthRGBAShader.js"
 */
+
 import * as dat from 'dat.gui';
 import { TEST_ENABLED } from './three/const';
 import InteractiveMesh from './three/interactive.mesh';
@@ -75,7 +76,7 @@ class Tau {
 		this.tweenTau();
 		// });
 		const renderer = this.renderer = this.addRenderer();
-		// const composer = this.composer = this.addComposer();
+		const composer = this.composer = this.addComposer();
 		/*
 		const orbit = this.orbit = new Orbit();
 		const dragListener = this.dragListener = orbit.setDragListener(container);
@@ -226,9 +227,9 @@ class Tau {
 	}
 
 	addComposer_() {
-		const renderer = this.renderer,
-			scene = this.scene,
-			camera = this.camera;
+		const renderer = this.renderer;
+		const scene = this.scene;
+		const camera = this.camera;
 		const composer = new THREE.EffectComposer(renderer);
 		const renderPass = new THREE.RenderPass(scene, camera);
 		composer.addPass(renderPass);
@@ -247,14 +248,26 @@ class Tau {
 		return composer;
 	}
 
-	addComposer() {
-		const renderer = this.renderer,
-			scene = this.scene,
-			camera = this.camera;
+	addComposer__() {
+		const renderer = this.renderer;
+		const scene = this.scene;
+		const camera = this.camera;
 		const composer = new THREE.EffectComposer(renderer);
 		const ssaoPass = new THREE.SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
 		ssaoPass.kernelRadius = 16;
 		composer.addPass(ssaoPass);
+		return composer;
+	}
+
+	addComposer() {
+		const renderer = this.renderer;
+		const scene = this.scene;
+		const camera = this.camera;
+		const composer = new THREE.EffectComposer(renderer);
+		const renderPass = new THREE.RenderPass(scene, camera);
+		composer.addPass(renderPass);
+		const shaderPass = new THREE.ShaderPass(THREE.ShadowShader);
+		composer.addPass(shaderPass);
 		return composer;
 	}
 
@@ -877,6 +890,10 @@ class Tau {
 			// this.tau.rotation.set(Math.cos(this.count / 100) * Math.PI / 180 * 2, Math.cos(this.count / 100) * Math.PI / 180 * 2, 0);
 			this.updateCubeCamera();
 			renderer.render(scene, camera);
+			const composer = this.composer;
+			if (composer) {
+				composer.render();
+			}
 		}
 		this.checkForScreenshot(renderer);
 	}
@@ -886,10 +903,6 @@ class Tau {
 		renderer.setAnimationLoop(() => {
 			this.render();
 		});
-		const composer = this.composer;
-		if (composer) {
-			composer.render();
-		}
 	}
 
 	// utils
@@ -969,6 +982,113 @@ class Tau {
 	}
 
 }
+
+THREE.SepiaShader = {
+	uniforms: {
+		tDiffuse: {
+			value: null
+		},
+		amount: {
+			value: 1.0
+		}
+	},
+	vertexShader: `
+		varying vec2 vUv;
+		void main() {
+			vUv = uv;
+			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+		}
+	`,
+	fragmentShader: `
+		uniform float amount;
+		uniform sampler2D tDiffuse;
+		varying vec2 vUv;
+		void main() {
+			vec4 color = texture2D(tDiffuse, vUv);
+			vec3 c = color.rgb;
+			color.r = dot( c, vec3( 1.0 - 0.607 * amount, 0.769 * amount, 0.189 * amount ) );
+			color.g = dot( c, vec3( 0.349 * amount, 1.0 - 0.314 * amount, 0.168 * amount ) );
+			color.b = dot( c, vec3( 0.272 * amount, 0.534 * amount, 1.0 - 0.869 * amount ) );
+			gl_FragColor = vec4(min(vec3(1.0), color.rgb), color.a);
+		}
+	`
+};
+
+THREE.ShadowShader = {
+	uniforms: {
+		tDiffuse: {
+			value: null
+		},
+		amount: {
+			value: 1.0
+		}
+	},
+	vertexShader: `
+		varying vec2 vUv;
+		void main() {
+			vUv = uv;
+			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+		}
+	`,
+	fragmentShader: `
+		uniform float amount;
+		uniform sampler2D tDiffuse;
+		varying vec2 vUv;
+
+		const int blurSize = 20;
+		const int horizontalPass = 1;	// 0 or 1 to indicate vertical or horizontal pass
+		const float sigma = 5.0;		// The sigma value for the gaussian function: higher value means more blur
+										// A good value for 9x9 is around 3 to 5
+										// A good value for 7x7 is around 2.5 to 4
+										// A good value for 5x5 is around 2 to 3.5
+										// ... play around with this based on what you need :)
+		const vec2 texOffset = vec2(0.001, 0.001);
+		const float PI = 3.14159265;
+
+		const float MAX_ITERATIONS = 100.0;
+
+		vec4 gaussian(sampler2D texture, vec2 p) {
+  			float numBlurPixelsPerSide = float(blurSize / 2);
+  			// Incremental Gaussian Coefficent Calculation (See GPU Gems 3 pp. 877 - 889)
+  			vec3 incrementalGaussian;
+  			incrementalGaussian.x = 1.0 / (sqrt(2.0 * PI) * sigma);
+  			incrementalGaussian.y = exp(-0.5 / (sigma * sigma));
+  			incrementalGaussian.z = incrementalGaussian.y * incrementalGaussian.y;
+
+  			vec4 avgValue = vec4(0.0, 0.0, 0.0, 0.0);
+  			float coefficientSum = 0.0;
+
+  			// Take the central sample first...
+  			avgValue += texture2D(texture, p) * incrementalGaussian.x;
+  			coefficientSum += incrementalGaussian.x;
+  			incrementalGaussian.xy *= incrementalGaussian.yz;
+
+			// Go through the remaining 8 vertical samples (4 on each side of the center)
+  			for (float i = 1.0; i <= MAX_ITERATIONS; i+= 1.0) {
+				if (i >= numBlurPixelsPerSide) {
+					break;
+				}
+    			avgValue += texture2D(texture, p - i * texOffset) * incrementalGaussian.x;
+    			avgValue += texture2D(texture, p + i * texOffset) * incrementalGaussian.x;
+    			coefficientSum += 2.0 * incrementalGaussian.x;
+    			incrementalGaussian.xy *= incrementalGaussian.yz;
+  			}
+
+			return avgValue / coefficientSum;
+		}
+
+		void main() {
+			vec4 color = texture2D(tDiffuse, vUv);
+
+			vec4 shadow = gaussian(tDiffuse, vec2(vUv.x - 0.01, vUv.y + 0.01));
+			// vec4 shadow = texture2D(tDiffuse, vec2(vUv.x - 0.01, vUv.y + 0.01));
+			shadow.r = shadow.g = shadow.b = 0.0;
+			shadow.a *= 0.15;
+
+			gl_FragColor = vec4(min(vec3(1.0), shadow.rgb + color.rgb), color.a + shadow.a);
+		}
+	`
+};
 
 const tau = new Tau();
 /*
