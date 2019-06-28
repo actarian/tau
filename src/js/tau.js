@@ -75,6 +75,7 @@ class Tau {
 		const lights = this.lights = this.addLights(scene);
 		this.tweenTau();
 		// });
+		this.pixelRatio = Math.max(window.devicePixelRatio, 1.5);
 		const renderer = this.renderer = this.addRenderer();
 		const composer = this.composer = this.addComposer();
 		/*
@@ -188,7 +189,7 @@ class Tau {
 		this.renderer = renderer;
 		renderer.setClearColor(0xffffff, 0);
 		// renderer.setPixelRatio(window.devicePixelRatio);
-		renderer.setPixelRatio(Math.max(window.devicePixelRatio, 1.5));
+		renderer.setPixelRatio(this.pixelRatio);
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 		// container.innerHTML = '';
@@ -264,8 +265,12 @@ class Tau {
 		const scene = this.scene;
 		const camera = this.camera;
 		const composer = new THREE.EffectComposer(renderer);
-		const renderPass = new THREE.RenderPass(scene, camera);
-		composer.addPass(renderPass);
+		// const renderPass = new THREE.RenderPass(scene, camera);
+		// composer.addPass(renderPass);
+		const taaRenderPass = new THREE.TAARenderPass(scene, camera);
+		taaRenderPass.sampleLevel = 2;
+		taaRenderPass.unbiased = true;
+		composer.addPass(taaRenderPass);
 		const shaderPass = new THREE.ShaderPass(THREE.ShadowShader);
 		composer.addPass(shaderPass);
 		return composer;
@@ -645,10 +650,10 @@ class Tau {
 		// const lightMap = new THREE.TextureLoader().load('img/scalare-33-blue-lightmap.jpg');
 		const material = new THREE.MeshStandardMaterial({
 			color: 0x1f45c0,
+			// emissive: 0x333333,
 			// map: lightMap,
 			// normalMap: lightMap,
 			// metalnessMap: lightMap,
-			// emissive: 0x000066,
 			roughness: 0.9,
 			metalness: 0.0,
 		});
@@ -659,10 +664,10 @@ class Tau {
 		// const lightMap = new THREE.TextureLoader().load('img/scalare-33-green-lightmap.jpg');
 		const material = new THREE.MeshStandardMaterial({
 			color: 0x1aac4e,
+			// emissive: 0x333333,
 			// map: lightMap,
 			// normalMap: lightMap,
 			// metalnessMap: lightMap,
-			// emissive: 0x006600,
 			roughness: 0.9,
 			metalness: 0.0,
 		});
@@ -802,7 +807,7 @@ class Tau {
 				camera.updateProjectionMatrix();
 			}
 			if (composer) {
-				composer.setSize(w, h);
+				composer.setSize(w * this.pixelRatio, h * this.pixelRatio);
 			}
 		} catch (error) {
 			this.debugInfo.innerHTML = error;
@@ -1035,7 +1040,7 @@ THREE.ShadowShader = {
 		uniform sampler2D tDiffuse;
 		varying vec2 vUv;
 
-		const int blurSize = 20;
+		const int blurSize = 5;
 		const int horizontalPass = 1;	// 0 or 1 to indicate vertical or horizontal pass
 		const float sigma = 5.0;		// The sigma value for the gaussian function: higher value means more blur
 										// A good value for 9x9 is around 3 to 5
@@ -1080,12 +1085,14 @@ THREE.ShadowShader = {
 		void main() {
 			vec4 color = texture2D(tDiffuse, vUv);
 
-			vec4 shadow = gaussian(tDiffuse, vec2(vUv.x - 0.01, vUv.y + 0.01));
-			// vec4 shadow = texture2D(tDiffuse, vec2(vUv.x - 0.01, vUv.y + 0.01));
+			vec4 shadow = gaussian(tDiffuse, vec2(vUv.x - 0.005, vUv.y + 0.01));
+			// vec4 shadow = texture2D(tDiffuse, vec2(vUv.x - 0.005, vUv.y + 0.01));
 			shadow.r = shadow.g = shadow.b = 0.0;
 			shadow.a *= 0.15;
 
-			gl_FragColor = vec4(min(vec3(1.0), shadow.rgb + color.rgb), color.a + shadow.a);
+			vec3 rgb = color.rgb + shadow.rgb;
+			float alpha = min(1.0, max(color.a, shadow.a));
+			gl_FragColor = vec4(rgb, alpha);
 		}
 	`
 };

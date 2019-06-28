@@ -33,8 +33,9 @@
 					"node_modules/three/examples/js/shaders/SAOShader.js",
 					"node_modules/three/examples/js/shaders/SSAOShader.js",
 					"node_modules/three/examples/js/shaders/DepthLimitedBlurShader.js",
-					"node_modules/three/examples/js/shaders/UnpackDepthRGBAShader.js"
-
+					"node_modules/three/examples/js/shaders/UnpackDepthRGBAShader.js",
+					"node_modules/three/examples/js/postprocessing/SSAARenderPass.js",
+					"node_modules/three/examples/js/postprocessing/TAARenderPass.js"
 				],
 				"output": "docs/js/tau-vendors.js",
 				"minify": true

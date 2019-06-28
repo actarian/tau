@@ -3003,6 +3003,7 @@ function () {
       var lights = this.lights = this.addLights(scene);
       this.tweenTau(); // });
 
+      this.pixelRatio = Math.max(window.devicePixelRatio, 1.5);
       var renderer = this.renderer = this.addRenderer();
       var composer = this.composer = this.addComposer();
       /*
@@ -3132,7 +3133,7 @@ function () {
       this.renderer = renderer;
       renderer.setClearColor(0xffffff, 0); // renderer.setPixelRatio(window.devicePixelRatio);
 
-      renderer.setPixelRatio(Math.max(window.devicePixelRatio, 1.5));
+      renderer.setPixelRatio(this.pixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
       // container.innerHTML = '';
@@ -3214,9 +3215,13 @@ function () {
       var renderer = this.renderer;
       var scene = this.scene;
       var camera = this.camera;
-      var composer = new THREE.EffectComposer(renderer);
-      var renderPass = new THREE.RenderPass(scene, camera);
-      composer.addPass(renderPass);
+      var composer = new THREE.EffectComposer(renderer); // const renderPass = new THREE.RenderPass(scene, camera);
+      // composer.addPass(renderPass);
+
+      var taaRenderPass = new THREE.TAARenderPass(scene, camera);
+      taaRenderPass.sampleLevel = 2;
+      taaRenderPass.unbiased = true;
+      composer.addPass(taaRenderPass);
       var shaderPass = new THREE.ShaderPass(THREE.ShadowShader);
       composer.addPass(shaderPass);
       return composer;
@@ -3618,10 +3623,10 @@ function () {
       // const lightMap = new THREE.TextureLoader().load('img/scalare-33-blue-lightmap.jpg');
       var material = new THREE.MeshStandardMaterial({
         color: 0x1f45c0,
+        // emissive: 0x333333,
         // map: lightMap,
         // normalMap: lightMap,
         // metalnessMap: lightMap,
-        // emissive: 0x000066,
         roughness: 0.9,
         metalness: 0.0
       });
@@ -3633,10 +3638,10 @@ function () {
       // const lightMap = new THREE.TextureLoader().load('img/scalare-33-green-lightmap.jpg');
       var material = new THREE.MeshStandardMaterial({
         color: 0x1aac4e,
+        // emissive: 0x333333,
         // map: lightMap,
         // normalMap: lightMap,
         // metalnessMap: lightMap,
-        // emissive: 0x006600,
         roughness: 0.9,
         metalness: 0.0
       });
@@ -3789,7 +3794,7 @@ function () {
         }
 
         if (composer) {
-          composer.setSize(w, h);
+          composer.setSize(w * this.pixelRatio, h * this.pixelRatio);
         }
       } catch (error) {
         this.debugInfo.innerHTML = error;
@@ -4027,7 +4032,7 @@ THREE.ShadowShader = {
     }
   },
   vertexShader: "\n\t\tvarying vec2 vUv;\n\t\tvoid main() {\n\t\t\tvUv = uv;\n\t\t\tgl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n\t\t}\n\t",
-  fragmentShader: "\n\t\tuniform float amount;\n\t\tuniform sampler2D tDiffuse;\n\t\tvarying vec2 vUv;\n\n\t\tconst int blurSize = 20;\n\t\tconst int horizontalPass = 1;\t// 0 or 1 to indicate vertical or horizontal pass\n\t\tconst float sigma = 5.0;\t\t// The sigma value for the gaussian function: higher value means more blur\n\t\t\t\t\t\t\t\t\t\t// A good value for 9x9 is around 3 to 5\n\t\t\t\t\t\t\t\t\t\t// A good value for 7x7 is around 2.5 to 4\n\t\t\t\t\t\t\t\t\t\t// A good value for 5x5 is around 2 to 3.5\n\t\t\t\t\t\t\t\t\t\t// ... play around with this based on what you need :)\n\t\tconst vec2 texOffset = vec2(0.001, 0.001);\n\t\tconst float PI = 3.14159265;\n\n\t\tconst float MAX_ITERATIONS = 100.0;\n\n\t\tvec4 gaussian(sampler2D texture, vec2 p) {\n  \t\t\tfloat numBlurPixelsPerSide = float(blurSize / 2);\n  \t\t\t// Incremental Gaussian Coefficent Calculation (See GPU Gems 3 pp. 877 - 889)\n  \t\t\tvec3 incrementalGaussian;\n  \t\t\tincrementalGaussian.x = 1.0 / (sqrt(2.0 * PI) * sigma);\n  \t\t\tincrementalGaussian.y = exp(-0.5 / (sigma * sigma));\n  \t\t\tincrementalGaussian.z = incrementalGaussian.y * incrementalGaussian.y;\n\n  \t\t\tvec4 avgValue = vec4(0.0, 0.0, 0.0, 0.0);\n  \t\t\tfloat coefficientSum = 0.0;\n\n  \t\t\t// Take the central sample first...\n  \t\t\tavgValue += texture2D(texture, p) * incrementalGaussian.x;\n  \t\t\tcoefficientSum += incrementalGaussian.x;\n  \t\t\tincrementalGaussian.xy *= incrementalGaussian.yz;\n\n\t\t\t// Go through the remaining 8 vertical samples (4 on each side of the center)\n  \t\t\tfor (float i = 1.0; i <= MAX_ITERATIONS; i+= 1.0) {\n\t\t\t\tif (i >= numBlurPixelsPerSide) {\n\t\t\t\t\tbreak;\n\t\t\t\t}\n    \t\t\tavgValue += texture2D(texture, p - i * texOffset) * incrementalGaussian.x;\n    \t\t\tavgValue += texture2D(texture, p + i * texOffset) * incrementalGaussian.x;\n    \t\t\tcoefficientSum += 2.0 * incrementalGaussian.x;\n    \t\t\tincrementalGaussian.xy *= incrementalGaussian.yz;\n  \t\t\t}\n\n\t\t\treturn avgValue / coefficientSum;\n\t\t}\n\n\t\tvoid main() {\n\t\t\tvec4 color = texture2D(tDiffuse, vUv);\n\n\t\t\tvec4 shadow = gaussian(tDiffuse, vec2(vUv.x - 0.01, vUv.y + 0.01));\n\t\t\t// vec4 shadow = texture2D(tDiffuse, vec2(vUv.x - 0.01, vUv.y + 0.01));\n\t\t\tshadow.r = shadow.g = shadow.b = 0.0;\n\t\t\tshadow.a *= 0.15;\n\n\t\t\tgl_FragColor = vec4(min(vec3(1.0), shadow.rgb + color.rgb), color.a + shadow.a);\n\t\t}\n\t"
+  fragmentShader: "\n\t\tuniform float amount;\n\t\tuniform sampler2D tDiffuse;\n\t\tvarying vec2 vUv;\n\n\t\tconst int blurSize = 5;\n\t\tconst int horizontalPass = 1;\t// 0 or 1 to indicate vertical or horizontal pass\n\t\tconst float sigma = 5.0;\t\t// The sigma value for the gaussian function: higher value means more blur\n\t\t\t\t\t\t\t\t\t\t// A good value for 9x9 is around 3 to 5\n\t\t\t\t\t\t\t\t\t\t// A good value for 7x7 is around 2.5 to 4\n\t\t\t\t\t\t\t\t\t\t// A good value for 5x5 is around 2 to 3.5\n\t\t\t\t\t\t\t\t\t\t// ... play around with this based on what you need :)\n\t\tconst vec2 texOffset = vec2(0.001, 0.001);\n\t\tconst float PI = 3.14159265;\n\n\t\tconst float MAX_ITERATIONS = 100.0;\n\n\t\tvec4 gaussian(sampler2D texture, vec2 p) {\n  \t\t\tfloat numBlurPixelsPerSide = float(blurSize / 2);\n  \t\t\t// Incremental Gaussian Coefficent Calculation (See GPU Gems 3 pp. 877 - 889)\n  \t\t\tvec3 incrementalGaussian;\n  \t\t\tincrementalGaussian.x = 1.0 / (sqrt(2.0 * PI) * sigma);\n  \t\t\tincrementalGaussian.y = exp(-0.5 / (sigma * sigma));\n  \t\t\tincrementalGaussian.z = incrementalGaussian.y * incrementalGaussian.y;\n\n  \t\t\tvec4 avgValue = vec4(0.0, 0.0, 0.0, 0.0);\n  \t\t\tfloat coefficientSum = 0.0;\n\n  \t\t\t// Take the central sample first...\n  \t\t\tavgValue += texture2D(texture, p) * incrementalGaussian.x;\n  \t\t\tcoefficientSum += incrementalGaussian.x;\n  \t\t\tincrementalGaussian.xy *= incrementalGaussian.yz;\n\n\t\t\t// Go through the remaining 8 vertical samples (4 on each side of the center)\n  \t\t\tfor (float i = 1.0; i <= MAX_ITERATIONS; i+= 1.0) {\n\t\t\t\tif (i >= numBlurPixelsPerSide) {\n\t\t\t\t\tbreak;\n\t\t\t\t}\n    \t\t\tavgValue += texture2D(texture, p - i * texOffset) * incrementalGaussian.x;\n    \t\t\tavgValue += texture2D(texture, p + i * texOffset) * incrementalGaussian.x;\n    \t\t\tcoefficientSum += 2.0 * incrementalGaussian.x;\n    \t\t\tincrementalGaussian.xy *= incrementalGaussian.yz;\n  \t\t\t}\n\n\t\t\treturn avgValue / coefficientSum;\n\t\t}\n\n\t\tvoid main() {\n\t\t\tvec4 color = texture2D(tDiffuse, vUv);\n\n\t\t\tvec4 shadow = gaussian(tDiffuse, vec2(vUv.x - 0.005, vUv.y + 0.01));\n\t\t\t// vec4 shadow = texture2D(tDiffuse, vec2(vUv.x - 0.005, vUv.y + 0.01));\n\t\t\tshadow.r = shadow.g = shadow.b = 0.0;\n\t\t\tshadow.a *= 0.15;\n\n\t\t\tvec3 rgb = color.rgb + shadow.rgb;\n\t\t\tfloat alpha = min(1.0, max(color.a, shadow.a));\n\t\t\tgl_FragColor = vec4(rgb, alpha);\n\t\t}\n\t"
 };
 var tau = new Tau();
 /*
