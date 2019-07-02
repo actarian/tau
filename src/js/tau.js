@@ -649,7 +649,7 @@ class Tau {
 	getBlue(texture) {
 		// const lightMap = new THREE.TextureLoader().load('img/scalare-33-blue-lightmap.jpg');
 		const material = new THREE.MeshStandardMaterial({
-			color: 0x1f45c0,
+			color: 0x024c99, // 0x1f45c0,
 			// emissive: 0x333333,
 			// map: lightMap,
 			// normalMap: lightMap,
@@ -663,7 +663,7 @@ class Tau {
 	getGreen(texture) {
 		// const lightMap = new THREE.TextureLoader().load('img/scalare-33-green-lightmap.jpg');
 		const material = new THREE.MeshStandardMaterial({
-			color: 0x1aac4e,
+			color: 0x15b29a, // 0x1aac4e,
 			// emissive: 0x333333,
 			// map: lightMap,
 			// normalMap: lightMap,
