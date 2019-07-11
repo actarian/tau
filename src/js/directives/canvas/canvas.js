@@ -166,8 +166,8 @@ export default class Canvas extends Emittable {
 			snapshot: this.onSave,
 		};
 		gui.add(callback, 'snapshot');
-		gui.close();
-		// dat.GUI.toggleHide();
+		// gui.close();
+		dat.GUI.toggleHide();
 		return gui;
 	}
 
