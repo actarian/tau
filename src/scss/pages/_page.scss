@@ -1,0 +1,31 @@
+@import "../mixins";
+
+.page {
+	display: block;
+	position: relative;
+	width: 100%;
+	min-height: 100vh;
+	overflow: hidden;
+
+	.view {
+		position: relative;
+		background: $background;
+		min-height: 100vh;
+	}
+
+	@include media-breakpoint-down(xs) {
+		padding: 0;
+	}
+
+}
+
+.wrapper {
+	background: $background;
+	min-height: 100vh;
+	margin: 0 auto;
+	padding: 0;
+}
+
+.section {
+	position: relative;
+}

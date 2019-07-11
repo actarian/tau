@@ -1,0 +1,126 @@
+<script type="text/javascript" lazy-script>
+	window.product = {
+		bristles: [{
+			name: 'Dure',
+			key: 'hard',
+			colors: ['#024c99', '#15b29a']
+		}, {
+			name: 'Medie',
+			key: 'medium',
+			colors: ['#0e38b1', '#e13334']
+		}, {
+			name: 'Morbide',
+			key: 'soft',
+			colors: ['#0e38b1', '#3d6d4f']
+		}, {
+			name: 'Molto Morbide',
+			key: 'softer',
+			colors: ['#0e38b1', '#e13334']
+		}],
+		colors: [{
+			name: 'Rosso',
+			key: 'red',
+			colors: ['#e13334']
+		}, {
+			name: 'Bianco',
+			key: 'white',
+			colors: ['#ebe8e1']
+		}, {
+			name: 'Blu',
+			key: 'blue',
+			colors: ['#0e38b1']
+		}, {
+			name: 'Verde',
+			key: 'green',
+			colors: ['#3d6d4f']
+		}]
+	}
+
+</script>
+
+<div ng-controller="ProductCtrl as productCtrl">
+
+	<section class="section--product-hero" data-anchor="hero">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-8 offset-md-2">
+					<div class="title">professional 27</div>
+					<div class="abstract">testina piccola, efficacia massima.</div>
+					<div class="description">Lo spazzolino ideale per raggiungere comodamente le zone più difficili del cavo orale, garantendo una spazzolata efficace e al tempo stesso delicata.</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section--product-info" overscroll="300">
+		<div class="container">
+			<div class="title">stile e funzionalità.</div>
+			<div class="listing--info row">
+				<div class="listing__item col-md-4" data-overscroll-anchor="manico">
+					<div class="bullet"></div>
+					<div class="title">manico diritto</div>
+					<div class="abstract">per una corretta impugnatura</div>
+				</div>
+				<div class="listing__item col-md-4 offset-md-4" data-overscroll-anchor="testina">
+					<div class="bullet"></div>
+					<div class="title">testina corta</div>
+					<div class="abstract">solo 27 millimetri, massima efficacia di spazzolamento</div>
+				</div>
+				<div class="listing__item col-md-4" data-overscroll-anchor="setole">
+					<div class="bullet"></div>
+					<div class="title">setole di due durezze</div>
+					<div class="abstract">una rimuove la placca l’altra massaggia le gengive</div>
+				</div>
+				<div class="listing__item col-md-4 offset-md-4" data-overscroll-anchor="scalare">
+					<div class="bullet"></div>
+					<div class="title">inclinazione scalare</div>
+					<div class="abstract">per raggiungere anche i punti più nascosti</div>
+				</div>
+				<div class="listing__item col-md-4" data-overscroll-anchor="italy">
+					<div class="bullet"></div>
+					<div class="title">made in italy</div>
+					<div class="abstract">100% prodotto e realizzato in Italia con i migliori materiali</div>
+				</div>
+				<div class="listing__item col-md-4 offset-md-4" data-overscroll-anchor="setole-tynex">
+					<div class="bullet"></div>
+					<div class="title">setole arrotondate in tynex</div>
+					<div class="abstract">per raggiungere anche i punti più nascosti</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section--product-colors fixed" canvas data-anchor="colors">
+		<div class="container">
+			<div class="title">lo spazzolino perfetto per te.</div>
+			<div class="row">
+				<div class="col-md-8 offset-md-2">
+					<div class="group--inline">
+						<div class="group--nav">
+							<div class="label">Setole:</div>
+							<ul class="nav--types">
+								<li ng-class="{ active: productCtrl.bristle == item}" ng-click="productCtrl.bristle = item" ng-repeat="item in productCtrl.product.bristles track by $index"><span class="name" ng-bind="item.name"></span></li>
+							</ul>
+						</div>
+						<div class="group--nav">
+							<div class="label">Colore:</div>
+							<ul class="nav--colors">
+								<li class="color color--{{item.key}}" ng-class="{ active: productCtrl.color == item}" ng-click="productCtrl.color = item" ng-repeat="item in productCtrl.product.colors track by $index"><span class="bullet"></span><span class="name" ng-bind="item.name"></span></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="inner">
+			<div class="debug__info"></div>
+		</div>
+	</section>
+
+	<section class="section--product-related">
+		<div class="container">
+			<img class="template" src="img/product/product.jpg" />
+		</div>
+	</section>
+
+</div>
