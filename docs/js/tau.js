@@ -18400,7 +18400,7 @@ app.filter('trusted', ['$sce', _trusted.TrustedFilter]);
 var _default = MODULE_NAME;
 exports.default = _default;
 
-},{"./directives/canvas.directive":201,"./directives/lazy-script.directive":206,"./directives/lazy.directive":207,"./directives/overscroll.directive":208,"./filters/trusted.filter":209,"./product/product.controller":210,"./root.controller":211,"./services/api.service":212,"./services/dom.service":213,"./shared/location.service":214,"./shared/promise.service":215,"./shared/state.service":217,"./shared/storage.service":218}],201:[function(require,module,exports){
+},{"./directives/canvas.directive":201,"./directives/lazy-script.directive":207,"./directives/lazy.directive":208,"./directives/overscroll.directive":209,"./filters/trusted.filter":210,"./product/product.controller":211,"./root.controller":212,"./services/api.service":213,"./services/dom.service":214,"./shared/location.service":215,"./shared/promise.service":216,"./shared/state.service":218,"./shared/storage.service":219}],201:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18436,6 +18436,9 @@ function () {
 
     this.domService = DomService;
     this.restrict = 'A';
+    this.scope = {
+      canvas: '='
+    };
   }
 
   _createClass(CanvasDirective, [{
@@ -18443,7 +18446,11 @@ function () {
     value: function link(scope, element, attributes, controller) {
       var node = element[0];
       var inner = node.querySelector('.inner');
-      var canvas = new _canvas.default(inner);
+      var model = scope.model || 'models/tau-marin_5.obj';
+      var canvas = new _canvas.default(inner, model);
+      canvas.on('load', function () {
+        node.classList.add('loaded');
+      });
       /*
       const loader = new THREE.loader();
       loader.load('img/panorama-sm/panorama-01.jpg', (texture) => {
@@ -18526,7 +18533,7 @@ function () {
 exports.default = CanvasDirective;
 CanvasDirective.factory.$inject = ['DomService'];
 
-},{"../shared/rect":216,"./canvas/canvas":202}],202:[function(require,module,exports){
+},{"../shared/rect":217,"./canvas/canvas":202}],202:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18538,6 +18545,8 @@ var dat = _interopRequireWildcard(require("dat.gui"));
 
 var _const = require("./three/const");
 
+var _emittable = _interopRequireDefault(require("./three/emittable"));
+
 var _interactive = _interopRequireDefault(require("./three/interactive.mesh"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -18548,16 +18557,28 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 var USE_CUBE_CAMERA = true;
 var COLORS = [0xFFFFFF, 0xFC4445, 0xFEEE6, 0x55BCC9, 0x97CAEF, 0xCAFAFE];
 
 var Canvas =
 /*#__PURE__*/
-function () {
+function (_Emittable) {
+  _inherits(Canvas, _Emittable);
+
   _createClass(Canvas, [{
     key: "anchor",
     get: function get() {
@@ -18593,55 +18614,82 @@ function () {
         this.setColor(color);
       }
     }
+  }, {
+    key: "zoom",
+    get: function get() {
+      var r;
+
+      if (this.container.offsetWidth > 1024) {
+        r = this.container.offsetWidth / 1080;
+      } else {
+        r = this.container.offsetWidth / 600;
+      }
+
+      return (this.zoom_ + r) * 0.6;
+    }
   }]);
 
-  function Canvas(container) {
+  function Canvas(container, model) {
+    var _this;
+
     _classCallCheck(this, Canvas);
 
-    this.container = container;
-    this.colorIndex = 0;
-    this.count = 0;
-    this.mouse = {
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Canvas).call(this));
+    _this.container = container;
+    _this.model = model || 'models/tau-marin_5.obj'; // 'models/scalare-33-b/scalare-33-b.obj',
+
+    _this.colorIndex = 0;
+    _this.count = 0;
+    _this.mouse = {
       x: 0,
       y: 0
     };
-    this.parallax = {
+    _this.parallax = {
       x: 0,
       y: 0
     };
-    this.size = {
+    _this.size = {
       width: 0,
       height: 0,
       aspect: 0
     };
-    this.cameraDirection = new THREE.Vector3(); // const debugInfo = this.debugInfo = section.querySelector('.debug__info');
+    _this.zoom_ = 0;
+    _this.cameraDirection = new THREE.Vector3(); // const debugInfo = this.debugInfo = section.querySelector('.debug__info');
     // const debugSave = this.debugSave = section.querySelector('.debug__save');
     // Dom.detect(body);
     // body.classList.add('ready');
 
-    this.onWindowResize = this.onWindowResize.bind(this);
-    this.onKeyDown = this.onKeyDown.bind(this);
-    this.onMouseDown = this.onMouseDown.bind(this);
-    this.onMouseMove = this.onMouseMove.bind(this);
-    this.onMouseUp = this.onMouseUp.bind(this);
-    this.onMouseWheel = this.onMouseWheel.bind(this);
-    this.onSave = this.onSave.bind(this); //
+    _this.onWindowResize = _this.onWindowResize.bind(_assertThisInitialized(_this));
+    _this.onKeyDown = _this.onKeyDown.bind(_assertThisInitialized(_this));
+    _this.onMouseDown = _this.onMouseDown.bind(_assertThisInitialized(_this));
+    _this.onMouseMove = _this.onMouseMove.bind(_assertThisInitialized(_this));
+    _this.onMouseUp = _this.onMouseUp.bind(_assertThisInitialized(_this));
+    _this.onMouseWheel = _this.onMouseWheel.bind(_assertThisInitialized(_this));
+    _this.onSave = _this.onSave.bind(_assertThisInitialized(_this));
 
-    var scene = this.scene = this.addScene();
-    var camera = this.camera = this.addCamera(); // const addons = this.addons = this.addBoxes(scene);
+    var scene = _this.scene = _this.addScene();
 
-    var addons = this.addons = this.addSpheres(scene);
-    this.getCubeCamera();
-    var texture = this.cubeCamera1.renderTarget.texture; // const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
+    var camera = _this.camera = _this.addCamera(); // const addons = this.addons = this.addBoxes(scene);
+
+
+    var addons = _this.addons = _this.addSpheres(scene);
+
+    _this.getCubeCamera();
+
+    var texture = _this.cubeCamera1.renderTarget.texture; // const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
     // this.addText('Scalare 33', scene);
 
-    var tau = this.tau = this.addTau(scene, texture);
-    var lights = this.lights = this.addLights(scene); // this.tweenTau();
+    var tau = _this.tau = _this.addTau(scene, texture);
+
+    var lights = _this.lights = _this.addLights(scene); // this.tweenTau();
     // });
 
-    this.pixelRatio = Math.max(window.devicePixelRatio, 1.5);
-    var renderer = this.renderer = this.addRenderer();
-    var composer = this.composer = this.addComposer();
+
+    _this.pixelRatio = Math.max(window.devicePixelRatio, 1.0); // !!! 1.5
+
+    var renderer = _this.renderer = _this.addRenderer();
+
+    var composer = _this.composer = _this.addComposer();
     /*
     const orbit = this.orbit = new Orbit();
     const dragListener = this.dragListener = orbit.setDragListener(container);
@@ -18649,7 +18697,8 @@ function () {
     const raycaster = this.raycaster = new THREE.Raycaster();
     */
 
-    window.addEventListener('resize', this.onWindowResize, false);
+
+    window.addEventListener('resize', _this.onWindowResize, false);
     /*
     window.addEventListener('keydown', this.onKeyDown, false);
     document.addEventListener('mousemove', this.onMouseMove, false);
@@ -18660,27 +18709,18 @@ function () {
     // this.debugSave.addEventListener('click', this.onSave, false);
     // this.section.classList.add('init');
 
-    this.onWindowResize(); // this.updateBackgroundColor();
+    _this.onWindowResize(); // this.updateBackgroundColor();
 
-    var gui = this.gui = this.addGUI();
-  }
-  /*
-  load(jsonUrl) {
-  	try {
-  		fetch(jsonUrl).then(response => response.json()).then(response => {
-  			this.pivot.views = response.views;
-  		});
-  	} catch (error) {
-  		this.debugInfo.innerHTML = error;
-  	}
-  }
-  */
 
+    var gui = _this.gui = _this.addGUI();
+
+    return _this;
+  }
 
   _createClass(Canvas, [{
     key: "addGUI",
     value: function addGUI() {
-      var _this = this;
+      var _this2 = this;
 
       var gui = new dat.GUI();
       var keys = ['green', 'blue', 'red', 'silver', 'clear'];
@@ -18690,7 +18730,7 @@ function () {
         // console.log(rest);
         keys.forEach(function (key) {
           var m = properties[key];
-          var material = _this[key];
+          var material = _this2[key];
           material.color.setHex(m.color);
 
           if (key === 'clear') {
@@ -18702,15 +18742,15 @@ function () {
             material.metalness = m.metalness;
           }
         });
-        _this.camera.zoom = properties.zoom;
+        _this2.camera.zoom = properties.zoom;
 
-        _this.camera.updateProjectionMatrix();
+        _this2.camera.updateProjectionMatrix();
       };
 
       properties.zoom = this.camera.zoom;
       var folders = keys.map(function (key) {
         var m = properties[key] = {};
-        var material = _this[key];
+        var material = _this2[key];
         m.color = material.color.getHex();
         var folder = gui.addFolder(key);
         folder.addColor(m, 'color').onFinishChange(onChange);
@@ -18743,7 +18783,7 @@ function () {
   }, {
     key: "updateBackgroundColor",
     value: function updateBackgroundColor() {
-      var _this2 = this;
+      var _this3 = this;
 
       this.colorIndex++;
       this.colorIndex = this.colorIndex % COLORS.length;
@@ -18760,13 +18800,13 @@ function () {
         delay: 3,
         ease: Power2.easeInOut,
         onUpdate: function onUpdate() {
-          _this2.addons.children.forEach(function (x) {
+          _this3.addons.children.forEach(function (x) {
             x.material.color.setHex(color);
             x.material.needsUpdate = true;
           });
         },
         onComplete: function onComplete() {
-          _this2.updateBackgroundColor();
+          _this3.updateBackgroundColor();
         }
       });
     }
@@ -18807,7 +18847,7 @@ function () {
       var camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, 2000);
       camera.position.set(0, 0, 40);
       camera.target = new THREE.Vector3();
-      camera.zoom = 0.6;
+      camera.zoom = this.zoom;
       /*
       // camera.target.z = ROOM_RADIUS;
       // camera.lookAt(camera.target);
@@ -18962,20 +19002,20 @@ function () {
   }, {
     key: "addText",
     value: function addText(message, parent) {
-      var _this3 = this;
+      var _this4 = this;
 
       var loader = new THREE.FontLoader();
       loader.load('fonts/helvetiker_regular.typeface.json', function (font) {
-        _this3.font = font;
+        _this4.font = font;
         var material = new THREE.MeshBasicMaterial({
           color: 0xe11e26 // transparent: true,
           // opacity: 1,
           // side: THREE.DoubleSide
 
         });
-        _this3.fontMaterial = material;
+        _this4.fontMaterial = material;
 
-        var text = _this3.setText(message, parent);
+        var text = _this4.setText(message, parent);
       });
     }
   }, {
@@ -19013,12 +19053,12 @@ function () {
   }, {
     key: "addBoxes",
     value: function addBoxes(parent) {
-      var _this4 = this;
+      var _this5 = this;
 
       var group = new THREE.Group();
       group.visible = true;
       var boxes = new Array(12).fill(null).map(function (x, i) {
-        var box = _this4.addBox(group);
+        var box = _this5.addBox(group);
 
         var r = Math.PI * 2 / 12 * i;
         box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
@@ -19030,7 +19070,7 @@ function () {
   }, {
     key: "addTau",
     value: function addTau(parent, texture) {
-      var _this5 = this;
+      var _this6 = this;
 
       var tau = new THREE.Group();
       /*
@@ -19050,8 +19090,7 @@ function () {
       var blue = this.blue = this.getBlue();
       var green = this.green = this.getGreen();
       var loader = new THREE.OBJLoader();
-      loader.load('models/tau-marin_5.obj', // 'models/scalare-33-b/scalare-33-b.obj',
-      function (object) {
+      loader.load(this.model, function (object) {
         var i = 0;
         object.traverse(function (child) {
           if (child instanceof THREE.Mesh) {
@@ -19094,8 +19133,8 @@ function () {
             } else if (i === 3) {
             	child.material = clear;
             	tau.body = child;
-                              }
-                              */
+            }
+            */
           }
         }); // this.addLogo(object);
         // object.material = material;
@@ -19103,9 +19142,11 @@ function () {
 
         tau.add(object);
 
-        _this5.setBristle(_this5.bristle);
+        _this6.setBristle(_this6.bristle);
 
-        _this5.setColor(_this5.color);
+        _this6.setColor(_this6.color);
+
+        _this6.emit('load');
       }, function (xhr) {// console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
       }, function (error) {
         console.log('An error happened');
@@ -19117,7 +19158,7 @@ function () {
   }, {
     key: "tweenTau",
     value: function tweenTau(anchor) {
-      var _this6 = this;
+      var _this7 = this;
 
       // tau.rotation.set(Math.PI / 4, Math.PI / 4, Math.PI / 4);
       // tau.rotation.set(0, 0, Math.PI / 2);
@@ -19129,6 +19170,8 @@ function () {
       // [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // tre quarti destra
       // [Math.PI / 2, 0, 0]; // top right
       // [0, Math.PI, Math.PI / 2]; // vertical right;
+      var sm = window.innerWidth < 1024,
+          smx = -3;
       var rotation, position, zoom;
 
       switch (anchor) {
@@ -19136,63 +19179,63 @@ function () {
           position = [0, 0, 0];
           rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // tre quarti sinistra
 
-          zoom = 0.6;
+          this.zoom_ = 0;
           break;
 
         case 'manico':
-          position = [0, 0, 0];
+          position = [sm ? smx : 0, 0, 0];
           rotation = [0, Math.PI, Math.PI / 2]; // vertical right;
 
-          zoom = 0.6;
+          this.zoom_ = 0;
           break;
 
         case 'testina':
-          position = [0, 0, 0];
+          position = [sm ? smx * 0.8 : 0, 0, 0];
           rotation = [0, -Math.PI / 2, Math.PI / 32]; // testina vista dietro
 
-          zoom = 0.8;
+          this.zoom_ = 0.2;
           break;
 
         case 'setole':
-          position = [0, -3, 0];
+          position = [sm ? smx * 0.6 : 0, -3, 0];
           rotation = [0, Math.PI - Math.PI / 4, Math.PI / 2]; // vertical right;
 
-          zoom = 1.0;
+          this.zoom_ = 0.4;
           break;
 
         case 'scalare':
-          position = [0, -3, 0];
+          position = [sm ? smx * 0.6 : 0, -3, 0];
           rotation = [0, Math.PI, Math.PI / 2]; // vertical right;
           // rotation = [0, 0, Math.PI / 2]; // vertical left;
 
-          zoom = 1.0;
+          this.zoom_ = 0.4;
           break;
 
         case 'italy':
-          position = [0, 0, 0];
+          position = [sm ? smx : 0, 0, 0];
           rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // tre quarti sinistra
 
-          zoom = 0.6;
+          this.zoom_ = 0;
           break;
 
         case 'setole-tynex':
-          position = [0, -2, 0];
+          position = [sm ? smx * 0.8 : 0, -2, 0];
           rotation = [0, 0, Math.PI / 2]; // vertical left;
 
-          zoom = 0.8;
+          this.zoom_ = 0.2;
           break;
 
         case 'colors':
           position = [0, 0, 0];
           rotation = [0, Math.PI, 0]; // horizontal left
 
-          zoom = 0.6;
+          this.zoom_ = 0;
           break;
 
         default:
           position = [0, 0, 0];
           rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4];
-          zoom = 0.6;
+          this.zoom_ = 0;
       }
 
       var tau = this.tau;
@@ -19225,10 +19268,10 @@ function () {
 
       });
       TweenMax.to(this.camera, 0.6, {
-        zoom: zoom,
+        zoom: this.zoom,
         ease: Power2.easeInOut,
         onUpdate: function onUpdate() {
-          _this6.camera.updateProjectionMatrix();
+          _this7.camera.updateProjectionMatrix();
         }
       });
     }
@@ -19250,7 +19293,7 @@ function () {
   }, {
     key: "setBristle",
     value: function setBristle(bristle) {
-      var _this7 = this;
+      var _this8 = this;
 
       if (bristle) {
         // console.log('setBristle', bristle);
@@ -19268,13 +19311,13 @@ function () {
 
               case 'verde':
                 // child.material = green;
-                _this7.tweenColor(child.material, bristle.colors[1]);
+                _this8.tweenColor(child.material, bristle.colors[1]);
 
                 break;
 
               case 'blu':
                 // child.material = blue;
-                _this7.tweenColor(child.material, bristle.colors[0]);
+                _this8.tweenColor(child.material, bristle.colors[0]);
 
                 break;
             }
@@ -19285,7 +19328,7 @@ function () {
   }, {
     key: "setColor",
     value: function setColor(color) {
-      var _this8 = this;
+      var _this9 = this;
 
       if (color) {
         // console.log('setColor', color);
@@ -19297,7 +19340,7 @@ function () {
             // console.log(child);
             switch (child.name) {
               case 'corpo_spazzolino_rosso':
-                _this8.tweenColor(child.material, color.colors[0]); // console.log(child.material, color.colors[0]);
+                _this9.tweenColor(child.material, color.colors[0]); // console.log(child.material, color.colors[0]);
 
 
                 break;
@@ -19362,7 +19405,7 @@ function () {
   }, {
     key: "getEnvMap",
     value: function getEnvMap(callback) {
-      var _this9 = this;
+      var _this10 = this;
 
       var loader = new THREE.TextureLoader().load('img/hdr-04.jpg', function (source, textureData) {
         // source.encoding = THREE.sRGBEncoding;
@@ -19376,7 +19419,7 @@ function () {
 
         var cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options); // pngBackground = cubemapGenerator.renderTarget;
 
-        var texture = cubemapGenerator.update(_this9.renderer);
+        var texture = cubemapGenerator.update(_this10.renderer);
         /*
         var pmremGenerator = new THREE.PMREMGenerator( cubeMapTexture );
         pmremGenerator.update( renderer );
@@ -19413,7 +19456,7 @@ function () {
   }, {
     key: "getHDRMap",
     value: function getHDRMap(callback) {
-      var _this10 = this;
+      var _this11 = this;
 
       var type = THREE.UnsignedByteType; // const type = THREE.FloatType;
 
@@ -19437,8 +19480,8 @@ function () {
         var cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, {
           resolution: 512
         });
-        _this10.renderer.toneMappingExposure = 2.0;
-        var texture = cubemapGenerator.update(_this10.renderer);
+        _this11.renderer.toneMappingExposure = 2.0;
+        var texture = cubemapGenerator.update(_this11.renderer);
         source.dispose();
 
         if (typeof callback === 'function') {
@@ -19739,11 +19782,11 @@ function () {
   }, {
     key: "animate",
     value: function animate() {
-      var _this11 = this;
+      var _this12 = this;
 
       var renderer = this.renderer;
       renderer.setAnimationLoop(function () {
-        _this11.render();
+        _this12.render();
       });
     } // utils
 
@@ -19842,21 +19885,9 @@ function () {
   }]);
 
   return Canvas;
-}();
+}(_emittable.default);
 
 exports.default = Canvas;
-THREE.SepiaShader = {
-  uniforms: {
-    tDiffuse: {
-      value: null
-    },
-    amount: {
-      value: 1.0
-    }
-  },
-  vertexShader: "\n\t\tvarying vec2 vUv;\n\t\tvoid main() {\n\t\t\tvUv = uv;\n\t\t\tgl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n\t\t}\n\t",
-  fragmentShader: "\n\t\tuniform float amount;\n\t\tuniform sampler2D tDiffuse;\n\t\tvarying vec2 vUv;\n\t\tvoid main() {\n\t\t\tvec4 color = texture2D(tDiffuse, vUv);\n\t\t\tvec3 c = color.rgb;\n\t\t\tcolor.r = dot( c, vec3( 1.0 - 0.607 * amount, 0.769 * amount, 0.189 * amount ) );\n\t\t\tcolor.g = dot( c, vec3( 0.349 * amount, 1.0 - 0.314 * amount, 0.168 * amount ) );\n\t\t\tcolor.b = dot( c, vec3( 0.272 * amount, 0.534 * amount, 1.0 - 0.869 * amount ) );\n\t\t\tgl_FragColor = vec4(min(vec3(1.0), color.rgb), color.a);\n\t\t}\n\t"
-};
 THREE.ShadowShader = {
   uniforms: {
     tDiffuse: {
@@ -19870,7 +19901,7 @@ THREE.ShadowShader = {
   fragmentShader: "\n\t\tuniform float amount;\n\t\tuniform sampler2D tDiffuse;\n\t\tvarying vec2 vUv;\n\n\t\tconst int blurSize = 5;\n\t\tconst int horizontalPass = 1;\t// 0 or 1 to indicate vertical or horizontal pass\n\t\tconst float sigma = 5.0;\t\t// The sigma value for the gaussian function: higher value means more blur\n\t\t\t\t\t\t\t\t\t\t// A good value for 9x9 is around 3 to 5\n\t\t\t\t\t\t\t\t\t\t// A good value for 7x7 is around 2.5 to 4\n\t\t\t\t\t\t\t\t\t\t// A good value for 5x5 is around 2 to 3.5\n\t\t\t\t\t\t\t\t\t\t// ... play around with this based on what you need :)\n\t\tconst vec2 texOffset = vec2(0.001, 0.001);\n\t\tconst float PI = 3.14159265;\n\n\t\tconst float MAX_ITERATIONS = 100.0;\n\n\t\tvec4 gaussian(sampler2D texture, vec2 p) {\n  \t\t\tfloat numBlurPixelsPerSide = float(blurSize / 2);\n  \t\t\t// Incremental Gaussian Coefficent Calculation (See GPU Gems 3 pp. 877 - 889)\n  \t\t\tvec3 incrementalGaussian;\n  \t\t\tincrementalGaussian.x = 1.0 / (sqrt(2.0 * PI) * sigma);\n  \t\t\tincrementalGaussian.y = exp(-0.5 / (sigma * sigma));\n  \t\t\tincrementalGaussian.z = incrementalGaussian.y * incrementalGaussian.y;\n\n  \t\t\tvec4 avgValue = vec4(0.0, 0.0, 0.0, 0.0);\n  \t\t\tfloat coefficientSum = 0.0;\n\n  \t\t\t// Take the central sample first...\n  \t\t\tavgValue += texture2D(texture, p) * incrementalGaussian.x;\n  \t\t\tcoefficientSum += incrementalGaussian.x;\n  \t\t\tincrementalGaussian.xy *= incrementalGaussian.yz;\n\n\t\t\t// Go through the remaining 8 vertical samples (4 on each side of the center)\n  \t\t\tfor (float i = 1.0; i <= MAX_ITERATIONS; i+= 1.0) {\n\t\t\t\tif (i >= numBlurPixelsPerSide) {\n\t\t\t\t\tbreak;\n\t\t\t\t}\n    \t\t\tavgValue += texture2D(texture, p - i * texOffset) * incrementalGaussian.x;\n    \t\t\tavgValue += texture2D(texture, p + i * texOffset) * incrementalGaussian.x;\n    \t\t\tcoefficientSum += 2.0 * incrementalGaussian.x;\n    \t\t\tincrementalGaussian.xy *= incrementalGaussian.yz;\n  \t\t\t}\n\n\t\t\treturn avgValue / coefficientSum;\n\t\t}\n\n\t\tvoid main() {\n\t\t\tvec4 color = texture2D(tDiffuse, vUv);\n\n\t\t\tvec4 shadow = gaussian(tDiffuse, vec2(vUv.x - 0.005, vUv.y + 0.01));\n\t\t\t// vec4 shadow = texture2D(tDiffuse, vec2(vUv.x - 0.005, vUv.y + 0.01));\n\t\t\tshadow.r = shadow.g = shadow.b = 0.0;\n\t\t\tshadow.a *= 0.15;\n\n\t\t\tvec3 rgb = color.rgb + shadow.rgb;\n\t\t\tfloat alpha = min(1.0, max(color.a, shadow.a));\n\t\t\tgl_FragColor = vec4(rgb, alpha);\n\t\t}\n\t"
 };
 
-},{"./three/const":203,"./three/interactive.mesh":205,"dat.gui":1}],203:[function(require,module,exports){
+},{"./three/const":203,"./three/emittable":204,"./three/interactive.mesh":206,"dat.gui":1}],203:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19921,6 +19952,75 @@ THREE.Euler.prototype.add = function (euler) {
 };
 
 },{}],204:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+/* jshint esversion: 6 */
+
+/* global window, document */
+var Emittable =
+/*#__PURE__*/
+function () {
+  function Emittable() {
+    _classCallCheck(this, Emittable);
+
+    this.events = {};
+  }
+
+  _createClass(Emittable, [{
+    key: "on",
+    value: function on(type, callback) {
+      var _this = this;
+
+      var event = this.events[type] = this.events[type] || [];
+      event.push(callback);
+      return function () {
+        _this.events[type] = event.filter(function (x) {
+          return x !== callback;
+        });
+      };
+    }
+  }, {
+    key: "off",
+    value: function off(type, callback) {
+      var event = this.events[type];
+
+      if (event) {
+        this.events[type] = event.filter(function (x) {
+          return x !== callback;
+        });
+      }
+    }
+  }, {
+    key: "emit",
+    value: function emit(type, data) {
+      var event = this.events[type];
+
+      if (event) {
+        event.forEach(function (callback) {
+          // callback.call(this, data);
+          callback(data);
+        });
+      }
+    }
+  }]);
+
+  return Emittable;
+}();
+
+exports.default = Emittable;
+
+},{}],205:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20014,7 +20114,7 @@ function (_THREE$Mesh) {
 
 exports.default = EmittableMesh;
 
-},{}],205:[function(require,module,exports){
+},{}],206:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20137,7 +20237,7 @@ function (_EmittableMesh) {
 exports.default = InteractiveMesh;
 InteractiveMesh.items = [];
 
-},{"./emittable.mesh":204}],206:[function(require,module,exports){
+},{"./emittable.mesh":205}],207:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20203,7 +20303,7 @@ function () {
 exports.default = LazyScriptDirective;
 LazyScriptDirective.factory.$inject = [];
 
-},{}],207:[function(require,module,exports){
+},{}],208:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20379,7 +20479,7 @@ function () {
 exports.default = LazyDirective;
 LazyDirective.factory.$inject = ['DomService'];
 
-},{"../shared/rect":216,"rxjs/operators":198}],208:[function(require,module,exports){
+},{"../shared/rect":217,"rxjs/operators":198}],209:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20405,6 +20505,12 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+var MODES = {
+  NONE: 0,
+  FIXED: 1,
+  ABSOLUTE: 2
+};
+
 var OverscrollDirective =
 /*#__PURE__*/
 function () {
@@ -20424,6 +20530,22 @@ function () {
 
       var anchors = _toConsumableArray(node.querySelectorAll('[data-overscroll-anchor]'));
 
+      var onClick = function onClick(event) {
+        var index = anchors.indexOf(event.currentTarget);
+
+        var rect = _rect.default.fromNode(node);
+
+        var h = container.offsetHeight;
+        var d = h / 100 * overscroll;
+        var s = d / anchors.length;
+        var top = window.pageYOffset + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
+
+        window.scrollTo(0, top);
+      };
+
+      anchors.forEach(function (x) {
+        x.addEventListener('click', onClick);
+      });
       var windowRectWidth;
       var subscription = this.domService.scrollIntersection$(node).subscribe(function (event) {
         var rect = event.rect;
@@ -20446,11 +20568,20 @@ function () {
         var containerRect = _rect.default.fromNode(container);
 
         if (y === d) {
-          container.setAttribute('style', "position: absolute; left: ".concat(containerRect.left, "px; width: ").concat(containerRect.width, "px; bottom: 0"));
+          if (element.mode !== MODES.ABSOLUTE) {
+            element.mode = MODES.ABSOLUTE;
+            container.setAttribute('style', "position: absolute; left: ".concat(containerRect.left, "px; width: ").concat(containerRect.width, "px; bottom: 0"));
+          }
         } else if (y > 0) {
-          container.setAttribute('style', "position: fixed; left: ".concat(containerRect.left, "px; width: ").concat(containerRect.width, "px; top: 0;"));
+          if (element.mode !== MODES.FIXED) {
+            element.mode = MODES.FIXED;
+            container.setAttribute('style', "position: fixed; left: ".concat(containerRect.left, "px; width: ").concat(containerRect.width, "px; top: 0;"));
+          }
         } else {
-          container.setAttribute('style', '');
+          if (element.mode !== MODES.NONE) {
+            element.mode = MODES.NONE;
+            container.setAttribute('style', '');
+          }
         }
 
         if (top < event.windowRect.height / 4 && rect.bottom > event.windowRect.height / 4) {
@@ -20472,10 +20603,19 @@ function () {
               }
             }
           });
+        } else {
+          anchors.forEach(function (x) {
+            if (x.classList.contains('active')) {
+              x.classList.remove('active');
+            }
+          });
         }
       });
       element.on('$destroy', function () {
         subscription.unsubscribe();
+        anchors.forEach(function (x) {
+          x.removeEventListener('click', onClick);
+        });
       });
     }
   }], [{
@@ -20491,7 +20631,7 @@ function () {
 exports.default = OverscrollDirective;
 OverscrollDirective.factory.$inject = ['DomService'];
 
-},{"../shared/rect":216}],209:[function(require,module,exports){
+},{"../shared/rect":217}],210:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20506,7 +20646,7 @@ function TrustedFilter($sce) {
   };
 }
 
-},{}],210:[function(require,module,exports){
+},{}],211:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20566,7 +20706,6 @@ function () {
     set: function set(color) {
       if (this.color_ !== color) {
         this.color_ = color;
-        console.log('color', color);
         this.$scope.$broadcast('onColor', color);
       }
     }
@@ -20579,7 +20718,7 @@ ProductCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService'];
 var _default = ProductCtrl;
 exports.default = _default;
 
-},{}],211:[function(require,module,exports){
+},{}],212:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20848,7 +20987,7 @@ RootCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService', 'WishlistS
 var _default = RootCtrl;
 exports.default = _default;
 
-},{"rxjs":2,"rxjs/operators":198}],212:[function(require,module,exports){
+},{"rxjs":2,"rxjs/operators":198}],213:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20919,7 +21058,7 @@ function () {
 exports.default = ApiService;
 ApiService.factory.$inject = ['$http'];
 
-},{"rxjs":2}],213:[function(require,module,exports){
+},{"rxjs":2}],214:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21317,7 +21456,7 @@ DomService.scroll$ = function () {
 
 DomService.scrollAndRect$ = (0, _rxjs.combineLatest)(DomService.scroll$, DomService.windowRect$);
 
-},{"../shared/rect":216,"rxjs":2,"rxjs/internal/scheduler/animationFrame":161,"rxjs/operators":198}],214:[function(require,module,exports){
+},{"../shared/rect":217,"rxjs":2,"rxjs/internal/scheduler/animationFrame":161,"rxjs/operators":198}],215:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21420,7 +21559,7 @@ function () {
 exports.default = LocationService;
 LocationService.factory.$inject = ['$location'];
 
-},{}],215:[function(require,module,exports){
+},{}],216:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21475,7 +21614,7 @@ function () {
 exports.default = PromiseService;
 PromiseService.factory.$inject = ['$q'];
 
-},{}],216:[function(require,module,exports){
+},{}],217:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21623,7 +21762,7 @@ function () {
 
 exports.default = Rect;
 
-},{}],217:[function(require,module,exports){
+},{}],218:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21816,7 +21955,7 @@ function () {
 exports.default = StateService;
 StateService.factory.$inject = ['$timeout', '$rootScope'];
 
-},{}],218:[function(require,module,exports){
+},{}],219:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

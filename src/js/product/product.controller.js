@@ -40,7 +40,6 @@ class ProductCtrl {
 	set color(color) {
 		if (this.color_ !== color) {
 			this.color_ = color;
-			console.log('color', color);
 			this.$scope.$broadcast('onColor', color);
 		}
 	}

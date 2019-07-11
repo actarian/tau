@@ -10,12 +10,19 @@ export default class CanvasDirective {
 	) {
 		this.domService = DomService;
 		this.restrict = 'A';
+		this.scope = {
+			canvas: '='
+		};
 	}
 
 	link(scope, element, attributes, controller) {
 		const node = element[0];
 		const inner = node.querySelector('.inner');
-		const canvas = new Canvas(inner);
+		const model = scope.model || 'models/tau-marin_5.obj';
+		const canvas = new Canvas(inner, model);
+		canvas.on('load', () => {
+			node.classList.add('loaded');
+		});
 		/*
 		const loader = new THREE.loader();
 		loader.load('img/panorama-sm/panorama-01.jpg', (texture) => {

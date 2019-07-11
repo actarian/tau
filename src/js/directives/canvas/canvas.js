@@ -2,12 +2,13 @@
 
 import * as dat from 'dat.gui';
 import { TEST_ENABLED } from './three/const';
+import Emittable from './three/emittable';
 import InteractiveMesh from './three/interactive.mesh';
 
 const USE_CUBE_CAMERA = true;
 const COLORS = [0xFFFFFF, 0xFC4445, 0xFEEE6, 0x55BCC9, 0x97CAEF, 0xCAFAFE];
 
-export default class Canvas {
+export default class Canvas extends Emittable {
 
 	get anchor() {
 		return this.anchor_;
@@ -43,13 +44,26 @@ export default class Canvas {
 		}
 	}
 
-	constructor(container) {
+	get zoom() {
+		let r;
+		if (this.container.offsetWidth > 1024) {
+			r = this.container.offsetWidth / 1080;
+		} else {
+			r = this.container.offsetWidth / 600;
+		}
+		return (this.zoom_ + r) * 0.6;
+	}
+
+	constructor(container, model) {
+		super();
 		this.container = container;
+		this.model = model || 'models/tau-marin_5.obj'; // 'models/scalare-33-b/scalare-33-b.obj',
 		this.colorIndex = 0;
 		this.count = 0;
 		this.mouse = { x: 0, y: 0 };
 		this.parallax = { x: 0, y: 0 };
 		this.size = { width: 0, height: 0, aspect: 0 };
+		this.zoom_ = 0;
 		this.cameraDirection = new THREE.Vector3();
 		// const debugInfo = this.debugInfo = section.querySelector('.debug__info');
 		// const debugSave = this.debugSave = section.querySelector('.debug__save');
@@ -62,27 +76,19 @@ export default class Canvas {
 		this.onMouseUp = this.onMouseUp.bind(this);
 		this.onMouseWheel = this.onMouseWheel.bind(this);
 		this.onSave = this.onSave.bind(this);
-		//
 		const scene = this.scene = this.addScene();
 		const camera = this.camera = this.addCamera();
 		// const addons = this.addons = this.addBoxes(scene);
 		const addons = this.addons = this.addSpheres(scene);
-
 		this.getCubeCamera();
-
 		const texture = this.cubeCamera1.renderTarget.texture;
 		// const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
 		// this.addText('Scalare 33', scene);
-
 		const tau = this.tau = this.addTau(scene, texture);
-
 		const lights = this.lights = this.addLights(scene);
-
 		// this.tweenTau();
-
 		// });
-		this.pixelRatio = Math.max(window.devicePixelRatio, 1.5);
-
+		this.pixelRatio = Math.max(window.devicePixelRatio, 1.0); // !!! 1.5
 		const renderer = this.renderer = this.addRenderer();
 		const composer = this.composer = this.addComposer();
 		/*
@@ -110,18 +116,6 @@ export default class Canvas {
 
 		const gui = this.gui = this.addGUI();
 	}
-
-	/*
-	load(jsonUrl) {
-		try {
-			fetch(jsonUrl).then(response => response.json()).then(response => {
-				this.pivot.views = response.views;
-			});
-		} catch (error) {
-			this.debugInfo.innerHTML = error;
-		}
-	}
-	*/
 
 	addGUI() {
 		const gui = new dat.GUI();
@@ -234,7 +228,7 @@ export default class Canvas {
 		const camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, 2000);
 		camera.position.set(0, 0, 40);
 		camera.target = new THREE.Vector3();
-		camera.zoom = 0.6;
+		camera.zoom = this.zoom;
 		/*
 		// camera.target.z = ROOM_RADIUS;
 		// camera.lookAt(camera.target);
@@ -450,10 +444,7 @@ export default class Canvas {
 		const blue = this.blue = this.getBlue();
 		const green = this.green = this.getGreen();
 		const loader = new THREE.OBJLoader();
-		loader.load(
-			'models/tau-marin_5.obj',
-			// 'models/scalare-33-b/scalare-33-b.obj',
-			(object) => {
+		loader.load(this.model, (object) => {
 				let i = 0;
 				object.traverse((child) => {
 
@@ -496,8 +487,8 @@ export default class Canvas {
 						} else if (i === 3) {
 							child.material = clear;
 							tau.body = child;
-                        }
-                        */
+						}
+						*/
 					}
 				});
 				// this.addLogo(object);
@@ -506,6 +497,7 @@ export default class Canvas {
 				tau.add(object);
 				this.setBristle(this.bristle);
 				this.setColor(this.color);
+				this.emit('load');
 			},
 			(xhr) => {
 				// console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
@@ -531,53 +523,55 @@ export default class Canvas {
 		// [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // tre quarti destra
 		// [Math.PI / 2, 0, 0]; // top right
 		// [0, Math.PI, Math.PI / 2]; // vertical right;
+		const sm = window.innerWidth < 1024,
+			smx = -3;
 		let rotation, position, zoom;
 		switch (anchor) {
 			case 'hero':
 				position = [0, 0, 0];
 				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // tre quarti sinistra
-				zoom = 0.6;
+				this.zoom_ = 0;
 				break;
 			case 'manico':
-				position = [0, 0, 0];
+				position = [sm ? smx : 0, 0, 0];
 				rotation = [0, Math.PI, Math.PI / 2]; // vertical right;
-				zoom = 0.6;
+				this.zoom_ = 0;
 				break;
 			case 'testina':
-				position = [0, 0, 0];
+				position = [sm ? smx * 0.8 : 0, 0, 0];
 				rotation = [0, -Math.PI / 2, Math.PI / 32]; // testina vista dietro
-				zoom = 0.8;
+				this.zoom_ = 0.2;
 				break;
 			case 'setole':
-				position = [0, -3, 0];
+				position = [sm ? smx * 0.6 : 0, -3, 0];
 				rotation = [0, Math.PI - Math.PI / 4, Math.PI / 2]; // vertical right;
-				zoom = 1.0;
+				this.zoom_ = 0.4;
 				break;
 			case 'scalare':
-				position = [0, -3, 0];
+				position = [sm ? smx * 0.6 : 0, -3, 0];
 				rotation = [0, Math.PI, Math.PI / 2]; // vertical right;
 				// rotation = [0, 0, Math.PI / 2]; // vertical left;
-				zoom = 1.0;
+				this.zoom_ = 0.4;
 				break;
 			case 'italy':
-				position = [0, 0, 0];
+				position = [sm ? smx : 0, 0, 0];
 				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // tre quarti sinistra
-				zoom = 0.6;
+				this.zoom_ = 0;
 				break;
 			case 'setole-tynex':
-				position = [0, -2, 0];
+				position = [sm ? smx * 0.8 : 0, -2, 0];
 				rotation = [0, 0, Math.PI / 2]; // vertical left;
-				zoom = 0.8;
+				this.zoom_ = 0.2;
 				break;
 			case 'colors':
 				position = [0, 0, 0];
 				rotation = [0, Math.PI, 0]; // horizontal left
-				zoom = 0.6;
+				this.zoom_ = 0;
 				break;
 			default:
 				position = [0, 0, 0];
 				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4];
-				zoom = 0.6;
+				this.zoom_ = 0;
 		}
 		const tau = this.tau;
 		/*
@@ -607,7 +601,7 @@ export default class Canvas {
 			*/
 		});
 		TweenMax.to(this.camera, 0.6, {
-			zoom: zoom,
+			zoom: this.zoom,
 			ease: Power2.easeInOut,
 			onUpdate: () => {
 				this.camera.updateProjectionMatrix();
@@ -1149,37 +1143,6 @@ export default class Canvas {
 	}
 
 }
-
-THREE.SepiaShader = {
-	uniforms: {
-		tDiffuse: {
-			value: null
-		},
-		amount: {
-			value: 1.0
-		}
-	},
-	vertexShader: `
-		varying vec2 vUv;
-		void main() {
-			vUv = uv;
-			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-		}
-	`,
-	fragmentShader: `
-		uniform float amount;
-		uniform sampler2D tDiffuse;
-		varying vec2 vUv;
-		void main() {
-			vec4 color = texture2D(tDiffuse, vUv);
-			vec3 c = color.rgb;
-			color.r = dot( c, vec3( 1.0 - 0.607 * amount, 0.769 * amount, 0.189 * amount ) );
-			color.g = dot( c, vec3( 0.349 * amount, 1.0 - 0.314 * amount, 0.168 * amount ) );
-			color.b = dot( c, vec3( 0.272 * amount, 0.534 * amount, 1.0 - 0.869 * amount ) );
-			gl_FragColor = vec4(min(vec3(1.0), color.rgb), color.a);
-		}
-	`
-};
 
 THREE.ShadowShader = {
 	uniforms: {

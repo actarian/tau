@@ -2,6 +2,12 @@
 
 import Rect from '../shared/rect';
 
+const MODES = {
+	NONE: 0,
+	FIXED: 1,
+	ABSOLUTE: 2,
+};
+
 export default class OverscrollDirective {
 
 	constructor(
@@ -16,6 +22,19 @@ export default class OverscrollDirective {
 		const container = node.querySelector('.container');
 		const overscroll = attributes.overscroll ? parseInt(attributes.overscroll) : 100;
 		const anchors = [...node.querySelectorAll('[data-overscroll-anchor]')];
+		const onClick = (event) => {
+			const index = anchors.indexOf(event.currentTarget);
+			const rect = Rect.fromNode(node);
+			const h = container.offsetHeight;
+			const d = h / 100 * overscroll;
+			const s = d / anchors.length;
+			const top = window.pageYOffset + rect.top + s * index + (s / 2);
+			// console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
+			window.scrollTo(0, top);
+		};
+		anchors.forEach(x => {
+			x.addEventListener('click', onClick);
+		});
 		let windowRectWidth;
 		const subscription = this.domService.scrollIntersection$(node).subscribe(event => {
 			const rect = event.rect;
@@ -33,11 +52,20 @@ export default class OverscrollDirective {
 			}
 			const containerRect = Rect.fromNode(container);
 			if (y === d) {
-				container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
+				if (element.mode !== MODES.ABSOLUTE) {
+					element.mode = MODES.ABSOLUTE;
+					container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
+				}
 			} else if (y > 0) {
-				container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
+				if (element.mode !== MODES.FIXED) {
+					element.mode = MODES.FIXED;
+					container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
+				}
 			} else {
-				container.setAttribute('style', '');
+				if (element.mode !== MODES.NONE) {
+					element.mode = MODES.NONE;
+					container.setAttribute('style', '');
+				}
 			}
 			if (top < event.windowRect.height / 4 && rect.bottom > event.windowRect.height / 4) {
 				const index = Math.floor(y / d * anchors.length);
@@ -56,10 +84,19 @@ export default class OverscrollDirective {
 						}
 					}
 				});
+			} else {
+				anchors.forEach(x => {
+					if (x.classList.contains('active')) {
+						x.classList.remove('active');
+					}
+				});
 			}
 		});
 		element.on('$destroy', () => {
 			subscription.unsubscribe();
+			anchors.forEach(x => {
+				x.removeEventListener('click', onClick);
+			});
 		});
 	}
 
