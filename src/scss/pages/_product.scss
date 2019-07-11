@@ -51,6 +51,7 @@
 		max-width: 660px;
 		margin: 0 auto;
 	}
+
 }
 
 .section--product-info {
@@ -65,7 +66,14 @@
 		font-weight: $font-semibold;
 		line-height: 1.2;
 		color: $foreground-secondary;
-		margin-bottom: 350px;
+		margin-bottom: 5vh;
+	}
+
+	.group--vertical-center {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		min-height: calc(90vh - 44px);
 	}
 
 	.listing--info {
@@ -325,9 +333,17 @@
 		font-weight: 600;
 		background: rgba(255, 255, 255, 0.9);
 		color: black;
+		display: none;
 	}
 
 }
+
+.section--product-related {
+	img {
+		width: 100%;
+	}
+}
+
 
 /*
 .title {
