@@ -172,6 +172,7 @@ export default class Canvas {
 			snapshot: this.onSave,
 		};
 		gui.add(callback, 'snapshot');
+		dat.GUI.toggleHide();
 		return gui;
 	}
 
