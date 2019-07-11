@@ -18709,10 +18709,8 @@ function (_Emittable) {
     // this.debugSave.addEventListener('click', this.onSave, false);
     // this.section.classList.add('init');
 
-    _this.onWindowResize(); // this.updateBackgroundColor();
+    _this.onWindowResize(); // const gui = this.gui = this.addGUI();
 
-
-    var gui = _this.gui = _this.addGUI();
 
     return _this;
   }

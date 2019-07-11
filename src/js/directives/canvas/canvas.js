@@ -111,10 +111,7 @@ export default class Canvas extends Emittable {
 		// this.section.classList.add('init');
 
 		this.onWindowResize();
-
-		// this.updateBackgroundColor();
-
-		const gui = this.gui = this.addGUI();
+		// const gui = this.gui = this.addGUI();
 	}
 
 	addGUI() {
@@ -166,8 +163,8 @@ export default class Canvas extends Emittable {
 			snapshot: this.onSave,
 		};
 		gui.add(callback, 'snapshot');
-		// gui.close();
-		dat.GUI.toggleHide();
+		gui.close();
+		// dat.GUI.toggleHide();
 		return gui;
 	}
 
