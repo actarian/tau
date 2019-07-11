@@ -97,6 +97,8 @@
 				.bullet {
 					&:before {
 						border-color: $foreground-primary;
+						// animation: heartbeat 1.5s ease-in-out infinite both;
+						animation: pulse 1s infinite;
 					}
 				}
 			}
@@ -353,3 +355,43 @@
 	font-weight: bold;
 }
 */
+
+@keyframes heartbeat {
+	from {
+		transform: translateX(-50%) translateY(-50%) scale(1);
+		transform-origin: center center;
+		animation-timing-function: ease-out;
+	}
+
+	10% {
+		transform: translateX(-50%) translateY(-50%) scale(0.91);
+		animation-timing-function: ease-in;
+	}
+
+	17% {
+		transform: translateX(-50%) translateY(-50%) scale(0.98);
+		animation-timing-function: ease-out;
+	}
+
+	33% {
+		transform: translateX(-50%) translateY(-50%) scale(0.87);
+		animation-timing-function: ease-in;
+	}
+
+	45% {
+		transform: translateX(-50%) translateY(-50%) scale(1);
+		animation-timing-function: ease-out;
+	}
+}
+
+@keyframes pulse {
+	0% {
+		transform: translateX(-50%) translateY(-50%) scale(1.0);
+		opacity: 1;
+	}
+
+	100% {
+		transform: translateX(-50%) translateY(-50%) scale(1.5);
+		opacity: 0;
+	}
+}

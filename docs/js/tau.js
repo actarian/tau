@@ -19126,56 +19126,71 @@ function () {
       // tau.rotation.set(0, -Math.PI / 2, Math.PI / 16);
       // vertical left [0, 0, Math.PI / 2]
       // horizontal right [0, 0, 0];
-      var rotation, zoom;
+      // [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // tre quarti destra
+      // [Math.PI / 2, 0, 0]; // top right
+      // [0, Math.PI, Math.PI / 2]; // vertical right;
+      var rotation, position, zoom;
 
       switch (anchor) {
         case 'hero':
+          position = [0, 0, 0];
           rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // tre quarti sinistra
 
           zoom = 0.6;
           break;
 
         case 'manico':
+          position = [0, 0, 0];
           rotation = [0, Math.PI, Math.PI / 2]; // vertical right;
 
           zoom = 0.6;
           break;
 
         case 'testina':
+          position = [0, 0, 0];
           rotation = [0, -Math.PI / 2, Math.PI / 32]; // testina vista dietro
 
           zoom = 0.8;
           break;
 
         case 'setole':
-          rotation = [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // tre quarti destra
+          position = [0, -3, 0];
+          rotation = [0, Math.PI - Math.PI / 4, Math.PI / 2]; // vertical right;
 
-          zoom = 0.6;
+          zoom = 1.0;
           break;
 
         case 'scalare':
-          rotation = [Math.PI / 2, 0, 0];
-          zoom = 0.6;
+          position = [0, -3, 0];
+          rotation = [0, Math.PI, Math.PI / 2]; // vertical right;
+          // rotation = [0, 0, Math.PI / 2]; // vertical left;
+
+          zoom = 1.0;
           break;
 
         case 'italy':
+          position = [0, 0, 0];
           rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // tre quarti sinistra
 
           zoom = 0.6;
           break;
 
         case 'setole-tynex':
-          rotation = [Math.PI / 4, Math.PI / 4, 0];
-          zoom = 0.6;
+          position = [0, -2, 0];
+          rotation = [0, 0, Math.PI / 2]; // vertical left;
+
+          zoom = 0.8;
           break;
 
         case 'colors':
+          position = [0, 0, 0];
           rotation = [0, Math.PI, 0]; // horizontal left
 
           zoom = 0.6;
           break;
 
         default:
+          position = [0, 0, 0];
           rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4];
           zoom = 0.6;
       }
@@ -19190,6 +19205,12 @@ function () {
       const rotation = rotations[ri];
       */
 
+      TweenMax.to(this.tau.position, 0.8, {
+        x: position[0],
+        y: position[1],
+        z: position[2],
+        ease: Power2.easeInOut
+      });
       TweenMax.to(this.tau.rotation, 1.2, {
         x: rotation[0],
         y: rotation[1],
