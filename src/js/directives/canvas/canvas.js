@@ -49,7 +49,7 @@ export default class Canvas extends Emittable {
 		if (this.container.offsetWidth > 1024) {
 			r = this.container.offsetWidth / 1080;
 		} else {
-			r = this.container.offsetWidth / 600;
+			r = this.container.offsetWidth / 512;
 		}
 		return (this.zoom_ + r) * 0.6;
 	}
@@ -512,76 +512,93 @@ export default class Canvas extends Emittable {
 	}
 
 	tweenTau(anchor) {
-		// tau.rotation.set(Math.PI / 4, Math.PI / 4, Math.PI / 4);
-		// tau.rotation.set(0, 0, Math.PI / 2);
-		// tau.rotation.set(Math.PI / 2, 0, 0);
-		// tau.rotation.set(Math.PI / 4, Math.PI / 4, 0);
-		// tau.rotation.set(0, -Math.PI / 2, Math.PI / 16);
-
-		// vertical left [0, 0, Math.PI / 2]
-		// horizontal right [0, 0, 0];
-		// [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // tre quarti destra
-		// [Math.PI / 2, 0, 0]; // top right
-		// [0, Math.PI, Math.PI / 2]; // vertical right;
-		const sm = window.innerWidth < 1024,
-			smx = -3;
-		let rotation, position, zoom;
+		// [0, 0, Math.PI / 2]; // 										vertical left
+		// [0, 0, 0]; // 												horizontal right
+		// [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
+		// [Math.PI / 2, 0, 0]; // 										top right
+		// [0, Math.PI, Math.PI / 2]; // 								vertical right;
+		const sm = window.innerWidth < 1024;
+		let rotation, position;
 		switch (anchor) {
 			case 'hero':
 				position = [0, 0, 0];
-				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // tre quarti sinistra
+				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
 				this.zoom_ = 0;
+				this.container.classList.remove('lefted');
 				break;
 			case 'manico':
-				position = [sm ? smx : 0, 0, 0];
-				rotation = [0, Math.PI, Math.PI / 2]; // vertical right;
+				position = [0, 0, 0];
+				rotation = [0, Math.PI, Math.PI / 2]; // 								vertical right;
 				this.zoom_ = 0;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
 				break;
 			case 'testina':
-				position = [sm ? smx * 0.8 : 0, 0, 0];
-				rotation = [0, -Math.PI / 2, Math.PI / 32]; // testina vista dietro
+				position = [0, 0, 0];
+				rotation = [0, -Math.PI / 2, Math.PI / 32]; // 							testina vista dietro
 				this.zoom_ = 0.2;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
 				break;
 			case 'setole':
-				position = [sm ? smx * 0.6 : 0, -3, 0];
-				rotation = [0, Math.PI - Math.PI / 4, Math.PI / 2]; // vertical right;
+				position = [0, -3, 0];
+				rotation = [0, Math.PI - Math.PI / 4, Math.PI / 2]; // 					vertical right;
 				this.zoom_ = 0.4;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
 				break;
 			case 'scalare':
-				position = [sm ? smx * 0.6 : 0, -3, 0];
-				rotation = [0, Math.PI, Math.PI / 2]; // vertical right;
-				// rotation = [0, 0, Math.PI / 2]; // vertical left;
+				position = [0, -3, 0];
+				rotation = [0, Math.PI, Math.PI / 2]; // 								vertical right;
 				this.zoom_ = 0.4;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
 				break;
 			case 'italy':
-				position = [sm ? smx : 0, 0, 0];
-				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // tre quarti sinistra
+				position = [0, 0, 0];
+				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
 				this.zoom_ = 0;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
 				break;
 			case 'setole-tynex':
-				position = [sm ? smx * 0.8 : 0, -2, 0];
-				rotation = [0, 0, Math.PI / 2]; // vertical left;
+				position = [0, -2, 0];
+				rotation = [0, 0, Math.PI / 2]; // 										vertical left;
 				this.zoom_ = 0.2;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
 				break;
 			case 'colors':
 				position = [0, 0, 0];
-				rotation = [0, Math.PI, 0]; // horizontal left
+				rotation = [0, Math.PI, 0]; // 											horizontal left
 				this.zoom_ = 0;
+				this.container.classList.remove('lefted');
 				break;
 			default:
 				position = [0, 0, 0];
-				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4];
+				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
 				this.zoom_ = 0;
+				this.container.classList.remove('lefted');
 		}
 		const tau = this.tau;
-		/*
-		let ri = tau.ri !== undefined ? tau.ri : -1;
-		ri++;
-		ri = ri % rotations.length;
-		tau.ri = ri;
-		console.log(tau, ri);
-		const rotation = rotations[ri];
-		*/
 		TweenMax.to(this.tau.position, 0.8, {
 			x: position[0],
 			y: position[1],
@@ -593,12 +610,6 @@ export default class Canvas extends Emittable {
 			y: rotation[1],
 			z: rotation[2],
 			ease: Power2.easeInOut,
-			/*
-			delay: 2,
-			onComplete: () => {
-				this.tweenTau();
-			}
-			*/
 		});
 		TweenMax.to(this.camera, 0.6, {
 			zoom: this.zoom,

@@ -27,3 +27,14 @@
 }
 
 @include make-grid-columns();
+
+@include media-breakpoint-down(sm) {
+
+	@for $i from 1 through 20 {
+
+		.o-#{$i} {
+			order: $i;
+		}
+	}
+
+}

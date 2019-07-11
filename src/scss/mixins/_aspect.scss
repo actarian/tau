@@ -3,6 +3,7 @@
 
 	&:before,
 	&>img,
+	&>svg,
 	&>video,
 	&>* {
 		grid-area: 1 / 1 / 2 / 2;
@@ -27,6 +28,7 @@
 	overflow: hidden;
 
 	img,
+	svg,
 	video,
 	canvas,
 	ng-transclude {
@@ -50,6 +52,7 @@
 	overflow: hidden;
 
 	img,
+	svg,
 	video,
 	canvas,
 	ng-transclude {
@@ -69,6 +72,7 @@
 	overflow: hidden;
 
 	img,
+	svg,
 	video,
 	canvas,
 	ng-transclude {

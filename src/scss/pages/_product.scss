@@ -225,7 +225,7 @@
 			.listing__item {
 
 				.bullet {
-					left: -5px;
+					left: -10px;
 					top: 5px;
 					width: 4px;
 					height: 4px;
@@ -465,8 +465,13 @@
 		top: 50%;
 		left: 50%;
 		transform: translateX(-50%) translateY(-50%);
+		transition: left ease-in-out 1200ms;
 		pointer-events: none;
 		z-index: 100;
+
+		&.lefted {
+			left: 12.5%;
+		}
 
 		canvas {
 			display: block;
@@ -477,6 +482,7 @@
 			height: 100%;
 			// background: #ffffff;
 		}
+
 	}
 
 	&.fixed {
