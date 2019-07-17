@@ -279,10 +279,12 @@
 	}
 
 	.group--inline {
+		position: relative;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		width: 100%;
+		z-index: 101;
 	}
 
 	.group--nav {
@@ -471,6 +473,10 @@
 
 		&.lefted {
 			left: 12.5%;
+		}
+
+		&.interactive {
+			pointer-events: all;
 		}
 
 		canvas {

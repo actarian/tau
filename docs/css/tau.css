@@ -2913,6 +2913,7 @@ footer img {
   min-height: calc(90vh - 44px); }
 
 .section--product-colors .group--inline {
+  position: relative;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -2922,7 +2923,8 @@ footer img {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  width: 100%; }
+  width: 100%;
+  z-index: 101; }
 
 .section--product-colors .group--nav {
   display: -webkit-box;
@@ -3070,6 +3072,8 @@ footer img {
     z-index: 100; }
     [canvas] .inner.lefted {
       left: 12.5%; }
+    [canvas] .inner.interactive {
+      pointer-events: all; }
     [canvas] .inner canvas {
       display: block;
       position: absolute;

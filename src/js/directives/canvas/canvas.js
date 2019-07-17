@@ -1,9 +1,8 @@
 /* jshint esversion: 6 */
 
 import * as dat from 'dat.gui';
-import { TEST_ENABLED } from './three/const';
 import Emittable from './three/emittable';
-import InteractiveMesh from './three/interactive.mesh';
+import Orbit from './three/orbit/orbit';
 
 const USE_CUBE_CAMERA = true;
 const COLORS = [0xFFFFFF, 0xFC4445, 0xFEEE6, 0x55BCC9, 0x97CAEF, 0xCAFAFE];
@@ -58,139 +57,48 @@ export default class Canvas extends Emittable {
 		super();
 		this.container = container;
 		this.model = model || 'models/tau-marin_5.obj'; // 'models/scalare-33-b/scalare-33-b.obj',
-		this.colorIndex = 0;
 		this.count = 0;
 		this.mouse = { x: 0, y: 0 };
-		this.parallax = { x: 0, y: 0 };
 		this.size = { width: 0, height: 0, aspect: 0 };
 		this.zoom_ = 0;
-		this.cameraDirection = new THREE.Vector3();
+		// this.cameraDirection = new THREE.Vector3();
 		// const debugInfo = this.debugInfo = section.querySelector('.debug__info');
 		// const debugSave = this.debugSave = section.querySelector('.debug__save');
 		// Dom.detect(body);
 		// body.classList.add('ready');
 		this.onWindowResize = this.onWindowResize.bind(this);
-		this.onKeyDown = this.onKeyDown.bind(this);
-		this.onMouseDown = this.onMouseDown.bind(this);
-		this.onMouseMove = this.onMouseMove.bind(this);
-		this.onMouseUp = this.onMouseUp.bind(this);
 		this.onMouseWheel = this.onMouseWheel.bind(this);
 		this.onSave = this.onSave.bind(this);
+
 		const scene = this.scene = this.addScene();
 		const camera = this.camera = this.addCamera();
-		// const addons = this.addons = this.addBoxes(scene);
+
+		this.pixelRatio = Math.max(window.devicePixelRatio, 1.0); // !!! 1.5
+		const renderer = this.renderer = this.addRenderer();
+		const composer = this.composer = this.addComposer();
+
+		const controls = this.controls = this.addControls();
+		// const orbit = this.orbit = this.addOrbit(container);
+
 		const addons = this.addons = this.addSpheres(scene);
 		this.getCubeCamera();
 		const texture = this.cubeCamera1.renderTarget.texture;
 		// const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
 		// this.addText('Scalare 33', scene);
-		const tau = this.tau = this.addTau(scene, texture);
+		const materials = this.materials = this.addMaterials(texture);
+		const toothbrush = this.toothbrush = this.addToothbrush(scene, texture);
 		const lights = this.lights = this.addLights(scene);
 		// this.tweenTau();
 		// });
-		this.pixelRatio = Math.max(window.devicePixelRatio, 1.0); // !!! 1.5
-		const renderer = this.renderer = this.addRenderer();
-		const composer = this.composer = this.addComposer();
-		/*
-		const orbit = this.orbit = new Orbit();
-		const dragListener = this.dragListener = orbit.setDragListener(container);
-		// raycaster
-		const raycaster = this.raycaster = new THREE.Raycaster();
-		*/
 
 		window.addEventListener('resize', this.onWindowResize, false);
 
-		/*
-		window.addEventListener('keydown', this.onKeyDown, false);
-		document.addEventListener('mousemove', this.onMouseMove, false);
-		document.addEventListener('wheel', this.onMouseWheel, false);
-		this.container.addEventListener('mousedown', this.onMouseDown, false);
-		this.container.addEventListener('mouseup', this.onMouseUp, false);
-        */
+		// document.addEventListener('wheel', this.onMouseWheel, false);
 		// this.debugSave.addEventListener('click', this.onSave, false);
 		// this.section.classList.add('init');
 
 		this.onWindowResize();
-		// const gui = this.gui = this.addGUI();
-	}
-
-	addGUI() {
-		const gui = new dat.GUI();
-		const keys = ['green', 'blue', 'red', 'silver', 'clear'];
-		const properties = {};
-		const onChange = (...rest) => {
-			// console.log(rest);
-			keys.forEach(key => {
-				const m = properties[key];
-				const material = this[key];
-				material.color.setHex(m.color);
-				if (key === 'clear') {
-					material.refractionRatio = m.refractionRatio;
-					material.reflectivity = m.reflectivity;
-					material.opacity = m.opacity;
-				} else {
-					material.roughness = m.roughness;
-					material.metalness = m.metalness;
-				}
-			});
-			this.camera.zoom = properties.zoom;
-			this.camera.updateProjectionMatrix();
-		};
-		properties.zoom = this.camera.zoom;
-		const folders = keys.map(key => {
-			const m = properties[key] = {};
-			const material = this[key];
-			m.color = material.color.getHex();
-			const folder = gui.addFolder(key);
-			folder.addColor(m, 'color').onFinishChange(onChange);
-			if (key === 'clear') {
-				m.refractionRatio = material.refractionRatio;
-				m.reflectivity = material.reflectivity;
-				m.opacity = material.opacity;
-				folder.add(m, 'refractionRatio', 0.0, 1.0, 0.01).onFinishChange(onChange);
-				folder.add(m, 'reflectivity', 0.0, 1.0, 0.01).onFinishChange(onChange);
-				folder.add(m, 'opacity', 0.0, 1.0, 0.01).onFinishChange(onChange);
-			} else {
-				m.roughness = material.roughness;
-				m.metalness = material.metalness;
-				folder.add(m, 'roughness', 0.0, 1.0, 0.01).onFinishChange(onChange);
-				folder.add(m, 'metalness', 0.0, 1.0, 0.01).onFinishChange(onChange);
-			}
-			return folder;
-		});
-		gui.add(properties, 'zoom', 0.1, 1.0, 0.01).onFinishChange(onChange);
-		const callback = {
-			snapshot: this.onSave,
-		};
-		gui.add(callback, 'snapshot');
-		gui.close();
-		// dat.GUI.toggleHide();
-		return gui;
-	}
-
-	updateBackgroundColor() {
-		this.colorIndex++;
-		this.colorIndex = this.colorIndex % COLORS.length;
-		const color = COLORS[this.colorIndex];
-		/*
-		const r = Math.floor(Math.random() * 255);
-		const g = Math.floor(Math.random() * 255);
-		const b = Math.floor(Math.random() * 255);
-		*/
-		TweenMax.to(this.renderer.domElement, 0.7, {
-			backgroundColor: color, // `rgba(${r},${g},${b},1)`,
-			delay: 3,
-			ease: Power2.easeInOut,
-			onUpdate: () => {
-				this.addons.children.forEach(x => {
-					x.material.color.setHex(color);
-					x.material.needsUpdate = true;
-				});
-			},
-			onComplete: () => {
-				this.updateBackgroundColor();
-			}
-		});
+		// const gui = this.gui = this.addGUI__();
 	}
 
 	addRenderer() {
@@ -226,54 +134,34 @@ export default class Canvas extends Emittable {
 		camera.position.set(0, 0, 40);
 		camera.target = new THREE.Vector3();
 		camera.zoom = this.zoom;
-		/*
-		// camera.target.z = ROOM_RADIUS;
-		// camera.lookAt(camera.target);
-		const controls = this.controls = new THREE.OrbitControls(camera, renderer.domElement);
-		controls.maxDistance = 250;
-		controls.minDistance = 100;
-		// controls.maxPolarAngle = Math.PI / 2;
-		// controls.minPolarAngle = Math.PI / 2;
-		// camera.position.set(60, 205, -73);
-        // camera.position.set(0, 50, 100);
-		camera.position.set(6.3, 4.5, 111.5);
-		camera.position.multiplyScalar(1.5);
-		controls.update();
-        */
 		return camera;
 	}
 
-	addComposer_() {
-		const renderer = this.renderer;
-		const scene = this.scene;
+	addControls() {
 		const camera = this.camera;
-		const composer = new THREE.EffectComposer(renderer);
-		const renderPass = new THREE.RenderPass(scene, camera);
-		composer.addPass(renderPass);
-		const saoPass = new THREE.SAOPass(scene, camera, false, true);
-		saoPass.output = THREE.SAOPass.OUTPUT.Default;
-		saoPass.saoBias = 0.5;
-		saoPass.saoIntensity = 0.18;
-		saoPass.saoScale = 1;
-		saoPass.saoKernelRadius = 100;
-		saoPass.saoMinResolution = 0;
-		saoPass.saoBlur = true;
-		saoPass.saoBlurRadius = 8;
-		saoPass.saoBlurStdDev = 4;
-		saoPass.saoBlurDepthCutoff = 0.01;
-		composer.addPass(saoPass);
-		return composer;
+		const renderer = this.renderer;
+		// camera.target.z = ROOM_RADIUS;
+		// camera.lookAt(camera.target);
+		const controls = new THREE.OrbitControls(camera, renderer.domElement);
+		controls.enablePan = false;
+		controls.enableZoom = false;
+		// controls.enableDamping = true;
+		controls.maxDistance = 60;
+		controls.minDistance = 20;
+		// controls.maxPolarAngle = Math.PI / 2;
+		// controls.minPolarAngle = Math.PI / 2;
+		// camera.position.set(60, 205, -73);
+		// camera.position.set(0, 50, 100);
+		// camera.position.set(6.3, 4.5, 111.5);
+		// camera.position.multiplyScalar(1.5);
+		controls.update();
+		return controls;
 	}
 
-	addComposer__() {
-		const renderer = this.renderer;
-		const scene = this.scene;
-		const camera = this.camera;
-		const composer = new THREE.EffectComposer(renderer);
-		const ssaoPass = new THREE.SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
-		ssaoPass.kernelRadius = 16;
-		composer.addPass(ssaoPass);
-		return composer;
+	addOrbit(container) {
+		const orbit = new Orbit();
+		const dragListener = orbit.setDragListener(container);
+		return orbit;
 	}
 
 	addComposer() {
@@ -369,62 +257,7 @@ export default class Canvas extends Emittable {
 		return lights;
 	}
 
-	addText(message, parent) {
-		const loader = new THREE.FontLoader();
-		loader.load('fonts/helvetiker_regular.typeface.json', (font) => {
-			this.font = font;
-			const material = new THREE.MeshBasicMaterial({
-				color: 0xe11e26,
-				// transparent: true,
-				// opacity: 1,
-				// side: THREE.DoubleSide
-			});
-			this.fontMaterial = material;
-			const text = this.setText(message, parent);
-		});
-	}
-
-	setText(message, parent) {
-		message = message || 'Scalare 33';
-		if (this.text) {
-			this.text.parent.remove(this.text);
-			this.text.geometry.dispose();
-		}
-		const shapes = this.font.generateShapes(message, 0.5);
-		const geometry = new THREE.ShapeBufferGeometry(shapes);
-		geometry.computeBoundingBox();
-		const x = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
-		geometry.translate(x, 0, 0);
-		const text = new THREE.Mesh(geometry, this.fontMaterial);
-		text.position.set(0, 0, -10);
-		this.text = text;
-		parent.add(text);
-		return text;
-	}
-
-	addBox(parent) {
-		const geometry = new THREE.BoxGeometry(600, 30, 30);
-		const material = new THREE.MeshBasicMaterial({ color: 0xafb3bc });
-		const cube = new THREE.Mesh(geometry, material);
-		parent.add(cube);
-		return cube;
-	}
-
-	addBoxes(parent) {
-		const group = new THREE.Group();
-		group.visible = true;
-		const boxes = new Array(12).fill(null).map((x, i) => {
-			const box = this.addBox(group);
-			const r = Math.PI * 2 / 12 * i;
-			box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
-			return box;
-		});
-		parent.add(group);
-		return group;
-	}
-
-	addTau(parent, texture) {
-		const tau = new THREE.Group();
+	addMaterials(texture) {
 		/*
 		const texture = new THREE.loader().load('img/matcap.jpg');
 		const material = new THREE.MeshMatcapMaterial({
@@ -435,16 +268,26 @@ export default class Canvas extends Emittable {
 		});
 		*/
 		// const texture = this.getEnvMap();
-		const clear = this.clear = this.getClear(texture);
-		const silver = this.silver = this.getSilver(texture);
-		const red = this.red = this.getRed(texture);
-		const blue = this.blue = this.getBlue();
-		const green = this.green = this.getGreen();
+		const clear = this.getClear(texture);
+		const silver = this.getSilver(texture);
+		const red = this.getRed(texture);
+		const blue = this.getBlue();
+		const green = this.getGreen();
+		return {
+			clear,
+			silver,
+			red,
+			blue,
+			green,
+		};
+	}
+
+	addToothbrush(parent, texture) {
+		const toothbrush = new THREE.Group();
 		const loader = new THREE.OBJLoader();
 		loader.load(this.model, (object) => {
 				let i = 0;
 				object.traverse((child) => {
-
 					if (child instanceof THREE.Mesh) {
 						// child.geometry.scale(10, 10, 10);
 						// THREE.BufferGeometryUtils.mergeVertices(child.geometry);
@@ -455,18 +298,18 @@ export default class Canvas extends Emittable {
 						if (i === 0) {
 							child.geometry.computeFaceNormals();
 							child.geometry.computeVertexNormals(true);
-							child.material = red;
-							tau.color = child;
+							child.material = this.materials.red;
+							toothbrush.color = child;
 						} else if (i === 1) {
-							child.material = clear;
-							tau.body = child;
+							child.material = this.materials.clear;
+							toothbrush.body = child;
 						} else if (i === 2) {
-							child.material = silver;
-							tau.logo = child;
+							child.material = this.materials.silver;
+							toothbrush.logo = child;
 						} else if (i === 3) {
-							child.material = green;
+							child.material = this.materials.green;
 						} else if (i === 4) {
-							child.material = blue;
+							child.material = this.materials.blue;
 						}
 						i++;
 						/*
@@ -476,14 +319,14 @@ export default class Canvas extends Emittable {
 						// child.geometry.computeTangents();
 						THREE.BufferGeometryUtils.computeTangents(child.geometry);
 						if (i === 0) {
-							child.material = red;
+							child.material = this.materials.red;
 						} else if (i === 1) {
-							child.material = green;
+							child.material = this.materials.green;
 						} else if (i === 2) {
-							child.material = blue;
+							child.material = this.materials.blue;
 						} else if (i === 3) {
-							child.material = clear;
-							tau.body = child;
+							child.material = this.materials.clear;
+							toothbrush.body = child;
 						}
 						*/
 					}
@@ -491,7 +334,7 @@ export default class Canvas extends Emittable {
 				// this.addLogo(object);
 				// object.material = material;
 				// object.rotateZ(Math.PI / 8);
-				tau.add(object);
+				toothbrush.add(object);
 				this.setBristle(this.bristle);
 				this.setColor(this.color);
 				this.emit('load');
@@ -503,9 +346,9 @@ export default class Canvas extends Emittable {
 				console.log('An error happened');
 			}
 		);
-		tau.rotation.set(Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4);
-		parent.add(tau);
-		return tau;
+		toothbrush.rotation.set(Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4);
+		parent.add(toothbrush);
+		return toothbrush;
 	}
 
 	tweenTau(anchor) {
@@ -522,6 +365,7 @@ export default class Canvas extends Emittable {
 				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
 				this.zoom_ = 0;
 				this.container.classList.remove('lefted');
+				this.container.classList.remove('interactive');
 				break;
 			case 'manico':
 				position = [0, 0, 0];
@@ -532,6 +376,7 @@ export default class Canvas extends Emittable {
 				} else {
 					this.container.classList.remove('lefted');
 				}
+				this.container.classList.remove('interactive');
 				break;
 			case 'testina':
 				position = [0, 0, 0];
@@ -542,6 +387,7 @@ export default class Canvas extends Emittable {
 				} else {
 					this.container.classList.remove('lefted');
 				}
+				this.container.classList.remove('interactive');
 				break;
 			case 'setole':
 				position = [0, -3, 0];
@@ -552,6 +398,7 @@ export default class Canvas extends Emittable {
 				} else {
 					this.container.classList.remove('lefted');
 				}
+				this.container.classList.remove('interactive');
 				break;
 			case 'scalare':
 				position = [0, -3, 0];
@@ -562,6 +409,7 @@ export default class Canvas extends Emittable {
 				} else {
 					this.container.classList.remove('lefted');
 				}
+				this.container.classList.remove('interactive');
 				break;
 			case 'italy':
 				position = [0, 0, 0];
@@ -572,6 +420,7 @@ export default class Canvas extends Emittable {
 				} else {
 					this.container.classList.remove('lefted');
 				}
+				this.container.classList.remove('interactive');
 				break;
 			case 'setole-tynex':
 				position = [0, -2, 0];
@@ -582,27 +431,30 @@ export default class Canvas extends Emittable {
 				} else {
 					this.container.classList.remove('lefted');
 				}
+				this.container.classList.remove('interactive');
 				break;
 			case 'colors':
 				position = [0, 0, 0];
 				rotation = [0, Math.PI, 0]; // 											horizontal left
 				this.zoom_ = 0;
 				this.container.classList.remove('lefted');
+				this.container.classList.add('interactive');
 				break;
 			default:
 				position = [0, 0, 0];
 				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
 				this.zoom_ = 0;
 				this.container.classList.remove('lefted');
+				this.container.classList.remove('interactive');
 		}
-		const tau = this.tau;
-		TweenMax.to(this.tau.position, 0.8, {
+		const toothbrush = this.toothbrush;
+		TweenMax.to(this.toothbrush.position, 0.8, {
 			x: position[0],
 			y: position[1],
 			z: position[2],
 			ease: Power2.easeInOut,
 		});
-		TweenMax.to(this.tau.rotation, 1.2, {
+		TweenMax.to(this.toothbrush.rotation, 1.2, {
 			x: rotation[0],
 			y: rotation[1],
 			z: rotation[2],
@@ -615,6 +467,18 @@ export default class Canvas extends Emittable {
 				this.camera.updateProjectionMatrix();
 			}
 		});
+		if (this.controls && this.camera.position.x !== 0) {
+			TweenMax.to(this.camera.position, 0.6, {
+				x: 0,
+				y: 0,
+				z: 40,
+				ease: Power2.easeInOut,
+				onUpdate: () => {
+					this.controls.update();
+					this.camera.updateProjectionMatrix();
+				}
+			});
+		}
 	}
 
 	tweenColor(material, colorValue) {
@@ -634,9 +498,9 @@ export default class Canvas extends Emittable {
 	setBristle(bristle) {
 		if (bristle) {
 			// console.log('setBristle', bristle);
-			const tau = this.tau;
-			if (tau.children.length) {
-				const object = tau.children[0];
+			const toothbrush = this.toothbrush;
+			if (toothbrush.children.length) {
+				const object = toothbrush.children[0];
 				object.traverse((child) => {
 					// console.log(child);
 					switch (child.name) {
@@ -661,9 +525,9 @@ export default class Canvas extends Emittable {
 	setColor(color) {
 		if (color) {
 			// console.log('setColor', color);
-			const tau = this.tau;
-			if (tau.children.length) {
-				const object = tau.children[0];
+			const toothbrush = this.toothbrush;
+			if (toothbrush.children.length) {
+				const object = toothbrush.children[0];
 				object.traverse((child) => {
 					// console.log(child);
 					switch (child.name) {
@@ -679,17 +543,6 @@ export default class Canvas extends Emittable {
 				});
 			}
 		}
-	}
-
-	addLogo(parent) {
-		const geometry = new THREE.PlaneGeometry(24, 3, 3, 1);
-		geometry.rotateX(-Math.PI / 2);
-		geometry.translate(20, 2, 0);
-		geometry.rotateY(Math.PI);
-		// geometry.translate(0, 2.2, -24);
-		const logo = new THREE.Mesh(geometry, this.silver);
-		parent.add(logo);
-		return logo;
 	}
 
 	getCubeCamera() {
@@ -709,71 +562,6 @@ export default class Canvas extends Emittable {
 			cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
 			this.scene.add(cubeCamera1);
 		}
-	}
-
-	getEnvMap_(callback) {
-		const textures = [
-			'img/cubemaps/lights/',
-			'img/cubemaps/park/',
-			'img/cubemaps/pond/',
-			'img/cubemaps/lake/',
-			'img/cubemaps/square/'
-		];
-		const index = 0;
-		const urls = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg'];
-		// const texture = THREE.ImageUtils.loadTextureCube(urls, new THREE.CubeRefractionMapping(), render);
-		const loader = new THREE.CubeTextureLoader().setPath(textures[index]).load(urls, (texture, textureData) => {
-			texture.mapping = THREE.CubeRefractionMapping;
-			if (typeof callback === 'function') {
-				callback(texture, textureData);
-			}
-		});
-		return loader;
-	}
-
-	getEnvMap(callback) {
-		const loader = new THREE.TextureLoader().load('img/hdr-04.jpg', (source, textureData) => {
-			// source.encoding = THREE.sRGBEncoding;
-			source.mapping = THREE.UVMapping;
-			const options = {
-				resolution: 1024,
-				generateMipmaps: true,
-				minFilter: THREE.LinearMipMapLinearFilter,
-				magFilter: THREE.LinearFilter
-			};
-			// this.scene.background = new THREE.CubemapGenerator(this.renderer).fromEquirectangular(source, options);
-			const cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options);
-			// pngBackground = cubemapGenerator.renderTarget;
-			const texture = cubemapGenerator.update(this.renderer);
-			/*
-			var pmremGenerator = new THREE.PMREMGenerator( cubeMapTexture );
-			pmremGenerator.update( renderer );
-			var pmremCubeUVPacker = new THREE.PMREMCubeUVPacker( pmremGenerator.cubeLods );
-			pmremCubeUVPacker.update( renderer );
-			pngCubeRenderTarget = pmremCubeUVPacker.CubeUVRenderTarget;
-			*/
-			source.dispose();
-			/*
-			pmremGenerator.dispose();
-			pmremCubeUVPacker.dispose();
-			*/
-			texture.mapping = THREE.CubeReflectionMapping;
-			texture.mapping = THREE.CubeRefractionMapping;
-			/*
-			texture.minFilter = THREE.NearestFilter;
-			texture.magFilter = THREE.NearestFilter;
-			texture.minFilter = THREE.LinearFilter;
-			texture.magFilter = THREE.LinearFilter;
-			*/
-			// texture.generateMipmaps = false;
-			// texture.flipY = true;
-			// this.renderer.toneMappingExposure = 2.0;
-			if (typeof callback === 'function') {
-				callback(texture);
-			}
-		});
-		//
-		return loader;
 	}
 
 	getHDRMap(callback) {
@@ -907,7 +695,7 @@ export default class Canvas extends Emittable {
 	}
 
 	updateCubeCamera() {
-		if (USE_CUBE_CAMERA && this.tau && this.tau.body) {
+		if (USE_CUBE_CAMERA && this.toothbrush && this.toothbrush.body) {
 			const renderer = this.renderer;
 			const scene = this.scene;
 			// pingpong
@@ -915,26 +703,26 @@ export default class Canvas extends Emittable {
 				cubeCamera0 = this.cubeCamera0,
 				cubeCamera1 = this.cubeCamera1;
 			renderer.setClearColor(0xfefefe, 1);
-			this.tau.body.visible = false;
-			this.tau.logo.visible = false;
-			this.tau.color.visible = false;
+			this.toothbrush.body.visible = false;
+			this.toothbrush.logo.visible = false;
+			this.toothbrush.color.visible = false;
 			this.addons.visible = true;
 			// renderer.shadowMap.enabled = false;
 			if (count % 2 === 0) {
-				this.clear.envMap = cubeCamera0.renderTarget.texture;
-				this.silver.envMap = cubeCamera0.renderTarget.texture;
-				// this.red.envMap = cubeCamera0.renderTarget.texture;
+				this.materials.clear.envMap = cubeCamera0.renderTarget.texture;
+				this.materials.silver.envMap = cubeCamera0.renderTarget.texture;
+				// this.materials.red.envMap = cubeCamera0.renderTarget.texture;
 				cubeCamera1.update(renderer, scene);
 			} else {
-				this.clear.envMap = cubeCamera1.renderTarget.texture;
-				this.silver.envMap = cubeCamera1.renderTarget.texture;
-				// this.red.envMap = cubeCamera1.renderTarget.texture;
+				this.materials.clear.envMap = cubeCamera1.renderTarget.texture;
+				this.materials.silver.envMap = cubeCamera1.renderTarget.texture;
+				// this.materials.red.envMap = cubeCamera1.renderTarget.texture;
 				cubeCamera0.update(renderer, scene);
 			}
 			this.count = count + 1;
-			this.tau.body.visible = true;
-			this.tau.logo.visible = true;
-			this.tau.color.visible = true;
+			this.toothbrush.body.visible = true;
+			this.toothbrush.logo.visible = true;
+			this.toothbrush.color.visible = true;
 			this.addons.visible = false;
 			/*
 			this.addons.rotation.set(
@@ -959,7 +747,6 @@ export default class Canvas extends Emittable {
 			const size = this.size;
 			size.width = container.offsetWidth;
 			size.height = container.offsetHeight;
-			console.log(container, size);
 			const w = size.width;
 			const h = size.height;
 			size.aspect = w / h;
@@ -978,57 +765,6 @@ export default class Canvas extends Emittable {
 		}
 	}
 
-	onKeyDown(e) {
-		try {
-			// console.log(e.which, e.key);
-			const key = `${e.which} ${e.key}`;
-			this.debugInfo.innerHTML = key;
-		} catch (error) {
-			this.debugInfo.innerHTML = error;
-		}
-	}
-
-	onMouseDown(event) {
-		if (TEST_ENABLED) {
-			// this.dragListener.start();
-			this.controllers.setText('down');
-			return;
-		}
-		try {
-			this.mousedown = true;
-			const raycaster = this.raycaster;
-			raycaster.setFromCamera(this.mouse, this.camera);
-		} catch (error) {
-			this.debugInfo.innerHTML = error;
-		}
-	}
-
-	onMouseMove(event) {
-		try {
-			const w2 = this.container.offsetWidth / 2;
-			const h2 = this.container.offsetHeight / 2;
-			this.mouse = {
-				x: (event.clientX - w2) / w2,
-				y: -(event.clientY - h2) / h2,
-			};
-			const raycaster = this.raycaster;
-			raycaster.setFromCamera(this.mouse, this.camera);
-			InteractiveMesh.hittest(raycaster, this.mousedown);
-		} catch (error) {
-			this.debugInfo.innerHTML = error;
-		}
-	}
-
-	onMouseUp(event) {
-		if (TEST_ENABLED) {
-			// this.dragListener.end();
-			this.controllers.setText('up');
-			return;
-		}
-		console.log(this.camera.position);
-		this.mousedown = false;
-	}
-
 	onMouseWheel(event) {
 		try {
 			const camera = this.camera;
@@ -1044,25 +780,50 @@ export default class Canvas extends Emittable {
 		this.save = true;
 	}
 
+	updateControls() {
+		const controls = this.controls;
+		if (controls) {
+			controls.update();
+		}
+	}
+
+	updateOrbit() {
+		const orbit = this.orbit;
+		if (orbit) {
+			const camera = this.camera;
+			orbit.update();
+			camera.target.x = 40 * Math.sin(orbit.phi) * Math.cos(orbit.theta);
+			camera.target.y = 40 * Math.cos(orbit.phi);
+			camera.target.z = 40 * Math.sin(orbit.phi) * Math.sin(orbit.theta);
+			camera.lookAt(camera.target);
+			/*
+			// distortion
+			camera.position.copy( camera.target ).negate();
+			*/
+		}
+	}
+
+	updateComposer() {
+		const composer = this.composer;
+		if (composer) {
+			composer.render();
+		}
+	}
+
 	// animation
 
 	render(delta) {
-		const controls = this.controls;
 		const renderer = this.renderer;
 		const camera = this.camera;
 		const scene = this.scene;
 		if (!this.saving) {
-			if (controls) {
-				controls.update();
-			}
+			this.updateControls();
+			this.updateOrbit();
 			// this.lights.rotation.set(0, this.lights.rotation.y + 0.003, 0);
-			// this.tau.rotation.set(Math.cos(this.count / 100) * Math.PI / 180 * 2, Math.cos(this.count / 100) * Math.PI / 180 * 2, 0);
+			// this.toothbrush.rotation.set(Math.cos(this.count / 100) * Math.PI / 180 * 2, Math.cos(this.count / 100) * Math.PI / 180 * 2, 0);
 			this.updateCubeCamera();
 			renderer.render(scene, camera);
-			const composer = this.composer;
-			if (composer) {
-				composer.render();
-			}
+			this.updateComposer();
 		}
 		this.checkForScreenshot(renderer);
 	}
@@ -1148,6 +909,218 @@ export default class Canvas extends Emittable {
 		anchor.dataset.downloadurl = ['text/json', anchor.download, anchor.href].join(':');
 		event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
 		anchor.dispatchEvent(event);
+	}
+
+	addGUI__() {
+		const gui = new dat.GUI();
+		const keys = ['green', 'blue', 'red', 'silver', 'clear'];
+		const properties = {};
+		const onChange = (...rest) => {
+			// console.log(rest);
+			keys.forEach(key => {
+				const m = properties[key];
+				const material = this[key];
+				material.color.setHex(m.color);
+				if (key === 'clear') {
+					material.refractionRatio = m.refractionRatio;
+					material.reflectivity = m.reflectivity;
+					material.opacity = m.opacity;
+				} else {
+					material.roughness = m.roughness;
+					material.metalness = m.metalness;
+				}
+			});
+			this.camera.zoom = properties.zoom;
+			this.camera.updateProjectionMatrix();
+		};
+		properties.zoom = this.camera.zoom;
+		const folders = keys.map(key => {
+			const m = properties[key] = {};
+			const material = this[key];
+			m.color = material.color.getHex();
+			const folder = gui.addFolder(key);
+			folder.addColor(m, 'color').onFinishChange(onChange);
+			if (key === 'clear') {
+				m.refractionRatio = material.refractionRatio;
+				m.reflectivity = material.reflectivity;
+				m.opacity = material.opacity;
+				folder.add(m, 'refractionRatio', 0.0, 1.0, 0.01).onFinishChange(onChange);
+				folder.add(m, 'reflectivity', 0.0, 1.0, 0.01).onFinishChange(onChange);
+				folder.add(m, 'opacity', 0.0, 1.0, 0.01).onFinishChange(onChange);
+			} else {
+				m.roughness = material.roughness;
+				m.metalness = material.metalness;
+				folder.add(m, 'roughness', 0.0, 1.0, 0.01).onFinishChange(onChange);
+				folder.add(m, 'metalness', 0.0, 1.0, 0.01).onFinishChange(onChange);
+			}
+			return folder;
+		});
+		gui.add(properties, 'zoom', 0.1, 1.0, 0.01).onFinishChange(onChange);
+		const callback = {
+			snapshot: this.onSave,
+		};
+		gui.add(callback, 'snapshot');
+		gui.close();
+		// dat.GUI.toggleHide();
+		return gui;
+	}
+
+	/*
+	addLogo__(parent) {
+		const geometry = new THREE.PlaneGeometry(24, 3, 3, 1);
+		geometry.rotateX(-Math.PI / 2);
+		geometry.translate(20, 2, 0);
+		geometry.rotateY(Math.PI);
+		// geometry.translate(0, 2.2, -24);
+		const logo = new THREE.Mesh(geometry, this.materials.silver);
+		parent.add(logo);
+		return logo;
+	}
+	*/
+
+	addComposer__() {
+		const renderer = this.renderer;
+		const scene = this.scene;
+		const camera = this.camera;
+		const composer = new THREE.EffectComposer(renderer);
+		const renderPass = new THREE.RenderPass(scene, camera);
+		composer.addPass(renderPass);
+		const saoPass = new THREE.SAOPass(scene, camera, false, true);
+		saoPass.output = THREE.SAOPass.OUTPUT.Default;
+		saoPass.saoBias = 0.5;
+		saoPass.saoIntensity = 0.18;
+		saoPass.saoScale = 1;
+		saoPass.saoKernelRadius = 100;
+		saoPass.saoMinResolution = 0;
+		saoPass.saoBlur = true;
+		saoPass.saoBlurRadius = 8;
+		saoPass.saoBlurStdDev = 4;
+		saoPass.saoBlurDepthCutoff = 0.01;
+		composer.addPass(saoPass);
+		return composer;
+	}
+
+	addComposer___() {
+		const renderer = this.renderer;
+		const scene = this.scene;
+		const camera = this.camera;
+		const composer = new THREE.EffectComposer(renderer);
+		const ssaoPass = new THREE.SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
+		ssaoPass.kernelRadius = 16;
+		composer.addPass(ssaoPass);
+		return composer;
+	}
+
+	getEnvMap___(callback) {
+		const textures = [
+			'img/cubemaps/lights/',
+			'img/cubemaps/park/',
+			'img/cubemaps/pond/',
+			'img/cubemaps/lake/',
+			'img/cubemaps/square/'
+		];
+		const index = 0;
+		const urls = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg'];
+		// const texture = THREE.ImageUtils.loadTextureCube(urls, new THREE.CubeRefractionMapping(), render);
+		const loader = new THREE.CubeTextureLoader().setPath(textures[index]).load(urls, (texture, textureData) => {
+			texture.mapping = THREE.CubeRefractionMapping;
+			if (typeof callback === 'function') {
+				callback(texture, textureData);
+			}
+		});
+		return loader;
+	}
+
+	getEnvMap__(callback) {
+		const loader = new THREE.TextureLoader().load('img/hdr-04.jpg', (source, textureData) => {
+			// source.encoding = THREE.sRGBEncoding;
+			source.mapping = THREE.UVMapping;
+			const options = {
+				resolution: 1024,
+				generateMipmaps: true,
+				minFilter: THREE.LinearMipMapLinearFilter,
+				magFilter: THREE.LinearFilter
+			};
+			// this.scene.background = new THREE.CubemapGenerator(this.renderer).fromEquirectangular(source, options);
+			const cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options);
+			// pngBackground = cubemapGenerator.renderTarget;
+			const texture = cubemapGenerator.update(this.renderer);
+			/*
+			var pmremGenerator = new THREE.PMREMGenerator( cubeMapTexture );
+			pmremGenerator.update( renderer );
+			var pmremCubeUVPacker = new THREE.PMREMCubeUVPacker( pmremGenerator.cubeLods );
+			pmremCubeUVPacker.update( renderer );
+			pngCubeRenderTarget = pmremCubeUVPacker.CubeUVRenderTarget;
+			*/
+			source.dispose();
+			/*
+			pmremGenerator.dispose();
+			pmremCubeUVPacker.dispose();
+			*/
+			texture.mapping = THREE.CubeReflectionMapping;
+			texture.mapping = THREE.CubeRefractionMapping;
+			/*
+			texture.minFilter = THREE.NearestFilter;
+			texture.magFilter = THREE.NearestFilter;
+			texture.minFilter = THREE.LinearFilter;
+			texture.magFilter = THREE.LinearFilter;
+			*/
+			// texture.generateMipmaps = false;
+			// texture.flipY = true;
+			// this.renderer.toneMappingExposure = 2.0;
+			if (typeof callback === 'function') {
+				callback(texture);
+			}
+		});
+		//
+		return loader;
+	}
+
+	updateBackgroundColor__() {
+		this.colorIndex = this.colorIndex || 0;
+		this.colorIndex++;
+		this.colorIndex = this.colorIndex % COLORS.length;
+		const color = COLORS[this.colorIndex];
+		/*
+		const r = Math.floor(Math.random() * 255);
+		const g = Math.floor(Math.random() * 255);
+		const b = Math.floor(Math.random() * 255);
+		*/
+		TweenMax.to(this.renderer.domElement, 0.7, {
+			backgroundColor: color, // `rgba(${r},${g},${b},1)`,
+			delay: 3,
+			ease: Power2.easeInOut,
+			onUpdate: () => {
+				this.addons.children.forEach(x => {
+					x.material.color.setHex(color);
+					x.material.needsUpdate = true;
+				});
+			},
+			onComplete: () => {
+				this.updateBackgroundColor();
+			}
+		});
+	}
+
+	addBox__(parent) {
+		const geometry = new THREE.BoxGeometry(600, 30, 30);
+		const material = new THREE.MeshBasicMaterial({ color: 0xafb3bc });
+		const cube = new THREE.Mesh(geometry, material);
+		parent.add(cube);
+		return cube;
+	}
+
+	addBoxes__(parent) {
+		const group = new THREE.Group();
+		group.visible = true;
+		const boxes = new Array(12).fill(null).map((x, i) => {
+			const box = this.addBox__(group);
+			const r = Math.PI * 2 / 12 * i;
+			box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
+			return box;
+		});
+		parent.add(group);
+		return group;
 	}
 
 }
