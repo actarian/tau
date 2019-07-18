@@ -47,18 +47,21 @@ export default class Canvas extends Emittable {
 
 	get zoom() {
 		let r;
-		if (this.container.offsetWidth > 1024) {
-			r = this.container.offsetWidth / 1080;
+		const w = this.container.offsetWidth;
+		const h = this.container.offsetHeight;
+		const s = Math.max(Math.min(w, h, 1200), 375);
+		if (s >= 768) {
+			r = s / 1440;
 		} else {
-			r = this.container.offsetWidth / 512;
+			r = s / 640;
 		}
-		return (this.zoom_ + r) * 0.6;
+		return (this.zoom_ + r);
 	}
 
-	constructor(container, model) {
+	constructor(container, product) {
 		super();
 		this.container = container;
-		this.model = model || 'models/professional-27.fbx'; // 'models/tau-marin_5.obj'
+		this.product = product;
 		this.count = 0;
 		this.mouse = { x: 0, y: 0 };
 		this.size = { width: 0, height: 0, aspect: 0 };
@@ -75,7 +78,6 @@ export default class Canvas extends Emittable {
 		const scene = this.scene = this.addScene();
 		const camera = this.camera = this.addCamera();
 
-		this.pixelRatio = Math.max(window.devicePixelRatio, 1.0); // !!! 1.5
 		const renderer = this.renderer = this.addRenderer();
 		const composer = this.composer = this.addComposer();
 
@@ -115,7 +117,8 @@ export default class Canvas extends Emittable {
 		this.renderer = renderer;
 		renderer.setClearColor(0xffffff, 0);
 		// renderer.setPixelRatio(window.devicePixelRatio);
-		renderer.setPixelRatio(this.pixelRatio);
+		const pixelRatio = this.pixelRatio = 1; // Math.max(window.devicePixelRatio, 1.4);
+		renderer.setPixelRatio(pixelRatio);
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 		// container.innerHTML = '';
@@ -148,8 +151,8 @@ export default class Canvas extends Emittable {
 		controls.enablePan = false;
 		controls.enableZoom = false;
 		// controls.enableDamping = true;
-		controls.maxDistance = CAMERA_DISTANCE;
-		controls.minDistance = CAMERA_DISTANCE;
+		controls.maxDistance = CAMERA_DISTANCE * 3;
+		controls.minDistance = CAMERA_DISTANCE * 0.25;
 		// controls.maxPolarAngle = Math.PI / 2;
 		// controls.minPolarAngle = Math.PI / 2;
 		// camera.position.set(60, 205, -73);
@@ -324,8 +327,7 @@ export default class Canvas extends Emittable {
 	getBristlesPrimary(texture) {
 		// const lightMap = new THREE.TextureLoader().load('img/scalare-33-bristlesPrimary-lightmap.jpg');
 		const material = new THREE.MeshStandardMaterial({
-			color: 0x024c99, // 0x1f45c0,
-			// emissive: 0x333333,
+			color: this.product.bristles[0] ? this.product.bristles[0].colors[0] : 0xffffff,
 			// map: lightMap,
 			// normalMap: lightMap,
 			// metalnessMap: lightMap,
@@ -338,8 +340,7 @@ export default class Canvas extends Emittable {
 	getBristlesSecondary(texture) {
 		// const lightMap = new THREE.TextureLoader().load('img/scalare-33-bristlesSecondary-lightmap.jpg');
 		const material = new THREE.MeshStandardMaterial({
-			color: 0x15b29a, // 0x1aac4e,
-			// emissive: 0x333333,
+			color: this.product.bristles[0] ? this.product.bristles[0].colors[1] : 0xffffff,
 			// map: lightMap,
 			// normalMap: lightMap,
 			// metalnessMap: lightMap,
@@ -369,7 +370,7 @@ export default class Canvas extends Emittable {
 	addToothbrush(parent, texture) {
 		const toothbrush = new THREE.Group();
 		const loader = new THREE.FBXLoader(); // new THREE.OBJLoader();
-		loader.load(this.model, (object) => {
+		loader.load(this.product.model, (object) => {
 				let i = 0;
 				object.traverse((child) => {
 					if (child instanceof THREE.Mesh) {
@@ -560,13 +561,13 @@ export default class Canvas extends Emittable {
 				this.container.classList.remove('interactive');
 		}
 		const toothbrush = this.toothbrush;
-		TweenMax.to(this.toothbrush.position, 0.8, {
+		TweenMax.to(toothbrush.position, 0.8, {
 			x: position[0],
 			y: position[1],
 			z: position[2],
 			ease: Power2.easeInOut,
 		});
-		TweenMax.to(this.toothbrush.rotation, 1.2, {
+		TweenMax.to(toothbrush.rotation, 1.2, {
 			x: rotation[0],
 			y: rotation[1],
 			z: rotation[2],
@@ -602,7 +603,7 @@ export default class Canvas extends Emittable {
 		// [0, 0, 0]; // 												horizontal right
 		// [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
 		// [Math.PI / 2, 0, 0]; // 										top right
-		const sm = window.innerWidth < 1024;
+		const sm = this.container.offsetWidth < 768;
 		let rotation, position;
 		switch (anchor) {
 			case 'hero':
@@ -616,90 +617,58 @@ export default class Canvas extends Emittable {
 				position = [0, 0, 0];
 				rotation = [0, 0, deg(-90)]; // 								vertical right;
 				this.zoom_ = 0;
-				if (sm) {
-					this.container.classList.add('lefted');
-				} else {
-					this.container.classList.remove('lefted');
-				}
 				this.container.classList.remove('interactive');
 				break;
 			case 'testina':
 				position = [0, 0, 0];
 				rotation = [0, deg(90), deg(-5)]; // 							testina vista dietro
-				this.zoom_ = 0.2;
-				if (sm) {
-					this.container.classList.add('lefted');
-				} else {
-					this.container.classList.remove('lefted');
-				}
+				this.zoom_ = sm ? 0.6 : 0.2;
 				this.container.classList.remove('interactive');
 				break;
 			case 'setole':
-				position = [0, cm(-3), 0];
+				position = [0, cm(-12), 0];
 				rotation = [0, deg(-30), deg(-90)]; // 								vertical right tre quarti;
 				this.zoom_ = 0.4;
-				if (sm) {
-					this.container.classList.add('lefted');
-				} else {
-					this.container.classList.remove('lefted');
-				}
 				this.container.classList.remove('interactive');
 				break;
 			case 'scalare':
-				position = [0, cm(-3), 0];
+				position = [0, cm(-12), 0];
 				rotation = [0, 0, deg(-90)]; // 								vertical right;
 				this.zoom_ = 0.4;
-				if (sm) {
-					this.container.classList.add('lefted');
-				} else {
-					this.container.classList.remove('lefted');
-				}
 				this.container.classList.remove('interactive');
 				break;
 			case 'italy':
 				position = [0, 0, 0];
 				rotation = [0, deg(-60), deg(-60)]; // 							tre quarti sinistra
 				this.zoom_ = 0;
-				if (sm) {
-					this.container.classList.add('lefted');
-				} else {
-					this.container.classList.remove('lefted');
-				}
 				this.container.classList.remove('interactive');
 				break;
 			case 'setole-tynex':
-				position = [0, cm(-2), 0];
+				position = [0, cm(-7), 0];
 				rotation = [0, deg(-180), deg(-90)]; // 										vertical left;
 				this.zoom_ = 0.2;
-				if (sm) {
-					this.container.classList.add('lefted');
-				} else {
-					this.container.classList.remove('lefted');
-				}
 				this.container.classList.remove('interactive');
 				break;
 			case 'colors':
 				position = [0, 0, 0];
-				rotation = [0, 0, 0]; // 													horizontal left
-				this.zoom_ = 0;
-				this.container.classList.remove('lefted');
+				rotation = [0, 0, 0];
+				this.zoom_ = sm ? -0.2 : 0;
 				this.container.classList.add('interactive');
 				break;
 			default:
 				position = [0, 0, 0];
 				rotation = [0, deg(-60), deg(-60)]; // 		tre quarti sinistra
 				this.zoom_ = 0;
-				this.container.classList.remove('lefted');
 				this.container.classList.remove('interactive');
 		}
 		const toothbrush = this.toothbrush;
-		TweenMax.to(this.toothbrush.position, 0.8, {
+		TweenMax.to(toothbrush.position, 0.8, {
 			x: position[0],
 			y: position[1],
 			z: position[2],
 			ease: Power2.easeInOut,
 		});
-		TweenMax.to(this.toothbrush.rotation, 1.2, {
+		TweenMax.to(toothbrush.rotation, 1.2, {
 			x: rotation[0],
 			y: rotation[1],
 			z: rotation[2],
@@ -747,19 +716,17 @@ export default class Canvas extends Emittable {
 			if (toothbrush.children.length) {
 				const object = toothbrush.children[0];
 				object.traverse((child) => {
-					// console.log(child);
 					switch (child.name) {
-						case 'corpo_spazzolino_rosso':
-						case 'corpo_spazzolino':
-						case 'logo':
+						case 'body-secondary':
+						case 'body-primary':
 							break;
-						case 'verde':
-							// child.material = bristlesSecondary;
+						case 'bristles-primary':
+							this.tweenColor(child.material, bristle.colors[0]);
+							break;
+						case 'bristles-secondary':
 							this.tweenColor(child.material, bristle.colors[1]);
 							break;
-						case 'blu':
-							// child.material = bristlesPrimary;
-							this.tweenColor(child.material, bristle.colors[0]);
+						case 'logo':
 							break;
 					}
 				});
@@ -781,9 +748,10 @@ export default class Canvas extends Emittable {
 							// console.log(child.material, color.colors[0]);
 							break;
 						case 'body-primary':
-						case 'bristlesPrimary':
-						case 'bristlesSecondary':
+						case 'bristles-primary':
+						case 'bristles-secondary':
 						case 'logo':
+							break;
 					}
 				});
 			}
@@ -925,6 +893,7 @@ export default class Canvas extends Emittable {
 			}
 			if (camera) {
 				camera.aspect = w / h;
+				camera.zoom = this.zoom;
 				camera.updateProjectionMatrix();
 			}
 			if (composer) {

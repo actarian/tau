@@ -11,33 +11,22 @@ export default class CanvasDirective {
 		this.domService = DomService;
 		this.restrict = 'A';
 		this.scope = {
-			canvas: '='
+			product: '=?canvas'
 		};
 	}
 
 	link(scope, element, attributes, controller) {
 		const node = element[0];
 		const inner = node.querySelector('.inner');
-		const model = scope.model || 'models/professional-27.fbx';
-		const canvas = new Canvas(inner, model);
+		const product = scope.product || {
+			model: 'models/professional-27.fbx',
+			bristles: [],
+			colors: []
+		};
+		const canvas = new Canvas(inner, product);
 		canvas.on('load', () => {
 			node.classList.add('loaded');
 		});
-		/*
-		const loader = new THREE.loader();
-		loader.load('img/panorama-sm/panorama-01.jpg', (texture) => {
-			texture.mapping = THREE.UVMapping;
-			const options = {
-				resolution: 1024,
-				generateMipmaps: true,
-				minFilter: THREE.LinearMipMapLinearFilter,
-				magFilter: THREE.LinearFilter
-			};
-			canvas.scene.background = new THREE.CubemapGenerator(canvas.renderer).fromEquirectangular(texture, options);
-			canvas.animate();
-		});
-		*/
-		// canvas.load('data/vr.json');
 		canvas.animate();
 		const anchors = [...document.querySelectorAll('[data-anchor]')];
 		const subscription = this.domService.scrollIntersection$(node).subscribe(event => {

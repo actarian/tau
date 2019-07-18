@@ -18437,7 +18437,7 @@ function () {
     this.domService = DomService;
     this.restrict = 'A';
     this.scope = {
-      canvas: '='
+      product: '=?canvas'
     };
   }
 
@@ -18446,27 +18446,15 @@ function () {
     value: function link(scope, element, attributes, controller) {
       var node = element[0];
       var inner = node.querySelector('.inner');
-      var model = scope.model || 'models/professional-27.fbx';
-      var canvas = new _canvas.default(inner, model);
+      var product = scope.product || {
+        model: 'models/professional-27.fbx',
+        bristles: [],
+        colors: []
+      };
+      var canvas = new _canvas.default(inner, product);
       canvas.on('load', function () {
         node.classList.add('loaded');
       });
-      /*
-      const loader = new THREE.loader();
-      loader.load('img/panorama-sm/panorama-01.jpg', (texture) => {
-      	texture.mapping = THREE.UVMapping;
-      	const options = {
-      		resolution: 1024,
-      		generateMipmaps: true,
-      		minFilter: THREE.LinearMipMapLinearFilter,
-      		magFilter: THREE.LinearFilter
-      	};
-      	canvas.scene.background = new THREE.CubemapGenerator(canvas.renderer).fromEquirectangular(texture, options);
-      	canvas.animate();
-      });
-      */
-      // canvas.load('data/vr.json');
-
       canvas.animate();
 
       var anchors = _toConsumableArray(document.querySelectorAll('[data-anchor]'));
@@ -18619,26 +18607,28 @@ function (_Emittable) {
     key: "zoom",
     get: function get() {
       var r;
+      var w = this.container.offsetWidth;
+      var h = this.container.offsetHeight;
+      var s = Math.max(Math.min(w, h, 1200), 375);
 
-      if (this.container.offsetWidth > 1024) {
-        r = this.container.offsetWidth / 1080;
+      if (s >= 768) {
+        r = s / 1440;
       } else {
-        r = this.container.offsetWidth / 512;
+        r = s / 640;
       }
 
-      return (this.zoom_ + r) * 0.6;
+      return this.zoom_ + r;
     }
   }]);
 
-  function Canvas(container, model) {
+  function Canvas(container, product) {
     var _this;
 
     _classCallCheck(this, Canvas);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Canvas).call(this));
     _this.container = container;
-    _this.model = model || 'models/professional-27.fbx'; // 'models/tau-marin_5.obj'
-
+    _this.product = product;
     _this.count = 0;
     _this.mouse = {
       x: 0,
@@ -18662,8 +18652,6 @@ function (_Emittable) {
     var scene = _this.scene = _this.addScene();
 
     var camera = _this.camera = _this.addCamera();
-
-    _this.pixelRatio = Math.max(window.devicePixelRatio, 1.0); // !!! 1.5
 
     var renderer = _this.renderer = _this.addRenderer();
 
@@ -18711,7 +18699,9 @@ function (_Emittable) {
       this.renderer = renderer;
       renderer.setClearColor(0xffffff, 0); // renderer.setPixelRatio(window.devicePixelRatio);
 
-      renderer.setPixelRatio(this.pixelRatio);
+      var pixelRatio = this.pixelRatio = 1; // Math.max(window.devicePixelRatio, 1.4);
+
+      renderer.setPixelRatio(pixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
       // container.innerHTML = '';
@@ -18748,8 +18738,8 @@ function (_Emittable) {
       controls.enablePan = false;
       controls.enableZoom = false; // controls.enableDamping = true;
 
-      controls.maxDistance = CAMERA_DISTANCE;
-      controls.minDistance = CAMERA_DISTANCE; // controls.maxPolarAngle = Math.PI / 2;
+      controls.maxDistance = CAMERA_DISTANCE * 3;
+      controls.minDistance = CAMERA_DISTANCE * 0.25; // controls.maxPolarAngle = Math.PI / 2;
       // controls.minPolarAngle = Math.PI / 2;
       // camera.position.set(60, 205, -73);
       // camera.position.set(0, 50, 100);
@@ -18936,9 +18926,7 @@ function (_Emittable) {
     value: function getBristlesPrimary(texture) {
       // const lightMap = new THREE.TextureLoader().load('img/scalare-33-bristlesPrimary-lightmap.jpg');
       var material = new THREE.MeshStandardMaterial({
-        color: 0x024c99,
-        // 0x1f45c0,
-        // emissive: 0x333333,
+        color: this.product.bristles[0] ? this.product.bristles[0].colors[0] : 0xffffff,
         // map: lightMap,
         // normalMap: lightMap,
         // metalnessMap: lightMap,
@@ -18952,9 +18940,7 @@ function (_Emittable) {
     value: function getBristlesSecondary(texture) {
       // const lightMap = new THREE.TextureLoader().load('img/scalare-33-bristlesSecondary-lightmap.jpg');
       var material = new THREE.MeshStandardMaterial({
-        color: 0x15b29a,
-        // 0x1aac4e,
-        // emissive: 0x333333,
+        color: this.product.bristles[0] ? this.product.bristles[0].colors[1] : 0xffffff,
         // map: lightMap,
         // normalMap: lightMap,
         // metalnessMap: lightMap,
@@ -18989,7 +18975,7 @@ function (_Emittable) {
       var toothbrush = new THREE.Group();
       var loader = new THREE.FBXLoader(); // new THREE.OBJLoader();
 
-      loader.load(this.model, function (object) {
+      loader.load(this.product.model, function (object) {
         var i = 0;
         object.traverse(function (child) {
           if (child instanceof THREE.Mesh) {
@@ -19220,13 +19206,13 @@ function (_Emittable) {
       }
 
       var toothbrush = this.toothbrush;
-      TweenMax.to(this.toothbrush.position, 0.8, {
+      TweenMax.to(toothbrush.position, 0.8, {
         x: position[0],
         y: position[1],
         z: position[2],
         ease: Power2.easeInOut
       });
-      TweenMax.to(this.toothbrush.rotation, 1.2, {
+      TweenMax.to(toothbrush.rotation, 1.2, {
         x: rotation[0],
         y: rotation[1],
         z: rotation[2],
@@ -19267,7 +19253,7 @@ function (_Emittable) {
       // [0, 0, 0]; // 												horizontal right
       // [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
       // [Math.PI / 2, 0, 0]; // 										top right
-      var sm = window.innerWidth < 1024;
+      var sm = this.container.offsetWidth < 768;
       var rotation, position;
 
       switch (anchor) {
@@ -19285,13 +19271,6 @@ function (_Emittable) {
           rotation = [0, 0, (0, _const.deg)(-90)]; // 								vertical right;
 
           this.zoom_ = 0;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
           this.container.classList.remove('interactive');
           break;
 
@@ -19299,44 +19278,23 @@ function (_Emittable) {
           position = [0, 0, 0];
           rotation = [0, (0, _const.deg)(90), (0, _const.deg)(-5)]; // 							testina vista dietro
 
-          this.zoom_ = 0.2;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
+          this.zoom_ = sm ? 0.6 : 0.2;
           this.container.classList.remove('interactive');
           break;
 
         case 'setole':
-          position = [0, (0, _const.cm)(-3), 0];
+          position = [0, (0, _const.cm)(-12), 0];
           rotation = [0, (0, _const.deg)(-30), (0, _const.deg)(-90)]; // 								vertical right tre quarti;
 
           this.zoom_ = 0.4;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
           this.container.classList.remove('interactive');
           break;
 
         case 'scalare':
-          position = [0, (0, _const.cm)(-3), 0];
+          position = [0, (0, _const.cm)(-12), 0];
           rotation = [0, 0, (0, _const.deg)(-90)]; // 								vertical right;
 
           this.zoom_ = 0.4;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
           this.container.classList.remove('interactive');
           break;
 
@@ -19345,37 +19303,21 @@ function (_Emittable) {
           rotation = [0, (0, _const.deg)(-60), (0, _const.deg)(-60)]; // 							tre quarti sinistra
 
           this.zoom_ = 0;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
           this.container.classList.remove('interactive');
           break;
 
         case 'setole-tynex':
-          position = [0, (0, _const.cm)(-2), 0];
+          position = [0, (0, _const.cm)(-7), 0];
           rotation = [0, (0, _const.deg)(-180), (0, _const.deg)(-90)]; // 										vertical left;
 
           this.zoom_ = 0.2;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
           this.container.classList.remove('interactive');
           break;
 
         case 'colors':
           position = [0, 0, 0];
-          rotation = [0, 0, 0]; // 													horizontal left
-
-          this.zoom_ = 0;
-          this.container.classList.remove('lefted');
+          rotation = [0, 0, 0];
+          this.zoom_ = sm ? -0.2 : 0;
           this.container.classList.add('interactive');
           break;
 
@@ -19384,18 +19326,17 @@ function (_Emittable) {
           rotation = [0, (0, _const.deg)(-60), (0, _const.deg)(-60)]; // 		tre quarti sinistra
 
           this.zoom_ = 0;
-          this.container.classList.remove('lefted');
           this.container.classList.remove('interactive');
       }
 
       var toothbrush = this.toothbrush;
-      TweenMax.to(this.toothbrush.position, 0.8, {
+      TweenMax.to(toothbrush.position, 0.8, {
         x: position[0],
         y: position[1],
         z: position[2],
         ease: Power2.easeInOut
       });
-      TweenMax.to(this.toothbrush.rotation, 1.2, {
+      TweenMax.to(toothbrush.rotation, 1.2, {
         x: rotation[0],
         y: rotation[1],
         z: rotation[2],
@@ -19450,23 +19391,22 @@ function (_Emittable) {
         if (toothbrush.children.length) {
           var object = toothbrush.children[0];
           object.traverse(function (child) {
-            // console.log(child);
             switch (child.name) {
-              case 'corpo_spazzolino_rosso':
-              case 'corpo_spazzolino':
-              case 'logo':
+              case 'body-secondary':
+              case 'body-primary':
                 break;
 
-              case 'verde':
-                // child.material = bristlesSecondary;
+              case 'bristles-primary':
+                _this5.tweenColor(child.material, bristle.colors[0]);
+
+                break;
+
+              case 'bristles-secondary':
                 _this5.tweenColor(child.material, bristle.colors[1]);
 
                 break;
 
-              case 'blu':
-                // child.material = bristlesPrimary;
-                _this5.tweenColor(child.material, bristle.colors[0]);
-
+              case 'logo':
                 break;
             }
           });
@@ -19494,9 +19434,10 @@ function (_Emittable) {
                 break;
 
               case 'body-primary':
-              case 'bristlesPrimary':
-              case 'bristlesSecondary':
+              case 'bristles-primary':
+              case 'bristles-secondary':
               case 'logo':
+                break;
             }
           });
         }
@@ -19652,6 +19593,7 @@ function (_Emittable) {
 
         if (camera) {
           camera.aspect = w / h;
+          camera.zoom = this.zoom;
           camera.updateProjectionMatrix();
         }
 
