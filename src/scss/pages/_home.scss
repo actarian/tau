@@ -1,0 +1,58 @@
+.section--home-hero {
+
+	.container {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		min-height: 80vh;
+	}
+
+	.title {
+		text-align: center;
+		font-size: 120px;
+		font-weight: $font-semibold;
+		line-height: 1.2;
+		color: $foreground-primary;
+		margin-bottom: 30px;
+	}
+
+	.abstract {
+		text-align: center;
+		font-size: 36px;
+		font-weight: $font-medium;
+		line-height: 1.2;
+		color: $foreground-secondary;
+		margin-bottom: 50px;
+	}
+
+	.description {
+		text-align: center;
+		font-size: 24px;
+		max-width: 660px;
+		margin: 0 auto;
+	}
+
+	@include media-breakpoint-down(sm) {
+
+		.container {
+			justify-content: flex-end;
+		}
+
+		.title {
+			font-size: 36px;
+			margin-bottom: 15px;
+		}
+
+		.abstract {
+			font-size: 20px;
+			margin-bottom: 20px;
+		}
+
+		.description {
+			font-size: 16px;
+			margin-bottom: 20px;
+		}
+
+	}
+
+}

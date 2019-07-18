@@ -18,7 +18,7 @@ export default class CanvasDirective {
 	link(scope, element, attributes, controller) {
 		const node = element[0];
 		const inner = node.querySelector('.inner');
-		const model = scope.model || 'models/tau-marin_5.obj';
+		const model = scope.model || 'models/professional-27.fbx';
 		const canvas = new Canvas(inner, model);
 		canvas.on('load', () => {
 			node.classList.add('loaded');

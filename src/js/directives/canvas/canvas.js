@@ -1,9 +1,11 @@
 /* jshint esversion: 6 */
 
 import * as dat from 'dat.gui';
+import { cm, deg } from './three/const';
 import Emittable from './three/emittable';
 import Orbit from './three/orbit/orbit';
 
+const CAMERA_DISTANCE = 2;
 const USE_CUBE_CAMERA = true;
 const COLORS = [0xFFFFFF, 0xFC4445, 0xFEEE6, 0x55BCC9, 0x97CAEF, 0xCAFAFE];
 
@@ -56,7 +58,7 @@ export default class Canvas extends Emittable {
 	constructor(container, model) {
 		super();
 		this.container = container;
-		this.model = model || 'models/tau-marin_5.obj'; // 'models/scalare-33-b/scalare-33-b.obj',
+		this.model = model || 'models/professional-27.fbx'; // 'models/tau-marin_5.obj'
 		this.count = 0;
 		this.mouse = { x: 0, y: 0 };
 		this.size = { width: 0, height: 0, aspect: 0 };
@@ -131,7 +133,7 @@ export default class Canvas extends Emittable {
 
 	addCamera() {
 		const camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, 2000);
-		camera.position.set(0, 0, 40);
+		camera.position.set(0, 0, CAMERA_DISTANCE);
 		camera.target = new THREE.Vector3();
 		camera.zoom = this.zoom;
 		return camera;
@@ -146,8 +148,8 @@ export default class Canvas extends Emittable {
 		controls.enablePan = false;
 		controls.enableZoom = false;
 		// controls.enableDamping = true;
-		controls.maxDistance = 60;
-		controls.minDistance = 20;
+		controls.maxDistance = CAMERA_DISTANCE;
+		controls.minDistance = CAMERA_DISTANCE;
 		// controls.maxPolarAngle = Math.PI / 2;
 		// controls.minPolarAngle = Math.PI / 2;
 		// camera.position.set(60, 205, -73);
@@ -184,7 +186,7 @@ export default class Canvas extends Emittable {
 		const lights = new THREE.Group();
 
 		const light0 = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.8);
-		light0.position.set(0, 10, 0);
+		light0.position.set(0, 2, 0);
 		lights.add(light0);
 		/*
 		const helper0 = new THREE.HemisphereLightHelper(light0, 10, 0x888888);
@@ -192,7 +194,7 @@ export default class Canvas extends Emittable {
 		*/
 
 		const light1 = new THREE.DirectionalLight(0xffffff, 0.8);
-		light1.position.set(0, 0, 50);
+		light1.position.set(0, 0, 4);
 		/*
 		light1.castShadow = true;
 		light1.shadow.camera.near = 0.5; // default
@@ -268,23 +270,105 @@ export default class Canvas extends Emittable {
 		});
 		*/
 		// const texture = this.getEnvMap();
-		const clear = this.getClear(texture);
-		const silver = this.getSilver(texture);
-		const red = this.getRed(texture);
-		const blue = this.getBlue();
-		const green = this.getGreen();
+		const bodyPrimaryClear = this.getBodyPrimaryClear(texture);
+		const logoSilver = this.getLogoSilver(texture);
+		const bodySecondary = this.getBodySecondary(texture);
+		const bristlesPrimary = this.getBristlesPrimary();
+		const bristlesSecondary = this.getBristlesSecondary();
 		return {
-			clear,
-			silver,
-			red,
-			blue,
-			green,
+			bodyPrimaryClear,
+			bodySecondary,
+			bristlesPrimary,
+			bristlesSecondary,
+			logoSilver,
 		};
+	}
+
+	getBodyPrimaryClear(texture) {
+		const material = new THREE.MeshPhongMaterial({
+			color: 0xffffff,
+			envMap: texture,
+			transparent: true,
+			refractionRatio: 0.6,
+			reflectivity: 0.8,
+			opacity: 0.25,
+			alphaTest: 0.2,
+			/*
+			refractionRatio: 0.99,
+			reflectivity: 0.99,
+			opacity: 0.5,
+			*/
+			side: THREE.DoubleSide,
+			// blending: THREE.AdditiveBlending,
+		});
+		// material.vertexTangents = true;
+		return material;
+	}
+
+	getBodySecondary(texture) {
+		const material = new THREE.MeshStandardMaterial({
+			color: 0xe11e26,
+			// emissive: 0x4f0300,
+			roughness: 0.2,
+			metalness: 0.2,
+			// envMap: texture,
+			// envMapIntensity: 0.4,
+			// The refractionRatio must have value in the range 0 to 1.
+			// The default value, very close to 1, give almost invisible glass.
+			// refractionRatio: 0,
+			// side: THREE.DoubleSide,
+		});
+		return material;
+	}
+
+	getBristlesPrimary(texture) {
+		// const lightMap = new THREE.TextureLoader().load('img/scalare-33-bristlesPrimary-lightmap.jpg');
+		const material = new THREE.MeshStandardMaterial({
+			color: 0x024c99, // 0x1f45c0,
+			// emissive: 0x333333,
+			// map: lightMap,
+			// normalMap: lightMap,
+			// metalnessMap: lightMap,
+			roughness: 0.9,
+			metalness: 0.0,
+		});
+		return material;
+	}
+
+	getBristlesSecondary(texture) {
+		// const lightMap = new THREE.TextureLoader().load('img/scalare-33-bristlesSecondary-lightmap.jpg');
+		const material = new THREE.MeshStandardMaterial({
+			color: 0x15b29a, // 0x1aac4e,
+			// emissive: 0x333333,
+			// map: lightMap,
+			// normalMap: lightMap,
+			// metalnessMap: lightMap,
+			roughness: 0.9,
+			metalness: 0.0,
+		});
+		return material;
+	}
+
+	getLogoSilver() {
+		const texture = new THREE.TextureLoader().load('img/models/toothbrush-logo.png');
+		const material = new THREE.MeshStandardMaterial({
+			color: 0xffffff,
+			map: texture,
+			transparent: true,
+			roughness: 0.15,
+			metalness: 0.9,
+			// envMap: texture,
+			// side: THREE.DoubleSide,
+			//
+			// opacity: 1,
+			// alphaTest: 0.1,
+		});
+		return material;
 	}
 
 	addToothbrush(parent, texture) {
 		const toothbrush = new THREE.Group();
-		const loader = new THREE.OBJLoader();
+		const loader = new THREE.FBXLoader(); // new THREE.OBJLoader();
 		loader.load(this.model, (object) => {
 				let i = 0;
 				object.traverse((child) => {
@@ -295,23 +379,50 @@ export default class Canvas extends Emittable {
 						// child.geometry.computeFaceNormals();
 						// child.geometry.computeVertexNormals(true);
 						// child.geometry.computeTangents();
+						switch (child.name) {
+							case 'body-primary':
+							case 'bubble':
+								// child.geometry.computeFaceNormals();
+								// child.geometry.computeVertexNormals(true);
+								child.material = this.materials.bodyPrimaryClear;
+								toothbrush.body = child;
+								break;
+							case 'body-secondary':
+								// child.geometry.computeFaceNormals();
+								// child.geometry.computeVertexNormals(true);
+								child.material = this.materials.bodySecondary;
+								toothbrush.color = child;
+								break;
+							case 'bristles-primary':
+								child.material = this.materials.bristlesPrimary;
+								break;
+							case 'bristles-secondary':
+								child.material = this.materials.bristlesSecondary;
+								break;
+							case 'logo':
+								child.material = this.materials.logoSilver;
+								toothbrush.logo = child;
+								break;
+						}
+						/*
 						if (i === 0) {
 							child.geometry.computeFaceNormals();
 							child.geometry.computeVertexNormals(true);
-							child.material = this.materials.red;
+							child.material = this.materials.bodySecondary;
 							toothbrush.color = child;
 						} else if (i === 1) {
-							child.material = this.materials.clear;
+							child.material = this.materials.bodyPrimaryClear;
 							toothbrush.body = child;
 						} else if (i === 2) {
-							child.material = this.materials.silver;
+							child.material = this.materials.logoSilver;
 							toothbrush.logo = child;
 						} else if (i === 3) {
-							child.material = this.materials.green;
+							child.material = this.materials.bristlesSecondary;
 						} else if (i === 4) {
-							child.material = this.materials.blue;
+							child.material = this.materials.bristlesPrimary;
 						}
 						i++;
+						*/
 						/*
 						child.geometry.scale(150, 150, 150);
 						child.geometry.rotateX(-Math.PI / 2);
@@ -319,13 +430,13 @@ export default class Canvas extends Emittable {
 						// child.geometry.computeTangents();
 						THREE.BufferGeometryUtils.computeTangents(child.geometry);
 						if (i === 0) {
-							child.material = this.materials.red;
+							child.material = this.materials.bodySecondary;
 						} else if (i === 1) {
-							child.material = this.materials.green;
+							child.material = this.materials.bristlesSecondary;
 						} else if (i === 2) {
-							child.material = this.materials.blue;
+							child.material = this.materials.bristlesPrimary;
 						} else if (i === 3) {
-							child.material = this.materials.clear;
+							child.material = this.materials.bodyPrimaryClear;
 							toothbrush.body = child;
 						}
 						*/
@@ -346,12 +457,13 @@ export default class Canvas extends Emittable {
 				console.log('An error happened');
 			}
 		);
-		toothbrush.rotation.set(Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4);
+		// toothbrush.rotation.set(Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4);
+		toothbrush.rotation.set(0, deg(-60), deg(-60)); // 		tre quarti sinistra
 		parent.add(toothbrush);
 		return toothbrush;
 	}
 
-	tweenTau(anchor) {
+	tweenTau__(anchor) {
 		// [0, 0, Math.PI / 2]; // 										vertical left
 		// [0, 0, 0]; // 												horizontal right
 		// [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
@@ -471,7 +583,140 @@ export default class Canvas extends Emittable {
 			TweenMax.to(this.camera.position, 0.6, {
 				x: 0,
 				y: 0,
-				z: 40,
+				z: CAMERA_DISTANCE,
+				ease: Power2.easeInOut,
+				onUpdate: () => {
+					this.controls.update();
+					this.camera.updateProjectionMatrix();
+				}
+			});
+		}
+	}
+
+	tweenTau(anchor) {
+		// [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
+		// [0, Math.PI, Math.PI / 2]; // 								vertical right;
+		// [0, -Math.PI / 2, Math.PI / 32]; // 							testina vista dietro
+		// [0, Math.PI - Math.PI / 4, Math.PI / 2]; // 					vertical right tre quarti;
+		// [0, 0, Math.PI / 2]; // 										vertical left;
+		// [0, 0, 0]; // 												horizontal right
+		// [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
+		// [Math.PI / 2, 0, 0]; // 										top right
+		const sm = window.innerWidth < 1024;
+		let rotation, position;
+		switch (anchor) {
+			case 'hero':
+				position = [0, 0, 0];
+				rotation = [0, deg(-60), deg(-60)]; // 		tre quarti sinistra
+				this.zoom_ = 0;
+				this.container.classList.remove('lefted');
+				this.container.classList.remove('interactive');
+				break;
+			case 'manico':
+				position = [0, 0, 0];
+				rotation = [0, 0, deg(-90)]; // 								vertical right;
+				this.zoom_ = 0;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
+				this.container.classList.remove('interactive');
+				break;
+			case 'testina':
+				position = [0, 0, 0];
+				rotation = [0, deg(90), deg(-5)]; // 							testina vista dietro
+				this.zoom_ = 0.2;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
+				this.container.classList.remove('interactive');
+				break;
+			case 'setole':
+				position = [0, cm(-3), 0];
+				rotation = [0, deg(-30), deg(-90)]; // 								vertical right tre quarti;
+				this.zoom_ = 0.4;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
+				this.container.classList.remove('interactive');
+				break;
+			case 'scalare':
+				position = [0, cm(-3), 0];
+				rotation = [0, 0, deg(-90)]; // 								vertical right;
+				this.zoom_ = 0.4;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
+				this.container.classList.remove('interactive');
+				break;
+			case 'italy':
+				position = [0, 0, 0];
+				rotation = [0, deg(-60), deg(-60)]; // 							tre quarti sinistra
+				this.zoom_ = 0;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
+				this.container.classList.remove('interactive');
+				break;
+			case 'setole-tynex':
+				position = [0, cm(-2), 0];
+				rotation = [0, deg(-180), deg(-90)]; // 										vertical left;
+				this.zoom_ = 0.2;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
+				this.container.classList.remove('interactive');
+				break;
+			case 'colors':
+				position = [0, 0, 0];
+				rotation = [0, 0, 0]; // 													horizontal left
+				this.zoom_ = 0;
+				this.container.classList.remove('lefted');
+				this.container.classList.add('interactive');
+				break;
+			default:
+				position = [0, 0, 0];
+				rotation = [0, deg(-60), deg(-60)]; // 		tre quarti sinistra
+				this.zoom_ = 0;
+				this.container.classList.remove('lefted');
+				this.container.classList.remove('interactive');
+		}
+		const toothbrush = this.toothbrush;
+		TweenMax.to(this.toothbrush.position, 0.8, {
+			x: position[0],
+			y: position[1],
+			z: position[2],
+			ease: Power2.easeInOut,
+		});
+		TweenMax.to(this.toothbrush.rotation, 1.2, {
+			x: rotation[0],
+			y: rotation[1],
+			z: rotation[2],
+			ease: Power2.easeInOut,
+		});
+		TweenMax.to(this.camera, 0.6, {
+			zoom: this.zoom,
+			ease: Power2.easeInOut,
+			onUpdate: () => {
+				this.camera.updateProjectionMatrix();
+			}
+		});
+		if (this.controls && this.camera.position.x !== 0) {
+			TweenMax.to(this.camera.position, 0.6, {
+				x: 0,
+				y: 0,
+				z: CAMERA_DISTANCE,
 				ease: Power2.easeInOut,
 				onUpdate: () => {
 					this.controls.update();
@@ -509,11 +754,11 @@ export default class Canvas extends Emittable {
 						case 'logo':
 							break;
 						case 'verde':
-							// child.material = green;
+							// child.material = bristlesSecondary;
 							this.tweenColor(child.material, bristle.colors[1]);
 							break;
 						case 'blu':
-							// child.material = blue;
+							// child.material = bristlesPrimary;
 							this.tweenColor(child.material, bristle.colors[0]);
 							break;
 					}
@@ -531,14 +776,14 @@ export default class Canvas extends Emittable {
 				object.traverse((child) => {
 					// console.log(child);
 					switch (child.name) {
-						case 'corpo_spazzolino_rosso':
+						case 'body-secondary':
 							this.tweenColor(child.material, color.colors[0]);
 							// console.log(child.material, color.colors[0]);
 							break;
-						case 'corpo_spazzolino':
+						case 'body-primary':
+						case 'bristlesPrimary':
+						case 'bristlesSecondary':
 						case 'logo':
-						case 'verde':
-						case 'blu':
 					}
 				});
 			}
@@ -597,81 +842,6 @@ export default class Canvas extends Emittable {
 		return loader;
 	}
 
-	getBlue(texture) {
-		// const lightMap = new THREE.TextureLoader().load('img/scalare-33-blue-lightmap.jpg');
-		const material = new THREE.MeshStandardMaterial({
-			color: 0x024c99, // 0x1f45c0,
-			// emissive: 0x333333,
-			// map: lightMap,
-			// normalMap: lightMap,
-			// metalnessMap: lightMap,
-			roughness: 0.9,
-			metalness: 0.0,
-		});
-		return material;
-	}
-
-	getGreen(texture) {
-		// const lightMap = new THREE.TextureLoader().load('img/scalare-33-green-lightmap.jpg');
-		const material = new THREE.MeshStandardMaterial({
-			color: 0x15b29a, // 0x1aac4e,
-			// emissive: 0x333333,
-			// map: lightMap,
-			// normalMap: lightMap,
-			// metalnessMap: lightMap,
-			roughness: 0.9,
-			metalness: 0.0,
-		});
-		return material;
-	}
-
-	getRed(texture) {
-		const material = new THREE.MeshStandardMaterial({
-			color: 0xe11e26,
-			// emissive: 0x4f0300,
-			roughness: 0.2,
-			metalness: 0.2,
-			// envMap: texture,
-			// envMapIntensity: 0.4,
-			// The refractionRatio must have value in the range 0 to 1.
-			// The default value, very close to 1, give almost invisible glass.
-			// refractionRatio: 0,
-			// side: THREE.DoubleSide,
-		});
-		return material;
-	}
-
-	getSilver(texture) {
-		const material = new THREE.MeshStandardMaterial({
-			color: 0xdddddd,
-			roughness: 0.15,
-			metalness: 1.0,
-			envMap: texture,
-			side: THREE.DoubleSide,
-		});
-		return material;
-	}
-
-	getClear(texture) {
-		const material = new THREE.MeshPhongMaterial({
-			color: 0xffffff,
-			envMap: texture,
-			transparent: true,
-			refractionRatio: 0.6,
-			reflectivity: 0.8,
-			opacity: 0.25,
-			/*
-			refractionRatio: 0.99,
-			reflectivity: 0.99,
-			opacity: 0.5,
-			*/
-			side: THREE.DoubleSide,
-			// blending: THREE.AdditiveBlending,
-		});
-		// material.vertexTangents = true;
-		return material;
-	}
-
 	addSpheres(parent) {
 		const group = new THREE.Group();
 		group.visible = false;
@@ -709,14 +879,14 @@ export default class Canvas extends Emittable {
 			this.addons.visible = true;
 			// renderer.shadowMap.enabled = false;
 			if (count % 2 === 0) {
-				this.materials.clear.envMap = cubeCamera0.renderTarget.texture;
-				this.materials.silver.envMap = cubeCamera0.renderTarget.texture;
-				// this.materials.red.envMap = cubeCamera0.renderTarget.texture;
+				this.materials.bodyPrimaryClear.envMap = cubeCamera0.renderTarget.texture;
+				// this.materials.logoSilver.envMap = cubeCamera0.renderTarget.texture;
+				// this.materials.bodySecondary.envMap = cubeCamera0.renderTarget.texture;
 				cubeCamera1.update(renderer, scene);
 			} else {
-				this.materials.clear.envMap = cubeCamera1.renderTarget.texture;
-				this.materials.silver.envMap = cubeCamera1.renderTarget.texture;
-				// this.materials.red.envMap = cubeCamera1.renderTarget.texture;
+				this.materials.bodyPrimaryClear.envMap = cubeCamera1.renderTarget.texture;
+				// this.materials.logoSilver.envMap = cubeCamera1.renderTarget.texture;
+				// this.materials.bodySecondary.envMap = cubeCamera1.renderTarget.texture;
 				cubeCamera0.update(renderer, scene);
 			}
 			this.count = count + 1;
@@ -792,9 +962,9 @@ export default class Canvas extends Emittable {
 		if (orbit) {
 			const camera = this.camera;
 			orbit.update();
-			camera.target.x = 40 * Math.sin(orbit.phi) * Math.cos(orbit.theta);
-			camera.target.y = 40 * Math.cos(orbit.phi);
-			camera.target.z = 40 * Math.sin(orbit.phi) * Math.sin(orbit.theta);
+			camera.target.x = CAMERA_DISTANCE * Math.sin(orbit.phi) * Math.cos(orbit.theta);
+			camera.target.y = CAMERA_DISTANCE * Math.cos(orbit.phi);
+			camera.target.z = CAMERA_DISTANCE * Math.sin(orbit.phi) * Math.sin(orbit.theta);
 			camera.lookAt(camera.target);
 			/*
 			// distortion
@@ -913,7 +1083,7 @@ export default class Canvas extends Emittable {
 
 	addGUI__() {
 		const gui = new dat.GUI();
-		const keys = ['green', 'blue', 'red', 'silver', 'clear'];
+		const keys = ['bristlesSecondary', 'bristlesPrimary', 'bodySecondary', 'logoSilver', 'bodyPrimaryClear'];
 		const properties = {};
 		const onChange = (...rest) => {
 			// console.log(rest);
@@ -921,7 +1091,7 @@ export default class Canvas extends Emittable {
 				const m = properties[key];
 				const material = this[key];
 				material.color.setHex(m.color);
-				if (key === 'clear') {
+				if (key === 'bodyPrimaryClear') {
 					material.refractionRatio = m.refractionRatio;
 					material.reflectivity = m.reflectivity;
 					material.opacity = m.opacity;
@@ -940,7 +1110,7 @@ export default class Canvas extends Emittable {
 			m.color = material.color.getHex();
 			const folder = gui.addFolder(key);
 			folder.addColor(m, 'color').onFinishChange(onChange);
-			if (key === 'clear') {
+			if (key === 'bodyPrimaryClear') {
 				m.refractionRatio = material.refractionRatio;
 				m.reflectivity = material.reflectivity;
 				m.opacity = material.opacity;
@@ -972,7 +1142,7 @@ export default class Canvas extends Emittable {
 		geometry.translate(20, 2, 0);
 		geometry.rotateY(Math.PI);
 		// geometry.translate(0, 2.2, -24);
-		const logo = new THREE.Mesh(geometry, this.materials.silver);
+		const logo = new THREE.Mesh(geometry, this.materials.logoSilver);
 		parent.add(logo);
 		return logo;
 	}

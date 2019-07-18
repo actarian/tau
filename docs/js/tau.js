@@ -18400,7 +18400,7 @@ app.filter('trusted', ['$sce', _trusted.TrustedFilter]);
 var _default = MODULE_NAME;
 exports.default = _default;
 
-},{"./directives/canvas.directive":201,"./directives/lazy-script.directive":206,"./directives/lazy.directive":207,"./directives/overscroll.directive":208,"./filters/trusted.filter":209,"./product/product.controller":210,"./root.controller":211,"./services/api.service":212,"./services/dom.service":213,"./shared/location.service":214,"./shared/promise.service":215,"./shared/state.service":217,"./shared/storage.service":218}],201:[function(require,module,exports){
+},{"./directives/canvas.directive":201,"./directives/lazy-script.directive":207,"./directives/lazy.directive":208,"./directives/overscroll.directive":209,"./filters/trusted.filter":210,"./product/product.controller":211,"./root.controller":212,"./services/api.service":213,"./services/dom.service":214,"./shared/location.service":215,"./shared/promise.service":216,"./shared/state.service":218,"./shared/storage.service":219}],201:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18446,7 +18446,7 @@ function () {
     value: function link(scope, element, attributes, controller) {
       var node = element[0];
       var inner = node.querySelector('.inner');
-      var model = scope.model || 'models/tau-marin_5.obj';
+      var model = scope.model || 'models/professional-27.fbx';
       var canvas = new _canvas.default(inner, model);
       canvas.on('load', function () {
         node.classList.add('loaded');
@@ -18533,7 +18533,7 @@ function () {
 exports.default = CanvasDirective;
 CanvasDirective.factory.$inject = ['DomService'];
 
-},{"../shared/rect":216,"./canvas/canvas":202}],202:[function(require,module,exports){
+},{"../shared/rect":217,"./canvas/canvas":202}],202:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18542,6 +18542,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 
 var dat = _interopRequireWildcard(require("dat.gui"));
+
+var _const = require("./three/const");
 
 var _emittable = _interopRequireDefault(require("./three/emittable"));
 
@@ -18569,6 +18571,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+var CAMERA_DISTANCE = 2;
 var USE_CUBE_CAMERA = true;
 var COLORS = [0xFFFFFF, 0xFC4445, 0xFEEE6, 0x55BCC9, 0x97CAEF, 0xCAFAFE];
 
@@ -18634,7 +18637,7 @@ function (_Emittable) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Canvas).call(this));
     _this.container = container;
-    _this.model = model || 'models/tau-marin_5.obj'; // 'models/scalare-33-b/scalare-33-b.obj',
+    _this.model = model || 'models/professional-27.fbx'; // 'models/tau-marin_5.obj'
 
     _this.count = 0;
     _this.mouse = {
@@ -18729,7 +18732,7 @@ function (_Emittable) {
     key: "addCamera",
     value: function addCamera() {
       var camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, 2000);
-      camera.position.set(0, 0, 40);
+      camera.position.set(0, 0, CAMERA_DISTANCE);
       camera.target = new THREE.Vector3();
       camera.zoom = this.zoom;
       return camera;
@@ -18745,8 +18748,8 @@ function (_Emittable) {
       controls.enablePan = false;
       controls.enableZoom = false; // controls.enableDamping = true;
 
-      controls.maxDistance = 60;
-      controls.minDistance = 20; // controls.maxPolarAngle = Math.PI / 2;
+      controls.maxDistance = CAMERA_DISTANCE;
+      controls.minDistance = CAMERA_DISTANCE; // controls.maxPolarAngle = Math.PI / 2;
       // controls.minPolarAngle = Math.PI / 2;
       // camera.position.set(60, 205, -73);
       // camera.position.set(0, 50, 100);
@@ -18785,7 +18788,7 @@ function (_Emittable) {
     value: function addLights(parent) {
       var lights = new THREE.Group();
       var light0 = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.8);
-      light0.position.set(0, 10, 0);
+      light0.position.set(0, 2, 0);
       lights.add(light0);
       /*
       const helper0 = new THREE.HemisphereLightHelper(light0, 10, 0x888888);
@@ -18793,7 +18796,7 @@ function (_Emittable) {
       */
 
       var light1 = new THREE.DirectionalLight(0xffffff, 0.8);
-      light1.position.set(0, 0, 50);
+      light1.position.set(0, 0, 4);
       /*
       light1.castShadow = true;
       light1.shadow.camera.near = 0.5; // default
@@ -18875,18 +18878,108 @@ function (_Emittable) {
       });
       */
       // const texture = this.getEnvMap();
-      var clear = this.getClear(texture);
-      var silver = this.getSilver(texture);
-      var red = this.getRed(texture);
-      var blue = this.getBlue();
-      var green = this.getGreen();
+      var bodyPrimaryClear = this.getBodyPrimaryClear(texture);
+      var logoSilver = this.getLogoSilver(texture);
+      var bodySecondary = this.getBodySecondary(texture);
+      var bristlesPrimary = this.getBristlesPrimary();
+      var bristlesSecondary = this.getBristlesSecondary();
       return {
-        clear: clear,
-        silver: silver,
-        red: red,
-        blue: blue,
-        green: green
+        bodyPrimaryClear: bodyPrimaryClear,
+        bodySecondary: bodySecondary,
+        bristlesPrimary: bristlesPrimary,
+        bristlesSecondary: bristlesSecondary,
+        logoSilver: logoSilver
       };
+    }
+  }, {
+    key: "getBodyPrimaryClear",
+    value: function getBodyPrimaryClear(texture) {
+      var material = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        envMap: texture,
+        transparent: true,
+        refractionRatio: 0.6,
+        reflectivity: 0.8,
+        opacity: 0.25,
+        alphaTest: 0.2,
+
+        /*
+        refractionRatio: 0.99,
+        reflectivity: 0.99,
+        opacity: 0.5,
+        */
+        side: THREE.DoubleSide // blending: THREE.AdditiveBlending,
+
+      }); // material.vertexTangents = true;
+
+      return material;
+    }
+  }, {
+    key: "getBodySecondary",
+    value: function getBodySecondary(texture) {
+      var material = new THREE.MeshStandardMaterial({
+        color: 0xe11e26,
+        // emissive: 0x4f0300,
+        roughness: 0.2,
+        metalness: 0.2 // envMap: texture,
+        // envMapIntensity: 0.4,
+        // The refractionRatio must have value in the range 0 to 1.
+        // The default value, very close to 1, give almost invisible glass.
+        // refractionRatio: 0,
+        // side: THREE.DoubleSide,
+
+      });
+      return material;
+    }
+  }, {
+    key: "getBristlesPrimary",
+    value: function getBristlesPrimary(texture) {
+      // const lightMap = new THREE.TextureLoader().load('img/scalare-33-bristlesPrimary-lightmap.jpg');
+      var material = new THREE.MeshStandardMaterial({
+        color: 0x024c99,
+        // 0x1f45c0,
+        // emissive: 0x333333,
+        // map: lightMap,
+        // normalMap: lightMap,
+        // metalnessMap: lightMap,
+        roughness: 0.9,
+        metalness: 0.0
+      });
+      return material;
+    }
+  }, {
+    key: "getBristlesSecondary",
+    value: function getBristlesSecondary(texture) {
+      // const lightMap = new THREE.TextureLoader().load('img/scalare-33-bristlesSecondary-lightmap.jpg');
+      var material = new THREE.MeshStandardMaterial({
+        color: 0x15b29a,
+        // 0x1aac4e,
+        // emissive: 0x333333,
+        // map: lightMap,
+        // normalMap: lightMap,
+        // metalnessMap: lightMap,
+        roughness: 0.9,
+        metalness: 0.0
+      });
+      return material;
+    }
+  }, {
+    key: "getLogoSilver",
+    value: function getLogoSilver() {
+      var texture = new THREE.TextureLoader().load('img/models/toothbrush-logo.png');
+      var material = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: texture,
+        transparent: true,
+        roughness: 0.15,
+        metalness: 0.9 // envMap: texture,
+        // side: THREE.DoubleSide,
+        //
+        // opacity: 1,
+        // alphaTest: 0.1,
+
+      });
+      return material;
     }
   }, {
     key: "addToothbrush",
@@ -18894,7 +18987,8 @@ function (_Emittable) {
       var _this2 = this;
 
       var toothbrush = new THREE.Group();
-      var loader = new THREE.OBJLoader();
+      var loader = new THREE.FBXLoader(); // new THREE.OBJLoader();
+
       loader.load(this.model, function (object) {
         var i = 0;
         object.traverse(function (child) {
@@ -18905,24 +18999,55 @@ function (_Emittable) {
             // child.geometry.computeFaceNormals();
             // child.geometry.computeVertexNormals(true);
             // child.geometry.computeTangents();
-            if (i === 0) {
-              child.geometry.computeFaceNormals();
-              child.geometry.computeVertexNormals(true);
-              child.material = _this2.materials.red;
-              toothbrush.color = child;
-            } else if (i === 1) {
-              child.material = _this2.materials.clear;
-              toothbrush.body = child;
-            } else if (i === 2) {
-              child.material = _this2.materials.silver;
-              toothbrush.logo = child;
-            } else if (i === 3) {
-              child.material = _this2.materials.green;
-            } else if (i === 4) {
-              child.material = _this2.materials.blue;
-            }
+            switch (child.name) {
+              case 'body-primary':
+              case 'bubble':
+                // child.geometry.computeFaceNormals();
+                // child.geometry.computeVertexNormals(true);
+                child.material = _this2.materials.bodyPrimaryClear;
+                toothbrush.body = child;
+                break;
 
+              case 'body-secondary':
+                // child.geometry.computeFaceNormals();
+                // child.geometry.computeVertexNormals(true);
+                child.material = _this2.materials.bodySecondary;
+                toothbrush.color = child;
+                break;
+
+              case 'bristles-primary':
+                child.material = _this2.materials.bristlesPrimary;
+                break;
+
+              case 'bristles-secondary':
+                child.material = _this2.materials.bristlesSecondary;
+                break;
+
+              case 'logo':
+                child.material = _this2.materials.logoSilver;
+                toothbrush.logo = child;
+                break;
+            }
+            /*
+            if (i === 0) {
+            	child.geometry.computeFaceNormals();
+            	child.geometry.computeVertexNormals(true);
+            	child.material = this.materials.bodySecondary;
+            	toothbrush.color = child;
+            } else if (i === 1) {
+            	child.material = this.materials.bodyPrimaryClear;
+            	toothbrush.body = child;
+            } else if (i === 2) {
+            	child.material = this.materials.logoSilver;
+            	toothbrush.logo = child;
+            } else if (i === 3) {
+            	child.material = this.materials.bristlesSecondary;
+            } else if (i === 4) {
+            	child.material = this.materials.bristlesPrimary;
+            }
             i++;
+            */
+
             /*
             child.geometry.scale(150, 150, 150);
             child.geometry.rotateX(-Math.PI / 2);
@@ -18930,16 +19055,17 @@ function (_Emittable) {
             // child.geometry.computeTangents();
             THREE.BufferGeometryUtils.computeTangents(child.geometry);
             if (i === 0) {
-            	child.material = this.materials.red;
+            	child.material = this.materials.bodySecondary;
             } else if (i === 1) {
-            	child.material = this.materials.green;
+            	child.material = this.materials.bristlesSecondary;
             } else if (i === 2) {
-            	child.material = this.materials.blue;
+            	child.material = this.materials.bristlesPrimary;
             } else if (i === 3) {
-            	child.material = this.materials.clear;
+            	child.material = this.materials.bodyPrimaryClear;
             	toothbrush.body = child;
             }
             */
+
           }
         }); // this.addLogo(object);
         // object.material = material;
@@ -18955,14 +19081,16 @@ function (_Emittable) {
       }, function (xhr) {// console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
       }, function (error) {
         console.log('An error happened');
-      });
-      toothbrush.rotation.set(Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4);
+      }); // toothbrush.rotation.set(Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4);
+
+      toothbrush.rotation.set(0, (0, _const.deg)(-60), (0, _const.deg)(-60)); // 		tre quarti sinistra
+
       parent.add(toothbrush);
       return toothbrush;
     }
   }, {
-    key: "tweenTau",
-    value: function tweenTau(anchor) {
+    key: "tweenTau__",
+    value: function tweenTau__(anchor) {
       var _this3 = this;
 
       // [0, 0, Math.PI / 2]; // 										vertical left
@@ -19116,12 +19244,181 @@ function (_Emittable) {
         TweenMax.to(this.camera.position, 0.6, {
           x: 0,
           y: 0,
-          z: 40,
+          z: CAMERA_DISTANCE,
           ease: Power2.easeInOut,
           onUpdate: function onUpdate() {
             _this3.controls.update();
 
             _this3.camera.updateProjectionMatrix();
+          }
+        });
+      }
+    }
+  }, {
+    key: "tweenTau",
+    value: function tweenTau(anchor) {
+      var _this4 = this;
+
+      // [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
+      // [0, Math.PI, Math.PI / 2]; // 								vertical right;
+      // [0, -Math.PI / 2, Math.PI / 32]; // 							testina vista dietro
+      // [0, Math.PI - Math.PI / 4, Math.PI / 2]; // 					vertical right tre quarti;
+      // [0, 0, Math.PI / 2]; // 										vertical left;
+      // [0, 0, 0]; // 												horizontal right
+      // [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
+      // [Math.PI / 2, 0, 0]; // 										top right
+      var sm = window.innerWidth < 1024;
+      var rotation, position;
+
+      switch (anchor) {
+        case 'hero':
+          position = [0, 0, 0];
+          rotation = [0, (0, _const.deg)(-60), (0, _const.deg)(-60)]; // 		tre quarti sinistra
+
+          this.zoom_ = 0;
+          this.container.classList.remove('lefted');
+          this.container.classList.remove('interactive');
+          break;
+
+        case 'manico':
+          position = [0, 0, 0];
+          rotation = [0, 0, (0, _const.deg)(-90)]; // 								vertical right;
+
+          this.zoom_ = 0;
+
+          if (sm) {
+            this.container.classList.add('lefted');
+          } else {
+            this.container.classList.remove('lefted');
+          }
+
+          this.container.classList.remove('interactive');
+          break;
+
+        case 'testina':
+          position = [0, 0, 0];
+          rotation = [0, (0, _const.deg)(90), (0, _const.deg)(-5)]; // 							testina vista dietro
+
+          this.zoom_ = 0.2;
+
+          if (sm) {
+            this.container.classList.add('lefted');
+          } else {
+            this.container.classList.remove('lefted');
+          }
+
+          this.container.classList.remove('interactive');
+          break;
+
+        case 'setole':
+          position = [0, (0, _const.cm)(-3), 0];
+          rotation = [0, (0, _const.deg)(-30), (0, _const.deg)(-90)]; // 								vertical right tre quarti;
+
+          this.zoom_ = 0.4;
+
+          if (sm) {
+            this.container.classList.add('lefted');
+          } else {
+            this.container.classList.remove('lefted');
+          }
+
+          this.container.classList.remove('interactive');
+          break;
+
+        case 'scalare':
+          position = [0, (0, _const.cm)(-3), 0];
+          rotation = [0, 0, (0, _const.deg)(-90)]; // 								vertical right;
+
+          this.zoom_ = 0.4;
+
+          if (sm) {
+            this.container.classList.add('lefted');
+          } else {
+            this.container.classList.remove('lefted');
+          }
+
+          this.container.classList.remove('interactive');
+          break;
+
+        case 'italy':
+          position = [0, 0, 0];
+          rotation = [0, (0, _const.deg)(-60), (0, _const.deg)(-60)]; // 							tre quarti sinistra
+
+          this.zoom_ = 0;
+
+          if (sm) {
+            this.container.classList.add('lefted');
+          } else {
+            this.container.classList.remove('lefted');
+          }
+
+          this.container.classList.remove('interactive');
+          break;
+
+        case 'setole-tynex':
+          position = [0, (0, _const.cm)(-2), 0];
+          rotation = [0, (0, _const.deg)(-180), (0, _const.deg)(-90)]; // 										vertical left;
+
+          this.zoom_ = 0.2;
+
+          if (sm) {
+            this.container.classList.add('lefted');
+          } else {
+            this.container.classList.remove('lefted');
+          }
+
+          this.container.classList.remove('interactive');
+          break;
+
+        case 'colors':
+          position = [0, 0, 0];
+          rotation = [0, 0, 0]; // 													horizontal left
+
+          this.zoom_ = 0;
+          this.container.classList.remove('lefted');
+          this.container.classList.add('interactive');
+          break;
+
+        default:
+          position = [0, 0, 0];
+          rotation = [0, (0, _const.deg)(-60), (0, _const.deg)(-60)]; // 		tre quarti sinistra
+
+          this.zoom_ = 0;
+          this.container.classList.remove('lefted');
+          this.container.classList.remove('interactive');
+      }
+
+      var toothbrush = this.toothbrush;
+      TweenMax.to(this.toothbrush.position, 0.8, {
+        x: position[0],
+        y: position[1],
+        z: position[2],
+        ease: Power2.easeInOut
+      });
+      TweenMax.to(this.toothbrush.rotation, 1.2, {
+        x: rotation[0],
+        y: rotation[1],
+        z: rotation[2],
+        ease: Power2.easeInOut
+      });
+      TweenMax.to(this.camera, 0.6, {
+        zoom: this.zoom,
+        ease: Power2.easeInOut,
+        onUpdate: function onUpdate() {
+          _this4.camera.updateProjectionMatrix();
+        }
+      });
+
+      if (this.controls && this.camera.position.x !== 0) {
+        TweenMax.to(this.camera.position, 0.6, {
+          x: 0,
+          y: 0,
+          z: CAMERA_DISTANCE,
+          ease: Power2.easeInOut,
+          onUpdate: function onUpdate() {
+            _this4.controls.update();
+
+            _this4.camera.updateProjectionMatrix();
           }
         });
       }
@@ -19144,7 +19441,7 @@ function (_Emittable) {
   }, {
     key: "setBristle",
     value: function setBristle(bristle) {
-      var _this4 = this;
+      var _this5 = this;
 
       if (bristle) {
         // console.log('setBristle', bristle);
@@ -19161,14 +19458,14 @@ function (_Emittable) {
                 break;
 
               case 'verde':
-                // child.material = green;
-                _this4.tweenColor(child.material, bristle.colors[1]);
+                // child.material = bristlesSecondary;
+                _this5.tweenColor(child.material, bristle.colors[1]);
 
                 break;
 
               case 'blu':
-                // child.material = blue;
-                _this4.tweenColor(child.material, bristle.colors[0]);
+                // child.material = bristlesPrimary;
+                _this5.tweenColor(child.material, bristle.colors[0]);
 
                 break;
             }
@@ -19179,7 +19476,7 @@ function (_Emittable) {
   }, {
     key: "setColor",
     value: function setColor(color) {
-      var _this5 = this;
+      var _this6 = this;
 
       if (color) {
         // console.log('setColor', color);
@@ -19190,16 +19487,16 @@ function (_Emittable) {
           object.traverse(function (child) {
             // console.log(child);
             switch (child.name) {
-              case 'corpo_spazzolino_rosso':
-                _this5.tweenColor(child.material, color.colors[0]); // console.log(child.material, color.colors[0]);
+              case 'body-secondary':
+                _this6.tweenColor(child.material, color.colors[0]); // console.log(child.material, color.colors[0]);
 
 
                 break;
 
-              case 'corpo_spazzolino':
+              case 'body-primary':
+              case 'bristlesPrimary':
+              case 'bristlesSecondary':
               case 'logo':
-              case 'verde':
-              case 'blu':
             }
           });
         }
@@ -19228,7 +19525,7 @@ function (_Emittable) {
   }, {
     key: "getHDRMap",
     value: function getHDRMap(callback) {
-      var _this6 = this;
+      var _this7 = this;
 
       var type = THREE.UnsignedByteType; // const type = THREE.FloatType;
 
@@ -19252,8 +19549,8 @@ function (_Emittable) {
         var cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, {
           resolution: 512
         });
-        _this6.renderer.toneMappingExposure = 2.0;
-        var texture = cubemapGenerator.update(_this6.renderer);
+        _this7.renderer.toneMappingExposure = 2.0;
+        var texture = cubemapGenerator.update(_this7.renderer);
         source.dispose();
 
         if (typeof callback === 'function') {
@@ -19262,89 +19559,6 @@ function (_Emittable) {
       }); //
 
       return loader;
-    }
-  }, {
-    key: "getBlue",
-    value: function getBlue(texture) {
-      // const lightMap = new THREE.TextureLoader().load('img/scalare-33-blue-lightmap.jpg');
-      var material = new THREE.MeshStandardMaterial({
-        color: 0x024c99,
-        // 0x1f45c0,
-        // emissive: 0x333333,
-        // map: lightMap,
-        // normalMap: lightMap,
-        // metalnessMap: lightMap,
-        roughness: 0.9,
-        metalness: 0.0
-      });
-      return material;
-    }
-  }, {
-    key: "getGreen",
-    value: function getGreen(texture) {
-      // const lightMap = new THREE.TextureLoader().load('img/scalare-33-green-lightmap.jpg');
-      var material = new THREE.MeshStandardMaterial({
-        color: 0x15b29a,
-        // 0x1aac4e,
-        // emissive: 0x333333,
-        // map: lightMap,
-        // normalMap: lightMap,
-        // metalnessMap: lightMap,
-        roughness: 0.9,
-        metalness: 0.0
-      });
-      return material;
-    }
-  }, {
-    key: "getRed",
-    value: function getRed(texture) {
-      var material = new THREE.MeshStandardMaterial({
-        color: 0xe11e26,
-        // emissive: 0x4f0300,
-        roughness: 0.2,
-        metalness: 0.2 // envMap: texture,
-        // envMapIntensity: 0.4,
-        // The refractionRatio must have value in the range 0 to 1.
-        // The default value, very close to 1, give almost invisible glass.
-        // refractionRatio: 0,
-        // side: THREE.DoubleSide,
-
-      });
-      return material;
-    }
-  }, {
-    key: "getSilver",
-    value: function getSilver(texture) {
-      var material = new THREE.MeshStandardMaterial({
-        color: 0xdddddd,
-        roughness: 0.15,
-        metalness: 1.0,
-        envMap: texture,
-        side: THREE.DoubleSide
-      });
-      return material;
-    }
-  }, {
-    key: "getClear",
-    value: function getClear(texture) {
-      var material = new THREE.MeshPhongMaterial({
-        color: 0xffffff,
-        envMap: texture,
-        transparent: true,
-        refractionRatio: 0.6,
-        reflectivity: 0.8,
-        opacity: 0.25,
-
-        /*
-        refractionRatio: 0.99,
-        reflectivity: 0.99,
-        opacity: 0.5,
-        */
-        side: THREE.DoubleSide // blending: THREE.AdditiveBlending,
-
-      }); // material.vertexTangents = true;
-
-      return material;
     }
   }, {
     key: "addSpheres",
@@ -19388,13 +19602,13 @@ function (_Emittable) {
         this.addons.visible = true; // renderer.shadowMap.enabled = false;
 
         if (count % 2 === 0) {
-          this.materials.clear.envMap = cubeCamera0.renderTarget.texture;
-          this.materials.silver.envMap = cubeCamera0.renderTarget.texture; // this.materials.red.envMap = cubeCamera0.renderTarget.texture;
+          this.materials.bodyPrimaryClear.envMap = cubeCamera0.renderTarget.texture; // this.materials.logoSilver.envMap = cubeCamera0.renderTarget.texture;
+          // this.materials.bodySecondary.envMap = cubeCamera0.renderTarget.texture;
 
           cubeCamera1.update(renderer, scene);
         } else {
-          this.materials.clear.envMap = cubeCamera1.renderTarget.texture;
-          this.materials.silver.envMap = cubeCamera1.renderTarget.texture; // this.materials.red.envMap = cubeCamera1.renderTarget.texture;
+          this.materials.bodyPrimaryClear.envMap = cubeCamera1.renderTarget.texture; // this.materials.logoSilver.envMap = cubeCamera1.renderTarget.texture;
+          // this.materials.bodySecondary.envMap = cubeCamera1.renderTarget.texture;
 
           cubeCamera0.update(renderer, scene);
         }
@@ -19482,9 +19696,9 @@ function (_Emittable) {
       if (orbit) {
         var camera = this.camera;
         orbit.update();
-        camera.target.x = 40 * Math.sin(orbit.phi) * Math.cos(orbit.theta);
-        camera.target.y = 40 * Math.cos(orbit.phi);
-        camera.target.z = 40 * Math.sin(orbit.phi) * Math.sin(orbit.theta);
+        camera.target.x = CAMERA_DISTANCE * Math.sin(orbit.phi) * Math.cos(orbit.theta);
+        camera.target.y = CAMERA_DISTANCE * Math.cos(orbit.phi);
+        camera.target.z = CAMERA_DISTANCE * Math.sin(orbit.phi) * Math.sin(orbit.theta);
         camera.lookAt(camera.target);
         /*
         // distortion
@@ -19524,11 +19738,11 @@ function (_Emittable) {
   }, {
     key: "animate",
     value: function animate() {
-      var _this7 = this;
+      var _this8 = this;
 
       var renderer = this.renderer;
       renderer.setAnimationLoop(function () {
-        _this7.render();
+        _this8.render();
       });
     } // utils
 
@@ -19627,20 +19841,20 @@ function (_Emittable) {
   }, {
     key: "addGUI__",
     value: function addGUI__() {
-      var _this8 = this;
+      var _this9 = this;
 
       var gui = new dat.GUI();
-      var keys = ['green', 'blue', 'red', 'silver', 'clear'];
+      var keys = ['bristlesSecondary', 'bristlesPrimary', 'bodySecondary', 'logoSilver', 'bodyPrimaryClear'];
       var properties = {};
 
       var onChange = function onChange() {
         // console.log(rest);
         keys.forEach(function (key) {
           var m = properties[key];
-          var material = _this8[key];
+          var material = _this9[key];
           material.color.setHex(m.color);
 
-          if (key === 'clear') {
+          if (key === 'bodyPrimaryClear') {
             material.refractionRatio = m.refractionRatio;
             material.reflectivity = m.reflectivity;
             material.opacity = m.opacity;
@@ -19649,20 +19863,20 @@ function (_Emittable) {
             material.metalness = m.metalness;
           }
         });
-        _this8.camera.zoom = properties.zoom;
+        _this9.camera.zoom = properties.zoom;
 
-        _this8.camera.updateProjectionMatrix();
+        _this9.camera.updateProjectionMatrix();
       };
 
       properties.zoom = this.camera.zoom;
       var folders = keys.map(function (key) {
         var m = properties[key] = {};
-        var material = _this8[key];
+        var material = _this9[key];
         m.color = material.color.getHex();
         var folder = gui.addFolder(key);
         folder.addColor(m, 'color').onFinishChange(onChange);
 
-        if (key === 'clear') {
+        if (key === 'bodyPrimaryClear') {
           m.refractionRatio = material.refractionRatio;
           m.reflectivity = material.reflectivity;
           m.opacity = material.opacity;
@@ -19694,7 +19908,7 @@ function (_Emittable) {
     	geometry.translate(20, 2, 0);
     	geometry.rotateY(Math.PI);
     	// geometry.translate(0, 2.2, -24);
-    	const logo = new THREE.Mesh(geometry, this.materials.silver);
+    	const logo = new THREE.Mesh(geometry, this.materials.logoSilver);
     	parent.add(logo);
     	return logo;
     }
@@ -19754,7 +19968,7 @@ function (_Emittable) {
   }, {
     key: "getEnvMap__",
     value: function getEnvMap__(callback) {
-      var _this9 = this;
+      var _this10 = this;
 
       var loader = new THREE.TextureLoader().load('img/hdr-04.jpg', function (source, textureData) {
         // source.encoding = THREE.sRGBEncoding;
@@ -19768,7 +19982,7 @@ function (_Emittable) {
 
         var cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options); // pngBackground = cubemapGenerator.renderTarget;
 
-        var texture = cubemapGenerator.update(_this9.renderer);
+        var texture = cubemapGenerator.update(_this10.renderer);
         /*
         var pmremGenerator = new THREE.PMREMGenerator( cubeMapTexture );
         pmremGenerator.update( renderer );
@@ -19805,7 +20019,7 @@ function (_Emittable) {
   }, {
     key: "updateBackgroundColor__",
     value: function updateBackgroundColor__() {
-      var _this10 = this;
+      var _this11 = this;
 
       this.colorIndex = this.colorIndex || 0;
       this.colorIndex++;
@@ -19823,13 +20037,13 @@ function (_Emittable) {
         delay: 3,
         ease: Power2.easeInOut,
         onUpdate: function onUpdate() {
-          _this10.addons.children.forEach(function (x) {
+          _this11.addons.children.forEach(function (x) {
             x.material.color.setHex(color);
             x.material.needsUpdate = true;
           });
         },
         onComplete: function onComplete() {
-          _this10.updateBackgroundColor();
+          _this11.updateBackgroundColor();
         }
       });
     }
@@ -19847,12 +20061,12 @@ function (_Emittable) {
   }, {
     key: "addBoxes__",
     value: function addBoxes__(parent) {
-      var _this11 = this;
+      var _this12 = this;
 
       var group = new THREE.Group();
       group.visible = true;
       var boxes = new Array(12).fill(null).map(function (x, i) {
-        var box = _this11.addBox__(group);
+        var box = _this12.addBox__(group);
 
         var r = Math.PI * 2 / 12 * i;
         box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
@@ -19880,7 +20094,62 @@ THREE.ShadowShader = {
   fragmentShader: "\n\t\tuniform float amount;\n\t\tuniform sampler2D tDiffuse;\n\t\tvarying vec2 vUv;\n\n\t\tconst int blurSize = 5;\n\t\tconst int horizontalPass = 1;\t// 0 or 1 to indicate vertical or horizontal pass\n\t\tconst float sigma = 5.0;\t\t// The sigma value for the gaussian function: higher value means more blur\n\t\t\t\t\t\t\t\t\t\t// A good value for 9x9 is around 3 to 5\n\t\t\t\t\t\t\t\t\t\t// A good value for 7x7 is around 2.5 to 4\n\t\t\t\t\t\t\t\t\t\t// A good value for 5x5 is around 2 to 3.5\n\t\t\t\t\t\t\t\t\t\t// ... play around with this based on what you need :)\n\t\tconst vec2 texOffset = vec2(0.001, 0.001);\n\t\tconst float PI = 3.14159265;\n\n\t\tconst float MAX_ITERATIONS = 100.0;\n\n\t\tvec4 gaussian(sampler2D texture, vec2 p) {\n  \t\t\tfloat numBlurPixelsPerSide = float(blurSize / 2);\n  \t\t\t// Incremental Gaussian Coefficent Calculation (See GPU Gems 3 pp. 877 - 889)\n  \t\t\tvec3 incrementalGaussian;\n  \t\t\tincrementalGaussian.x = 1.0 / (sqrt(2.0 * PI) * sigma);\n  \t\t\tincrementalGaussian.y = exp(-0.5 / (sigma * sigma));\n  \t\t\tincrementalGaussian.z = incrementalGaussian.y * incrementalGaussian.y;\n\n  \t\t\tvec4 avgValue = vec4(0.0, 0.0, 0.0, 0.0);\n  \t\t\tfloat coefficientSum = 0.0;\n\n  \t\t\t// Take the central sample first...\n  \t\t\tavgValue += texture2D(texture, p) * incrementalGaussian.x;\n  \t\t\tcoefficientSum += incrementalGaussian.x;\n  \t\t\tincrementalGaussian.xy *= incrementalGaussian.yz;\n\n\t\t\t// Go through the remaining 8 vertical samples (4 on each side of the center)\n  \t\t\tfor (float i = 1.0; i <= MAX_ITERATIONS; i+= 1.0) {\n\t\t\t\tif (i >= numBlurPixelsPerSide) {\n\t\t\t\t\tbreak;\n\t\t\t\t}\n    \t\t\tavgValue += texture2D(texture, p - i * texOffset) * incrementalGaussian.x;\n    \t\t\tavgValue += texture2D(texture, p + i * texOffset) * incrementalGaussian.x;\n    \t\t\tcoefficientSum += 2.0 * incrementalGaussian.x;\n    \t\t\tincrementalGaussian.xy *= incrementalGaussian.yz;\n  \t\t\t}\n\n\t\t\treturn avgValue / coefficientSum;\n\t\t}\n\n\t\tvoid main() {\n\t\t\tvec4 color = texture2D(tDiffuse, vUv);\n\n\t\t\tvec4 shadow = gaussian(tDiffuse, vec2(vUv.x - 0.005, vUv.y + 0.01));\n\t\t\t// vec4 shadow = texture2D(tDiffuse, vec2(vUv.x - 0.005, vUv.y + 0.01));\n\t\t\tshadow.r = shadow.g = shadow.b = 0.0;\n\t\t\tshadow.a *= 0.15;\n\n\t\t\tvec3 rgb = color.rgb + shadow.rgb;\n\t\t\tfloat alpha = min(1.0, max(color.a, shadow.a));\n\t\t\tgl_FragColor = vec4(rgb, alpha);\n\t\t}\n\t"
 };
 
-},{"./three/emittable":203,"./three/orbit/orbit":205,"dat.gui":1}],203:[function(require,module,exports){
+},{"./three/const":203,"./three/emittable":204,"./three/orbit/orbit":206,"dat.gui":1}],203:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.cm = cm;
+exports.mm = mm;
+exports.deg = deg;
+exports.addCube = addCube;
+exports.ORIGIN = exports.POINTER_RADIUS = exports.POINT_RADIUS = exports.PANEL_RADIUS = exports.ROOM_RADIUS = exports.TEST_ENABLED = void 0;
+
+/* jshint esversion: 6 */
+
+/* global window, document */
+var TEST_ENABLED = false;
+exports.TEST_ENABLED = TEST_ENABLED;
+var ROOM_RADIUS = 200;
+exports.ROOM_RADIUS = ROOM_RADIUS;
+var PANEL_RADIUS = 100;
+exports.PANEL_RADIUS = PANEL_RADIUS;
+var POINT_RADIUS = 99;
+exports.POINT_RADIUS = POINT_RADIUS;
+var POINTER_RADIUS = 98;
+exports.POINTER_RADIUS = POINTER_RADIUS;
+var ORIGIN = new THREE.Vector3();
+exports.ORIGIN = ORIGIN;
+
+function cm(value) {
+  return value / 100;
+}
+
+function mm(value) {
+  return value / 1000;
+}
+
+function deg(value) {
+  return Math.PI / 180 * value;
+}
+
+function addCube(parent) {
+  var geometry = new THREE.BoxGeometry(1, 1, 1);
+  var material = new THREE.MeshBasicMaterial({
+    color: 0x00ff00
+  });
+  var cube = new THREE.Mesh(geometry, material);
+  parent.add(cube);
+  return cube;
+}
+
+THREE.Euler.prototype.add = function (euler) {
+  this.set(this.x + euler.x, this.y + euler.y, this.z + euler.z, this.order);
+  return this;
+};
+
+},{}],204:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19949,7 +20218,7 @@ function () {
 
 exports.default = Emittable;
 
-},{}],204:[function(require,module,exports){
+},{}],205:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20151,7 +20420,7 @@ function () {
 
 exports.default = DragListener;
 
-},{}],205:[function(require,module,exports){
+},{}],206:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20272,7 +20541,7 @@ function () {
 
 exports.default = Orbit;
 
-},{"./drag.listener":204}],206:[function(require,module,exports){
+},{"./drag.listener":205}],207:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20338,7 +20607,7 @@ function () {
 exports.default = LazyScriptDirective;
 LazyScriptDirective.factory.$inject = [];
 
-},{}],207:[function(require,module,exports){
+},{}],208:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20514,7 +20783,7 @@ function () {
 exports.default = LazyDirective;
 LazyDirective.factory.$inject = ['DomService'];
 
-},{"../shared/rect":216,"rxjs/operators":198}],208:[function(require,module,exports){
+},{"../shared/rect":217,"rxjs/operators":198}],209:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20666,7 +20935,7 @@ function () {
 exports.default = OverscrollDirective;
 OverscrollDirective.factory.$inject = ['DomService'];
 
-},{"../shared/rect":216}],209:[function(require,module,exports){
+},{"../shared/rect":217}],210:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20681,7 +20950,7 @@ function TrustedFilter($sce) {
   };
 }
 
-},{}],210:[function(require,module,exports){
+},{}],211:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20753,7 +21022,7 @@ ProductCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService'];
 var _default = ProductCtrl;
 exports.default = _default;
 
-},{}],211:[function(require,module,exports){
+},{}],212:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21022,7 +21291,7 @@ RootCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService', 'WishlistS
 var _default = RootCtrl;
 exports.default = _default;
 
-},{"rxjs":2,"rxjs/operators":198}],212:[function(require,module,exports){
+},{"rxjs":2,"rxjs/operators":198}],213:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21093,7 +21362,7 @@ function () {
 exports.default = ApiService;
 ApiService.factory.$inject = ['$http'];
 
-},{"rxjs":2}],213:[function(require,module,exports){
+},{"rxjs":2}],214:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21491,7 +21760,7 @@ DomService.scroll$ = function () {
 
 DomService.scrollAndRect$ = (0, _rxjs.combineLatest)(DomService.scroll$, DomService.windowRect$);
 
-},{"../shared/rect":216,"rxjs":2,"rxjs/internal/scheduler/animationFrame":161,"rxjs/operators":198}],214:[function(require,module,exports){
+},{"../shared/rect":217,"rxjs":2,"rxjs/internal/scheduler/animationFrame":161,"rxjs/operators":198}],215:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21594,7 +21863,7 @@ function () {
 exports.default = LocationService;
 LocationService.factory.$inject = ['$location'];
 
-},{}],215:[function(require,module,exports){
+},{}],216:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21649,7 +21918,7 @@ function () {
 exports.default = PromiseService;
 PromiseService.factory.$inject = ['$q'];
 
-},{}],216:[function(require,module,exports){
+},{}],217:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21797,7 +22066,7 @@ function () {
 
 exports.default = Rect;
 
-},{}],217:[function(require,module,exports){
+},{}],218:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21990,7 +22259,7 @@ function () {
 exports.default = StateService;
 StateService.factory.$inject = ['$timeout', '$rootScope'];
 
-},{}],218:[function(require,module,exports){
+},{}],219:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
