@@ -2,12 +2,14 @@
 
 import * as dat from 'dat.gui';
 import { cm, deg } from './three/const';
-import Emittable from './three/emittable';
+import Emittable from './three/interactive/emittable';
 import Orbit from './three/orbit/orbit';
+import { VR } from './three/vr/vr';
 
 const CAMERA_DISTANCE = 2;
+const VR_ENABLED = false;
+const COMPOSER_ENABLED = true; // !!!
 const USE_CUBE_CAMERA = true;
-const COLORS = [0xFFFFFF, 0xFC4445, 0xFEEE6, 0x55BCC9, 0x97CAEF, 0xCAFAFE];
 
 export default class Canvas extends Emittable {
 
@@ -79,6 +81,7 @@ export default class Canvas extends Emittable {
 		const camera = this.camera = this.addCamera();
 
 		const renderer = this.renderer = this.addRenderer();
+		const vr = this.vr = this.addVR();
 		const composer = this.composer = this.addComposer();
 
 		const controls = this.controls = this.addControls();
@@ -120,10 +123,33 @@ export default class Canvas extends Emittable {
 		const pixelRatio = this.pixelRatio = 1; // Math.max(window.devicePixelRatio, 1.4);
 		renderer.setPixelRatio(pixelRatio);
 		renderer.setSize(window.innerWidth, window.innerHeight);
-		renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+		if (VR_ENABLED) {
+			renderer.vr.enabled = true;
+		}
+		// renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 		// container.innerHTML = '';
 		this.container.appendChild(renderer.domElement);
 		return renderer;
+	}
+
+	addVR() {
+		if (VR_ENABLED) {
+			const vr = new VR(this.renderer, {
+				referenceSpaceType: 'local'
+			});
+			vr.on('presenting', () => {
+
+			});
+			vr.on('exit', () => {
+
+			});
+			vr.on('error', (error) => {
+				this.debugInfo.innerHTML = error;
+			});
+			this.emit('vrmode', vr.mode);
+			this.container.appendChild(vr.element);
+			return vr;
+		}
 	}
 
 	addScene() {
@@ -170,19 +196,21 @@ export default class Canvas extends Emittable {
 	}
 
 	addComposer() {
-		const renderer = this.renderer;
-		const scene = this.scene;
-		const camera = this.camera;
-		const composer = new THREE.EffectComposer(renderer);
-		// const renderPass = new THREE.RenderPass(scene, camera);
-		// composer.addPass(renderPass);
-		const taaRenderPass = new THREE.TAARenderPass(scene, camera);
-		taaRenderPass.sampleLevel = 2;
-		taaRenderPass.unbiased = true;
-		composer.addPass(taaRenderPass);
-		const shaderPass = new THREE.ShaderPass(THREE.ShadowShader);
-		composer.addPass(shaderPass);
-		return composer;
+		if (COMPOSER_ENABLED) {
+			const renderer = this.renderer;
+			const scene = this.scene;
+			const camera = this.camera;
+			const composer = new THREE.EffectComposer(renderer);
+			// const renderPass = new THREE.RenderPass(scene, camera);
+			// composer.addPass(renderPass);
+			const taaRenderPass = new THREE.TAARenderPass(scene, camera);
+			taaRenderPass.sampleLevel = 2;
+			taaRenderPass.unbiased = true;
+			composer.addPass(taaRenderPass);
+			const shaderPass = new THREE.ShaderPass(THREE.ShadowShader);
+			composer.addPass(shaderPass);
+			return composer;
+		}
 	}
 
 	addLights(parent) {
@@ -462,136 +490,6 @@ export default class Canvas extends Emittable {
 		toothbrush.rotation.set(0, deg(-60), deg(-60)); // 		tre quarti sinistra
 		parent.add(toothbrush);
 		return toothbrush;
-	}
-
-	tweenTau__(anchor) {
-		// [0, 0, Math.PI / 2]; // 										vertical left
-		// [0, 0, 0]; // 												horizontal right
-		// [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
-		// [Math.PI / 2, 0, 0]; // 										top right
-		// [0, Math.PI, Math.PI / 2]; // 								vertical right;
-		const sm = window.innerWidth < 1024;
-		let rotation, position;
-		switch (anchor) {
-			case 'hero':
-				position = [0, 0, 0];
-				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
-				this.zoom_ = 0;
-				this.container.classList.remove('lefted');
-				this.container.classList.remove('interactive');
-				break;
-			case 'manico':
-				position = [0, 0, 0];
-				rotation = [0, Math.PI, Math.PI / 2]; // 								vertical right;
-				this.zoom_ = 0;
-				if (sm) {
-					this.container.classList.add('lefted');
-				} else {
-					this.container.classList.remove('lefted');
-				}
-				this.container.classList.remove('interactive');
-				break;
-			case 'testina':
-				position = [0, 0, 0];
-				rotation = [0, -Math.PI / 2, Math.PI / 32]; // 							testina vista dietro
-				this.zoom_ = 0.2;
-				if (sm) {
-					this.container.classList.add('lefted');
-				} else {
-					this.container.classList.remove('lefted');
-				}
-				this.container.classList.remove('interactive');
-				break;
-			case 'setole':
-				position = [0, -3, 0];
-				rotation = [0, Math.PI - Math.PI / 4, Math.PI / 2]; // 					vertical right;
-				this.zoom_ = 0.4;
-				if (sm) {
-					this.container.classList.add('lefted');
-				} else {
-					this.container.classList.remove('lefted');
-				}
-				this.container.classList.remove('interactive');
-				break;
-			case 'scalare':
-				position = [0, -3, 0];
-				rotation = [0, Math.PI, Math.PI / 2]; // 								vertical right;
-				this.zoom_ = 0.4;
-				if (sm) {
-					this.container.classList.add('lefted');
-				} else {
-					this.container.classList.remove('lefted');
-				}
-				this.container.classList.remove('interactive');
-				break;
-			case 'italy':
-				position = [0, 0, 0];
-				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
-				this.zoom_ = 0;
-				if (sm) {
-					this.container.classList.add('lefted');
-				} else {
-					this.container.classList.remove('lefted');
-				}
-				this.container.classList.remove('interactive');
-				break;
-			case 'setole-tynex':
-				position = [0, -2, 0];
-				rotation = [0, 0, Math.PI / 2]; // 										vertical left;
-				this.zoom_ = 0.2;
-				if (sm) {
-					this.container.classList.add('lefted');
-				} else {
-					this.container.classList.remove('lefted');
-				}
-				this.container.classList.remove('interactive');
-				break;
-			case 'colors':
-				position = [0, 0, 0];
-				rotation = [0, Math.PI, 0]; // 											horizontal left
-				this.zoom_ = 0;
-				this.container.classList.remove('lefted');
-				this.container.classList.add('interactive');
-				break;
-			default:
-				position = [0, 0, 0];
-				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
-				this.zoom_ = 0;
-				this.container.classList.remove('lefted');
-				this.container.classList.remove('interactive');
-		}
-		const toothbrush = this.toothbrush;
-		TweenMax.to(toothbrush.position, 0.8, {
-			x: position[0],
-			y: position[1],
-			z: position[2],
-			ease: Power2.easeInOut,
-		});
-		TweenMax.to(toothbrush.rotation, 1.2, {
-			x: rotation[0],
-			y: rotation[1],
-			z: rotation[2],
-			ease: Power2.easeInOut,
-		});
-		TweenMax.to(this.camera, 0.6, {
-			zoom: this.zoom,
-			ease: Power2.easeInOut,
-			onUpdate: () => {
-				this.camera.updateProjectionMatrix();
-			}
-		});
-		if (this.controls && this.camera.position.x !== 0) {
-			TweenMax.to(this.camera.position, 0.6, {
-				x: 0,
-				y: 0,
-				z: CAMERA_DISTANCE,
-				ease: Power2.easeInOut,
-				onUpdate: () => {
-					this.controls.update();
-					this.camera.updateProjectionMatrix();
-				}
-			});
-		}
 	}
 
 	tweenTau(anchor) {
@@ -1105,6 +1003,138 @@ export default class Canvas extends Emittable {
 	}
 
 	/*
+
+	tweenTau__(anchor) {
+		// [0, 0, Math.PI / 2]; // 										vertical left
+		// [0, 0, 0]; // 												horizontal right
+		// [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
+		// [Math.PI / 2, 0, 0]; // 										top right
+		// [0, Math.PI, Math.PI / 2]; // 								vertical right;
+		const sm = window.innerWidth < 1024;
+		let rotation, position;
+		switch (anchor) {
+			case 'hero':
+				position = [0, 0, 0];
+				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
+				this.zoom_ = 0;
+				this.container.classList.remove('lefted');
+				this.container.classList.remove('interactive');
+				break;
+			case 'manico':
+				position = [0, 0, 0];
+				rotation = [0, Math.PI, Math.PI / 2]; // 								vertical right;
+				this.zoom_ = 0;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
+				this.container.classList.remove('interactive');
+				break;
+			case 'testina':
+				position = [0, 0, 0];
+				rotation = [0, -Math.PI / 2, Math.PI / 32]; // 							testina vista dietro
+				this.zoom_ = 0.2;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
+				this.container.classList.remove('interactive');
+				break;
+			case 'setole':
+				position = [0, -3, 0];
+				rotation = [0, Math.PI - Math.PI / 4, Math.PI / 2]; // 					vertical right;
+				this.zoom_ = 0.4;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
+				this.container.classList.remove('interactive');
+				break;
+			case 'scalare':
+				position = [0, -3, 0];
+				rotation = [0, Math.PI, Math.PI / 2]; // 								vertical right;
+				this.zoom_ = 0.4;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
+				this.container.classList.remove('interactive');
+				break;
+			case 'italy':
+				position = [0, 0, 0];
+				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
+				this.zoom_ = 0;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
+				this.container.classList.remove('interactive');
+				break;
+			case 'setole-tynex':
+				position = [0, -2, 0];
+				rotation = [0, 0, Math.PI / 2]; // 										vertical left;
+				this.zoom_ = 0.2;
+				if (sm) {
+					this.container.classList.add('lefted');
+				} else {
+					this.container.classList.remove('lefted');
+				}
+				this.container.classList.remove('interactive');
+				break;
+			case 'colors':
+				position = [0, 0, 0];
+				rotation = [0, Math.PI, 0]; // 											horizontal left
+				this.zoom_ = 0;
+				this.container.classList.remove('lefted');
+				this.container.classList.add('interactive');
+				break;
+			default:
+				position = [0, 0, 0];
+				rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
+				this.zoom_ = 0;
+				this.container.classList.remove('lefted');
+				this.container.classList.remove('interactive');
+		}
+		const toothbrush = this.toothbrush;
+		TweenMax.to(toothbrush.position, 0.8, {
+			x: position[0],
+			y: position[1],
+			z: position[2],
+			ease: Power2.easeInOut,
+		});
+		TweenMax.to(toothbrush.rotation, 1.2, {
+			x: rotation[0],
+			y: rotation[1],
+			z: rotation[2],
+			ease: Power2.easeInOut,
+		});
+		TweenMax.to(this.camera, 0.6, {
+			zoom: this.zoom,
+			ease: Power2.easeInOut,
+			onUpdate: () => {
+				this.camera.updateProjectionMatrix();
+			}
+		});
+		if (this.controls && this.camera.position.x !== 0) {
+			TweenMax.to(this.camera.position, 0.6, {
+				x: 0,
+				y: 0,
+				z: CAMERA_DISTANCE,
+				ease: Power2.easeInOut,
+				onUpdate: () => {
+					this.controls.update();
+					this.camera.updateProjectionMatrix();
+				}
+			});
+		}
+	}
+
+
 	addLogo__(parent) {
 		const geometry = new THREE.PlaneGeometry(24, 3, 3, 1);
 		geometry.rotateX(-Math.PI / 2);
@@ -1117,6 +1147,7 @@ export default class Canvas extends Emittable {
 	}
 	*/
 
+	/*
 	addComposer__() {
 		const renderer = this.renderer;
 		const scene = this.scene;
@@ -1138,130 +1169,121 @@ export default class Canvas extends Emittable {
 		composer.addPass(saoPass);
 		return composer;
 	}
+*/
 
-	addComposer___() {
-		const renderer = this.renderer;
-		const scene = this.scene;
-		const camera = this.camera;
-		const composer = new THREE.EffectComposer(renderer);
-		const ssaoPass = new THREE.SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
-		ssaoPass.kernelRadius = 16;
-		composer.addPass(ssaoPass);
-		return composer;
-	}
+	/*
+		addComposer___() {
+			const renderer = this.renderer;
+			const scene = this.scene;
+			const camera = this.camera;
+			const composer = new THREE.EffectComposer(renderer);
+			const ssaoPass = new THREE.SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
+			ssaoPass.kernelRadius = 16;
+			composer.addPass(ssaoPass);
+			return composer;
+		}
+	*/
 
-	getEnvMap___(callback) {
-		const textures = [
-			'img/cubemaps/lights/',
-			'img/cubemaps/park/',
-			'img/cubemaps/pond/',
-			'img/cubemaps/lake/',
-			'img/cubemaps/square/'
-		];
-		const index = 0;
-		const urls = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg'];
-		// const texture = THREE.ImageUtils.loadTextureCube(urls, new THREE.CubeRefractionMapping(), render);
-		const loader = new THREE.CubeTextureLoader().setPath(textures[index]).load(urls, (texture, textureData) => {
-			texture.mapping = THREE.CubeRefractionMapping;
-			if (typeof callback === 'function') {
-				callback(texture, textureData);
-			}
-		});
-		return loader;
-	}
+	/*
+		getEnvMap___(callback) {
+			const textures = [
+				'img/cubemaps/lights/',
+				'img/cubemaps/park/',
+				'img/cubemaps/pond/',
+				'img/cubemaps/lake/',
+				'img/cubemaps/square/'
+			];
+			const index = 0;
+			const urls = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg'];
+			// const texture = THREE.ImageUtils.loadTextureCube(urls, new THREE.CubeRefractionMapping(), render);
+			const loader = new THREE.CubeTextureLoader().setPath(textures[index]).load(urls, (texture, textureData) => {
+				texture.mapping = THREE.CubeRefractionMapping;
+				if (typeof callback === 'function') {
+					callback(texture, textureData);
+				}
+			});
+			return loader;
+		}
+	*/
 
-	getEnvMap__(callback) {
-		const loader = new THREE.TextureLoader().load('img/hdr-04.jpg', (source, textureData) => {
-			// source.encoding = THREE.sRGBEncoding;
-			source.mapping = THREE.UVMapping;
-			const options = {
-				resolution: 1024,
-				generateMipmaps: true,
-				minFilter: THREE.LinearMipMapLinearFilter,
-				magFilter: THREE.LinearFilter
-			};
-			// this.scene.background = new THREE.CubemapGenerator(this.renderer).fromEquirectangular(source, options);
-			const cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options);
-			// pngBackground = cubemapGenerator.renderTarget;
-			const texture = cubemapGenerator.update(this.renderer);
-			/*
-			var pmremGenerator = new THREE.PMREMGenerator( cubeMapTexture );
-			pmremGenerator.update( renderer );
-			var pmremCubeUVPacker = new THREE.PMREMCubeUVPacker( pmremGenerator.cubeLods );
-			pmremCubeUVPacker.update( renderer );
-			pngCubeRenderTarget = pmremCubeUVPacker.CubeUVRenderTarget;
-			*/
-			source.dispose();
-			/*
-			pmremGenerator.dispose();
-			pmremCubeUVPacker.dispose();
-			*/
-			texture.mapping = THREE.CubeReflectionMapping;
-			texture.mapping = THREE.CubeRefractionMapping;
-			/*
-			texture.minFilter = THREE.NearestFilter;
-			texture.magFilter = THREE.NearestFilter;
-			texture.minFilter = THREE.LinearFilter;
-			texture.magFilter = THREE.LinearFilter;
-			*/
-			// texture.generateMipmaps = false;
-			// texture.flipY = true;
-			// this.renderer.toneMappingExposure = 2.0;
-			if (typeof callback === 'function') {
-				callback(texture);
-			}
-		});
-		//
-		return loader;
-	}
+	/*
+		getEnvMap__(callback) {
+			const loader = new THREE.TextureLoader().load('img/hdr-04.jpg', (source, textureData) => {
+				// source.encoding = THREE.sRGBEncoding;
+				source.mapping = THREE.UVMapping;
+				const options = {
+					resolution: 1024,
+					generateMipmaps: true,
+					minFilter: THREE.LinearMipMapLinearFilter,
+					magFilter: THREE.LinearFilter
+				};
+				// this.scene.background = new THREE.CubemapGenerator(this.renderer).fromEquirectangular(source, options);
+				const cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options);
+				// pngBackground = cubemapGenerator.renderTarget;
+				const texture = cubemapGenerator.update(this.renderer);
+				source.dispose();
+				texture.mapping = THREE.CubeReflectionMapping;
+				texture.mapping = THREE.CubeRefractionMapping;
+				// texture.generateMipmaps = false;
+				// texture.flipY = true;
+				// this.renderer.toneMappingExposure = 2.0;
+				if (typeof callback === 'function') {
+					callback(texture);
+				}
+			});
+			//
+			return loader;
+		}
+	*/
 
-	updateBackgroundColor__() {
-		this.colorIndex = this.colorIndex || 0;
-		this.colorIndex++;
-		this.colorIndex = this.colorIndex % COLORS.length;
-		const color = COLORS[this.colorIndex];
-		/*
-		const r = Math.floor(Math.random() * 255);
-		const g = Math.floor(Math.random() * 255);
-		const b = Math.floor(Math.random() * 255);
-		*/
-		TweenMax.to(this.renderer.domElement, 0.7, {
-			backgroundColor: color, // `rgba(${r},${g},${b},1)`,
-			delay: 3,
-			ease: Power2.easeInOut,
-			onUpdate: () => {
-				this.addons.children.forEach(x => {
-					x.material.color.setHex(color);
-					x.material.needsUpdate = true;
-				});
-			},
-			onComplete: () => {
-				this.updateBackgroundColor();
-			}
-		});
-	}
+	/*
+		updateBackgroundColor__() {
+			this.colorIndex = this.colorIndex || 0;
+			this.colorIndex++;
+			this.colorIndex = this.colorIndex % COLORS.length;
+			const color = COLORS[this.colorIndex];
+			TweenMax.to(this.renderer.domElement, 0.7, {
+				backgroundColor: color, // `rgba(${r},${g},${b},1)`,
+				delay: 3,
+				ease: Power2.easeInOut,
+				onUpdate: () => {
+					this.addons.children.forEach(x => {
+						x.material.color.setHex(color);
+						x.material.needsUpdate = true;
+					});
+				},
+				onComplete: () => {
+					this.updateBackgroundColor();
+				}
+			});
+		}
+	*/
 
-	addBox__(parent) {
-		const geometry = new THREE.BoxGeometry(600, 30, 30);
-		const material = new THREE.MeshBasicMaterial({ color: 0xafb3bc });
-		const cube = new THREE.Mesh(geometry, material);
-		parent.add(cube);
-		return cube;
-	}
+	/*
+		addBox__(parent) {
+			const geometry = new THREE.BoxGeometry(600, 30, 30);
+			const material = new THREE.MeshBasicMaterial({ color: 0xafb3bc });
+			const cube = new THREE.Mesh(geometry, material);
+			parent.add(cube);
+			return cube;
+		}
+	*/
 
-	addBoxes__(parent) {
-		const group = new THREE.Group();
-		group.visible = true;
-		const boxes = new Array(12).fill(null).map((x, i) => {
-			const box = this.addBox__(group);
-			const r = Math.PI * 2 / 12 * i;
-			box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
-			return box;
-		});
-		parent.add(group);
-		return group;
-	}
+	/*
+		addBoxes__(parent) {
+			const group = new THREE.Group();
+			group.visible = true;
+			const boxes = new Array(12).fill(null).map((x, i) => {
+				const box = this.addBox__(group);
+				const r = Math.PI * 2 / 12 * i;
+				box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
+				return box;
+			});
+			parent.add(group);
+			return group;
+		}
 
+	*/
 }
 
 THREE.ShadowShader = {

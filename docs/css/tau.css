@@ -2837,11 +2837,6 @@ footer img {
             align-items: flex-start;
     cursor: pointer; }
     .section--product-info .listing--info .listing__item .bullet {
-      position: absolute;
-      left: -25px;
-      top: 8px;
-      width: 8px;
-      height: 8px;
       border-radius: 50%;
       -webkit-transition: border ease-in-out 350ms;
       transition: border ease-in-out 350ms; }
@@ -2876,45 +2871,53 @@ footer img {
               animation: pulse 1s infinite; }
 
 @media (min-width: 1024px) {
+  .section--product-info .listing--info .listing__item .bullet {
+    position: absolute;
+    width: 8px;
+    height: 8px; }
+  .section--product-info .listing--info .listing__item .title:before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -4px;
+    width: calc(100% + 9px);
+    height: calc(100% + 1px);
+    background: #e11e26;
+    -webkit-transform: scale(0, 1);
+            transform: scale(0, 1);
+    -webkit-transform-origin: 0 50%;
+            transform-origin: 0 50%;
+    -webkit-transition: -webkit-transform ease-out 350ms;
+    transition: -webkit-transform ease-out 350ms;
+    transition: transform ease-out 350ms;
+    transition: transform ease-out 350ms, -webkit-transform ease-out 350ms; }
+  .section--product-info .listing--info .listing__item .title:before {
+    -webkit-transform-origin: 100% 50%;
+            transform-origin: 100% 50%; }
+  .section--product-info .listing--info .listing__item.active .title {
+    color: #ffffff; }
+    .section--product-info .listing--info .listing__item.active .title:before {
+      -webkit-transform: scale(1, 1);
+              transform: scale(1, 1); }
+  .section--product-info .listing--info .listing__item:nth-child(even) .bullet {
+    left: -25px;
+    top: 8px;
+    background: #e11e26; }
   .section--product-info .listing--info .listing__item:nth-child(odd) {
     -webkit-box-align: end;
         -ms-flex-align: end;
             align-items: flex-end; }
     .section--product-info .listing--info .listing__item:nth-child(odd) .bullet {
-      left: auto;
       right: -25px;
+      top: 8px;
       background: #e11e26; }
-      .section--product-info .listing--info .listing__item:nth-child(odd) .bullet:before {
-        width: 8px;
-        height: 8px; }
     .section--product-info .listing--info .listing__item:nth-child(odd) .title {
       text-align: right; }
-      .section--product-info .listing--info .listing__item:nth-child(odd) .title:before {
-        content: '';
-        position: absolute;
-        top: -2px;
-        left: -4px;
-        width: calc(100% + 9px);
-        height: calc(100% + 1px);
-        background: #e11e26;
-        -webkit-transform: scale(0, 1);
-                transform: scale(0, 1);
-        -webkit-transform-origin: 0 50%;
-                transform-origin: 0 50%;
-        -webkit-transition: -webkit-transform ease-out 350ms;
-        transition: -webkit-transform ease-out 350ms;
-        transition: transform ease-out 350ms;
-        transition: transform ease-out 350ms, -webkit-transform ease-out 350ms; }
       .section--product-info .listing--info .listing__item:nth-child(odd) .title:before {
         -webkit-transform-origin: 100% 50%;
                 transform-origin: 100% 50%; }
     .section--product-info .listing--info .listing__item:nth-child(odd) .abstract {
-      text-align: right; }
-    .section--product-info .listing--info .listing__item:nth-child(odd).active .title {
-      color: #ffffff; }
-      .section--product-info .listing--info .listing__item:nth-child(odd).active .title:before {
-        -webkit-transform: scale(1, 1);
-                transform: scale(1, 1); } }
+      text-align: right; } }
 
 @media (max-width: 1023.98px) {
   .section--product-info .title {
@@ -3034,7 +3037,7 @@ footer img {
     font-weight: 700;
     color: #121212;
     text-transform: uppercase;
-    margin-right: 40px;
+    margin-right: 20px;
     line-height: 1;
     padding-top: 3px; }
 
@@ -3147,6 +3150,18 @@ footer img {
     padding: 14px; }
   .section--product-colors .nav--colors {
     padding-bottom: 20px; } }
+
+.btn--vr {
+  display: inline-block; }
+  .btn--vr .icon--vr {
+    width: 50px;
+    height: 50px;
+    -webkit-transition: fill ease-in-out 350ms;
+    transition: fill ease-in-out 350ms; }
+  .btn--vr .icon--vr, .btn--vr:active .icon--vr, .btn--vr:focus .icon--vr, .btn--vr:hover .icon--vr, .btn--vr:visited .icon--vr {
+    fill: #bbb; }
+  .btn--vr.active:hover .icon--vr {
+    fill: #E11E26; }
 
 [canvas] {
   position: relative;

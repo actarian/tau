@@ -2,12 +2,15 @@
 
 import Rect from '../shared/rect';
 import Canvas from './canvas/canvas';
+import { VR_MODE } from './canvas/three/vr/vr';
 
 export default class CanvasDirective {
 
 	constructor(
+		$timeout,
 		DomService
 	) {
+		this.$timeout = $timeout;
 		this.domService = DomService;
 		this.restrict = 'A';
 		this.scope = {
@@ -24,6 +27,22 @@ export default class CanvasDirective {
 			colors: []
 		};
 		const canvas = new Canvas(inner, product);
+		canvas.on('vrmode', (vrmode) => {
+			let vrMode;
+			switch (vrmode) {
+				case VR_MODE.VR:
+				case VR_MODE.XR:
+					vrMode = 'vrmode--enabled';
+					break;
+				case VR_MODE.NONE:
+					vrMode = 'vrmode--none';
+					break;
+			}
+			this.$timeout(() => {
+				scope.$root.vrmode = vrmode;
+			});
+			document.body.classList.add(vrMode);
+		});
 		canvas.on('load', () => {
 			node.classList.add('loaded');
 		});
@@ -75,10 +94,10 @@ export default class CanvasDirective {
 		});
 	}
 
-	static factory(DomService) {
-		return new CanvasDirective(DomService);
+	static factory($timeout, DomService) {
+		return new CanvasDirective($timeout, DomService);
 	}
 
 }
 
-CanvasDirective.factory.$inject = ['DomService'];
+CanvasDirective.factory.$inject = ['$timeout', 'DomService'];

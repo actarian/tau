@@ -1,6 +1,7 @@
 ﻿/* jshint esversion: 6 */
 
 import CanvasDirective from './directives/canvas.directive';
+import { VR_MODE } from './directives/canvas/three/vr/vr';
 import LazyScriptDirective from './directives/lazy-script.directive';
 import LazyDirective from './directives/lazy.directive';
 import OverscrollDirective from './directives/overscroll.directive';
@@ -40,5 +41,10 @@ app.controller('RootCtrl', RootCtrl)
 	.controller('ProductCtrl', ProductCtrl);
 
 app.filter('trusted', ['$sce', TrustedFilter]);
+
+app.run(['$rootScope', ($rootScope) => {
+	$rootScope.vrmodes = VR_MODE;
+	$rootScope.vrmode = VR_MODE.NONE;
+}]);
 
 export default MODULE_NAME;

@@ -124,6 +124,17 @@
 									<li class="color color--{{item.key}}" ng-class="{ active: productCtrl.color == item}" ng-click="productCtrl.color = item" ng-repeat="item in productCtrl.product.colors track by $index"><span class="bullet"></span><span class="name" ng-bind="item.name"></span></li>
 								</ul>
 							</div>
+							<div class="group--nav">
+								<div class="label">
+									<span class="label--enabled" ng-if="vrmode == vrmodes.NONE">VR non connesso:</span>
+									<span class="label--disabled" ng-if="vrmode != vrmodes.NONE">Provalo in VR:</span>
+								</div>
+								<button class="btn btn--vr" ng-class="{ active: vrmode != vrmodes.NONE }">
+									<svg class="icon icon--vr">
+										<use xlink:href="#icon--vr"></use>
+									</svg>
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
