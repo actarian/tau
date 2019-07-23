@@ -1,8 +1,8 @@
 /* jshint esversion: 6 */
 
 import Rect from '../shared/rect';
-import Canvas from './canvas/canvas';
-import { VR_MODE } from './canvas/three/vr/vr';
+import Canvas from '../threejs/canvas';
+import { VR_MODE } from '../threejs/vr/vr';
 
 export default class CanvasDirective {
 
@@ -19,13 +19,18 @@ export default class CanvasDirective {
 	}
 
 	link(scope, element, attributes, controller) {
+		if (!scope.product) {
+			return;
+		}
 		const node = element[0];
 		const inner = node.querySelector('.inner');
+		/*
 		const product = scope.product || {
-			model: 'models/professional-27.fbx',
+			model: 'threejs/models/toothbrush/....fbx',
 			bristles: [],
 			colors: []
 		};
+		*/
 		const canvas = new Canvas(inner, product);
 		canvas.on('vrmode', (vrmode) => {
 			let vrMode;

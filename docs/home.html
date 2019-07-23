@@ -84,35 +84,7 @@
 	<link href="https://fonts.googleapis.com/css?family=Poppins:300,500,600,700&display=swap" rel="stylesheet">
 	<link href="fonts/sofia/stylesheet.css" rel="stylesheet">
 	<link href="fonts/fontawesome/fontawesome.css" rel="stylesheet">
-	<link rel="stylesheet" type="text/css" href="slick/slick.css"/>
-	
-
-	<!-- angular puo essere rimosso caricando i partials server side
-	<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.8/angular.min.js"></script>
-	angular puo essere rimosso caricando i partials server side -->
-
-	<script type="x-shader/x-vertex" id="vertexshader">
-		attribute float size;
-		attribute vec3 customColor;
-		varying vec3 vColor;
-		void main() {
-			vColor = customColor;
-			vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-			gl_PointSize = size * ( 300.0 / -mvPosition.z );
-			gl_Position = projectionMatrix * mvPosition;
-		}
-	</script>
-	<script type="x-shader/x-fragment" id="fragmentshader">
-		uniform vec3 color;
-		uniform sampler2D texture;
-		varying vec3 vColor;
-		void main() {
-			gl_FragColor = vec4( color * vColor, 1.0 );
-			gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
-			if ( gl_FragColor.a < ALPHATEST ) discard;
-		}
-	</script>
-
+	<link rel="stylesheet" type="text/css" href="slick/slick.css" />
 </head>
 
 <body>
@@ -134,58 +106,59 @@
 	<script type="text/javascript" src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 	<script type="text/javascript" src="slick/slick.min.js"></script>
 	<script type="text/javascript" src="js/main.js"></script>
-	
+
 	<script>
-	$(document).ready(function(){
-		//Slide Prodotti Home
-		$('.section--home-slide-prodotti .slide').slick({
-			arrows: false,
-			dots: true,
-			slidesToShow: 1,
-			slidesToScroll: 1,
-			centerMode: true,
-			focusOnSelect: true,
-			responsive: [
-			{
-			breakpoint: 1441,
-				settings: {
-					slidesToShow: 2,
-					slidesToScroll: 1
-				}
+		$(document).ready(function() {
+			//Slide Prodotti Home
+			$('.section--home-slide-prodotti .slide').slick({
+				arrows: false,
+				dots: true,
+				slidesToShow: 1,
+				slidesToScroll: 1,
+				centerMode: true,
+				focusOnSelect: true,
+				responsive: [
+					{
+						breakpoint: 1441,
+						settings: {
+							slidesToShow: 2,
+							slidesToScroll: 1
+						}
 			},
-			{
-			breakpoint: 1025,
-				settings: {
-					slidesToShow: 2,
-					slidesToScroll: 2
-				}
+					{
+						breakpoint: 1025,
+						settings: {
+							slidesToShow: 2,
+							slidesToScroll: 2
+						}
 			},
-			{
-			breakpoint: 767,
-				settings: {
-					slidesToShow: 1,
-					slidesToScroll: 1
-				}
+					{
+						breakpoint: 767,
+						settings: {
+							slidesToShow: 1,
+							slidesToScroll: 1
+						}
 			}
 		]
-		});
-		//Slide Testimonial Home
-		$('.section--home-testimonial .slide').slick({
-			arrows: false,
-			dots: true,
-			slidesToShow: 1,
-			slidesToScroll: 1,
-			responsive: [
-			{
-			breakpoint: 767,
-				settings: {
-					slidesToShow: 1,
-					slidesToScroll: 1
-				}
+			});
+			//Slide Testimonial Home
+			$('.section--home-testimonial .slide').slick({
+				arrows: false,
+				dots: true,
+				slidesToShow: 1,
+				slidesToScroll: 1,
+				responsive: [
+					{
+						breakpoint: 767,
+						settings: {
+							slidesToShow: 1,
+							slidesToScroll: 1
+						}
 			}
 		]
+			});
 		});
-	});
+
 	</script>
 </body>
 

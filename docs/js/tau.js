@@ -18175,7 +18175,7 @@ exports.default = void 0;
 
 var _canvas = _interopRequireDefault(require("./directives/canvas.directive"));
 
-var _vr = require("./directives/canvas/three/vr/vr");
+var _vr = require("./threejs/vr/vr");
 
 var _lazyScript = _interopRequireDefault(require("./directives/lazy-script.directive"));
 
@@ -18220,7 +18220,7 @@ app.run(['$rootScope', $rootScope => {
 var _default = MODULE_NAME;
 exports.default = _default;
 
-},{"./directives/canvas.directive":201,"./directives/canvas/three/vr/vr":207,"./directives/lazy-script.directive":208,"./directives/lazy.directive":209,"./directives/overscroll.directive":210,"./filters/trusted.filter":211,"./product/product.controller":212,"./root.controller":213,"./services/api.service":214,"./services/dom.service":215,"./shared/location.service":216,"./shared/promise.service":217,"./shared/state.service":219,"./shared/storage.service":220}],201:[function(require,module,exports){
+},{"./directives/canvas.directive":201,"./directives/lazy-script.directive":202,"./directives/lazy.directive":203,"./directives/overscroll.directive":204,"./filters/trusted.filter":205,"./product/product.controller":206,"./root.controller":207,"./services/api.service":208,"./services/dom.service":209,"./shared/location.service":210,"./shared/promise.service":211,"./shared/state.service":213,"./shared/storage.service":214,"./threejs/vr/vr":221}],201:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18230,9 +18230,9 @@ exports.default = void 0;
 
 var _rect = _interopRequireDefault(require("../shared/rect"));
 
-var _canvas = _interopRequireDefault(require("./canvas/canvas"));
+var _canvas = _interopRequireDefault(require("../threejs/canvas"));
 
-var _vr = require("./canvas/three/vr/vr");
+var _vr = require("../threejs/vr/vr");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18248,13 +18248,20 @@ class CanvasDirective {
   }
 
   link(scope, element, attributes, controller) {
+    if (!scope.product) {
+      return;
+    }
+
     const node = element[0];
     const inner = node.querySelector('.inner');
+    /*
     const product = scope.product || {
-      model: 'models/professional-27.fbx',
-      bristles: [],
-      colors: []
+    	model: 'threejs/models/toothbrush/....fbx',
+    	bristles: [],
+    	colors: []
     };
+    */
+
     const canvas = new _canvas.default(inner, product);
     canvas.on('vrmode', vrmode => {
       let vrMode;
@@ -18339,7 +18346,1821 @@ class CanvasDirective {
 exports.default = CanvasDirective;
 CanvasDirective.factory.$inject = ['$timeout', 'DomService'];
 
-},{"../shared/rect":218,"./canvas/canvas":202,"./canvas/three/vr/vr":207}],202:[function(require,module,exports){
+},{"../shared/rect":212,"../threejs/canvas":215,"../threejs/vr/vr":221}],202:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/* jshint esversion: 6 */
+class LazyScriptDirective {
+  constructor() {
+    this.restrict = 'A';
+    this.scope = false;
+  }
+
+  link(scope, element, attributes, controller) {
+    // if (attributes.type === 'text/javascript-lazy') {
+    if (attributes.src !== undefined) {
+      fetch(attributes.src, {
+        mode: 'no-cors'
+      }).then(response => {
+        const code = response.text();
+
+        try {
+          new Function(code)();
+        } catch (error) {
+          console.log('LazyScriptDirective.error', error);
+        }
+      });
+    } else {
+      const code = element.text();
+
+      try {
+        new Function(code)();
+      } catch (error) {
+        console.log('LazyScriptDirective.error', error);
+      }
+    } // }
+    // element.on('$destroy', () => {});
+
+  }
+
+  static factory() {
+    return new LazyScriptDirective();
+  }
+
+}
+
+exports.default = LazyScriptDirective;
+LazyScriptDirective.factory.$inject = [];
+
+},{}],203:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _operators = require("rxjs/operators");
+
+var _rect = _interopRequireDefault(require("../shared/rect"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* jshint esversion: 6 */
+// let INDEX = 0;
+class LazyDirective {
+  // src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" lazy lazy-src="
+  constructor(DomService) {
+    this.domService = DomService;
+    this.restrict = 'A';
+    this.scope = {
+      src: "@?",
+      srcset: "@?",
+      backgroundSrc: "@?"
+    };
+  }
+
+  link(scope, element, attributes, controller) {
+    const image = element[0];
+    image.classList.remove('lazying', 'lazyed'); // image.index = INDEX++;
+    // empty picture
+    // image.setAttribute('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
+
+    const subscription = this.domService.appear$(image).subscribe(event => {
+      if (!image.classList.contains('lazying')) {
+        image.classList.add('lazying');
+        this.onAppearsInViewport(image, scope, attributes);
+      }
+    });
+    /*
+    element.subscription = this.lazy$(image).subscribe(intersection => {
+    	if (intersection.y > -0.5) {
+    		if (!image.classList.contains('lazyed')) {
+    			image.classList.add('lazyed');
+    			this.onAppearsInViewport(image, scope, attributes);
+    			setTimeout(() => {
+    				element.subscription.unsubscribe();
+    				element.subscription = null;
+    			}, 1);
+    		}
+    	}
+    });
+    */
+
+    element.on('$destroy', () => {
+      subscription.unsubscribe();
+    });
+  }
+
+  getThronSrc(image, src) {
+    const splitted = src.split('/std/');
+
+    if (splitted.length > 1) {
+      // Contenuto Thron
+      if (splitted[1].match(/^0x0\//)) {
+        // se non sono state richieste dimensioni specifiche, imposto le dimensioni necessarie alla pagina
+        src = splitted[0] + '/std/' + Math.floor(image.width * 1.1).toString() + 'x' + Math.floor(image.height * 1.1).toString() + splitted[1].substr(3);
+
+        if (!src.match(/[&?]scalemode=?/)) {
+          src += src.indexOf('?') !== -1 ? '&' : '?';
+          src += 'scalemode=centered';
+        }
+
+        if (window.devicePixelRatio > 1) {
+          src += src.indexOf('?') !== -1 ? '&' : '?';
+          src += 'dpr=' + Math.floor(window.devicePixelRatio * 100).toString();
+        }
+      }
+    }
+
+    return src;
+  }
+
+  onAppearsInViewport(image, scope, attributes) {
+    if (scope.srcset) {
+      // attributes.$set('srcset', scope.srcset);
+      image.setAttribute('srcset', scope.srcset);
+      image.removeAttribute('data-srcset');
+
+      if (scope.src) {
+        // attributes.$set('src', scope.src);
+        image.setAttribute('src', this.getThronSrc(image, scope.src));
+        image.removeAttribute('data-src');
+      }
+
+      image.classList.remove('lazying');
+      image.classList.add('lazyed');
+    } else if (scope.src) {
+      image.removeAttribute('data-src');
+      const src = this.getThronSrc(image, scope.src);
+      this.onImagePreload(image, src, srcOrUndefined => {
+        // image.setAttribute('src', src);
+        image.classList.remove('lazying');
+        image.classList.add('lazyed');
+      });
+    } else if (scope.backgroundSrc) {
+      image.setStyle('background-image', `url(${this.getThronSrc(image, scope.backgroundSrc)})`);
+      image.removeAttribute('data-background-src');
+      image.classList.remove('lazying');
+      image.classList.add('lazyed');
+    }
+  }
+
+  lazy$(node) {
+    return this.domService.rafAndRect$().pipe((0, _operators.map)(datas => {
+      const windowRect = datas[1];
+
+      const rect = _rect.default.fromNode(node);
+
+      const intersection = rect.intersection(windowRect);
+      return intersection;
+    }));
+  }
+
+  onImagePreload(image, src, callback) {
+    // const img = new Image();
+    image.onload = () => {
+      image.onload = image.onerror = null;
+
+      if (typeof callback === 'function') {
+        // setTimeout(() => {
+        callback(image.src); // }, 10);
+      }
+    };
+
+    image.onerror = function (e) {
+      image.onload = image.onerror = null;
+      image.src = 'data:image/png;base64,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'; // setTimeout(() => {
+
+      callback(); // }, 10);
+    };
+
+    image.src = src;
+  }
+
+  static factory(DomService) {
+    return new LazyDirective(DomService);
+  }
+
+}
+
+exports.default = LazyDirective;
+LazyDirective.factory.$inject = ['DomService'];
+
+},{"../shared/rect":212,"rxjs/operators":198}],204:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _rect = _interopRequireDefault(require("../shared/rect"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* jshint esversion: 6 */
+const MODES = {
+  NONE: 0,
+  FIXED: 1,
+  ABSOLUTE: 2
+};
+
+class OverscrollDirective {
+  constructor(DomService) {
+    this.domService = DomService;
+    this.restrict = 'A';
+  }
+
+  link(scope, element, attributes, controller) {
+    const node = element[0];
+    const container = node.querySelector('.container');
+    const overscroll = attributes.overscroll ? parseInt(attributes.overscroll) : 100;
+    const anchors = [...node.querySelectorAll('[data-overscroll-anchor]')];
+
+    const onClick = event => {
+      const index = anchors.indexOf(event.currentTarget);
+
+      const rect = _rect.default.fromNode(node);
+
+      const h = container.offsetHeight;
+      const d = h / 100 * overscroll;
+      const s = d / anchors.length;
+      const top = window.pageYOffset + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
+
+      window.scrollTo(0, top);
+    };
+
+    anchors.forEach(x => {
+      x.addEventListener('click', onClick);
+    });
+    let windowRectWidth;
+    const subscription = this.domService.scrollIntersection$(node).subscribe(event => {
+      const rect = event.rect;
+      const top = rect.top;
+
+      if (event.windowRect.width !== windowRectWidth) {
+        windowRectWidth = event.windowRect.width;
+        container.setAttribute('style', '');
+      }
+
+      const h = container.offsetHeight;
+      const d = h / 100 * overscroll;
+      node.setAttribute('style', `position: relative; height: ${h + d}px;`);
+      let y = 0;
+
+      if (top < 0) {
+        y = Math.min(-top, d);
+      }
+
+      const containerRect = _rect.default.fromNode(container);
+
+      if (y === d) {
+        if (element.mode !== MODES.ABSOLUTE) {
+          element.mode = MODES.ABSOLUTE;
+          container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
+        }
+      } else if (y > 0) {
+        if (element.mode !== MODES.FIXED) {
+          element.mode = MODES.FIXED;
+          container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
+        }
+      } else {
+        if (element.mode !== MODES.NONE) {
+          element.mode = MODES.NONE;
+          container.setAttribute('style', '');
+        }
+      }
+
+      if (top < event.windowRect.height / 4 && rect.bottom > event.windowRect.height / 4) {
+        const index = Math.floor(y / d * anchors.length);
+        anchors.forEach((x, i) => {
+          if (i === index) {
+            const value = x.getAttribute('data-overscroll-anchor');
+
+            if (scope.$root.anchor !== value) {
+              scope.$root.$broadcast('onAnchor', value);
+            }
+
+            if (!x.classList.contains('active')) {
+              x.classList.add('active');
+            }
+          } else {
+            if (x.classList.contains('active')) {
+              x.classList.remove('active');
+            }
+          }
+        });
+      } else {
+        anchors.forEach(x => {
+          if (x.classList.contains('active')) {
+            x.classList.remove('active');
+          }
+        });
+      }
+    });
+    element.on('$destroy', () => {
+      subscription.unsubscribe();
+      anchors.forEach(x => {
+        x.removeEventListener('click', onClick);
+      });
+    });
+  }
+
+  static factory(DomService) {
+    return new OverscrollDirective(DomService);
+  }
+
+}
+
+exports.default = OverscrollDirective;
+OverscrollDirective.factory.$inject = ['DomService'];
+
+},{"../shared/rect":212}],205:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.TrustedFilter = TrustedFilter;
+
+/* jshint esversion: 6 */
+function TrustedFilter($sce) {
+  return url => {
+    return $sce.trustAsResourceUrl(url);
+  };
+}
+
+},{}],206:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/* jshint esversion: 6 */
+class ProductCtrl {
+  constructor($scope, $timeout, DomService, ApiService) {
+    this.$scope = $scope;
+    this.$timeout = $timeout;
+    this.domService = DomService;
+    this.apiService = ApiService;
+    this.product = window.product || {
+      bristles: [],
+      colors: []
+    };
+
+    if (this.product.bristles.length) {
+      this.bristle = this.product.bristles[0];
+    }
+
+    if (this.product.colors.length) {
+      this.color = this.product.colors[0];
+    }
+
+    $scope.$on('destroy', () => {});
+  }
+
+  get bristle() {
+    return this.bristle_;
+  }
+
+  set bristle(bristle) {
+    if (this.bristle_ !== bristle) {
+      this.bristle_ = bristle;
+      this.$scope.$broadcast('onBristle', bristle);
+    }
+  }
+
+  get color() {
+    return this.color_;
+  }
+
+  set color(color) {
+    if (this.color_ !== color) {
+      this.color_ = color;
+      this.$scope.$broadcast('onColor', color);
+    }
+  }
+
+}
+
+ProductCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService'];
+var _default = ProductCtrl;
+exports.default = _default;
+
+},{}],207:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _rxjs = require("rxjs");
+
+var _operators = require("rxjs/operators");
+
+/* jshint esversion: 6 */
+class RootCtrl {
+  constructor($scope, $timeout, DomService, ApiService, WishlistService) {
+    this.$scope = $scope;
+    this.$timeout = $timeout;
+    this.domService = DomService;
+    this.apiService = ApiService;
+    this.wishlistService = WishlistService;
+    this.unsubscribe = new _rxjs.Subject();
+    this.wishlistService.count$.pipe((0, _operators.takeUntil)(this.unsubscribe)).subscribe(count => {
+      this.wishlistCount = count;
+    });
+    $scope.$on('destroy', () => {
+      // console.log('destroy');
+      this.unsubscribe.next();
+      this.unsubscribe.complete();
+    });
+  }
+
+  onScroll(event) {
+    const scrolled = event.scroll.scrollTop > 40;
+    const direction = event.scroll.direction;
+
+    if (event.scroll.direction) {
+      if (direction && (this.direction !== direction || this.scrolled !== scrolled)) {
+        this.$timeout(() => {
+          this.scrolled = scrolled;
+          this.direction = direction;
+        }, 1);
+      }
+    }
+  }
+
+  onInit(brand) {
+    this.brand = brand;
+    this.webglEnabled = false; // this.domService.hasWebglSupport();
+
+    this.domService.addCustomRules();
+    /*
+    this.domService.smoothScroll$('.page').subscribe((top) => {
+    	// console.log(top);
+    });
+    */
+
+    this.$timeout(() => {
+      this.init = true;
+      const view = document.querySelector('.view');
+      TweenMax.to(view, 0.6, {
+        opacity: 1,
+        delay: 0,
+        overwrite: 'all'
+      });
+    }, 1000);
+    this.$scope.$on('onDroppinIn', (scope, droppinIn) => {
+      // console.log('onDroppinIn', droppinIn);
+      this.$timeout(() => {
+        this.droppinIn = droppinIn;
+      });
+    });
+  }
+
+  getClasses() {
+    const classes = {};
+    classes[this.brand] = true;
+
+    if (this.init) {
+      classes.init = true;
+    }
+
+    if (this.direction === -1) {
+      classes['scrolled-up'] = true;
+    }
+
+    if (this.direction === 1) {
+      classes['scrolled-down'] = true;
+    }
+
+    if (this.droppinIn) {
+      classes['droppin-in'] = true;
+    }
+
+    return classes;
+  }
+
+  closeNav() {
+    const node = document.querySelector(`.section--submenu.active`);
+    return this.onDroppedOut(node);
+  }
+
+  openNav(nav) {
+    const node = document.querySelector(`#nav-${nav} .section--submenu`);
+    return this.onDroppedIn(node);
+  }
+
+  toggleNav(id) {
+    this.nav = this.nav === id ? null : id;
+    this.closeNav().then(() => {
+      if (this.nav) {
+        this.openNav(this.nav);
+      }
+    });
+  }
+
+  onDroppedOut(node) {
+    // console.log('onDroppedOut', node);
+    if (node) {
+      if (this.droppinIn) {
+        TweenMax.set(node, {
+          height: 0
+        });
+        return Promise.resolve();
+      } else {
+        TweenMax.set(node, {
+          overflow: 'hidden'
+        });
+        TweenMax.to(node, 0.6, {
+          height: 0,
+          ease: Expo.easeOut,
+          overwrite: 'all',
+          onComplete: () => {
+            delete node.style.overflow;
+            return Promise.resolve();
+          }
+        });
+      }
+    } else {
+      return Promise.resolve();
+    }
+    /*
+    return new Promise((resolve, reject) => {
+    	if (node) {
+    		const items = [].slice.call(node.querySelectorAll('.submenu__item'));
+    		TweenMax.staggerTo(items.reverse(), 0.25, {
+    			opacity: 0,
+    			stagger: 0.05,
+    			delay: 0.0,
+    			onComplete: () => {
+    				TweenMax.to(node, 0.2, {
+    					maxHeight: 0,
+    					ease: Expo.easeOut,
+    					delay: 0.0,
+    					onComplete: () => {
+    						resolve();
+    					}
+    				});
+    			}
+    		});
+    	} else {
+    		resolve();
+    	}
+    });
+    */
+
+  }
+
+  onDroppedIn(node) {
+    // console.log('onDroppedIn', node);
+    return new Promise((resolve, reject) => {
+      this.droppinIn = true;
+      const items = [].slice.call(node.querySelectorAll('.submenu__item'));
+      TweenMax.set(items, {
+        opacity: 0
+      });
+      TweenMax.set(node, {
+        height: 'auto'
+      });
+      const mh = node.offsetHeight;
+      TweenMax.set(node, {
+        height: 0,
+        overflow: 'hidden'
+      });
+      TweenMax.to(node, 0.8, {
+        height: mh,
+        ease: Expo.easeOut,
+        delay: 0.0,
+        overwrite: 'all',
+        onComplete: () => {
+          delete node.style.overflow;
+          TweenMax.set(node, {
+            height: 'auto'
+          }); // TweenMax.set(node, { clearProps: 'all' });
+
+          if (items.length === 0) {
+            this.droppinIn = false;
+          }
+        }
+      });
+
+      if (items.length) {
+        TweenMax.staggerTo(items, 0.35, {
+          opacity: 1,
+          stagger: 0.07,
+          delay: 0.5,
+          onComplete: () => {
+            this.droppinIn = false;
+          }
+        });
+      }
+    });
+  }
+
+  toggleBrand(event) {
+    const brands = ['atlas-concorde', 'atlas-concorde-solution', 'atlas-concorde-usa', 'atlas-concorde-russia'];
+    const i = (brands.indexOf(this.brand) + 1) % brands.length;
+    this.brand = brands[i];
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+
+  pad(index) {
+    return index < 10 ? '0' + index : index;
+  }
+
+  hasHash(hash) {
+    return window.location.hash.indexOf(hash) !== -1;
+  }
+
+}
+
+RootCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService', 'WishlistService'];
+var _default = RootCtrl;
+exports.default = _default;
+
+},{"rxjs":2,"rxjs/operators":198}],208:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _rxjs = require("rxjs");
+
+/* jshint esversion: 6 */
+const API_HREF = window.location.port === '6001' ? 'https://atlasconcorde.wslabs.it' : '';
+
+class ApiService {
+  constructor($http) {
+    this.http = $http;
+    const api = {
+      advancedSearch: {
+        get: () => {
+          return (0, _rxjs.from)($http.get('data/advanced-search.json')); // return from($http.get(API_HREF + '/api/advanced-search/json'));
+        }
+      },
+      wishlist: {
+        get: () => {
+          return (0, _rxjs.from)($http.get('data/moodboard.json'));
+        },
+        toggle: item => {
+          item.added = !item.added;
+          return Promise.resolve(item);
+        },
+        clearAll: () => {
+          return Promise.resolve();
+        }
+      },
+      moodboard: {
+        filter: filters => {
+          // return from($http.post(API_HREF + '/api/moodboard/json', filters));
+          return (0, _rxjs.from)($http.get('data/moodboard.json'));
+        }
+      },
+      storeLocator: {
+        all: () => {
+          return $http.get(API_HREF + '/api/store/json'); // return $http.get('data/store-locator.json');
+        }
+      }
+    };
+    Object.assign(this, api);
+  }
+
+  static factory($http) {
+    return new ApiService($http);
+  }
+
+}
+
+exports.default = ApiService;
+ApiService.factory.$inject = ['$http'];
+
+},{"rxjs":2}],209:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _rxjs = require("rxjs");
+
+var _animationFrame = require("rxjs/internal/scheduler/animationFrame");
+
+var _operators = require("rxjs/operators");
+
+var _rect = _interopRequireDefault(require("../shared/rect"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* jshint esversion: 6 */
+class DomService {
+  constructor() {}
+
+  get scrollTop() {
+    return DomService.getScrollTop(window);
+  }
+
+  get scrollLeft() {
+    return DomService.getScrollLeft(window);
+  }
+
+  hasWebglSupport() {
+    if (this.isIE()) {
+      return false;
+    }
+
+    if (!this.hasWebgl()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  isIE() {
+    const ua = window.navigator.userAgent;
+    const msie = ua.indexOf('MSIE ');
+
+    if (msie > 0) {
+      // IE 10 or older => return version number
+      return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+    }
+
+    const trident = ua.indexOf('Trident/');
+
+    if (trident > 0) {
+      // IE 11 => return version number
+      const rv = ua.indexOf('rv:');
+      return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+    }
+
+    const edge = ua.indexOf('Edge/');
+
+    if (edge > 0) {
+      // Edge (IE 12+) => return version number
+      return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+    } // other browser
+
+
+    return false;
+  }
+
+  hasWebgl() {
+    let gl,
+        debugInfo,
+        vendor,
+        renderer,
+        has = false;
+
+    try {
+      const canvas = document.createElement('canvas');
+
+      if (!!window.WebGLRenderingContext) {
+        gl = canvas.getContext('webgl', {
+          failIfMajorPerformanceCaveat: true
+        }) || canvas.getContext('experimental-webgl', {
+          failIfMajorPerformanceCaveat: true
+        });
+      }
+    } catch (e) {
+      console.log('no webgl');
+    }
+
+    if (gl) {
+      debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+      renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+      has = true;
+    }
+
+    console.log(`WebGLCapabilities debugInfo: ${debugInfo} vendor: ${vendor} renderer: ${renderer} `);
+    return has;
+  }
+
+  getOuterHeight(node) {
+    let height = node.clientHeight;
+    const computedStyle = window.getComputedStyle(node);
+    height += parseInt(computedStyle.marginTop, 10);
+    height += parseInt(computedStyle.marginBottom, 10);
+    height += parseInt(computedStyle.borderTopWidth, 10);
+    height += parseInt(computedStyle.borderBottomWidth, 10);
+    return height;
+  }
+
+  getOuterWidth(node) {
+    let width = node.clientWidth;
+    const computedStyle = window.getComputedStyle(node);
+    width += parseInt(computedStyle.marginLeft, 10);
+    width += parseInt(computedStyle.marginRight, 10);
+    width += parseInt(computedStyle.borderLeftWidth, 10);
+    width += parseInt(computedStyle.borderRightWidth, 10);
+    return width;
+  }
+
+  raf$() {
+    return DomService.raf$;
+  }
+
+  windowRect$() {
+    return DomService.windowRect$;
+  }
+
+  rafAndRect$() {
+    return DomService.rafAndRect$;
+  }
+
+  scroll$() {
+    return DomService.scroll$;
+  }
+
+  scrollAndRect$() {
+    return DomService.scrollAndRect$;
+  }
+
+  smoothScroll$(selector, friction = 20) {
+    const body = document.querySelector('body');
+    const node = document.querySelector(selector); // const outerHeight = this.getOuterHeight(node);
+
+    let down = false;
+    /*
+    const onWheel = (event) => {
+    	down = true;
+    }
+    const onDown = () => {
+    	down = true;
+    }
+    const onUp = () => {
+    	down = false;
+    }
+    document.addEventListener('wheel', onWheel);
+    document.addEventListener('touchstart', onDown);
+    document.addEventListener('touchend', onUp);
+    */
+
+    /*
+    document.addEventListener('touchstart', () => {
+    	console.log('touchstart');
+    	body.classList.add('down');
+    	down = true;
+    }, {passive:true});
+    document.addEventListener('touchend', () => {
+    	body.classList.remove('down');
+    	down = false;
+    });
+    console.log(window);
+    */
+
+    return this.raf$().pipe((0, _operators.map)(() => {
+      const outerHeight = this.getOuterHeight(node); // console.log(window.DocumentTouch);
+      // console.log(document instanceof DocumentTouch);
+      // console.log(navigator.msMaxTouchPoints);
+
+      if (body.offsetHeight !== outerHeight) {
+        // margin ?
+        body.style = `height: ${outerHeight}px`;
+      }
+
+      const nodeTop = node.top || 0;
+      const top = down ? -this.scrollTop : Math.round((nodeTop + (-this.scrollTop - nodeTop) / friction) * 100) / 100;
+
+      if (node.top !== top) {
+        node.top = top;
+        node.style = `position: fixed; width: 100%; transform: translateY(${top}px)`;
+        return top;
+      } else {
+        return null;
+      }
+    }), (0, _operators.filter)(x => x !== null), (0, _operators.shareReplay)());
+  }
+  /*
+  // trackpad
+  window.onwheel = function(e) {
+    e.preventDefault();
+    if (e.ctrlKey) {
+      zoom += e.deltaY;
+    } else {
+      offsetX += e.deltaX * 2;
+      offsetY -= e.deltaY * 2;
+    }
+  };
+  */
+
+
+  rafIntersection$(node) {
+    return this.rafAndRect$().pipe((0, _operators.map)(datas => {
+      // const scrollTop = datas[0];
+      const windowRect = datas[1];
+
+      const rect = _rect.default.fromNode(node);
+
+      const intersection = rect.intersection(windowRect);
+      const response = DomService.rafIntersection_;
+      response.scroll = datas[0];
+      response.windowRect = datas[1];
+      response.rect = rect;
+      response.intersection = intersection;
+      return response;
+    }));
+  }
+
+  scrollIntersection$(node) {
+    return this.scrollAndRect$().pipe((0, _operators.map)(datas => {
+      // const scrollTop = datas[0];
+      const windowRect = datas[1];
+
+      const rect = _rect.default.fromNode(node);
+
+      const intersection = rect.intersection(windowRect);
+      const response = DomService.scrollIntersection_;
+      response.scroll = datas[0];
+      response.windowRect = datas[1];
+      response.rect = rect;
+      response.intersection = intersection;
+      return response;
+    }));
+  }
+
+  appear$(node, value = 0.0) {
+    // -0.5
+    return this.rafIntersection$(node).pipe((0, _operators.filter)(x => x.intersection.y > value), (0, _operators.first)());
+  }
+
+  visibility$(node, value = 0.5) {
+    return this.rafIntersection$(node).pipe((0, _operators.map)(x => x.intersection.y > value), (0, _operators.distinctUntilChanged)());
+  }
+
+  firstVisibility$(node, value = 0.5) {
+    return this.visibility$(node, value).pipe((0, _operators.filter)(visible => visible), (0, _operators.first)());
+  }
+
+  addCustomRules() {
+    const sheet = this.addCustomSheet();
+    const body = document.querySelector('body');
+    const scrollBarWidth = window.innerWidth - body.clientWidth;
+    let rule = `body.droppin-in { padding-right: ${scrollBarWidth}px; }`;
+    sheet.insertRule(rule, 0);
+    rule = `body.droppin-in header { width: calc(100% - ${scrollBarWidth}px); }`;
+    sheet.insertRule(rule, 1);
+    rule = `body.droppin-in menu--product { width: calc(100% - ${scrollBarWidth}px); }`;
+    sheet.insertRule(rule, 2);
+  }
+
+  addCustomSheet() {
+    const style = document.createElement('style');
+    style.appendChild(document.createTextNode(''));
+    document.head.appendChild(style);
+    return style.sheet;
+  }
+
+  static factory() {
+    return new DomService();
+  }
+
+  static getScrollTop(node) {
+    return node.pageYOffset || node.scrollY || node.scrollTop || 0;
+  }
+
+  static getScrollLeft(node) {
+    return node.pageXOffset || node.scrollX || node.scrollLeft || 0;
+  }
+
+}
+
+exports.default = DomService;
+DomService.factory.$inject = [];
+DomService.rafIntersection_ = {};
+DomService.scrollIntersection_ = {};
+DomService.raf$ = (0, _rxjs.range)(0, Number.POSITIVE_INFINITY, _animationFrame.animationFrame);
+
+DomService.windowRect$ = function () {
+  const windowRect = new _rect.default({
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
+  return (0, _rxjs.fromEvent)(window, 'resize').pipe((0, _operators.map)(originalEvent => {
+    windowRect.width = window.innerWidth;
+    windowRect.height = window.innerHeight;
+    return windowRect;
+  }), (0, _operators.startWith)(windowRect));
+}();
+
+DomService.rafAndRect$ = (0, _rxjs.combineLatest)(DomService.raf$, DomService.windowRect$);
+
+DomService.scroll$ = function () {
+  const target = window;
+  let previousTop = DomService.getScrollTop(target);
+  const event = {
+    /*
+    top: target.offsetTop || 0,
+    left: target.offsetLeft || 0,
+    width: target.offsetWidth || target.innerWidth,
+    height: target.offsetHeight || target.innerHeight,
+    */
+    scrollTop: previousTop,
+    scrollLeft: DomService.getScrollLeft(target),
+    direction: 0,
+    originalEvent: null
+  };
+  return (0, _rxjs.fromEvent)(target, 'scroll').pipe((0, _operators.startWith)(event), (0, _operators.auditTime)(33), // 30 fps
+  (0, _operators.map)(originalEvent => {
+    /*
+    event.top = target.offsetTop || 0;
+    event.left = target.offsetLeft || 0;
+    event.width = target.offsetWidth || target.innerWidth;
+    event.height = target.offsetHeight || target.innerHeight;
+    */
+    event.scrollTop = DomService.getScrollTop(target);
+    event.scrollLeft = DomService.getScrollLeft(target);
+    const diff = event.scrollTop - previousTop;
+    event.direction = diff ? diff / Math.abs(diff) : 0;
+    previousTop = event.scrollTop;
+    event.originalEvent = originalEvent;
+    return event;
+  }) // ,
+  // filter(event => event.direction !== 0)
+  );
+}();
+
+DomService.scrollAndRect$ = (0, _rxjs.combineLatest)(DomService.scroll$, DomService.windowRect$);
+
+},{"../shared/rect":212,"rxjs":2,"rxjs/internal/scheduler/animationFrame":161,"rxjs/operators":198}],210:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/* jshint esversion: 6 */
+
+/* global angular */
+class LocationService {
+  constructor($location) {
+    this.$location = $location;
+  }
+
+  get(key) {
+    return this.$location.search()[key];
+  }
+
+  set(keyOrValue, value) {
+    if (typeof keyOrValue === 'string') {
+      this.$location.search(keyOrValue, value).replace();
+    } else {
+      this.$location.search(keyOrValue).replace();
+    }
+  }
+
+  deserialize(key) {
+    let value = null;
+    const serialized = this.get('q'); // console.log(serialized);
+
+    if (serialized) {
+      const json = window.atob(serialized);
+      value = JSON.parse(json);
+    } // console.log(value);
+
+
+    if (key && value) {
+      value = value[key];
+    }
+
+    return value || null;
+  }
+
+  serialize(keyOrValue, value) {
+    let serialized = null;
+    let q = this.deserialize() || {};
+
+    if (typeof keyOrValue === 'string') {
+      q[keyOrValue] = value;
+    } else {
+      q = keyOrValue;
+    }
+
+    const json = JSON.stringify(q);
+    serialized = window.btoa(json);
+    this.set('q', serialized);
+  }
+
+  getSerialization(keyOrValue, value) {
+    let serialized = null;
+    let q = {};
+
+    if (typeof keyOrValue === 'string') {
+      q[keyOrValue] = value;
+    } else {
+      q = keyOrValue;
+    }
+
+    const json = JSON.stringify(q);
+    serialized = window.btoa(json);
+    return serialized;
+  }
+
+  static factory($location) {
+    return new LocationService($location);
+  }
+
+}
+
+exports.default = LocationService;
+LocationService.factory.$inject = ['$location'];
+
+},{}],211:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/* jshint esversion: 6 */
+
+/* global angular */
+class PromiseService {
+  constructor($q) {
+    this.$q = $q;
+  }
+
+  make(callback) {
+    if (typeof callback !== 'function') {
+      throw 'promise resolve callback missing';
+    }
+
+    const deferred = this.$q.defer();
+    callback(deferred);
+    return deferred.promise;
+  }
+
+  all(promises) {
+    return this.$q.all(promises);
+  }
+
+  static factory($q) {
+    return new PromiseService($q);
+  }
+
+}
+
+exports.default = PromiseService;
+PromiseService.factory.$inject = ['$q'];
+
+},{}],212:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/* jshint esversion: 6 */
+class Rect {
+  constructor(rect) {
+    this.top = 0;
+    this.right = 0;
+    this.bottom = 0;
+    this.left = 0;
+    this.width = 0;
+    this.height = 0;
+    this.set(rect);
+  }
+
+  static contains(rect, left, top) {
+    return rect.top <= top && top <= rect.bottom && rect.left <= left && left <= rect.right;
+  }
+
+  static intersectRect(r1, r2) {
+    return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
+  }
+
+  static fromNode(node) {
+    if (!node) {
+      return;
+    }
+
+    const rect = node.rect_ || (node.rect_ = new Rect());
+    const rects = node.getClientRects();
+
+    if (!rects.length) {
+      // console.log(rects, node);
+      return rect;
+    }
+
+    const boundingRect = node.getBoundingClientRect(); // rect.top: boundingRect.top + defaultView.pageYOffset,
+    // rect.left: boundingRect.left + defaultView.pageXOffset,
+
+    rect.top = boundingRect.top;
+    rect.left = boundingRect.left;
+    rect.width = boundingRect.width;
+    rect.height = boundingRect.height;
+    rect.right = rect.left + rect.width;
+    rect.bottom = rect.top + rect.height;
+    rect.setCenter();
+    return rect;
+  }
+
+  set(rect) {
+    if (rect) {
+      Object.assign(this, rect);
+      this.right = this.left + this.width;
+      this.bottom = this.top + this.height;
+    }
+
+    this.setCenter();
+  }
+
+  setCenter() {
+    const center = this.center || (this.center = {});
+    center.top = this.top + this.height / 2;
+    center.left = this.left + this.width / 2;
+    center.x = center.left;
+    center.y = center.top;
+  }
+
+  contains(left, top) {
+    return Rect.contains(this, left, top);
+  }
+
+  intersect(rect) {
+    return Rect.intersectRect(this, rect);
+  }
+
+  intersection(rect) {
+    const intersection = this.intersection_ || (this.intersection_ = {
+      center: {}
+    });
+    intersection.center.x = (this.center.x - rect.center.x) / (rect.width / 2);
+    intersection.center.y = (this.center.y - rect.center.y) / (rect.height / 2);
+    const dx = this.left > rect.left ? 0 : Math.abs(rect.left - this.left);
+    const dy = this.top > rect.top ? 0 : Math.abs(rect.top - this.top);
+    const x = dx ? 1 - dx / this.width : (rect.left + rect.width - this.left) / this.width;
+    const y = dy ? 1 - dy / this.height : (rect.top + rect.height - this.top) / this.height;
+    intersection.x = x;
+    intersection.y = y;
+    return intersection;
+  }
+
+  intersection___(rect) {
+    const center = {
+      x: (this.center.x - rect.center.x) / (rect.width / 2),
+      y: (this.center.y - rect.center.y) / (rect.height / 2)
+    };
+
+    if (this.intersect(rect)) {
+      const dx = this.left > rect.left ? 0 : Math.abs(rect.left - this.left);
+      const dy = this.top > rect.top ? 0 : Math.abs(rect.top - this.top);
+      let x = dx ? 1 - dx / this.width : (rect.left + rect.width - this.left) / this.width;
+      let y = dy ? 1 - dy / this.height : (rect.top + rect.height - this.top) / this.height;
+      x = Math.min(1, x);
+      y = Math.min(1, y);
+      return {
+        x: x,
+        y: y,
+        center: center
+      };
+    } else {
+      return {
+        x: 0,
+        y: 0,
+        center: center
+      };
+    }
+  }
+
+}
+
+exports.default = Rect;
+
+},{}],213:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.State = void 0;
+
+/* jshint esversion: 6 */
+class State {
+  constructor($timeout, $rootScope) {
+    this.$timeout = $timeout;
+    this.$rootScope = $rootScope;
+    this.idle();
+  }
+
+  idle() {
+    this.isBusy = false;
+    this.isError = false;
+    this.isErroring = false;
+    this.isSuccess = false;
+    this.isSuccessing = false;
+    this.button = null;
+    this.errors = [];
+  }
+
+  busy() {
+    if (!this.isBusy) {
+      this.isBusy = true;
+      this.isError = false;
+      this.isErroring = false;
+      this.isSuccess = false;
+      this.isSuccessing = false;
+      this.errors = [];
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  classes(addons) {
+    const classes = {
+      ready: this.isReady,
+      busy: this.isBusy,
+      successing: this.isSuccessing,
+      success: this.isSuccess,
+      errorring: this.isErroring,
+      error: this.isError
+    };
+
+    if (addons) {
+      Object.keys(addons).forEach(key => {
+        classes[addons[key]] = classes[key];
+      });
+    }
+
+    return classes;
+  }
+
+  enabled() {
+    return !this.isBusy && !this.isErroring && !this.isSuccessing;
+  }
+
+  error(error) {
+    console.log('State.error', error);
+    this.isBusy = false;
+    this.isError = true;
+    this.isErroring = true;
+    this.isSuccess = false;
+    this.isSuccessing = false;
+    this.errors.push(error);
+    $timeout(() => {
+      this.isErroring = false;
+    }, DELAY);
+  }
+
+  errorMessage() {
+    return this.isError ? this.errors[this.errors.length - 1] : null;
+  }
+
+  labels(addons) {
+    const defaults = {
+      ready: 'submit',
+      busy: 'sending',
+      error: 'error',
+      success: 'success'
+    };
+
+    if (addons) {
+      angular.extend(defaults, addons);
+    }
+
+    let label = defaults.ready;
+
+    if (this.isBusy) {
+      label = defaults.busy;
+    } else if (this.isSuccess) {
+      label = defaults.success;
+    } else if (this.isError) {
+      label = defaults.error;
+    }
+
+    return label;
+  }
+
+  ready() {
+    this.idle();
+    this.isReady = true;
+    this.$rootScope.$broadcast('$thisReady', this);
+  }
+
+  submitClass() {
+    return {
+      busy: this.isBusy,
+      ready: this.isReady,
+      successing: this.isSuccessing,
+      success: this.isSuccess,
+      errorring: this.isErroring,
+      error: this.isError
+    };
+  }
+
+  success() {
+    this.isBusy = false;
+    this.isError = false;
+    this.isErroring = false;
+    this.isSuccess = true;
+    this.isSuccessing = true;
+    this.errors = [];
+    this.$timeout(() => {
+      this.isSuccessing = false;
+    }, DELAY);
+  }
+
+}
+
+exports.State = State;
+
+class StateService {
+  constructor($timeout, $rootScope) {
+    this.$timeout = $timeout;
+    this.$rootScope = $rootScope;
+  }
+
+  getState() {
+    return new State(this.$timeout, this.$rootScope);
+  }
+
+  static factory($timeout, $rootScope) {
+    return new StateService($timeout, $rootScope);
+  }
+
+}
+
+exports.default = StateService;
+StateService.factory.$inject = ['$timeout', '$rootScope'];
+
+},{}],214:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.SessionStorageService = exports.LocalStorageService = exports.CookieService = void 0;
+
+/* jshint esversion: 6 */
+
+/* global angular */
+const TIMEOUT = 5 * 60 * 1000; // five minutes
+
+class CookieService {
+  constructor(PromiseService) {
+    this.promise = PromiseService;
+  }
+
+  delete(name) {
+    setter(name, '', -1);
+  }
+
+  exist(name) {
+    return document.cookie.indexOf(';' + name + '=') !== -1 || document.cookie.indexOf(name + '=') === 0;
+  }
+
+  get(name) {
+    const cookieName = name + "=";
+    const ca = document.cookie.split(';');
+
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1, c.length);
+      }
+
+      if (c.indexOf(cookieName) === 0) {
+        const value = c.substring(cookieName.length, c.length);
+        let model = null;
+
+        try {
+          model = JSON.parse(decodeURIComponent(atob(value)));
+        } catch (e) {
+          console.log('CookieService.get.error parsing', key, e);
+        }
+
+        return model;
+      }
+    }
+
+    return null;
+  }
+
+  on(name) {
+    return this.promise.make(promise => {
+      let i,
+          interval = 1000,
+          elapsed = 0,
+          timeout = TIMEOUT;
+
+      const checkCookie = () => {
+        if (elapsed > timeout) {
+          promise.reject('timeout');
+        } else {
+          const c = this.get(name);
+
+          if (c) {
+            promise.resolve(c);
+          } else {
+            elapsed += interval;
+            i = setTimeout(checkCookie, interval);
+          }
+        }
+      };
+
+      checkCookie();
+    });
+  }
+
+  set(name, value, days) {
+    try {
+      const cache = [];
+      const json = JSON.stringify(value, function (key, value) {
+        if (key === 'pool') {
+          return;
+        }
+
+        if (typeof value === 'object' && value !== null) {
+          if (cache.indexOf(value) !== -1) {
+            // Circular reference found, discard key
+            return;
+          }
+
+          cache.push(value);
+        }
+
+        return value;
+      });
+      this.setter(name, btoa(encodeURIComponent(json)), days);
+    } catch (e) {
+      console.log('CookieService.error serializing', name, value, e);
+    }
+  }
+
+  setter(name, value, days) {
+    let expires;
+
+    if (days) {
+      const date = new Date();
+      date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+      expires = '; expires=' + date.toGMTString();
+    } else {
+      expires = '';
+    }
+
+    document.cookie = name + '=' + value + expires + '; path=/';
+  }
+
+  static factory(PromiseService) {
+    return new CookieService(PromiseService);
+  }
+
+}
+
+exports.CookieService = CookieService;
+CookieService.factory.$inject = ['PromiseService'];
+
+class LocalStorageService {
+  constructor(PromiseService) {
+    this.promise = PromiseService;
+  }
+
+  delete(name) {
+    window.localStorage.removeItem(name);
+  }
+
+  exist(name) {
+    return window.localStorage[name] !== undefined;
+  }
+
+  get(name) {
+    let value = null;
+
+    if (window.localStorage[name] !== undefined) {
+      try {
+        value = JSON.parse(window.localStorage[name]);
+      } catch (e) {
+        console.log('LocalStorageService.get.error parsing', name, e);
+      }
+    }
+
+    return value;
+  }
+
+  set(name, value) {
+    try {
+      const cache = [];
+      const json = JSON.stringify(value, function (key, value) {
+        if (key === 'pool') {
+          return;
+        }
+
+        if (typeof value === 'object' && value !== null) {
+          if (cache.indexOf(value) !== -1) {
+            // Circular reference found, discard key
+            return;
+          }
+
+          cache.push(value);
+        }
+
+        return value;
+      });
+      window.localStorage.setItem(name, json);
+    } catch (e) {
+      console.log('LocalStorageService.set.error serializing', name, value, e);
+    }
+  }
+
+  on(name) {
+    return this.promise.make(promise => {
+      let i,
+          interval = 1000,
+          elapsed = 0,
+          timeout = TIMEOUT;
+
+      const storageEvent = e => {
+        if (i) {
+          clearTimeout(i);
+        }
+
+        if (e.originalEvent.key == name) {
+          try {
+            const value = JSON.parse(e.originalEvent.newValue); // , e.originalEvent.oldValue
+
+            promise.resolve(value);
+          } catch (error) {
+            console.log('LocalStorageService.on.error parsing', name, error);
+            promise.reject('error parsing ' + name);
+          }
+        }
+      };
+
+      angular.element(window).on('storage', storageEvent);
+      i = setTimeout(function () {
+        promise.reject('timeout');
+      }, timeout);
+    });
+  }
+
+  static isLocalStorageSupported() {
+    let supported = false;
+
+    try {
+      supported = 'localStorage' in window && window.localStorage !== null;
+
+      if (supported) {
+        window.localStorage.setItem('test', '1');
+        window.localStorage.removeItem('test');
+      } else {
+        supported = false;
+      }
+    } catch (e) {
+      supported = false;
+    }
+
+    return supported;
+  }
+
+  static factory(PromiseService) {
+    if (LocalStorageService.isLocalStorageSupported()) {
+      return new LocalStorageService(PromiseService);
+    } else {
+      return new CookieService(PromiseService);
+    }
+  }
+
+}
+
+exports.LocalStorageService = LocalStorageService;
+LocalStorageService.factory.$inject = ['PromiseService'];
+
+class SessionStorageService {
+  constructor(PromiseService) {
+    this.promise = PromiseService;
+  }
+
+  delete(name) {
+    window.sessionStorage.removeItem(name);
+  }
+
+  exist(name) {
+    return window.sessionStorage[name] !== undefined;
+  }
+
+  get(name) {
+    let value = null;
+
+    if (window.sessionStorage[name] !== undefined) {
+      try {
+        value = JSON.parse(window.sessionStorage[name]);
+      } catch (e) {
+        console.log('SessionStorageService.get.error parsing', name, e);
+      }
+    }
+
+    return value;
+  }
+
+  set(name, value) {
+    try {
+      const cache = [];
+      const json = JSON.stringify(value, function (key, value) {
+        if (key === 'pool') {
+          return;
+        }
+
+        if (typeof value === 'object' && value !== null) {
+          if (cache.indexOf(value) !== -1) {
+            // Circular reference found, discard key
+            return;
+          }
+
+          cache.push(value);
+        }
+
+        return value;
+      });
+      window.sessionStorage.setItem(name, json);
+    } catch (e) {
+      console.log('SessionStorageService.set.error serializing', name, value, e);
+    }
+  }
+
+  on(name) {
+    return this.promise.make(promise => {
+      let i,
+          interval = 1000,
+          elapsed = 0,
+          timeout = TIMEOUT;
+
+      const storageEvent = e => {
+        if (i) {
+          clearTimeout(i);
+        }
+
+        if (e.originalEvent.key == name) {
+          try {
+            const value = JSON.parse(e.originalEvent.newValue); // , e.originalEvent.oldValue
+
+            promise.resolve(value);
+          } catch (error) {
+            console.log('SessionStorageService.on.error parsing', name, error);
+            promise.reject('error parsing ' + name);
+          }
+        }
+      };
+
+      angular.element(window).on('storage', storageEvent);
+      i = setTimeout(function () {
+        promise.reject('timeout');
+      }, timeout);
+    });
+  }
+
+  static isSessionStorageSupported() {
+    let supported = false;
+
+    try {
+      supported = 'sessionStorage' in window && window.sessionStorage !== null;
+
+      if (supported) {
+        window.sessionStorage.setItem('test', '1');
+        window.localsessionStorageStorage.removeItem('test');
+      } else {
+        supported = false;
+      }
+    } catch (e) {
+      supported = false;
+    }
+
+    return supported;
+  }
+
+  static factory(PromiseService) {
+    if (SessionStorageService.isSessionStorageSupported()) {
+      return new SessionStorageService(PromiseService);
+    } else {
+      return new CookieService(PromiseService);
+    }
+  }
+
+}
+
+exports.SessionStorageService = SessionStorageService;
+SessionStorageService.factory.$inject = ['PromiseService'];
+
+},{}],215:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18349,13 +20170,15 @@ exports.default = void 0;
 
 var dat = _interopRequireWildcard(require("dat.gui"));
 
-var _const = require("./three/const");
+var _const = require("./const");
 
-var _emittable = _interopRequireDefault(require("./three/interactive/emittable"));
+var _emittable = _interopRequireDefault(require("./interactive/emittable"));
 
-var _orbit = _interopRequireDefault(require("./three/orbit/orbit"));
+var _materials = _interopRequireDefault(require("./materials/materials"));
 
-var _vr = require("./three/vr/vr");
+var _orbit = _interopRequireDefault(require("./orbit/orbit"));
+
+var _vr = require("./vr/vr");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18363,7 +20186,6 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 /* jshint esversion: 6 */
 const CAMERA_DISTANCE = 2;
-const VR_ENABLED = false;
 const COMPOSER_ENABLED = true; // !!!
 
 const USE_CUBE_CAMERA = true;
@@ -18439,26 +20261,41 @@ class Canvas extends _emittable.default {
     // Dom.detect(body);
     // body.classList.add('ready');
 
+    this.onTouchStart = this.onTouchStart.bind(this);
+    this.onTouchEnd = this.onTouchEnd.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
     this.onMouseWheel = this.onMouseWheel.bind(this);
     this.onSave = this.onSave.bind(this);
     const scene = this.scene = this.addScene();
     const camera = this.camera = this.addCamera();
     const renderer = this.renderer = this.addRenderer();
+    let texture;
     const vr = this.vr = this.addVR();
-    const composer = this.composer = this.addComposer();
-    const controls = this.controls = this.addControls(); // const orbit = this.orbit = this.addOrbit(container);
 
-    const addons = this.addons = this.addSpheres(scene);
-    this.getCubeCamera();
-    const texture = this.cubeCamera1.renderTarget.texture; // const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
+    if (!_const.VR_ENABLED || vr.mode === VR_MODE.NONE) {
+      const composer = this.composer = this.addComposer();
+      const addons = this.addons = this.addSpheres(scene);
+      texture = this.getCubeCamera();
+    } else {
+      this.addSceneBackground(renderer, scene);
+      texture = scene.background;
+      renderer.vr.enabled = true;
+    } // const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
     // this.addText('Scalare 33', scene);
+    // const materials = this.materials = this.addMaterials(texture);
 
-    const materials = this.materials = this.addMaterials(texture);
+
+    const materials = this.materials = new _materials.default(product, _const.VR_ENABLED && vr.mode !== VR_MODE.NONE, texture);
     const toothbrush = this.toothbrush = this.addToothbrush(scene, texture);
     const lights = this.lights = this.addLights(scene); // this.tweenTau();
     // });
 
+    const controls = this.controls = this.addControls(); // const orbit = this.orbit = this.addOrbit(container);
+
+    renderer.domElement.addEventListener('touchstart', this.onTouchStart, false);
+    renderer.domElement.addEventListener('touchend', this.onTouchEnd, false);
+    renderer.domElement.addEventListener('mousedown', this.onTouchStart, false);
+    renderer.domElement.addEventListener('mouseup', this.onTouchEnd, false);
     window.addEventListener('resize', this.onWindowResize, false); // document.addEventListener('wheel', this.onMouseWheel, false);
     // this.debugSave.addEventListener('click', this.onSave, false);
     // this.section.classList.add('init');
@@ -18481,20 +20318,15 @@ class Canvas extends _emittable.default {
     const pixelRatio = this.pixelRatio = 1; // Math.max(window.devicePixelRatio, 1.4);
 
     renderer.setPixelRatio(pixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    if (VR_ENABLED) {
-      renderer.vr.enabled = true;
-    } // renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+    renderer.setSize(window.innerWidth, window.innerHeight); // renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
     // container.innerHTML = '';
-
 
     this.container.appendChild(renderer.domElement);
     return renderer;
   }
 
   addVR() {
-    if (VR_ENABLED) {
+    if (_const.VR_ENABLED) {
       const vr = new _vr.VR(this.renderer, {
         referenceSpaceType: 'local'
       });
@@ -18515,6 +20347,30 @@ class Canvas extends _emittable.default {
     // scene.fog = new THREE.Fog(scene.background, 10, 700);
 
     return scene;
+  }
+
+  addSceneBackground(renderer, scene, callback) {
+    const loader = new THREE.TextureLoader().load('img/environment/equirectangular.jpg', (source, textureData) => {
+      // const loader = new THREE.TextureLoader().load('img/environment/360_world.jpg', (source, textureData) => {
+      source.mapping = THREE.UVMapping;
+      const options = {
+        resolution: 1024,
+        generateMipmaps: true,
+        minFilter: THREE.LinearMipMapLinearFilter,
+        magFilter: THREE.LinearFilter
+      };
+      scene.background = new THREE.CubemapGenerator(renderer).fromEquirectangular(source, options);
+
+      if (typeof callback === 'function') {
+        const cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options);
+        const texture = cubemapGenerator.update(renderer);
+        texture.mapping = THREE.CubeReflectionMapping;
+        texture.mapping = THREE.CubeRefractionMapping;
+        source.dispose();
+        callback(texture);
+      }
+    });
+    return loader;
   }
 
   addCamera() {
@@ -18651,112 +20507,6 @@ class Canvas extends _emittable.default {
     return lights;
   }
 
-  addMaterials(texture) {
-    /*
-    const texture = new THREE.loader().load('img/matcap.jpg');
-    const material = new THREE.MeshMatcapMaterial({
-    	color: 0xffffff,
-    	matcap: texture,
-    	transparent: true,
-    	opacity: 1,
-    });
-    */
-    // const texture = this.getEnvMap();
-    const bodyPrimaryClear = this.getBodyPrimaryClear(texture);
-    const logoSilver = this.getLogoSilver(texture);
-    const bodySecondary = this.getBodySecondary(texture);
-    const bristlesPrimary = this.getBristlesPrimary();
-    const bristlesSecondary = this.getBristlesSecondary();
-    return {
-      bodyPrimaryClear,
-      bodySecondary,
-      bristlesPrimary,
-      bristlesSecondary,
-      logoSilver
-    };
-  }
-
-  getBodyPrimaryClear(texture) {
-    const material = new THREE.MeshPhongMaterial({
-      color: 0xffffff,
-      envMap: texture,
-      transparent: true,
-      refractionRatio: 0.6,
-      reflectivity: 0.8,
-      opacity: 0.25,
-      alphaTest: 0.2,
-
-      /*
-      refractionRatio: 0.99,
-      reflectivity: 0.99,
-      opacity: 0.5,
-      */
-      side: THREE.DoubleSide // blending: THREE.AdditiveBlending,
-
-    }); // material.vertexTangents = true;
-
-    return material;
-  }
-
-  getBodySecondary(texture) {
-    const material = new THREE.MeshStandardMaterial({
-      color: 0xe11e26,
-      // emissive: 0x4f0300,
-      roughness: 0.2,
-      metalness: 0.2 // envMap: texture,
-      // envMapIntensity: 0.4,
-      // The refractionRatio must have value in the range 0 to 1.
-      // The default value, very close to 1, give almost invisible glass.
-      // refractionRatio: 0,
-      // side: THREE.DoubleSide,
-
-    });
-    return material;
-  }
-
-  getBristlesPrimary(texture) {
-    // const lightMap = new THREE.TextureLoader().load('img/scalare-33-bristlesPrimary-lightmap.jpg');
-    const material = new THREE.MeshStandardMaterial({
-      color: this.product.bristles[0] ? this.product.bristles[0].colors[0] : 0xffffff,
-      // map: lightMap,
-      // normalMap: lightMap,
-      // metalnessMap: lightMap,
-      roughness: 0.9,
-      metalness: 0.0
-    });
-    return material;
-  }
-
-  getBristlesSecondary(texture) {
-    // const lightMap = new THREE.TextureLoader().load('img/scalare-33-bristlesSecondary-lightmap.jpg');
-    const material = new THREE.MeshStandardMaterial({
-      color: this.product.bristles[0] ? this.product.bristles[0].colors[1] : 0xffffff,
-      // map: lightMap,
-      // normalMap: lightMap,
-      // metalnessMap: lightMap,
-      roughness: 0.9,
-      metalness: 0.0
-    });
-    return material;
-  }
-
-  getLogoSilver() {
-    const texture = new THREE.TextureLoader().load('img/models/toothbrush-logo.png');
-    const material = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      map: texture,
-      transparent: true,
-      roughness: 0.15,
-      metalness: 0.9 // envMap: texture,
-      // side: THREE.DoubleSide,
-      //
-      // opacity: 1,
-      // alphaTest: 0.1,
-
-    });
-    return material;
-  }
-
   addToothbrush(parent, texture) {
     const toothbrush = new THREE.Group();
     const loader = new THREE.FBXLoader(); // new THREE.OBJLoader();
@@ -18798,6 +20548,7 @@ class Canvas extends _emittable.default {
             case 'logo':
               child.material = this.materials.logoSilver;
               toothbrush.logo = child;
+              child.renderOrder = 2;
               break;
           }
           /*
@@ -19063,6 +20814,7 @@ class Canvas extends _emittable.default {
       cubeCamera1.renderTarget.texture.generateMipmaps = true;
       cubeCamera1.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
       this.scene.add(cubeCamera1);
+      return this.cubeCamera1.renderTarget.texture;
     }
   }
 
@@ -19126,7 +20878,7 @@ class Canvas extends _emittable.default {
   }
 
   updateCubeCamera() {
-    if (USE_CUBE_CAMERA && this.toothbrush && this.toothbrush.body) {
+    if (USE_CUBE_CAMERA && this.cubeCamera0 && this.toothbrush && this.toothbrush.body) {
       const renderer = this.renderer;
       const scene = this.scene; // pingpong
 
@@ -19198,6 +20950,34 @@ class Canvas extends _emittable.default {
       }
     } catch (error) {
       this.debugInfo.innerHTML = error;
+    }
+  }
+
+  onTouchStart() {
+    if (this.container.classList.contains('interactive')) {
+      const sm = this.container.offsetWidth < 768;
+      this.zoom_ = sm ? 0.6 : 0.2;
+      TweenMax.to(this.camera, 0.6, {
+        zoom: this.zoom,
+        ease: Power2.easeInOut,
+        onUpdate: () => {
+          this.camera.updateProjectionMatrix();
+        }
+      });
+    }
+  }
+
+  onTouchEnd() {
+    if (this.container.classList.contains('interactive')) {
+      const sm = this.container.offsetWidth < 768;
+      this.zoom_ = sm ? -0.2 : 0;
+      TweenMax.to(this.camera, 0.6, {
+        zoom: this.zoom,
+        ease: Power2.easeInOut,
+        onUpdate: () => {
+          this.camera.updateProjectionMatrix();
+        }
+      });
     }
   }
 
@@ -19780,7 +21560,7 @@ THREE.ShadowShader = {
 	`
 };
 
-},{"./three/const":203,"./three/interactive/emittable":204,"./three/orbit/orbit":206,"./three/vr/vr":207,"dat.gui":1}],203:[function(require,module,exports){
+},{"./const":216,"./interactive/emittable":217,"./materials/materials":218,"./orbit/orbit":220,"./vr/vr":221,"dat.gui":1}],216:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19790,13 +21570,16 @@ exports.cm = cm;
 exports.mm = mm;
 exports.deg = deg;
 exports.addCube = addCube;
-exports.ORIGIN = exports.POINTER_RADIUS = exports.POINT_RADIUS = exports.PANEL_RADIUS = exports.ROOM_RADIUS = exports.TEST_ENABLED = void 0;
+exports.cameraToPicture = cameraToPicture;
+exports.MODEL_TYPE = exports.ORIGIN = exports.POINTER_RADIUS = exports.POINT_RADIUS = exports.PANEL_RADIUS = exports.ROOM_RADIUS = exports.VR_ENABLED = exports.TEST_ENABLED = void 0;
 
 /* jshint esversion: 6 */
 
 /* global window, document */
 const TEST_ENABLED = false;
 exports.TEST_ENABLED = TEST_ENABLED;
+const VR_ENABLED = false;
+exports.VR_ENABLED = VR_ENABLED;
 const ROOM_RADIUS = 200;
 exports.ROOM_RADIUS = ROOM_RADIUS;
 const PANEL_RADIUS = 100;
@@ -19807,6 +21590,13 @@ const POINTER_RADIUS = 98;
 exports.POINTER_RADIUS = POINTER_RADIUS;
 const ORIGIN = new THREE.Vector3();
 exports.ORIGIN = ORIGIN;
+const MODEL_TYPE = {
+  PROFESSIONAL_27: 1,
+  PROFESSIONAL_BLACK: 2,
+  PROFESSIONAL_WHITE: 3,
+  SCALARE_33: 4
+};
+exports.MODEL_TYPE = MODEL_TYPE;
 
 function cm(value) {
   return value / 100;
@@ -19835,7 +21625,62 @@ THREE.Euler.prototype.add = function (euler) {
   return this;
 };
 
-},{}],204:[function(require,module,exports){
+function cameraToPicture(cubeCamera, renderer, textureW) {
+  console.assert(cubeCamera instanceof THREE.CubeCamera);
+  textureW = textureW || cubeCamera.renderTarget.width;
+  const scene = new THREE.Scene();
+  const shader = THREE.ShaderLib.cube;
+  const uniforms = THREE.UniformsUtils.clone(shader.uniforms);
+  const material = new THREE.ShaderMaterial({
+    fragmentShader: shader.fragmentShader,
+    vertexShader: shader.vertexShader,
+    uniforms: uniforms,
+    depthWrite: false,
+    side: THREE.BackSide
+  }); // set the cubeCamera.renderTarget
+
+  uniforms.tCube.value = cubeCamera.renderTarget; // init geometry
+
+  const geometry = new THREE.BoxGeometry(500, 500, 500);
+  const mesh = new THREE.Mesh(geometry, material);
+  scene.add(mesh); // backup renderer parameters
+
+  const old = {
+    width: renderer.domElement.width,
+    height: renderer.domElement.height,
+    devicePixelRatio: renderer.devicePixelRatio
+  }; // set new renderer parameters
+
+  renderer.setSize(textureW, textureW);
+  renderer.devicePixelRatio = 1;
+  const images = [];
+  cubeCamera.children.slice().forEach(subCamera => {
+    // render sceneRtt with subCamera
+    renderer.render(scene, subCamera); // clone renderer.domElement
+
+    const canvas = document.createElement('canvas');
+    canvas.width = renderer.domElement.width;
+    canvas.height = renderer.domElement.height;
+    const context = canvas.getContext('2d'); // mirror in y axis - im not sure why it is needed
+
+    context.translate(0, canvas.height);
+    context.scale(1, -1); // draw the image in the cloned canvas
+
+    context.drawImage(renderer.domElement, 0, 0); // store cloned canvas
+
+    images.push(canvas);
+  }); // restore renderer parameters
+
+  renderer.devicePixelRatio = old.devicePixelRatio;
+  renderer.setSize(old.width, old.height);
+  mesh.dispose();
+  geometry.dispose();
+  material.dispose(); // return the just-built image
+
+  return images;
+}
+
+},{}],217:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19889,7 +21734,244 @@ class Emittable {
 
 exports.default = Emittable;
 
-},{}],205:[function(require,module,exports){
+},{}],218:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _const = require("../const");
+
+/* jshint esversion: 6 */
+class Materials {
+  constructor(product, vrenabled, texture) {
+    this.product = product;
+    this.vrenabled = vrenabled;
+    /*
+    const texture = new THREE.loader().load('threejs/matcap.jpg');
+    const material = new THREE.MeshMatcapMaterial({
+    	color: 0xffffff,
+    	matcap: texture,
+    	transparent: true,
+    	opacity: 1,
+    });
+    */
+    // const texture = this.getEnvMap();
+
+    const textures = this.textures = this.addTextures();
+    const white = this.white = this.getWhite();
+    const bodyPrimaryClear = this.bodyPrimaryClear = this.getBodyPrimaryClear(texture);
+    const logoSilver = this.logoSilver = this.getLogoSilver(texture);
+    const bodySecondary = this.bodySecondary = this.getBodySecondary(texture);
+    const bristlesPrimary = this.bristlesPrimary = this.getBristlesPrimary();
+    const bristlesSecondary = this.bristlesSecondary = this.getBristlesSecondary();
+  }
+
+  addTextures() {
+    const loader = new THREE.TextureLoader();
+    const textures = {
+      equirectangular: loader.load('threejs/environment/equirectangular-sm.jpg'),
+      matcap00: loader.load('threejs/matcap/matcap-00.jpg'),
+      matcap02: loader.load('threejs/matcap/matcap-02.jpg'),
+      matcap06: loader.load('threejs/matcap/matcap-06.jpg'),
+      matcap11: loader.load('threejs/matcap/matcap-11.jpg'),
+      toothbrushLogo: loader.load('threejs/models/toothbrush/toothbrush-logo.png')
+    };
+    return textures;
+  }
+
+  getWhite() {
+    let material;
+
+    if (this.vrenabled) {
+      material = new THREE.MeshMatcapMaterial({
+        color: 0xffffff,
+        matcap: this.textures.matcap06
+      });
+    } else {
+      material = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 0.2,
+        metalness: 0.2
+      });
+    }
+
+    return material;
+  }
+
+  getBodyPrimaryClear(texture) {
+    let material;
+    let color;
+
+    switch (this.product.modelType) {
+      case _const.MODEL_TYPE.PROFESSIONAL_BLACK:
+        color = 0x343333;
+        break;
+
+      default:
+        color = 0xfffffff;
+    }
+
+    if (this.vrenabled) {
+      material = new THREE.MeshMatcapMaterial({
+        color: color,
+        matcap: this.textures.matcap11,
+        transparent: true,
+        opacity: this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK ? 0.6 : 0.4,
+        alphaTest: 0.2,
+        side: THREE.DoubleSide
+      });
+    } else {
+      /*
+      material = new THREE.MeshMatcapMaterial({
+      	color: 0xeeeeee,
+      	matcap: this.textures.equirectangular,
+      	transparent: true,
+      	opacity: 0.4,
+      	alphaTest: 0.2,
+      	side: THREE.DoubleSide,
+      });
+      */
+      material = new THREE.MeshPhongMaterial({
+        color: color,
+        envMap: texture,
+        transparent: true,
+        refractionRatio: 0.6,
+        reflectivity: 0.8,
+        opacity: this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK ? 0.375 : 0.25,
+        alphaTest: 0.2,
+        // refractionRatio: 0.99,
+        // reflectivity: 0.99,
+        // opacity: 0.5,
+        side: THREE.DoubleSide // blending: THREE.AdditiveBlending,
+
+      });
+    } // material.vertexTangents = true;
+
+
+    return material;
+  }
+
+  getBodySecondary(texture) {
+    let material;
+
+    if (this.vrenabled) {
+      material = new THREE.MeshMatcapMaterial({
+        color: this.product.colors[0].colors[0],
+        matcap: this.textures.matcap11
+      });
+    } else {
+      material = new THREE.MeshStandardMaterial({
+        color: this.product.colors[0].colors[0],
+        // emissive: 0x4f0300,
+        roughness: 0.2,
+        metalness: 0.2 // envMap: texture,
+        // envMapIntensity: 0.4,
+        // The refractionRatio must have value in the range 0 to 1.
+        // The default value, very close to 1, give almost invisible glass.
+        // refractionRatio: 0,
+        // side: THREE.DoubleSide,
+
+      });
+    }
+
+    return material;
+  }
+
+  getBristlesPrimary(texture) {
+    let material;
+
+    if (this.vrenabled) {
+      material = new THREE.MeshMatcapMaterial({
+        color: this.product.bristles[0].colors[0],
+        matcap: this.textures.matcap02
+      });
+    } else {
+      material = new THREE.MeshStandardMaterial({
+        color: this.product.bristles[0].colors[0],
+        // 0x1f45c0,
+        // emissive: 0x333333,
+        // map: lightMap,
+        // normalMap: lightMap,
+        // metalnessMap: lightMap,
+        roughness: 0.9,
+        metalness: 0.0
+      });
+    }
+
+    return material;
+  }
+
+  getBristlesSecondary(texture) {
+    let material;
+
+    if (this.vrenabled) {
+      material = new THREE.MeshMatcapMaterial({
+        color: this.product.bristles[0].colors[1],
+        matcap: this.textures.matcap02
+      });
+    } else {
+      material = new THREE.MeshStandardMaterial({
+        color: this.product.bristles[0].colors[1],
+        // 0x1aac4e,
+        // emissive: 0x333333,
+        // map: lightMap,
+        // normalMap: lightMap,
+        // metalnessMap: lightMap,
+        roughness: 0.9,
+        metalness: 0.0
+      });
+    }
+
+    return material;
+  }
+
+  getLogoSilver() {
+    let material;
+
+    if (this.vrenabled) {
+      material = new THREE.MeshMatcapMaterial({
+        color: 0xffffff,
+        map: this.textures.toothbrushLogo,
+        matcap: this.textures.matcap00,
+        transparent: true,
+        alphaTest: 0.1
+      });
+    } else {
+      if (this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK) {
+        material = new THREE.MeshMatcapMaterial({
+          color: 0xffffff,
+          map: this.textures.toothbrushLogo,
+          matcap: this.textures.matcap00,
+          transparent: true,
+          alphaTest: 0.1
+        });
+      } else {
+        material = new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          map: this.textures.toothbrushLogo,
+          transparent: true,
+          roughness: 0.15,
+          metalness: 0.9 // envMap: texture,
+          // side: THREE.DoubleSide,
+          //
+          // opacity: 1,
+          // alphaTest: 0.1,
+
+        });
+      }
+    }
+
+    return material;
+  }
+
+}
+
+exports.default = Materials;
+
+},{"../const":216}],219:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20064,7 +22146,7 @@ class DragListener {
 
 exports.default = DragListener;
 
-},{}],206:[function(require,module,exports){
+},{}],220:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20163,7 +22245,7 @@ class Orbit {
 
 exports.default = Orbit;
 
-},{"./drag.listener":205}],207:[function(require,module,exports){
+},{"./drag.listener":219}],221:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20495,1819 +22577,5 @@ VRDisplays[0]: VRDisplay {
 
 exports.VR = VR;
 
-},{"../interactive/emittable":204}],208:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/* jshint esversion: 6 */
-class LazyScriptDirective {
-  constructor() {
-    this.restrict = 'A';
-    this.scope = false;
-  }
-
-  link(scope, element, attributes, controller) {
-    // if (attributes.type === 'text/javascript-lazy') {
-    if (attributes.src !== undefined) {
-      fetch(attributes.src, {
-        mode: 'no-cors'
-      }).then(response => {
-        const code = response.text();
-
-        try {
-          new Function(code)();
-        } catch (error) {
-          console.log('LazyScriptDirective.error', error);
-        }
-      });
-    } else {
-      const code = element.text();
-
-      try {
-        new Function(code)();
-      } catch (error) {
-        console.log('LazyScriptDirective.error', error);
-      }
-    } // }
-    // element.on('$destroy', () => {});
-
-  }
-
-  static factory() {
-    return new LazyScriptDirective();
-  }
-
-}
-
-exports.default = LazyScriptDirective;
-LazyScriptDirective.factory.$inject = [];
-
-},{}],209:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _operators = require("rxjs/operators");
-
-var _rect = _interopRequireDefault(require("../shared/rect"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/* jshint esversion: 6 */
-// let INDEX = 0;
-class LazyDirective {
-  // src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" lazy lazy-src="
-  constructor(DomService) {
-    this.domService = DomService;
-    this.restrict = 'A';
-    this.scope = {
-      src: "@?",
-      srcset: "@?",
-      backgroundSrc: "@?"
-    };
-  }
-
-  link(scope, element, attributes, controller) {
-    const image = element[0];
-    image.classList.remove('lazying', 'lazyed'); // image.index = INDEX++;
-    // empty picture
-    // image.setAttribute('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
-
-    const subscription = this.domService.appear$(image).subscribe(event => {
-      if (!image.classList.contains('lazying')) {
-        image.classList.add('lazying');
-        this.onAppearsInViewport(image, scope, attributes);
-      }
-    });
-    /*
-    element.subscription = this.lazy$(image).subscribe(intersection => {
-    	if (intersection.y > -0.5) {
-    		if (!image.classList.contains('lazyed')) {
-    			image.classList.add('lazyed');
-    			this.onAppearsInViewport(image, scope, attributes);
-    			setTimeout(() => {
-    				element.subscription.unsubscribe();
-    				element.subscription = null;
-    			}, 1);
-    		}
-    	}
-    });
-    */
-
-    element.on('$destroy', () => {
-      subscription.unsubscribe();
-    });
-  }
-
-  getThronSrc(image, src) {
-    const splitted = src.split('/std/');
-
-    if (splitted.length > 1) {
-      // Contenuto Thron
-      if (splitted[1].match(/^0x0\//)) {
-        // se non sono state richieste dimensioni specifiche, imposto le dimensioni necessarie alla pagina
-        src = splitted[0] + '/std/' + Math.floor(image.width * 1.1).toString() + 'x' + Math.floor(image.height * 1.1).toString() + splitted[1].substr(3);
-
-        if (!src.match(/[&?]scalemode=?/)) {
-          src += src.indexOf('?') !== -1 ? '&' : '?';
-          src += 'scalemode=centered';
-        }
-
-        if (window.devicePixelRatio > 1) {
-          src += src.indexOf('?') !== -1 ? '&' : '?';
-          src += 'dpr=' + Math.floor(window.devicePixelRatio * 100).toString();
-        }
-      }
-    }
-
-    return src;
-  }
-
-  onAppearsInViewport(image, scope, attributes) {
-    if (scope.srcset) {
-      // attributes.$set('srcset', scope.srcset);
-      image.setAttribute('srcset', scope.srcset);
-      image.removeAttribute('data-srcset');
-
-      if (scope.src) {
-        // attributes.$set('src', scope.src);
-        image.setAttribute('src', this.getThronSrc(image, scope.src));
-        image.removeAttribute('data-src');
-      }
-
-      image.classList.remove('lazying');
-      image.classList.add('lazyed');
-    } else if (scope.src) {
-      image.removeAttribute('data-src');
-      const src = this.getThronSrc(image, scope.src);
-      this.onImagePreload(image, src, srcOrUndefined => {
-        // image.setAttribute('src', src);
-        image.classList.remove('lazying');
-        image.classList.add('lazyed');
-      });
-    } else if (scope.backgroundSrc) {
-      image.setStyle('background-image', `url(${this.getThronSrc(image, scope.backgroundSrc)})`);
-      image.removeAttribute('data-background-src');
-      image.classList.remove('lazying');
-      image.classList.add('lazyed');
-    }
-  }
-
-  lazy$(node) {
-    return this.domService.rafAndRect$().pipe((0, _operators.map)(datas => {
-      const windowRect = datas[1];
-
-      const rect = _rect.default.fromNode(node);
-
-      const intersection = rect.intersection(windowRect);
-      return intersection;
-    }));
-  }
-
-  onImagePreload(image, src, callback) {
-    // const img = new Image();
-    image.onload = () => {
-      image.onload = image.onerror = null;
-
-      if (typeof callback === 'function') {
-        // setTimeout(() => {
-        callback(image.src); // }, 10);
-      }
-    };
-
-    image.onerror = function (e) {
-      image.onload = image.onerror = null;
-      image.src = 'data:image/png;base64,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'; // setTimeout(() => {
-
-      callback(); // }, 10);
-    };
-
-    image.src = src;
-  }
-
-  static factory(DomService) {
-    return new LazyDirective(DomService);
-  }
-
-}
-
-exports.default = LazyDirective;
-LazyDirective.factory.$inject = ['DomService'];
-
-},{"../shared/rect":218,"rxjs/operators":198}],210:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _rect = _interopRequireDefault(require("../shared/rect"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/* jshint esversion: 6 */
-const MODES = {
-  NONE: 0,
-  FIXED: 1,
-  ABSOLUTE: 2
-};
-
-class OverscrollDirective {
-  constructor(DomService) {
-    this.domService = DomService;
-    this.restrict = 'A';
-  }
-
-  link(scope, element, attributes, controller) {
-    const node = element[0];
-    const container = node.querySelector('.container');
-    const overscroll = attributes.overscroll ? parseInt(attributes.overscroll) : 100;
-    const anchors = [...node.querySelectorAll('[data-overscroll-anchor]')];
-
-    const onClick = event => {
-      const index = anchors.indexOf(event.currentTarget);
-
-      const rect = _rect.default.fromNode(node);
-
-      const h = container.offsetHeight;
-      const d = h / 100 * overscroll;
-      const s = d / anchors.length;
-      const top = window.pageYOffset + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
-
-      window.scrollTo(0, top);
-    };
-
-    anchors.forEach(x => {
-      x.addEventListener('click', onClick);
-    });
-    let windowRectWidth;
-    const subscription = this.domService.scrollIntersection$(node).subscribe(event => {
-      const rect = event.rect;
-      const top = rect.top;
-
-      if (event.windowRect.width !== windowRectWidth) {
-        windowRectWidth = event.windowRect.width;
-        container.setAttribute('style', '');
-      }
-
-      const h = container.offsetHeight;
-      const d = h / 100 * overscroll;
-      node.setAttribute('style', `position: relative; height: ${h + d}px;`);
-      let y = 0;
-
-      if (top < 0) {
-        y = Math.min(-top, d);
-      }
-
-      const containerRect = _rect.default.fromNode(container);
-
-      if (y === d) {
-        if (element.mode !== MODES.ABSOLUTE) {
-          element.mode = MODES.ABSOLUTE;
-          container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
-        }
-      } else if (y > 0) {
-        if (element.mode !== MODES.FIXED) {
-          element.mode = MODES.FIXED;
-          container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
-        }
-      } else {
-        if (element.mode !== MODES.NONE) {
-          element.mode = MODES.NONE;
-          container.setAttribute('style', '');
-        }
-      }
-
-      if (top < event.windowRect.height / 4 && rect.bottom > event.windowRect.height / 4) {
-        const index = Math.floor(y / d * anchors.length);
-        anchors.forEach((x, i) => {
-          if (i === index) {
-            const value = x.getAttribute('data-overscroll-anchor');
-
-            if (scope.$root.anchor !== value) {
-              scope.$root.$broadcast('onAnchor', value);
-            }
-
-            if (!x.classList.contains('active')) {
-              x.classList.add('active');
-            }
-          } else {
-            if (x.classList.contains('active')) {
-              x.classList.remove('active');
-            }
-          }
-        });
-      } else {
-        anchors.forEach(x => {
-          if (x.classList.contains('active')) {
-            x.classList.remove('active');
-          }
-        });
-      }
-    });
-    element.on('$destroy', () => {
-      subscription.unsubscribe();
-      anchors.forEach(x => {
-        x.removeEventListener('click', onClick);
-      });
-    });
-  }
-
-  static factory(DomService) {
-    return new OverscrollDirective(DomService);
-  }
-
-}
-
-exports.default = OverscrollDirective;
-OverscrollDirective.factory.$inject = ['DomService'];
-
-},{"../shared/rect":218}],211:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.TrustedFilter = TrustedFilter;
-
-/* jshint esversion: 6 */
-function TrustedFilter($sce) {
-  return url => {
-    return $sce.trustAsResourceUrl(url);
-  };
-}
-
-},{}],212:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/* jshint esversion: 6 */
-class ProductCtrl {
-  constructor($scope, $timeout, DomService, ApiService) {
-    this.$scope = $scope;
-    this.$timeout = $timeout;
-    this.domService = DomService;
-    this.apiService = ApiService;
-    this.product = window.product || {
-      bristles: [],
-      colors: []
-    };
-
-    if (this.product.bristles.length) {
-      this.bristle = this.product.bristles[0];
-    }
-
-    if (this.product.colors.length) {
-      this.color = this.product.colors[0];
-    }
-
-    $scope.$on('destroy', () => {});
-  }
-
-  get bristle() {
-    return this.bristle_;
-  }
-
-  set bristle(bristle) {
-    if (this.bristle_ !== bristle) {
-      this.bristle_ = bristle;
-      this.$scope.$broadcast('onBristle', bristle);
-    }
-  }
-
-  get color() {
-    return this.color_;
-  }
-
-  set color(color) {
-    if (this.color_ !== color) {
-      this.color_ = color;
-      this.$scope.$broadcast('onColor', color);
-    }
-  }
-
-}
-
-ProductCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService'];
-var _default = ProductCtrl;
-exports.default = _default;
-
-},{}],213:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _rxjs = require("rxjs");
-
-var _operators = require("rxjs/operators");
-
-/* jshint esversion: 6 */
-class RootCtrl {
-  constructor($scope, $timeout, DomService, ApiService, WishlistService) {
-    this.$scope = $scope;
-    this.$timeout = $timeout;
-    this.domService = DomService;
-    this.apiService = ApiService;
-    this.wishlistService = WishlistService;
-    this.unsubscribe = new _rxjs.Subject();
-    this.wishlistService.count$.pipe((0, _operators.takeUntil)(this.unsubscribe)).subscribe(count => {
-      this.wishlistCount = count;
-    });
-    $scope.$on('destroy', () => {
-      // console.log('destroy');
-      this.unsubscribe.next();
-      this.unsubscribe.complete();
-    });
-  }
-
-  onScroll(event) {
-    const scrolled = event.scroll.scrollTop > 40;
-    const direction = event.scroll.direction;
-
-    if (event.scroll.direction) {
-      if (direction && (this.direction !== direction || this.scrolled !== scrolled)) {
-        this.$timeout(() => {
-          this.scrolled = scrolled;
-          this.direction = direction;
-        }, 1);
-      }
-    }
-  }
-
-  onInit(brand) {
-    this.brand = brand;
-    this.webglEnabled = false; // this.domService.hasWebglSupport();
-
-    this.domService.addCustomRules();
-    /*
-    this.domService.smoothScroll$('.page').subscribe((top) => {
-    	// console.log(top);
-    });
-    */
-
-    this.$timeout(() => {
-      this.init = true;
-      const view = document.querySelector('.view');
-      TweenMax.to(view, 0.6, {
-        opacity: 1,
-        delay: 0,
-        overwrite: 'all'
-      });
-    }, 1000);
-    this.$scope.$on('onDroppinIn', (scope, droppinIn) => {
-      // console.log('onDroppinIn', droppinIn);
-      this.$timeout(() => {
-        this.droppinIn = droppinIn;
-      });
-    });
-  }
-
-  getClasses() {
-    const classes = {};
-    classes[this.brand] = true;
-
-    if (this.init) {
-      classes.init = true;
-    }
-
-    if (this.direction === -1) {
-      classes['scrolled-up'] = true;
-    }
-
-    if (this.direction === 1) {
-      classes['scrolled-down'] = true;
-    }
-
-    if (this.droppinIn) {
-      classes['droppin-in'] = true;
-    }
-
-    return classes;
-  }
-
-  closeNav() {
-    const node = document.querySelector(`.section--submenu.active`);
-    return this.onDroppedOut(node);
-  }
-
-  openNav(nav) {
-    const node = document.querySelector(`#nav-${nav} .section--submenu`);
-    return this.onDroppedIn(node);
-  }
-
-  toggleNav(id) {
-    this.nav = this.nav === id ? null : id;
-    this.closeNav().then(() => {
-      if (this.nav) {
-        this.openNav(this.nav);
-      }
-    });
-  }
-
-  onDroppedOut(node) {
-    // console.log('onDroppedOut', node);
-    if (node) {
-      if (this.droppinIn) {
-        TweenMax.set(node, {
-          height: 0
-        });
-        return Promise.resolve();
-      } else {
-        TweenMax.set(node, {
-          overflow: 'hidden'
-        });
-        TweenMax.to(node, 0.6, {
-          height: 0,
-          ease: Expo.easeOut,
-          overwrite: 'all',
-          onComplete: () => {
-            delete node.style.overflow;
-            return Promise.resolve();
-          }
-        });
-      }
-    } else {
-      return Promise.resolve();
-    }
-    /*
-    return new Promise((resolve, reject) => {
-    	if (node) {
-    		const items = [].slice.call(node.querySelectorAll('.submenu__item'));
-    		TweenMax.staggerTo(items.reverse(), 0.25, {
-    			opacity: 0,
-    			stagger: 0.05,
-    			delay: 0.0,
-    			onComplete: () => {
-    				TweenMax.to(node, 0.2, {
-    					maxHeight: 0,
-    					ease: Expo.easeOut,
-    					delay: 0.0,
-    					onComplete: () => {
-    						resolve();
-    					}
-    				});
-    			}
-    		});
-    	} else {
-    		resolve();
-    	}
-    });
-    */
-
-  }
-
-  onDroppedIn(node) {
-    // console.log('onDroppedIn', node);
-    return new Promise((resolve, reject) => {
-      this.droppinIn = true;
-      const items = [].slice.call(node.querySelectorAll('.submenu__item'));
-      TweenMax.set(items, {
-        opacity: 0
-      });
-      TweenMax.set(node, {
-        height: 'auto'
-      });
-      const mh = node.offsetHeight;
-      TweenMax.set(node, {
-        height: 0,
-        overflow: 'hidden'
-      });
-      TweenMax.to(node, 0.8, {
-        height: mh,
-        ease: Expo.easeOut,
-        delay: 0.0,
-        overwrite: 'all',
-        onComplete: () => {
-          delete node.style.overflow;
-          TweenMax.set(node, {
-            height: 'auto'
-          }); // TweenMax.set(node, { clearProps: 'all' });
-
-          if (items.length === 0) {
-            this.droppinIn = false;
-          }
-        }
-      });
-
-      if (items.length) {
-        TweenMax.staggerTo(items, 0.35, {
-          opacity: 1,
-          stagger: 0.07,
-          delay: 0.5,
-          onComplete: () => {
-            this.droppinIn = false;
-          }
-        });
-      }
-    });
-  }
-
-  toggleBrand(event) {
-    const brands = ['atlas-concorde', 'atlas-concorde-solution', 'atlas-concorde-usa', 'atlas-concorde-russia'];
-    const i = (brands.indexOf(this.brand) + 1) % brands.length;
-    this.brand = brands[i];
-    event.preventDefault();
-    event.stopImmediatePropagation();
-  }
-
-  pad(index) {
-    return index < 10 ? '0' + index : index;
-  }
-
-  hasHash(hash) {
-    return window.location.hash.indexOf(hash) !== -1;
-  }
-
-}
-
-RootCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService', 'WishlistService'];
-var _default = RootCtrl;
-exports.default = _default;
-
-},{"rxjs":2,"rxjs/operators":198}],214:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _rxjs = require("rxjs");
-
-/* jshint esversion: 6 */
-const API_HREF = window.location.port === '6001' ? 'https://atlasconcorde.wslabs.it' : '';
-
-class ApiService {
-  constructor($http) {
-    this.http = $http;
-    const api = {
-      advancedSearch: {
-        get: () => {
-          return (0, _rxjs.from)($http.get('data/advanced-search.json')); // return from($http.get(API_HREF + '/api/advanced-search/json'));
-        }
-      },
-      wishlist: {
-        get: () => {
-          return (0, _rxjs.from)($http.get('data/moodboard.json'));
-        },
-        toggle: item => {
-          item.added = !item.added;
-          return Promise.resolve(item);
-        },
-        clearAll: () => {
-          return Promise.resolve();
-        }
-      },
-      moodboard: {
-        filter: filters => {
-          // return from($http.post(API_HREF + '/api/moodboard/json', filters));
-          return (0, _rxjs.from)($http.get('data/moodboard.json'));
-        }
-      },
-      storeLocator: {
-        all: () => {
-          return $http.get(API_HREF + '/api/store/json'); // return $http.get('data/store-locator.json');
-        }
-      }
-    };
-    Object.assign(this, api);
-  }
-
-  static factory($http) {
-    return new ApiService($http);
-  }
-
-}
-
-exports.default = ApiService;
-ApiService.factory.$inject = ['$http'];
-
-},{"rxjs":2}],215:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _rxjs = require("rxjs");
-
-var _animationFrame = require("rxjs/internal/scheduler/animationFrame");
-
-var _operators = require("rxjs/operators");
-
-var _rect = _interopRequireDefault(require("../shared/rect"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/* jshint esversion: 6 */
-class DomService {
-  constructor() {}
-
-  get scrollTop() {
-    return DomService.getScrollTop(window);
-  }
-
-  get scrollLeft() {
-    return DomService.getScrollLeft(window);
-  }
-
-  hasWebglSupport() {
-    if (this.isIE()) {
-      return false;
-    }
-
-    if (!this.hasWebgl()) {
-      return false;
-    }
-
-    return true;
-  }
-
-  isIE() {
-    const ua = window.navigator.userAgent;
-    const msie = ua.indexOf('MSIE ');
-
-    if (msie > 0) {
-      // IE 10 or older => return version number
-      return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
-    }
-
-    const trident = ua.indexOf('Trident/');
-
-    if (trident > 0) {
-      // IE 11 => return version number
-      const rv = ua.indexOf('rv:');
-      return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
-    }
-
-    const edge = ua.indexOf('Edge/');
-
-    if (edge > 0) {
-      // Edge (IE 12+) => return version number
-      return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
-    } // other browser
-
-
-    return false;
-  }
-
-  hasWebgl() {
-    let gl,
-        debugInfo,
-        vendor,
-        renderer,
-        has = false;
-
-    try {
-      const canvas = document.createElement('canvas');
-
-      if (!!window.WebGLRenderingContext) {
-        gl = canvas.getContext('webgl', {
-          failIfMajorPerformanceCaveat: true
-        }) || canvas.getContext('experimental-webgl', {
-          failIfMajorPerformanceCaveat: true
-        });
-      }
-    } catch (e) {
-      console.log('no webgl');
-    }
-
-    if (gl) {
-      debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-      vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-      renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-      has = true;
-    }
-
-    console.log(`WebGLCapabilities debugInfo: ${debugInfo} vendor: ${vendor} renderer: ${renderer} `);
-    return has;
-  }
-
-  getOuterHeight(node) {
-    let height = node.clientHeight;
-    const computedStyle = window.getComputedStyle(node);
-    height += parseInt(computedStyle.marginTop, 10);
-    height += parseInt(computedStyle.marginBottom, 10);
-    height += parseInt(computedStyle.borderTopWidth, 10);
-    height += parseInt(computedStyle.borderBottomWidth, 10);
-    return height;
-  }
-
-  getOuterWidth(node) {
-    let width = node.clientWidth;
-    const computedStyle = window.getComputedStyle(node);
-    width += parseInt(computedStyle.marginLeft, 10);
-    width += parseInt(computedStyle.marginRight, 10);
-    width += parseInt(computedStyle.borderLeftWidth, 10);
-    width += parseInt(computedStyle.borderRightWidth, 10);
-    return width;
-  }
-
-  raf$() {
-    return DomService.raf$;
-  }
-
-  windowRect$() {
-    return DomService.windowRect$;
-  }
-
-  rafAndRect$() {
-    return DomService.rafAndRect$;
-  }
-
-  scroll$() {
-    return DomService.scroll$;
-  }
-
-  scrollAndRect$() {
-    return DomService.scrollAndRect$;
-  }
-
-  smoothScroll$(selector, friction = 20) {
-    const body = document.querySelector('body');
-    const node = document.querySelector(selector); // const outerHeight = this.getOuterHeight(node);
-
-    let down = false;
-    /*
-    const onWheel = (event) => {
-    	down = true;
-    }
-    const onDown = () => {
-    	down = true;
-    }
-    const onUp = () => {
-    	down = false;
-    }
-    document.addEventListener('wheel', onWheel);
-    document.addEventListener('touchstart', onDown);
-    document.addEventListener('touchend', onUp);
-    */
-
-    /*
-    document.addEventListener('touchstart', () => {
-    	console.log('touchstart');
-    	body.classList.add('down');
-    	down = true;
-    }, {passive:true});
-    document.addEventListener('touchend', () => {
-    	body.classList.remove('down');
-    	down = false;
-    });
-    console.log(window);
-    */
-
-    return this.raf$().pipe((0, _operators.map)(() => {
-      const outerHeight = this.getOuterHeight(node); // console.log(window.DocumentTouch);
-      // console.log(document instanceof DocumentTouch);
-      // console.log(navigator.msMaxTouchPoints);
-
-      if (body.offsetHeight !== outerHeight) {
-        // margin ?
-        body.style = `height: ${outerHeight}px`;
-      }
-
-      const nodeTop = node.top || 0;
-      const top = down ? -this.scrollTop : Math.round((nodeTop + (-this.scrollTop - nodeTop) / friction) * 100) / 100;
-
-      if (node.top !== top) {
-        node.top = top;
-        node.style = `position: fixed; width: 100%; transform: translateY(${top}px)`;
-        return top;
-      } else {
-        return null;
-      }
-    }), (0, _operators.filter)(x => x !== null), (0, _operators.shareReplay)());
-  }
-  /*
-  // trackpad
-  window.onwheel = function(e) {
-    e.preventDefault();
-    if (e.ctrlKey) {
-      zoom += e.deltaY;
-    } else {
-      offsetX += e.deltaX * 2;
-      offsetY -= e.deltaY * 2;
-    }
-  };
-  */
-
-
-  rafIntersection$(node) {
-    return this.rafAndRect$().pipe((0, _operators.map)(datas => {
-      // const scrollTop = datas[0];
-      const windowRect = datas[1];
-
-      const rect = _rect.default.fromNode(node);
-
-      const intersection = rect.intersection(windowRect);
-      const response = DomService.rafIntersection_;
-      response.scroll = datas[0];
-      response.windowRect = datas[1];
-      response.rect = rect;
-      response.intersection = intersection;
-      return response;
-    }));
-  }
-
-  scrollIntersection$(node) {
-    return this.scrollAndRect$().pipe((0, _operators.map)(datas => {
-      // const scrollTop = datas[0];
-      const windowRect = datas[1];
-
-      const rect = _rect.default.fromNode(node);
-
-      const intersection = rect.intersection(windowRect);
-      const response = DomService.scrollIntersection_;
-      response.scroll = datas[0];
-      response.windowRect = datas[1];
-      response.rect = rect;
-      response.intersection = intersection;
-      return response;
-    }));
-  }
-
-  appear$(node, value = 0.0) {
-    // -0.5
-    return this.rafIntersection$(node).pipe((0, _operators.filter)(x => x.intersection.y > value), (0, _operators.first)());
-  }
-
-  visibility$(node, value = 0.5) {
-    return this.rafIntersection$(node).pipe((0, _operators.map)(x => x.intersection.y > value), (0, _operators.distinctUntilChanged)());
-  }
-
-  firstVisibility$(node, value = 0.5) {
-    return this.visibility$(node, value).pipe((0, _operators.filter)(visible => visible), (0, _operators.first)());
-  }
-
-  addCustomRules() {
-    const sheet = this.addCustomSheet();
-    const body = document.querySelector('body');
-    const scrollBarWidth = window.innerWidth - body.clientWidth;
-    let rule = `body.droppin-in { padding-right: ${scrollBarWidth}px; }`;
-    sheet.insertRule(rule, 0);
-    rule = `body.droppin-in header { width: calc(100% - ${scrollBarWidth}px); }`;
-    sheet.insertRule(rule, 1);
-    rule = `body.droppin-in menu--product { width: calc(100% - ${scrollBarWidth}px); }`;
-    sheet.insertRule(rule, 2);
-  }
-
-  addCustomSheet() {
-    const style = document.createElement('style');
-    style.appendChild(document.createTextNode(''));
-    document.head.appendChild(style);
-    return style.sheet;
-  }
-
-  static factory() {
-    return new DomService();
-  }
-
-  static getScrollTop(node) {
-    return node.pageYOffset || node.scrollY || node.scrollTop || 0;
-  }
-
-  static getScrollLeft(node) {
-    return node.pageXOffset || node.scrollX || node.scrollLeft || 0;
-  }
-
-}
-
-exports.default = DomService;
-DomService.factory.$inject = [];
-DomService.rafIntersection_ = {};
-DomService.scrollIntersection_ = {};
-DomService.raf$ = (0, _rxjs.range)(0, Number.POSITIVE_INFINITY, _animationFrame.animationFrame);
-
-DomService.windowRect$ = function () {
-  const windowRect = new _rect.default({
-    width: window.innerWidth,
-    height: window.innerHeight
-  });
-  return (0, _rxjs.fromEvent)(window, 'resize').pipe((0, _operators.map)(originalEvent => {
-    windowRect.width = window.innerWidth;
-    windowRect.height = window.innerHeight;
-    return windowRect;
-  }), (0, _operators.startWith)(windowRect));
-}();
-
-DomService.rafAndRect$ = (0, _rxjs.combineLatest)(DomService.raf$, DomService.windowRect$);
-
-DomService.scroll$ = function () {
-  const target = window;
-  let previousTop = DomService.getScrollTop(target);
-  const event = {
-    /*
-    top: target.offsetTop || 0,
-    left: target.offsetLeft || 0,
-    width: target.offsetWidth || target.innerWidth,
-    height: target.offsetHeight || target.innerHeight,
-    */
-    scrollTop: previousTop,
-    scrollLeft: DomService.getScrollLeft(target),
-    direction: 0,
-    originalEvent: null
-  };
-  return (0, _rxjs.fromEvent)(target, 'scroll').pipe((0, _operators.startWith)(event), (0, _operators.auditTime)(33), // 30 fps
-  (0, _operators.map)(originalEvent => {
-    /*
-    event.top = target.offsetTop || 0;
-    event.left = target.offsetLeft || 0;
-    event.width = target.offsetWidth || target.innerWidth;
-    event.height = target.offsetHeight || target.innerHeight;
-    */
-    event.scrollTop = DomService.getScrollTop(target);
-    event.scrollLeft = DomService.getScrollLeft(target);
-    const diff = event.scrollTop - previousTop;
-    event.direction = diff ? diff / Math.abs(diff) : 0;
-    previousTop = event.scrollTop;
-    event.originalEvent = originalEvent;
-    return event;
-  }) // ,
-  // filter(event => event.direction !== 0)
-  );
-}();
-
-DomService.scrollAndRect$ = (0, _rxjs.combineLatest)(DomService.scroll$, DomService.windowRect$);
-
-},{"../shared/rect":218,"rxjs":2,"rxjs/internal/scheduler/animationFrame":161,"rxjs/operators":198}],216:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/* jshint esversion: 6 */
-
-/* global angular */
-class LocationService {
-  constructor($location) {
-    this.$location = $location;
-  }
-
-  get(key) {
-    return this.$location.search()[key];
-  }
-
-  set(keyOrValue, value) {
-    if (typeof keyOrValue === 'string') {
-      this.$location.search(keyOrValue, value).replace();
-    } else {
-      this.$location.search(keyOrValue).replace();
-    }
-  }
-
-  deserialize(key) {
-    let value = null;
-    const serialized = this.get('q'); // console.log(serialized);
-
-    if (serialized) {
-      const json = window.atob(serialized);
-      value = JSON.parse(json);
-    } // console.log(value);
-
-
-    if (key && value) {
-      value = value[key];
-    }
-
-    return value || null;
-  }
-
-  serialize(keyOrValue, value) {
-    let serialized = null;
-    let q = this.deserialize() || {};
-
-    if (typeof keyOrValue === 'string') {
-      q[keyOrValue] = value;
-    } else {
-      q = keyOrValue;
-    }
-
-    const json = JSON.stringify(q);
-    serialized = window.btoa(json);
-    this.set('q', serialized);
-  }
-
-  getSerialization(keyOrValue, value) {
-    let serialized = null;
-    let q = {};
-
-    if (typeof keyOrValue === 'string') {
-      q[keyOrValue] = value;
-    } else {
-      q = keyOrValue;
-    }
-
-    const json = JSON.stringify(q);
-    serialized = window.btoa(json);
-    return serialized;
-  }
-
-  static factory($location) {
-    return new LocationService($location);
-  }
-
-}
-
-exports.default = LocationService;
-LocationService.factory.$inject = ['$location'];
-
-},{}],217:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/* jshint esversion: 6 */
-
-/* global angular */
-class PromiseService {
-  constructor($q) {
-    this.$q = $q;
-  }
-
-  make(callback) {
-    if (typeof callback !== 'function') {
-      throw 'promise resolve callback missing';
-    }
-
-    const deferred = this.$q.defer();
-    callback(deferred);
-    return deferred.promise;
-  }
-
-  all(promises) {
-    return this.$q.all(promises);
-  }
-
-  static factory($q) {
-    return new PromiseService($q);
-  }
-
-}
-
-exports.default = PromiseService;
-PromiseService.factory.$inject = ['$q'];
-
-},{}],218:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-/* jshint esversion: 6 */
-class Rect {
-  constructor(rect) {
-    this.top = 0;
-    this.right = 0;
-    this.bottom = 0;
-    this.left = 0;
-    this.width = 0;
-    this.height = 0;
-    this.set(rect);
-  }
-
-  static contains(rect, left, top) {
-    return rect.top <= top && top <= rect.bottom && rect.left <= left && left <= rect.right;
-  }
-
-  static intersectRect(r1, r2) {
-    return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
-  }
-
-  static fromNode(node) {
-    if (!node) {
-      return;
-    }
-
-    const rect = node.rect_ || (node.rect_ = new Rect());
-    const rects = node.getClientRects();
-
-    if (!rects.length) {
-      // console.log(rects, node);
-      return rect;
-    }
-
-    const boundingRect = node.getBoundingClientRect(); // rect.top: boundingRect.top + defaultView.pageYOffset,
-    // rect.left: boundingRect.left + defaultView.pageXOffset,
-
-    rect.top = boundingRect.top;
-    rect.left = boundingRect.left;
-    rect.width = boundingRect.width;
-    rect.height = boundingRect.height;
-    rect.right = rect.left + rect.width;
-    rect.bottom = rect.top + rect.height;
-    rect.setCenter();
-    return rect;
-  }
-
-  set(rect) {
-    if (rect) {
-      Object.assign(this, rect);
-      this.right = this.left + this.width;
-      this.bottom = this.top + this.height;
-    }
-
-    this.setCenter();
-  }
-
-  setCenter() {
-    const center = this.center || (this.center = {});
-    center.top = this.top + this.height / 2;
-    center.left = this.left + this.width / 2;
-    center.x = center.left;
-    center.y = center.top;
-  }
-
-  contains(left, top) {
-    return Rect.contains(this, left, top);
-  }
-
-  intersect(rect) {
-    return Rect.intersectRect(this, rect);
-  }
-
-  intersection(rect) {
-    const intersection = this.intersection_ || (this.intersection_ = {
-      center: {}
-    });
-    intersection.center.x = (this.center.x - rect.center.x) / (rect.width / 2);
-    intersection.center.y = (this.center.y - rect.center.y) / (rect.height / 2);
-    const dx = this.left > rect.left ? 0 : Math.abs(rect.left - this.left);
-    const dy = this.top > rect.top ? 0 : Math.abs(rect.top - this.top);
-    const x = dx ? 1 - dx / this.width : (rect.left + rect.width - this.left) / this.width;
-    const y = dy ? 1 - dy / this.height : (rect.top + rect.height - this.top) / this.height;
-    intersection.x = x;
-    intersection.y = y;
-    return intersection;
-  }
-
-  intersection___(rect) {
-    const center = {
-      x: (this.center.x - rect.center.x) / (rect.width / 2),
-      y: (this.center.y - rect.center.y) / (rect.height / 2)
-    };
-
-    if (this.intersect(rect)) {
-      const dx = this.left > rect.left ? 0 : Math.abs(rect.left - this.left);
-      const dy = this.top > rect.top ? 0 : Math.abs(rect.top - this.top);
-      let x = dx ? 1 - dx / this.width : (rect.left + rect.width - this.left) / this.width;
-      let y = dy ? 1 - dy / this.height : (rect.top + rect.height - this.top) / this.height;
-      x = Math.min(1, x);
-      y = Math.min(1, y);
-      return {
-        x: x,
-        y: y,
-        center: center
-      };
-    } else {
-      return {
-        x: 0,
-        y: 0,
-        center: center
-      };
-    }
-  }
-
-}
-
-exports.default = Rect;
-
-},{}],219:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.State = void 0;
-
-/* jshint esversion: 6 */
-class State {
-  constructor($timeout, $rootScope) {
-    this.$timeout = $timeout;
-    this.$rootScope = $rootScope;
-    this.idle();
-  }
-
-  idle() {
-    this.isBusy = false;
-    this.isError = false;
-    this.isErroring = false;
-    this.isSuccess = false;
-    this.isSuccessing = false;
-    this.button = null;
-    this.errors = [];
-  }
-
-  busy() {
-    if (!this.isBusy) {
-      this.isBusy = true;
-      this.isError = false;
-      this.isErroring = false;
-      this.isSuccess = false;
-      this.isSuccessing = false;
-      this.errors = [];
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  classes(addons) {
-    const classes = {
-      ready: this.isReady,
-      busy: this.isBusy,
-      successing: this.isSuccessing,
-      success: this.isSuccess,
-      errorring: this.isErroring,
-      error: this.isError
-    };
-
-    if (addons) {
-      Object.keys(addons).forEach(key => {
-        classes[addons[key]] = classes[key];
-      });
-    }
-
-    return classes;
-  }
-
-  enabled() {
-    return !this.isBusy && !this.isErroring && !this.isSuccessing;
-  }
-
-  error(error) {
-    console.log('State.error', error);
-    this.isBusy = false;
-    this.isError = true;
-    this.isErroring = true;
-    this.isSuccess = false;
-    this.isSuccessing = false;
-    this.errors.push(error);
-    $timeout(() => {
-      this.isErroring = false;
-    }, DELAY);
-  }
-
-  errorMessage() {
-    return this.isError ? this.errors[this.errors.length - 1] : null;
-  }
-
-  labels(addons) {
-    const defaults = {
-      ready: 'submit',
-      busy: 'sending',
-      error: 'error',
-      success: 'success'
-    };
-
-    if (addons) {
-      angular.extend(defaults, addons);
-    }
-
-    let label = defaults.ready;
-
-    if (this.isBusy) {
-      label = defaults.busy;
-    } else if (this.isSuccess) {
-      label = defaults.success;
-    } else if (this.isError) {
-      label = defaults.error;
-    }
-
-    return label;
-  }
-
-  ready() {
-    this.idle();
-    this.isReady = true;
-    this.$rootScope.$broadcast('$thisReady', this);
-  }
-
-  submitClass() {
-    return {
-      busy: this.isBusy,
-      ready: this.isReady,
-      successing: this.isSuccessing,
-      success: this.isSuccess,
-      errorring: this.isErroring,
-      error: this.isError
-    };
-  }
-
-  success() {
-    this.isBusy = false;
-    this.isError = false;
-    this.isErroring = false;
-    this.isSuccess = true;
-    this.isSuccessing = true;
-    this.errors = [];
-    this.$timeout(() => {
-      this.isSuccessing = false;
-    }, DELAY);
-  }
-
-}
-
-exports.State = State;
-
-class StateService {
-  constructor($timeout, $rootScope) {
-    this.$timeout = $timeout;
-    this.$rootScope = $rootScope;
-  }
-
-  getState() {
-    return new State(this.$timeout, this.$rootScope);
-  }
-
-  static factory($timeout, $rootScope) {
-    return new StateService($timeout, $rootScope);
-  }
-
-}
-
-exports.default = StateService;
-StateService.factory.$inject = ['$timeout', '$rootScope'];
-
-},{}],220:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.SessionStorageService = exports.LocalStorageService = exports.CookieService = void 0;
-
-/* jshint esversion: 6 */
-
-/* global angular */
-const TIMEOUT = 5 * 60 * 1000; // five minutes
-
-class CookieService {
-  constructor(PromiseService) {
-    this.promise = PromiseService;
-  }
-
-  delete(name) {
-    setter(name, '', -1);
-  }
-
-  exist(name) {
-    return document.cookie.indexOf(';' + name + '=') !== -1 || document.cookie.indexOf(name + '=') === 0;
-  }
-
-  get(name) {
-    const cookieName = name + "=";
-    const ca = document.cookie.split(';');
-
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1, c.length);
-      }
-
-      if (c.indexOf(cookieName) === 0) {
-        const value = c.substring(cookieName.length, c.length);
-        let model = null;
-
-        try {
-          model = JSON.parse(decodeURIComponent(atob(value)));
-        } catch (e) {
-          console.log('CookieService.get.error parsing', key, e);
-        }
-
-        return model;
-      }
-    }
-
-    return null;
-  }
-
-  on(name) {
-    return this.promise.make(promise => {
-      let i,
-          interval = 1000,
-          elapsed = 0,
-          timeout = TIMEOUT;
-
-      const checkCookie = () => {
-        if (elapsed > timeout) {
-          promise.reject('timeout');
-        } else {
-          const c = this.get(name);
-
-          if (c) {
-            promise.resolve(c);
-          } else {
-            elapsed += interval;
-            i = setTimeout(checkCookie, interval);
-          }
-        }
-      };
-
-      checkCookie();
-    });
-  }
-
-  set(name, value, days) {
-    try {
-      const cache = [];
-      const json = JSON.stringify(value, function (key, value) {
-        if (key === 'pool') {
-          return;
-        }
-
-        if (typeof value === 'object' && value !== null) {
-          if (cache.indexOf(value) !== -1) {
-            // Circular reference found, discard key
-            return;
-          }
-
-          cache.push(value);
-        }
-
-        return value;
-      });
-      this.setter(name, btoa(encodeURIComponent(json)), days);
-    } catch (e) {
-      console.log('CookieService.error serializing', name, value, e);
-    }
-  }
-
-  setter(name, value, days) {
-    let expires;
-
-    if (days) {
-      const date = new Date();
-      date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-      expires = '; expires=' + date.toGMTString();
-    } else {
-      expires = '';
-    }
-
-    document.cookie = name + '=' + value + expires + '; path=/';
-  }
-
-  static factory(PromiseService) {
-    return new CookieService(PromiseService);
-  }
-
-}
-
-exports.CookieService = CookieService;
-CookieService.factory.$inject = ['PromiseService'];
-
-class LocalStorageService {
-  constructor(PromiseService) {
-    this.promise = PromiseService;
-  }
-
-  delete(name) {
-    window.localStorage.removeItem(name);
-  }
-
-  exist(name) {
-    return window.localStorage[name] !== undefined;
-  }
-
-  get(name) {
-    let value = null;
-
-    if (window.localStorage[name] !== undefined) {
-      try {
-        value = JSON.parse(window.localStorage[name]);
-      } catch (e) {
-        console.log('LocalStorageService.get.error parsing', name, e);
-      }
-    }
-
-    return value;
-  }
-
-  set(name, value) {
-    try {
-      const cache = [];
-      const json = JSON.stringify(value, function (key, value) {
-        if (key === 'pool') {
-          return;
-        }
-
-        if (typeof value === 'object' && value !== null) {
-          if (cache.indexOf(value) !== -1) {
-            // Circular reference found, discard key
-            return;
-          }
-
-          cache.push(value);
-        }
-
-        return value;
-      });
-      window.localStorage.setItem(name, json);
-    } catch (e) {
-      console.log('LocalStorageService.set.error serializing', name, value, e);
-    }
-  }
-
-  on(name) {
-    return this.promise.make(promise => {
-      let i,
-          interval = 1000,
-          elapsed = 0,
-          timeout = TIMEOUT;
-
-      const storageEvent = e => {
-        if (i) {
-          clearTimeout(i);
-        }
-
-        if (e.originalEvent.key == name) {
-          try {
-            const value = JSON.parse(e.originalEvent.newValue); // , e.originalEvent.oldValue
-
-            promise.resolve(value);
-          } catch (error) {
-            console.log('LocalStorageService.on.error parsing', name, error);
-            promise.reject('error parsing ' + name);
-          }
-        }
-      };
-
-      angular.element(window).on('storage', storageEvent);
-      i = setTimeout(function () {
-        promise.reject('timeout');
-      }, timeout);
-    });
-  }
-
-  static isLocalStorageSupported() {
-    let supported = false;
-
-    try {
-      supported = 'localStorage' in window && window.localStorage !== null;
-
-      if (supported) {
-        window.localStorage.setItem('test', '1');
-        window.localStorage.removeItem('test');
-      } else {
-        supported = false;
-      }
-    } catch (e) {
-      supported = false;
-    }
-
-    return supported;
-  }
-
-  static factory(PromiseService) {
-    if (LocalStorageService.isLocalStorageSupported()) {
-      return new LocalStorageService(PromiseService);
-    } else {
-      return new CookieService(PromiseService);
-    }
-  }
-
-}
-
-exports.LocalStorageService = LocalStorageService;
-LocalStorageService.factory.$inject = ['PromiseService'];
-
-class SessionStorageService {
-  constructor(PromiseService) {
-    this.promise = PromiseService;
-  }
-
-  delete(name) {
-    window.sessionStorage.removeItem(name);
-  }
-
-  exist(name) {
-    return window.sessionStorage[name] !== undefined;
-  }
-
-  get(name) {
-    let value = null;
-
-    if (window.sessionStorage[name] !== undefined) {
-      try {
-        value = JSON.parse(window.sessionStorage[name]);
-      } catch (e) {
-        console.log('SessionStorageService.get.error parsing', name, e);
-      }
-    }
-
-    return value;
-  }
-
-  set(name, value) {
-    try {
-      const cache = [];
-      const json = JSON.stringify(value, function (key, value) {
-        if (key === 'pool') {
-          return;
-        }
-
-        if (typeof value === 'object' && value !== null) {
-          if (cache.indexOf(value) !== -1) {
-            // Circular reference found, discard key
-            return;
-          }
-
-          cache.push(value);
-        }
-
-        return value;
-      });
-      window.sessionStorage.setItem(name, json);
-    } catch (e) {
-      console.log('SessionStorageService.set.error serializing', name, value, e);
-    }
-  }
-
-  on(name) {
-    return this.promise.make(promise => {
-      let i,
-          interval = 1000,
-          elapsed = 0,
-          timeout = TIMEOUT;
-
-      const storageEvent = e => {
-        if (i) {
-          clearTimeout(i);
-        }
-
-        if (e.originalEvent.key == name) {
-          try {
-            const value = JSON.parse(e.originalEvent.newValue); // , e.originalEvent.oldValue
-
-            promise.resolve(value);
-          } catch (error) {
-            console.log('SessionStorageService.on.error parsing', name, error);
-            promise.reject('error parsing ' + name);
-          }
-        }
-      };
-
-      angular.element(window).on('storage', storageEvent);
-      i = setTimeout(function () {
-        promise.reject('timeout');
-      }, timeout);
-    });
-  }
-
-  static isSessionStorageSupported() {
-    let supported = false;
-
-    try {
-      supported = 'sessionStorage' in window && window.sessionStorage !== null;
-
-      if (supported) {
-        window.sessionStorage.setItem('test', '1');
-        window.localsessionStorageStorage.removeItem('test');
-      } else {
-        supported = false;
-      }
-    } catch (e) {
-      supported = false;
-    }
-
-    return supported;
-  }
-
-  static factory(PromiseService) {
-    if (SessionStorageService.isSessionStorageSupported()) {
-      return new SessionStorageService(PromiseService);
-    } else {
-      return new CookieService(PromiseService);
-    }
-  }
-
-}
-
-exports.SessionStorageService = SessionStorageService;
-SessionStorageService.factory.$inject = ['PromiseService'];
-
-},{}]},{},[199]);
+},{"../interactive/emittable":217}]},{},[199]);
 //# sourceMappingURL=tau.js.map

@@ -253,7 +253,7 @@
 			flex-wrap: nowrap;
 			width: calc(100% + 20px);
 			height: 40px;
-			margin-bottom: 20px;
+			margin-bottom: 5vh;
 
 			.listing__item {
 				position: static;
@@ -472,10 +472,11 @@
 	}
 
 	@include media-breakpoint-down(sm) {
+		margin-bottom: 20vh;
 
 		.title {
 			font-size: 20px;
-			margin-bottom: 35vh;
+			margin-bottom: 50vh;
 		}
 
 		.group--vertical-center {
@@ -495,16 +496,33 @@
 		.group--nav {
 			display: block;
 
-			&:first-child {
+			.label {
+				display: none;
+			}
+
+			&.group--nav--bristles {
 				order: 2;
 			}
 
-			&:last-child {
+			&.group--nav--colors {
 				order: 1;
 			}
 
-			.label {
-				display: none;
+			&.group--nav--vr {
+				order: 3;
+				margin-top: 20px;
+				position: absolute;
+				top: 100%;
+
+				.label {
+					display: block;
+					position: absolute;
+					bottom: -12px;
+					white-space: nowrap;
+					left: 50%;
+					transform: translateX(-50%);
+					font-size: 12px;
+				}
 			}
 		}
 
@@ -524,6 +542,7 @@
 
 .btn--vr {
 	display: inline-block;
+	background: transparent;
 
 	.icon--vr {
 		width: 50px;
@@ -639,5 +658,58 @@
 		transform: translateX(-50%) translateY(-50%) scale(1.5);
 		opacity: 0;
 		border-color: $border;
+	}
+}
+
+@keyframes dash {
+	100% {
+		stroke-dashoffset: -295%;
+	}
+}
+
+@keyframes icon-rotate {
+	0% {
+		opacity: 0;
+		visibility: visible;
+	}
+
+	20% {
+		opacity: 1;
+	}
+
+	90% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+		visibility: hidden;
+	}
+}
+
+.icon--rotate {
+	width: 50%;
+	max-width: 173px;
+	max-height: 173px;
+	pointer-events: none;
+	visibility: hidden;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-50%);
+
+	.interactive & {
+		animation: 6s 1s icon-rotate;
+
+		.icon--rotate__ellipse {
+			fill: none;
+			stroke: #E10000;
+			stroke-width: 2;
+			stroke-miterlimit: 10;
+			stroke-dasharray: 5%, 5%;
+			stroke-dashoffset: -5%;
+			animation: 8s linear 0s infinite normal none running dash;
+		}
+
 	}
 }

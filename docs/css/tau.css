@@ -3554,7 +3554,7 @@ footer {
         flex-wrap: nowrap;
     width: calc(100% + 20px);
     height: 40px;
-    margin-bottom: 20px; }
+    margin-bottom: 5vh; }
     .section--product-info .listing--info .listing__item {
       position: static;
       width: 30px;
@@ -3729,46 +3729,65 @@ footer {
       margin: 0; }
 
 @media (max-width: 1023.98px) {
-  .section--product-colors .title {
-    font-size: 20px;
-    margin-bottom: 35vh; }
-  .section--product-colors .group--vertical-center {
-    min-height: 70vh; }
-  .section--product-colors .group--inline {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-            flex-direction: column; }
-    .section--product-colors .group--inline .label {
-      display: none; }
-  .section--product-colors .group--nav {
-    display: block; }
-    .section--product-colors .group--nav:first-child {
-      -webkit-box-ordinal-group: 3;
-          -ms-flex-order: 2;
-              order: 2; }
-    .section--product-colors .group--nav:last-child {
-      -webkit-box-ordinal-group: 2;
-          -ms-flex-order: 1;
-              order: 1; }
-    .section--product-colors .group--nav .label {
-      display: none; }
-  .section--product-colors .nav--types {
-    -ms-flex-pack: distribute;
-        justify-content: space-around;
-    width: 100%;
-    padding: 14px; }
-  .section--product-colors .nav--colors {
-    padding-bottom: 20px; } }
+  .section--product-colors {
+    margin-bottom: 20vh; }
+    .section--product-colors .title {
+      font-size: 20px;
+      margin-bottom: 50vh; }
+    .section--product-colors .group--vertical-center {
+      min-height: 70vh; }
+    .section--product-colors .group--inline {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+          -ms-flex-direction: column;
+              flex-direction: column; }
+      .section--product-colors .group--inline .label {
+        display: none; }
+    .section--product-colors .group--nav {
+      display: block; }
+      .section--product-colors .group--nav .label {
+        display: none; }
+      .section--product-colors .group--nav.group--nav--bristles {
+        -webkit-box-ordinal-group: 3;
+            -ms-flex-order: 2;
+                order: 2; }
+      .section--product-colors .group--nav.group--nav--colors {
+        -webkit-box-ordinal-group: 2;
+            -ms-flex-order: 1;
+                order: 1; }
+      .section--product-colors .group--nav.group--nav--vr {
+        -webkit-box-ordinal-group: 4;
+            -ms-flex-order: 3;
+                order: 3;
+        margin-top: 20px;
+        position: absolute;
+        top: 100%; }
+        .section--product-colors .group--nav.group--nav--vr .label {
+          display: block;
+          position: absolute;
+          bottom: -12px;
+          white-space: nowrap;
+          left: 50%;
+          -webkit-transform: translateX(-50%);
+                  transform: translateX(-50%);
+          font-size: 12px; }
+    .section--product-colors .nav--types {
+      -ms-flex-pack: distribute;
+          justify-content: space-around;
+      width: 100%;
+      padding: 14px; }
+    .section--product-colors .nav--colors {
+      padding-bottom: 20px; } }
 
 .btn--vr {
-  display: inline-block; }
+  display: inline-block;
+  background: transparent; }
   .btn--vr .icon--vr {
     width: 50px;
     height: 50px;
@@ -3857,6 +3876,62 @@ footer {
             transform: translateX(-50%) translateY(-50%) scale(1.5);
     opacity: 0;
     border-color: #e4e4e6; } }
+
+@-webkit-keyframes dash {
+  100% {
+    stroke-dashoffset: -295%; } }
+
+@keyframes dash {
+  100% {
+    stroke-dashoffset: -295%; } }
+
+@-webkit-keyframes icon-rotate {
+  0% {
+    opacity: 0;
+    visibility: visible; }
+  20% {
+    opacity: 1; }
+  90% {
+    opacity: 1; }
+  100% {
+    opacity: 0;
+    visibility: hidden; } }
+
+@keyframes icon-rotate {
+  0% {
+    opacity: 0;
+    visibility: visible; }
+  20% {
+    opacity: 1; }
+  90% {
+    opacity: 1; }
+  100% {
+    opacity: 0;
+    visibility: hidden; } }
+
+.icon--rotate {
+  width: 50%;
+  max-width: 173px;
+  max-height: 173px;
+  pointer-events: none;
+  visibility: hidden;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translateX(-50%) translateY(-50%);
+          transform: translateX(-50%) translateY(-50%); }
+  .interactive .icon--rotate {
+    -webkit-animation: 6s 1s icon-rotate;
+            animation: 6s 1s icon-rotate; }
+    .interactive .icon--rotate .icon--rotate__ellipse {
+      fill: none;
+      stroke: #E10000;
+      stroke-width: 2;
+      stroke-miterlimit: 10;
+      stroke-dasharray: 5%, 5%;
+      stroke-dashoffset: -5%;
+      -webkit-animation: 8s linear 0s infinite normal none running dash;
+              animation: 8s linear 0s infinite normal none running dash; }
 
 @media (max-width: 859.98px) {
   .hidden-xs-down {
