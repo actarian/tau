@@ -2,42 +2,50 @@
 
 import Rect from '../shared/rect';
 import Canvas from './canvas/canvas';
+import { VR_MODE } from './canvas/three/vr/vr';
 
 export default class CanvasDirective {
 
 	constructor(
+		$timeout,
 		DomService
 	) {
+		this.$timeout = $timeout;
 		this.domService = DomService;
 		this.restrict = 'A';
 		this.scope = {
-			canvas: '='
+			product: '=?canvas'
 		};
 	}
 
 	link(scope, element, attributes, controller) {
 		const node = element[0];
 		const inner = node.querySelector('.inner');
-		const model = scope.model || 'models/professional-27.fbx';
-		const canvas = new Canvas(inner, model);
+		const product = scope.product || {
+			model: 'models/professional-27.fbx',
+			bristles: [],
+			colors: []
+		};
+		const canvas = new Canvas(inner, product);
+		canvas.on('vrmode', (vrmode) => {
+			let vrMode;
+			switch (vrmode) {
+				case VR_MODE.VR:
+				case VR_MODE.XR:
+					vrMode = 'vrmode--enabled';
+					break;
+				case VR_MODE.NONE:
+					vrMode = 'vrmode--none';
+					break;
+			}
+			this.$timeout(() => {
+				scope.$root.vrmode = vrmode;
+			});
+			document.body.classList.add(vrMode);
+		});
 		canvas.on('load', () => {
 			node.classList.add('loaded');
 		});
-		/*
-		const loader = new THREE.loader();
-		loader.load('img/panorama-sm/panorama-01.jpg', (texture) => {
-			texture.mapping = THREE.UVMapping;
-			const options = {
-				resolution: 1024,
-				generateMipmaps: true,
-				minFilter: THREE.LinearMipMapLinearFilter,
-				magFilter: THREE.LinearFilter
-			};
-			canvas.scene.background = new THREE.CubemapGenerator(canvas.renderer).fromEquirectangular(texture, options);
-			canvas.animate();
-		});
-		*/
-		// canvas.load('data/vr.json');
 		canvas.animate();
 		const anchors = [...document.querySelectorAll('[data-anchor]')];
 		const subscription = this.domService.scrollIntersection$(node).subscribe(event => {
@@ -86,10 +94,10 @@ export default class CanvasDirective {
 		});
 	}
 
-	static factory(DomService) {
-		return new CanvasDirective(DomService);
+	static factory($timeout, DomService) {
+		return new CanvasDirective($timeout, DomService);
 	}
 
 }
 
-CanvasDirective.factory.$inject = ['DomService'];
+CanvasDirective.factory.$inject = ['$timeout', 'DomService'];

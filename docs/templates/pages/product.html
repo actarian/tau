@@ -4,19 +4,19 @@
 		bristles: [{
 			name: 'Dure',
 			key: 'hard',
-			colors: ['#024c99', '#15b29a']
+			colors: ['#024c99', '#e13334']
 		}, {
 			name: 'Medie',
 			key: 'medium',
-			colors: ['#0e38b1', '#e13334']
+			colors: ['#024c99', '#42a644']
 		}, {
 			name: 'Morbide',
 			key: 'soft',
-			colors: ['#0e38b1', '#3d6d4f']
+			colors: ['#024c99', '#60b9f3']
 		}, {
 			name: 'Molto Morbide',
 			key: 'softer',
-			colors: ['#0e38b1', '#e13334']
+			colors: ['#024c99', '#15b29a']
 		}],
 		colors: [{
 			name: 'Rosso',
@@ -58,42 +58,54 @@
 			<div class="title">stile e funzionalità.</div>
 			<div class="group--vertical-center">
 				<div class="listing--info row">
-					<div class="listing__item col-8 offset-4 col-md-4 offset-md-0" data-overscroll-anchor="manico">
+					<div class="listing__item col-md-4 offset-md-0" data-overscroll-anchor="manico">
 						<div class="bullet"></div>
-						<div class="title"><span>manico diritto</span></div>
-						<div class="abstract">per una corretta impugnatura</div>
+						<div class="group--info">
+							<div class="title"><span>manico diritto</span></div>
+							<div class="abstract">per una corretta impugnatura</div>
+						</div>
 					</div>
-					<div class="listing__item col-8 offset-4 col-md-4 offset-md-4" data-overscroll-anchor="testina">
+					<div class="listing__item col-md-4 offset-md-4" data-overscroll-anchor="testina">
 						<div class="bullet"></div>
-						<div class="title"><span>testina corta</span></div>
-						<div class="abstract">solo 27 millimetri, massima efficacia di spazzolamento</div>
+						<div class="group--info">
+							<div class="title"><span>testina corta</span></div>
+							<div class="abstract">solo 27 millimetri, massima efficacia di spazzolamento</div>
+						</div>
 					</div>
-					<div class="listing__item col-8 offset-4 col-md-4 offset-md-0" data-overscroll-anchor="setole">
+					<div class="listing__item col-md-4 offset-md-0" data-overscroll-anchor="setole">
 						<div class="bullet"></div>
-						<div class="title"><span>setole di due durezze</span></div>
-						<div class="abstract">una rimuove la placca l’altra massaggia le gengive</div>
+						<div class="group--info">
+							<div class="title"><span>setole di due durezze</span></div>
+							<div class="abstract">una rimuove la placca l’altra massaggia le gengive</div>
+						</div>
 					</div>
-					<div class="listing__item col-8 offset-4 col-md-4 offset-md-4" data-overscroll-anchor="scalare">
+					<div class="listing__item col-md-4 offset-md-4" data-overscroll-anchor="scalare">
 						<div class="bullet"></div>
-						<div class="title"><span>inclinazione scalare</span></div>
-						<div class="abstract">per raggiungere anche i punti più nascosti</div>
+						<div class="group--info">
+							<div class="title"><span>inclinazione scalare</span></div>
+							<div class="abstract">per raggiungere anche i punti più nascosti</div>
+						</div>
 					</div>
-					<div class="listing__item col-8 offset-4 col-md-4 offset-md-0" data-overscroll-anchor="italy">
+					<div class="listing__item col-md-4 offset-md-0" data-overscroll-anchor="italy">
 						<div class="bullet"></div>
-						<div class="title"><span>made in italy</span></div>
-						<div class="abstract">100% prodotto e realizzato in Italia con i migliori materiali</div>
+						<div class="group--info">
+							<div class="title"><span>made in italy</span></div>
+							<div class="abstract">100% prodotto e realizzato in Italia con i migliori materiali</div>
+						</div>
 					</div>
-					<div class="listing__item col-8 offset-4 col-md-4 offset-md-4" data-overscroll-anchor="setole-tynex">
+					<div class="listing__item col-md-4 offset-md-4" data-overscroll-anchor="setole-tynex">
 						<div class="bullet"></div>
-						<div class="title"><span>setole arrotondate in tynex</span></div>
-						<div class="abstract">per raggiungere anche i punti più nascosti</div>
+						<div class="group--info">
+							<div class="title"><span>setole arrotondate in tynex</span></div>
+							<div class="abstract">per raggiungere anche i punti più nascosti</div>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<section class="section--product-colors fixed" canvas="productCtrl.model" data-anchor="colors">
+	<section class="section--product-colors fixed" canvas="productCtrl.product" data-anchor="colors">
 		<div class="container">
 			<div class="group--vertical-center">
 				<div class="title">lo spazzolino perfetto per te.</div>
@@ -111,6 +123,17 @@
 								<ul class="nav--colors">
 									<li class="color color--{{item.key}}" ng-class="{ active: productCtrl.color == item}" ng-click="productCtrl.color = item" ng-repeat="item in productCtrl.product.colors track by $index"><span class="bullet"></span><span class="name" ng-bind="item.name"></span></li>
 								</ul>
+							</div>
+							<div class="group--nav">
+								<div class="label">
+									<span class="label--enabled" ng-if="vrmode == vrmodes.NONE">VR non connesso:</span>
+									<span class="label--disabled" ng-if="vrmode != vrmodes.NONE">Provalo in VR:</span>
+								</div>
+								<button class="btn btn--vr" ng-class="{ active: vrmode != vrmodes.NONE }">
+									<svg class="icon icon--vr">
+										<use xlink:href="#icon--vr"></use>
+									</svg>
+								</button>
 							</div>
 						</div>
 					</div>

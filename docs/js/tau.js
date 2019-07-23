@@ -18361,6 +18361,8 @@ exports.default = void 0;
 
 var _canvas = _interopRequireDefault(require("./directives/canvas.directive"));
 
+var _vr = require("./directives/canvas/three/vr/vr");
+
 var _lazyScript = _interopRequireDefault(require("./directives/lazy-script.directive"));
 
 var _lazy = _interopRequireDefault(require("./directives/lazy.directive"));
@@ -18397,10 +18399,14 @@ app.factory('ApiService', _api.default.factory).factory('DomService', _dom.defau
 app.directive('canvas', _canvas.default.factory).directive('overscroll', _overscroll.default.factory).directive('lazy', _lazy.default.factory).directive('lazyScript', _lazyScript.default.factory);
 app.controller('RootCtrl', _root.default).controller('ProductCtrl', _product.default);
 app.filter('trusted', ['$sce', _trusted.TrustedFilter]);
+app.run(['$rootScope', function ($rootScope) {
+  $rootScope.vrmodes = _vr.VR_MODE;
+  $rootScope.vrmode = _vr.VR_MODE.NONE;
+}]);
 var _default = MODULE_NAME;
 exports.default = _default;
 
-},{"./directives/canvas.directive":201,"./directives/lazy-script.directive":207,"./directives/lazy.directive":208,"./directives/overscroll.directive":209,"./filters/trusted.filter":210,"./product/product.controller":211,"./root.controller":212,"./services/api.service":213,"./services/dom.service":214,"./shared/location.service":215,"./shared/promise.service":216,"./shared/state.service":218,"./shared/storage.service":219}],201:[function(require,module,exports){
+},{"./directives/canvas.directive":201,"./directives/canvas/three/vr/vr":207,"./directives/lazy-script.directive":208,"./directives/lazy.directive":209,"./directives/overscroll.directive":210,"./filters/trusted.filter":211,"./product/product.controller":212,"./root.controller":213,"./services/api.service":214,"./services/dom.service":215,"./shared/location.service":216,"./shared/promise.service":217,"./shared/state.service":219,"./shared/storage.service":220}],201:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18411,6 +18417,8 @@ exports.default = void 0;
 var _rect = _interopRequireDefault(require("../shared/rect"));
 
 var _canvas = _interopRequireDefault(require("./canvas/canvas"));
+
+var _vr = require("./canvas/three/vr/vr");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18431,42 +18439,53 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var CanvasDirective =
 /*#__PURE__*/
 function () {
-  function CanvasDirective(DomService) {
+  function CanvasDirective($timeout, DomService) {
     _classCallCheck(this, CanvasDirective);
 
+    this.$timeout = $timeout;
     this.domService = DomService;
     this.restrict = 'A';
     this.scope = {
-      canvas: '='
+      product: '=?canvas'
     };
   }
 
   _createClass(CanvasDirective, [{
     key: "link",
     value: function link(scope, element, attributes, controller) {
+      var _this = this;
+
       var node = element[0];
       var inner = node.querySelector('.inner');
-      var model = scope.model || 'models/professional-27.fbx';
-      var canvas = new _canvas.default(inner, model);
+      var product = scope.product || {
+        model: 'models/professional-27.fbx',
+        bristles: [],
+        colors: []
+      };
+      var canvas = new _canvas.default(inner, product);
+      canvas.on('vrmode', function (vrmode) {
+        var vrMode;
+
+        switch (vrmode) {
+          case _vr.VR_MODE.VR:
+          case _vr.VR_MODE.XR:
+            vrMode = 'vrmode--enabled';
+            break;
+
+          case _vr.VR_MODE.NONE:
+            vrMode = 'vrmode--none';
+            break;
+        }
+
+        _this.$timeout(function () {
+          scope.$root.vrmode = vrmode;
+        });
+
+        document.body.classList.add(vrMode);
+      });
       canvas.on('load', function () {
         node.classList.add('loaded');
       });
-      /*
-      const loader = new THREE.loader();
-      loader.load('img/panorama-sm/panorama-01.jpg', (texture) => {
-      	texture.mapping = THREE.UVMapping;
-      	const options = {
-      		resolution: 1024,
-      		generateMipmaps: true,
-      		minFilter: THREE.LinearMipMapLinearFilter,
-      		magFilter: THREE.LinearFilter
-      	};
-      	canvas.scene.background = new THREE.CubemapGenerator(canvas.renderer).fromEquirectangular(texture, options);
-      	canvas.animate();
-      });
-      */
-      // canvas.load('data/vr.json');
-
       canvas.animate();
 
       var anchors = _toConsumableArray(document.querySelectorAll('[data-anchor]'));
@@ -18522,8 +18541,8 @@ function () {
     }
   }], [{
     key: "factory",
-    value: function factory(DomService) {
-      return new CanvasDirective(DomService);
+    value: function factory($timeout, DomService) {
+      return new CanvasDirective($timeout, DomService);
     }
   }]);
 
@@ -18531,9 +18550,9 @@ function () {
 }();
 
 exports.default = CanvasDirective;
-CanvasDirective.factory.$inject = ['DomService'];
+CanvasDirective.factory.$inject = ['$timeout', 'DomService'];
 
-},{"../shared/rect":217,"./canvas/canvas":202}],202:[function(require,module,exports){
+},{"../shared/rect":218,"./canvas/canvas":202,"./canvas/three/vr/vr":207}],202:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18545,9 +18564,11 @@ var dat = _interopRequireWildcard(require("dat.gui"));
 
 var _const = require("./three/const");
 
-var _emittable = _interopRequireDefault(require("./three/emittable"));
+var _emittable = _interopRequireDefault(require("./three/interactive/emittable"));
 
 var _orbit = _interopRequireDefault(require("./three/orbit/orbit"));
+
+var _vr = require("./three/vr/vr");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18572,8 +18593,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 var CAMERA_DISTANCE = 2;
+var VR_ENABLED = false;
+var COMPOSER_ENABLED = true; // !!!
+
 var USE_CUBE_CAMERA = true;
-var COLORS = [0xFFFFFF, 0xFC4445, 0xFEEE6, 0x55BCC9, 0x97CAEF, 0xCAFAFE];
 
 var Canvas =
 /*#__PURE__*/
@@ -18619,26 +18642,28 @@ function (_Emittable) {
     key: "zoom",
     get: function get() {
       var r;
+      var w = this.container.offsetWidth;
+      var h = this.container.offsetHeight;
+      var s = Math.max(Math.min(w, h, 1200), 375);
 
-      if (this.container.offsetWidth > 1024) {
-        r = this.container.offsetWidth / 1080;
+      if (s >= 768) {
+        r = s / 1440;
       } else {
-        r = this.container.offsetWidth / 512;
+        r = s / 640;
       }
 
-      return (this.zoom_ + r) * 0.6;
+      return this.zoom_ + r;
     }
   }]);
 
-  function Canvas(container, model) {
+  function Canvas(container, product) {
     var _this;
 
     _classCallCheck(this, Canvas);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Canvas).call(this));
     _this.container = container;
-    _this.model = model || 'models/professional-27.fbx'; // 'models/tau-marin_5.obj'
-
+    _this.product = product;
     _this.count = 0;
     _this.mouse = {
       x: 0,
@@ -18663,9 +18688,9 @@ function (_Emittable) {
 
     var camera = _this.camera = _this.addCamera();
 
-    _this.pixelRatio = Math.max(window.devicePixelRatio, 1.0); // !!! 1.5
-
     var renderer = _this.renderer = _this.addRenderer();
+
+    var vr = _this.vr = _this.addVR();
 
     var composer = _this.composer = _this.addComposer();
 
@@ -18711,13 +18736,38 @@ function (_Emittable) {
       this.renderer = renderer;
       renderer.setClearColor(0xffffff, 0); // renderer.setPixelRatio(window.devicePixelRatio);
 
-      renderer.setPixelRatio(this.pixelRatio);
+      var pixelRatio = this.pixelRatio = 1; // Math.max(window.devicePixelRatio, 1.4);
+
+      renderer.setPixelRatio(pixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+
+      if (VR_ENABLED) {
+        renderer.vr.enabled = true;
+      } // renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
       // container.innerHTML = '';
+
 
       this.container.appendChild(renderer.domElement);
       return renderer;
+    }
+  }, {
+    key: "addVR",
+    value: function addVR() {
+      var _this2 = this;
+
+      if (VR_ENABLED) {
+        var vr = new _vr.VR(this.renderer, {
+          referenceSpaceType: 'local'
+        });
+        vr.on('presenting', function () {});
+        vr.on('exit', function () {});
+        vr.on('error', function (error) {
+          _this2.debugInfo.innerHTML = error;
+        });
+        this.emit('vrmode', vr.mode);
+        this.container.appendChild(vr.element);
+        return vr;
+      }
     }
   }, {
     key: "addScene",
@@ -18748,8 +18798,8 @@ function (_Emittable) {
       controls.enablePan = false;
       controls.enableZoom = false; // controls.enableDamping = true;
 
-      controls.maxDistance = CAMERA_DISTANCE;
-      controls.minDistance = CAMERA_DISTANCE; // controls.maxPolarAngle = Math.PI / 2;
+      controls.maxDistance = CAMERA_DISTANCE * 3;
+      controls.minDistance = CAMERA_DISTANCE * 0.25; // controls.maxPolarAngle = Math.PI / 2;
       // controls.minPolarAngle = Math.PI / 2;
       // camera.position.set(60, 205, -73);
       // camera.position.set(0, 50, 100);
@@ -18769,19 +18819,21 @@ function (_Emittable) {
   }, {
     key: "addComposer",
     value: function addComposer() {
-      var renderer = this.renderer;
-      var scene = this.scene;
-      var camera = this.camera;
-      var composer = new THREE.EffectComposer(renderer); // const renderPass = new THREE.RenderPass(scene, camera);
-      // composer.addPass(renderPass);
+      if (COMPOSER_ENABLED) {
+        var renderer = this.renderer;
+        var scene = this.scene;
+        var camera = this.camera;
+        var composer = new THREE.EffectComposer(renderer); // const renderPass = new THREE.RenderPass(scene, camera);
+        // composer.addPass(renderPass);
 
-      var taaRenderPass = new THREE.TAARenderPass(scene, camera);
-      taaRenderPass.sampleLevel = 2;
-      taaRenderPass.unbiased = true;
-      composer.addPass(taaRenderPass);
-      var shaderPass = new THREE.ShaderPass(THREE.ShadowShader);
-      composer.addPass(shaderPass);
-      return composer;
+        var taaRenderPass = new THREE.TAARenderPass(scene, camera);
+        taaRenderPass.sampleLevel = 2;
+        taaRenderPass.unbiased = true;
+        composer.addPass(taaRenderPass);
+        var shaderPass = new THREE.ShaderPass(THREE.ShadowShader);
+        composer.addPass(shaderPass);
+        return composer;
+      }
     }
   }, {
     key: "addLights",
@@ -18936,9 +18988,7 @@ function (_Emittable) {
     value: function getBristlesPrimary(texture) {
       // const lightMap = new THREE.TextureLoader().load('img/scalare-33-bristlesPrimary-lightmap.jpg');
       var material = new THREE.MeshStandardMaterial({
-        color: 0x024c99,
-        // 0x1f45c0,
-        // emissive: 0x333333,
+        color: this.product.bristles[0] ? this.product.bristles[0].colors[0] : 0xffffff,
         // map: lightMap,
         // normalMap: lightMap,
         // metalnessMap: lightMap,
@@ -18952,9 +19002,7 @@ function (_Emittable) {
     value: function getBristlesSecondary(texture) {
       // const lightMap = new THREE.TextureLoader().load('img/scalare-33-bristlesSecondary-lightmap.jpg');
       var material = new THREE.MeshStandardMaterial({
-        color: 0x15b29a,
-        // 0x1aac4e,
-        // emissive: 0x333333,
+        color: this.product.bristles[0] ? this.product.bristles[0].colors[1] : 0xffffff,
         // map: lightMap,
         // normalMap: lightMap,
         // metalnessMap: lightMap,
@@ -18984,12 +19032,12 @@ function (_Emittable) {
   }, {
     key: "addToothbrush",
     value: function addToothbrush(parent, texture) {
-      var _this2 = this;
+      var _this3 = this;
 
       var toothbrush = new THREE.Group();
       var loader = new THREE.FBXLoader(); // new THREE.OBJLoader();
 
-      loader.load(this.model, function (object) {
+      loader.load(this.product.model, function (object) {
         var i = 0;
         object.traverse(function (child) {
           if (child instanceof THREE.Mesh) {
@@ -19004,27 +19052,27 @@ function (_Emittable) {
               case 'bubble':
                 // child.geometry.computeFaceNormals();
                 // child.geometry.computeVertexNormals(true);
-                child.material = _this2.materials.bodyPrimaryClear;
+                child.material = _this3.materials.bodyPrimaryClear;
                 toothbrush.body = child;
                 break;
 
               case 'body-secondary':
                 // child.geometry.computeFaceNormals();
                 // child.geometry.computeVertexNormals(true);
-                child.material = _this2.materials.bodySecondary;
+                child.material = _this3.materials.bodySecondary;
                 toothbrush.color = child;
                 break;
 
               case 'bristles-primary':
-                child.material = _this2.materials.bristlesPrimary;
+                child.material = _this3.materials.bristlesPrimary;
                 break;
 
               case 'bristles-secondary':
-                child.material = _this2.materials.bristlesSecondary;
+                child.material = _this3.materials.bristlesSecondary;
                 break;
 
               case 'logo':
-                child.material = _this2.materials.logoSilver;
+                child.material = _this3.materials.logoSilver;
                 toothbrush.logo = child;
                 break;
             }
@@ -19073,11 +19121,11 @@ function (_Emittable) {
 
         toothbrush.add(object);
 
-        _this2.setBristle(_this2.bristle);
+        _this3.setBristle(_this3.bristle);
 
-        _this2.setColor(_this2.color);
+        _this3.setColor(_this3.color);
 
-        _this2.emit('load');
+        _this3.emit('load');
       }, function (xhr) {// console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
       }, function (error) {
         console.log('An error happened');
@@ -19087,172 +19135,6 @@ function (_Emittable) {
 
       parent.add(toothbrush);
       return toothbrush;
-    }
-  }, {
-    key: "tweenTau__",
-    value: function tweenTau__(anchor) {
-      var _this3 = this;
-
-      // [0, 0, Math.PI / 2]; // 										vertical left
-      // [0, 0, 0]; // 												horizontal right
-      // [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
-      // [Math.PI / 2, 0, 0]; // 										top right
-      // [0, Math.PI, Math.PI / 2]; // 								vertical right;
-      var sm = window.innerWidth < 1024;
-      var rotation, position;
-
-      switch (anchor) {
-        case 'hero':
-          position = [0, 0, 0];
-          rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
-
-          this.zoom_ = 0;
-          this.container.classList.remove('lefted');
-          this.container.classList.remove('interactive');
-          break;
-
-        case 'manico':
-          position = [0, 0, 0];
-          rotation = [0, Math.PI, Math.PI / 2]; // 								vertical right;
-
-          this.zoom_ = 0;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
-          this.container.classList.remove('interactive');
-          break;
-
-        case 'testina':
-          position = [0, 0, 0];
-          rotation = [0, -Math.PI / 2, Math.PI / 32]; // 							testina vista dietro
-
-          this.zoom_ = 0.2;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
-          this.container.classList.remove('interactive');
-          break;
-
-        case 'setole':
-          position = [0, -3, 0];
-          rotation = [0, Math.PI - Math.PI / 4, Math.PI / 2]; // 					vertical right;
-
-          this.zoom_ = 0.4;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
-          this.container.classList.remove('interactive');
-          break;
-
-        case 'scalare':
-          position = [0, -3, 0];
-          rotation = [0, Math.PI, Math.PI / 2]; // 								vertical right;
-
-          this.zoom_ = 0.4;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
-          this.container.classList.remove('interactive');
-          break;
-
-        case 'italy':
-          position = [0, 0, 0];
-          rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
-
-          this.zoom_ = 0;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
-          this.container.classList.remove('interactive');
-          break;
-
-        case 'setole-tynex':
-          position = [0, -2, 0];
-          rotation = [0, 0, Math.PI / 2]; // 										vertical left;
-
-          this.zoom_ = 0.2;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
-          this.container.classList.remove('interactive');
-          break;
-
-        case 'colors':
-          position = [0, 0, 0];
-          rotation = [0, Math.PI, 0]; // 											horizontal left
-
-          this.zoom_ = 0;
-          this.container.classList.remove('lefted');
-          this.container.classList.add('interactive');
-          break;
-
-        default:
-          position = [0, 0, 0];
-          rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
-
-          this.zoom_ = 0;
-          this.container.classList.remove('lefted');
-          this.container.classList.remove('interactive');
-      }
-
-      var toothbrush = this.toothbrush;
-      TweenMax.to(this.toothbrush.position, 0.8, {
-        x: position[0],
-        y: position[1],
-        z: position[2],
-        ease: Power2.easeInOut
-      });
-      TweenMax.to(this.toothbrush.rotation, 1.2, {
-        x: rotation[0],
-        y: rotation[1],
-        z: rotation[2],
-        ease: Power2.easeInOut
-      });
-      TweenMax.to(this.camera, 0.6, {
-        zoom: this.zoom,
-        ease: Power2.easeInOut,
-        onUpdate: function onUpdate() {
-          _this3.camera.updateProjectionMatrix();
-        }
-      });
-
-      if (this.controls && this.camera.position.x !== 0) {
-        TweenMax.to(this.camera.position, 0.6, {
-          x: 0,
-          y: 0,
-          z: CAMERA_DISTANCE,
-          ease: Power2.easeInOut,
-          onUpdate: function onUpdate() {
-            _this3.controls.update();
-
-            _this3.camera.updateProjectionMatrix();
-          }
-        });
-      }
     }
   }, {
     key: "tweenTau",
@@ -19267,7 +19149,7 @@ function (_Emittable) {
       // [0, 0, 0]; // 												horizontal right
       // [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
       // [Math.PI / 2, 0, 0]; // 										top right
-      var sm = window.innerWidth < 1024;
+      var sm = this.container.offsetWidth < 768;
       var rotation, position;
 
       switch (anchor) {
@@ -19285,13 +19167,6 @@ function (_Emittable) {
           rotation = [0, 0, (0, _const.deg)(-90)]; // 								vertical right;
 
           this.zoom_ = 0;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
           this.container.classList.remove('interactive');
           break;
 
@@ -19299,44 +19174,23 @@ function (_Emittable) {
           position = [0, 0, 0];
           rotation = [0, (0, _const.deg)(90), (0, _const.deg)(-5)]; // 							testina vista dietro
 
-          this.zoom_ = 0.2;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
+          this.zoom_ = sm ? 0.6 : 0.2;
           this.container.classList.remove('interactive');
           break;
 
         case 'setole':
-          position = [0, (0, _const.cm)(-3), 0];
+          position = [0, (0, _const.cm)(-12), 0];
           rotation = [0, (0, _const.deg)(-30), (0, _const.deg)(-90)]; // 								vertical right tre quarti;
 
           this.zoom_ = 0.4;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
           this.container.classList.remove('interactive');
           break;
 
         case 'scalare':
-          position = [0, (0, _const.cm)(-3), 0];
+          position = [0, (0, _const.cm)(-12), 0];
           rotation = [0, 0, (0, _const.deg)(-90)]; // 								vertical right;
 
           this.zoom_ = 0.4;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
           this.container.classList.remove('interactive');
           break;
 
@@ -19345,37 +19199,21 @@ function (_Emittable) {
           rotation = [0, (0, _const.deg)(-60), (0, _const.deg)(-60)]; // 							tre quarti sinistra
 
           this.zoom_ = 0;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
           this.container.classList.remove('interactive');
           break;
 
         case 'setole-tynex':
-          position = [0, (0, _const.cm)(-2), 0];
+          position = [0, (0, _const.cm)(-7), 0];
           rotation = [0, (0, _const.deg)(-180), (0, _const.deg)(-90)]; // 										vertical left;
 
           this.zoom_ = 0.2;
-
-          if (sm) {
-            this.container.classList.add('lefted');
-          } else {
-            this.container.classList.remove('lefted');
-          }
-
           this.container.classList.remove('interactive');
           break;
 
         case 'colors':
           position = [0, 0, 0];
-          rotation = [0, 0, 0]; // 													horizontal left
-
-          this.zoom_ = 0;
-          this.container.classList.remove('lefted');
+          rotation = [0, 0, 0];
+          this.zoom_ = sm ? -0.2 : 0;
           this.container.classList.add('interactive');
           break;
 
@@ -19384,18 +19222,17 @@ function (_Emittable) {
           rotation = [0, (0, _const.deg)(-60), (0, _const.deg)(-60)]; // 		tre quarti sinistra
 
           this.zoom_ = 0;
-          this.container.classList.remove('lefted');
           this.container.classList.remove('interactive');
       }
 
       var toothbrush = this.toothbrush;
-      TweenMax.to(this.toothbrush.position, 0.8, {
+      TweenMax.to(toothbrush.position, 0.8, {
         x: position[0],
         y: position[1],
         z: position[2],
         ease: Power2.easeInOut
       });
-      TweenMax.to(this.toothbrush.rotation, 1.2, {
+      TweenMax.to(toothbrush.rotation, 1.2, {
         x: rotation[0],
         y: rotation[1],
         z: rotation[2],
@@ -19450,23 +19287,22 @@ function (_Emittable) {
         if (toothbrush.children.length) {
           var object = toothbrush.children[0];
           object.traverse(function (child) {
-            // console.log(child);
             switch (child.name) {
-              case 'corpo_spazzolino_rosso':
-              case 'corpo_spazzolino':
-              case 'logo':
+              case 'body-secondary':
+              case 'body-primary':
                 break;
 
-              case 'verde':
-                // child.material = bristlesSecondary;
+              case 'bristles-primary':
+                _this5.tweenColor(child.material, bristle.colors[0]);
+
+                break;
+
+              case 'bristles-secondary':
                 _this5.tweenColor(child.material, bristle.colors[1]);
 
                 break;
 
-              case 'blu':
-                // child.material = bristlesPrimary;
-                _this5.tweenColor(child.material, bristle.colors[0]);
-
+              case 'logo':
                 break;
             }
           });
@@ -19494,9 +19330,10 @@ function (_Emittable) {
                 break;
 
               case 'body-primary':
-              case 'bristlesPrimary':
-              case 'bristlesSecondary':
+              case 'bristles-primary':
+              case 'bristles-secondary':
               case 'logo':
+                break;
             }
           });
         }
@@ -19652,6 +19489,7 @@ function (_Emittable) {
 
         if (camera) {
           camera.aspect = w / h;
+          camera.zoom = this.zoom;
           camera.updateProjectionMatrix();
         }
 
@@ -19902,6 +19740,136 @@ function (_Emittable) {
       return gui;
     }
     /*
+    	tweenTau__(anchor) {
+    	// [0, 0, Math.PI / 2]; // 										vertical left
+    	// [0, 0, 0]; // 												horizontal right
+    	// [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
+    	// [Math.PI / 2, 0, 0]; // 										top right
+    	// [0, Math.PI, Math.PI / 2]; // 								vertical right;
+    	const sm = window.innerWidth < 1024;
+    	let rotation, position;
+    	switch (anchor) {
+    		case 'hero':
+    			position = [0, 0, 0];
+    			rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
+    			this.zoom_ = 0;
+    			this.container.classList.remove('lefted');
+    			this.container.classList.remove('interactive');
+    			break;
+    		case 'manico':
+    			position = [0, 0, 0];
+    			rotation = [0, Math.PI, Math.PI / 2]; // 								vertical right;
+    			this.zoom_ = 0;
+    			if (sm) {
+    				this.container.classList.add('lefted');
+    			} else {
+    				this.container.classList.remove('lefted');
+    			}
+    			this.container.classList.remove('interactive');
+    			break;
+    		case 'testina':
+    			position = [0, 0, 0];
+    			rotation = [0, -Math.PI / 2, Math.PI / 32]; // 							testina vista dietro
+    			this.zoom_ = 0.2;
+    			if (sm) {
+    				this.container.classList.add('lefted');
+    			} else {
+    				this.container.classList.remove('lefted');
+    			}
+    			this.container.classList.remove('interactive');
+    			break;
+    		case 'setole':
+    			position = [0, -3, 0];
+    			rotation = [0, Math.PI - Math.PI / 4, Math.PI / 2]; // 					vertical right;
+    			this.zoom_ = 0.4;
+    			if (sm) {
+    				this.container.classList.add('lefted');
+    			} else {
+    				this.container.classList.remove('lefted');
+    			}
+    			this.container.classList.remove('interactive');
+    			break;
+    		case 'scalare':
+    			position = [0, -3, 0];
+    			rotation = [0, Math.PI, Math.PI / 2]; // 								vertical right;
+    			this.zoom_ = 0.4;
+    			if (sm) {
+    				this.container.classList.add('lefted');
+    			} else {
+    				this.container.classList.remove('lefted');
+    			}
+    			this.container.classList.remove('interactive');
+    			break;
+    		case 'italy':
+    			position = [0, 0, 0];
+    			rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
+    			this.zoom_ = 0;
+    			if (sm) {
+    				this.container.classList.add('lefted');
+    			} else {
+    				this.container.classList.remove('lefted');
+    			}
+    			this.container.classList.remove('interactive');
+    			break;
+    		case 'setole-tynex':
+    			position = [0, -2, 0];
+    			rotation = [0, 0, Math.PI / 2]; // 										vertical left;
+    			this.zoom_ = 0.2;
+    			if (sm) {
+    				this.container.classList.add('lefted');
+    			} else {
+    				this.container.classList.remove('lefted');
+    			}
+    			this.container.classList.remove('interactive');
+    			break;
+    		case 'colors':
+    			position = [0, 0, 0];
+    			rotation = [0, Math.PI, 0]; // 											horizontal left
+    			this.zoom_ = 0;
+    			this.container.classList.remove('lefted');
+    			this.container.classList.add('interactive');
+    			break;
+    		default:
+    			position = [0, 0, 0];
+    			rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
+    			this.zoom_ = 0;
+    			this.container.classList.remove('lefted');
+    			this.container.classList.remove('interactive');
+    	}
+    	const toothbrush = this.toothbrush;
+    	TweenMax.to(toothbrush.position, 0.8, {
+    		x: position[0],
+    		y: position[1],
+    		z: position[2],
+    		ease: Power2.easeInOut,
+    	});
+    	TweenMax.to(toothbrush.rotation, 1.2, {
+    		x: rotation[0],
+    		y: rotation[1],
+    		z: rotation[2],
+    		ease: Power2.easeInOut,
+    	});
+    	TweenMax.to(this.camera, 0.6, {
+    		zoom: this.zoom,
+    		ease: Power2.easeInOut,
+    		onUpdate: () => {
+    			this.camera.updateProjectionMatrix();
+    		}
+    	});
+    	if (this.controls && this.camera.position.x !== 0) {
+    		TweenMax.to(this.camera.position, 0.6, {
+    			x: 0,
+    			y: 0,
+    			z: CAMERA_DISTANCE,
+    			ease: Power2.easeInOut,
+    			onUpdate: () => {
+    				this.controls.update();
+    				this.camera.updateProjectionMatrix();
+    			}
+    		});
+    	}
+    }
+    
     addLogo__(parent) {
     	const geometry = new THREE.PlaneGeometry(24, 3, 3, 1);
     	geometry.rotateX(-Math.PI / 2);
@@ -19914,167 +19882,143 @@ function (_Emittable) {
     }
     */
 
-  }, {
-    key: "addComposer__",
-    value: function addComposer__() {
-      var renderer = this.renderer;
-      var scene = this.scene;
-      var camera = this.camera;
-      var composer = new THREE.EffectComposer(renderer);
-      var renderPass = new THREE.RenderPass(scene, camera);
-      composer.addPass(renderPass);
-      var saoPass = new THREE.SAOPass(scene, camera, false, true);
-      saoPass.output = THREE.SAOPass.OUTPUT.Default;
-      saoPass.saoBias = 0.5;
-      saoPass.saoIntensity = 0.18;
-      saoPass.saoScale = 1;
-      saoPass.saoKernelRadius = 100;
-      saoPass.saoMinResolution = 0;
-      saoPass.saoBlur = true;
-      saoPass.saoBlurRadius = 8;
-      saoPass.saoBlurStdDev = 4;
-      saoPass.saoBlurDepthCutoff = 0.01;
-      composer.addPass(saoPass);
-      return composer;
+    /*
+    addComposer__() {
+    	const renderer = this.renderer;
+    	const scene = this.scene;
+    	const camera = this.camera;
+    	const composer = new THREE.EffectComposer(renderer);
+    	const renderPass = new THREE.RenderPass(scene, camera);
+    	composer.addPass(renderPass);
+    	const saoPass = new THREE.SAOPass(scene, camera, false, true);
+    	saoPass.output = THREE.SAOPass.OUTPUT.Default;
+    	saoPass.saoBias = 0.5;
+    	saoPass.saoIntensity = 0.18;
+    	saoPass.saoScale = 1;
+    	saoPass.saoKernelRadius = 100;
+    	saoPass.saoMinResolution = 0;
+    	saoPass.saoBlur = true;
+    	saoPass.saoBlurRadius = 8;
+    	saoPass.saoBlurStdDev = 4;
+    	saoPass.saoBlurDepthCutoff = 0.01;
+    	composer.addPass(saoPass);
+    	return composer;
     }
-  }, {
-    key: "addComposer___",
-    value: function addComposer___() {
-      var renderer = this.renderer;
-      var scene = this.scene;
-      var camera = this.camera;
-      var composer = new THREE.EffectComposer(renderer);
-      var ssaoPass = new THREE.SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
-      ssaoPass.kernelRadius = 16;
-      composer.addPass(ssaoPass);
-      return composer;
-    }
-  }, {
-    key: "getEnvMap___",
-    value: function getEnvMap___(callback) {
-      var textures = ['img/cubemaps/lights/', 'img/cubemaps/park/', 'img/cubemaps/pond/', 'img/cubemaps/lake/', 'img/cubemaps/square/'];
-      var index = 0;
-      var urls = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg']; // const texture = THREE.ImageUtils.loadTextureCube(urls, new THREE.CubeRefractionMapping(), render);
+    */
 
-      var loader = new THREE.CubeTextureLoader().setPath(textures[index]).load(urls, function (texture, textureData) {
-        texture.mapping = THREE.CubeRefractionMapping;
+    /*
+    	addComposer___() {
+    		const renderer = this.renderer;
+    		const scene = this.scene;
+    		const camera = this.camera;
+    		const composer = new THREE.EffectComposer(renderer);
+    		const ssaoPass = new THREE.SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
+    		ssaoPass.kernelRadius = 16;
+    		composer.addPass(ssaoPass);
+    		return composer;
+    	}
+    */
 
-        if (typeof callback === 'function') {
-          callback(texture, textureData);
-        }
-      });
-      return loader;
-    }
-  }, {
-    key: "getEnvMap__",
-    value: function getEnvMap__(callback) {
-      var _this10 = this;
+    /*
+    	getEnvMap___(callback) {
+    		const textures = [
+    			'img/cubemaps/lights/',
+    			'img/cubemaps/park/',
+    			'img/cubemaps/pond/',
+    			'img/cubemaps/lake/',
+    			'img/cubemaps/square/'
+    		];
+    		const index = 0;
+    		const urls = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg'];
+    		// const texture = THREE.ImageUtils.loadTextureCube(urls, new THREE.CubeRefractionMapping(), render);
+    		const loader = new THREE.CubeTextureLoader().setPath(textures[index]).load(urls, (texture, textureData) => {
+    			texture.mapping = THREE.CubeRefractionMapping;
+    			if (typeof callback === 'function') {
+    				callback(texture, textureData);
+    			}
+    		});
+    		return loader;
+    	}
+    */
 
-      var loader = new THREE.TextureLoader().load('img/hdr-04.jpg', function (source, textureData) {
-        // source.encoding = THREE.sRGBEncoding;
-        source.mapping = THREE.UVMapping;
-        var options = {
-          resolution: 1024,
-          generateMipmaps: true,
-          minFilter: THREE.LinearMipMapLinearFilter,
-          magFilter: THREE.LinearFilter
-        }; // this.scene.background = new THREE.CubemapGenerator(this.renderer).fromEquirectangular(source, options);
+    /*
+    	getEnvMap__(callback) {
+    		const loader = new THREE.TextureLoader().load('img/hdr-04.jpg', (source, textureData) => {
+    			// source.encoding = THREE.sRGBEncoding;
+    			source.mapping = THREE.UVMapping;
+    			const options = {
+    				resolution: 1024,
+    				generateMipmaps: true,
+    				minFilter: THREE.LinearMipMapLinearFilter,
+    				magFilter: THREE.LinearFilter
+    			};
+    			// this.scene.background = new THREE.CubemapGenerator(this.renderer).fromEquirectangular(source, options);
+    			const cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options);
+    			// pngBackground = cubemapGenerator.renderTarget;
+    			const texture = cubemapGenerator.update(this.renderer);
+    			source.dispose();
+    			texture.mapping = THREE.CubeReflectionMapping;
+    			texture.mapping = THREE.CubeRefractionMapping;
+    			// texture.generateMipmaps = false;
+    			// texture.flipY = true;
+    			// this.renderer.toneMappingExposure = 2.0;
+    			if (typeof callback === 'function') {
+    				callback(texture);
+    			}
+    		});
+    		//
+    		return loader;
+    	}
+    */
 
-        var cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options); // pngBackground = cubemapGenerator.renderTarget;
+    /*
+    	updateBackgroundColor__() {
+    		this.colorIndex = this.colorIndex || 0;
+    		this.colorIndex++;
+    		this.colorIndex = this.colorIndex % COLORS.length;
+    		const color = COLORS[this.colorIndex];
+    		TweenMax.to(this.renderer.domElement, 0.7, {
+    			backgroundColor: color, // `rgba(${r},${g},${b},1)`,
+    			delay: 3,
+    			ease: Power2.easeInOut,
+    			onUpdate: () => {
+    				this.addons.children.forEach(x => {
+    					x.material.color.setHex(color);
+    					x.material.needsUpdate = true;
+    				});
+    			},
+    			onComplete: () => {
+    				this.updateBackgroundColor();
+    			}
+    		});
+    	}
+    */
 
-        var texture = cubemapGenerator.update(_this10.renderer);
-        /*
-        var pmremGenerator = new THREE.PMREMGenerator( cubeMapTexture );
-        pmremGenerator.update( renderer );
-        var pmremCubeUVPacker = new THREE.PMREMCubeUVPacker( pmremGenerator.cubeLods );
-        pmremCubeUVPacker.update( renderer );
-        pngCubeRenderTarget = pmremCubeUVPacker.CubeUVRenderTarget;
-        */
+    /*
+    	addBox__(parent) {
+    		const geometry = new THREE.BoxGeometry(600, 30, 30);
+    		const material = new THREE.MeshBasicMaterial({ color: 0xafb3bc });
+    		const cube = new THREE.Mesh(geometry, material);
+    		parent.add(cube);
+    		return cube;
+    	}
+    */
 
-        source.dispose();
-        /*
-        pmremGenerator.dispose();
-        pmremCubeUVPacker.dispose();
-        */
+    /*
+    	addBoxes__(parent) {
+    		const group = new THREE.Group();
+    		group.visible = true;
+    		const boxes = new Array(12).fill(null).map((x, i) => {
+    			const box = this.addBox__(group);
+    			const r = Math.PI * 2 / 12 * i;
+    			box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
+    			return box;
+    		});
+    		parent.add(group);
+    		return group;
+    	}
+    	*/
 
-        texture.mapping = THREE.CubeReflectionMapping;
-        texture.mapping = THREE.CubeRefractionMapping;
-        /*
-        texture.minFilter = THREE.NearestFilter;
-        texture.magFilter = THREE.NearestFilter;
-        texture.minFilter = THREE.LinearFilter;
-        texture.magFilter = THREE.LinearFilter;
-        */
-        // texture.generateMipmaps = false;
-        // texture.flipY = true;
-        // this.renderer.toneMappingExposure = 2.0;
-
-        if (typeof callback === 'function') {
-          callback(texture);
-        }
-      }); //
-
-      return loader;
-    }
-  }, {
-    key: "updateBackgroundColor__",
-    value: function updateBackgroundColor__() {
-      var _this11 = this;
-
-      this.colorIndex = this.colorIndex || 0;
-      this.colorIndex++;
-      this.colorIndex = this.colorIndex % COLORS.length;
-      var color = COLORS[this.colorIndex];
-      /*
-      const r = Math.floor(Math.random() * 255);
-      const g = Math.floor(Math.random() * 255);
-      const b = Math.floor(Math.random() * 255);
-      */
-
-      TweenMax.to(this.renderer.domElement, 0.7, {
-        backgroundColor: color,
-        // `rgba(${r},${g},${b},1)`,
-        delay: 3,
-        ease: Power2.easeInOut,
-        onUpdate: function onUpdate() {
-          _this11.addons.children.forEach(function (x) {
-            x.material.color.setHex(color);
-            x.material.needsUpdate = true;
-          });
-        },
-        onComplete: function onComplete() {
-          _this11.updateBackgroundColor();
-        }
-      });
-    }
-  }, {
-    key: "addBox__",
-    value: function addBox__(parent) {
-      var geometry = new THREE.BoxGeometry(600, 30, 30);
-      var material = new THREE.MeshBasicMaterial({
-        color: 0xafb3bc
-      });
-      var cube = new THREE.Mesh(geometry, material);
-      parent.add(cube);
-      return cube;
-    }
-  }, {
-    key: "addBoxes__",
-    value: function addBoxes__(parent) {
-      var _this12 = this;
-
-      var group = new THREE.Group();
-      group.visible = true;
-      var boxes = new Array(12).fill(null).map(function (x, i) {
-        var box = _this12.addBox__(group);
-
-        var r = Math.PI * 2 / 12 * i;
-        box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
-        return box;
-      });
-      parent.add(group);
-      return group;
-    }
   }]);
 
   return Canvas;
@@ -20094,7 +20038,7 @@ THREE.ShadowShader = {
   fragmentShader: "\n\t\tuniform float amount;\n\t\tuniform sampler2D tDiffuse;\n\t\tvarying vec2 vUv;\n\n\t\tconst int blurSize = 5;\n\t\tconst int horizontalPass = 1;\t// 0 or 1 to indicate vertical or horizontal pass\n\t\tconst float sigma = 5.0;\t\t// The sigma value for the gaussian function: higher value means more blur\n\t\t\t\t\t\t\t\t\t\t// A good value for 9x9 is around 3 to 5\n\t\t\t\t\t\t\t\t\t\t// A good value for 7x7 is around 2.5 to 4\n\t\t\t\t\t\t\t\t\t\t// A good value for 5x5 is around 2 to 3.5\n\t\t\t\t\t\t\t\t\t\t// ... play around with this based on what you need :)\n\t\tconst vec2 texOffset = vec2(0.001, 0.001);\n\t\tconst float PI = 3.14159265;\n\n\t\tconst float MAX_ITERATIONS = 100.0;\n\n\t\tvec4 gaussian(sampler2D texture, vec2 p) {\n  \t\t\tfloat numBlurPixelsPerSide = float(blurSize / 2);\n  \t\t\t// Incremental Gaussian Coefficent Calculation (See GPU Gems 3 pp. 877 - 889)\n  \t\t\tvec3 incrementalGaussian;\n  \t\t\tincrementalGaussian.x = 1.0 / (sqrt(2.0 * PI) * sigma);\n  \t\t\tincrementalGaussian.y = exp(-0.5 / (sigma * sigma));\n  \t\t\tincrementalGaussian.z = incrementalGaussian.y * incrementalGaussian.y;\n\n  \t\t\tvec4 avgValue = vec4(0.0, 0.0, 0.0, 0.0);\n  \t\t\tfloat coefficientSum = 0.0;\n\n  \t\t\t// Take the central sample first...\n  \t\t\tavgValue += texture2D(texture, p) * incrementalGaussian.x;\n  \t\t\tcoefficientSum += incrementalGaussian.x;\n  \t\t\tincrementalGaussian.xy *= incrementalGaussian.yz;\n\n\t\t\t// Go through the remaining 8 vertical samples (4 on each side of the center)\n  \t\t\tfor (float i = 1.0; i <= MAX_ITERATIONS; i+= 1.0) {\n\t\t\t\tif (i >= numBlurPixelsPerSide) {\n\t\t\t\t\tbreak;\n\t\t\t\t}\n    \t\t\tavgValue += texture2D(texture, p - i * texOffset) * incrementalGaussian.x;\n    \t\t\tavgValue += texture2D(texture, p + i * texOffset) * incrementalGaussian.x;\n    \t\t\tcoefficientSum += 2.0 * incrementalGaussian.x;\n    \t\t\tincrementalGaussian.xy *= incrementalGaussian.yz;\n  \t\t\t}\n\n\t\t\treturn avgValue / coefficientSum;\n\t\t}\n\n\t\tvoid main() {\n\t\t\tvec4 color = texture2D(tDiffuse, vUv);\n\n\t\t\tvec4 shadow = gaussian(tDiffuse, vec2(vUv.x - 0.005, vUv.y + 0.01));\n\t\t\t// vec4 shadow = texture2D(tDiffuse, vec2(vUv.x - 0.005, vUv.y + 0.01));\n\t\t\tshadow.r = shadow.g = shadow.b = 0.0;\n\t\t\tshadow.a *= 0.15;\n\n\t\t\tvec3 rgb = color.rgb + shadow.rgb;\n\t\t\tfloat alpha = min(1.0, max(color.a, shadow.a));\n\t\t\tgl_FragColor = vec4(rgb, alpha);\n\t\t}\n\t"
 };
 
-},{"./three/const":203,"./three/emittable":204,"./three/orbit/orbit":206,"dat.gui":1}],203:[function(require,module,exports){
+},{"./three/const":203,"./three/interactive/emittable":204,"./three/orbit/orbit":206,"./three/vr/vr":207,"dat.gui":1}],203:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20164,14 +20108,15 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 /* jshint esversion: 6 */
-
-/* global window, document */
 var Emittable =
 /*#__PURE__*/
 function () {
   function Emittable() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
     _classCallCheck(this, Emittable);
 
+    Object.assign(this, options);
     this.events = {};
   }
 
@@ -20208,6 +20153,14 @@ function () {
         event.forEach(function (callback) {
           // callback.call(this, data);
           callback(data);
+        });
+      }
+
+      var broadcast = this.events.broadcast;
+
+      if (broadcast) {
+        broadcast.forEach(function (callback) {
+          callback(type, data);
         });
       }
     }
@@ -20547,6 +20500,401 @@ exports.default = Orbit;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.VR = exports.VR_MODE = void 0;
+
+var _emittable = _interopRequireDefault(require("../interactive/emittable"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var VR_MODE = {
+  NONE: 0,
+  VR: 1,
+  XR: 2
+};
+exports.VR_MODE = VR_MODE;
+
+var VR =
+/*#__PURE__*/
+function (_Emittable) {
+  _inherits(VR, _Emittable);
+
+  function VR(renderer, options) {
+    var _this;
+
+    _classCallCheck(this, VR);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(VR).call(this));
+
+    if (options && options.frameOfReferenceType) {
+      renderer.vr.setFrameOfReferenceType(options.frameOfReferenceType);
+    }
+
+    _this.renderer = renderer;
+    _this.options = options;
+    _this.onVRDisplayConnect = _this.onVRDisplayConnect.bind(_assertThisInitialized(_this));
+    _this.onVRDisplayDisconnect = _this.onVRDisplayDisconnect.bind(_assertThisInitialized(_this));
+    _this.onVRDisplayPresentChange = _this.onVRDisplayPresentChange.bind(_assertThisInitialized(_this));
+    _this.onVRDisplayActivate = _this.onVRDisplayActivate.bind(_assertThisInitialized(_this));
+    _this.onVRMouseEnter = _this.onVRMouseEnter.bind(_assertThisInitialized(_this));
+    _this.onVRMouseLeave = _this.onVRMouseLeave.bind(_assertThisInitialized(_this));
+    _this.onVRClick = _this.onVRClick.bind(_assertThisInitialized(_this));
+    _this.onXRClick = _this.onXRClick.bind(_assertThisInitialized(_this));
+    _this.onXRSessionStarted = _this.onXRSessionStarted.bind(_assertThisInitialized(_this));
+    _this.onXRSessionEnded = _this.onXRSessionEnded.bind(_assertThisInitialized(_this));
+    _this.mode = _this.detectMode();
+
+    _this.initElement();
+
+    return _this;
+  }
+
+  _createClass(VR, [{
+    key: "detectMode",
+    value: function detectMode() {
+      var mode = VR_MODE.NONE;
+
+      if ('xr' in navigator) {
+        mode = VR_MODE.XR;
+      } else if ('getVRDisplays' in navigator) {
+        mode = VR_MODE.VR;
+      }
+
+      return mode;
+    }
+  }, {
+    key: "initElement",
+    value: function initElement() {
+      try {
+        var element;
+
+        switch (this.mode) {
+          case VR_MODE.VR:
+            element = this.element = this.addElement('button');
+            element.style.display = 'none';
+            window.addEventListener('vrdisplayconnect', this.onVRDisplayConnect, false);
+            window.addEventListener('vrdisplaydisconnect', this.onVRDisplayDisconnect, false);
+            window.addEventListener('vrdisplaypresentchange', this.onVRDisplayPresentChange, false);
+            window.addEventListener('vrdisplayactivate', this.onVRDisplayActivate, false);
+            this.getVR();
+            break;
+
+          case VR_MODE.XR:
+            element = this.element = this.addElement('button');
+            this.getXR();
+            break;
+
+          default:
+            element = this.element = this.addElement('a');
+            element.style.display = 'block';
+            element.style.left = 'calc(50% - 90px)';
+            element.style.width = '180px';
+            element.style.textDecoration = 'none';
+            element.href = 'https://webvr.info';
+            element.target = '_blank';
+            element.innerHTML = 'WEBVR NOT SUPPORTED';
+        }
+
+        this.element = element;
+      } catch (error) {
+        // console.log(error);
+        this.emit('error', error);
+      }
+    }
+  }, {
+    key: "addElement",
+    value: function addElement(type) {
+      var element = document.createElement(type);
+      element.style.display = 'none';
+      element.style.position = 'absolute';
+      element.style.bottom = '20px';
+      element.style.padding = '12px 6px';
+      element.style.border = '1px solid #fff';
+      element.style.borderRadius = '4px';
+      element.style.background = 'rgba(0,0,0,0.1)';
+      element.style.color = '#fff';
+      element.style.font = 'normal 13px sans-serif';
+      element.style.textAlign = 'center';
+      element.style.opacity = '0.5';
+      element.style.outline = 'none';
+      element.style.zIndex = '999';
+      return element;
+    }
+  }, {
+    key: "getVR",
+    value: function getVR() {
+      var _this2 = this;
+
+      navigator.getVRDisplays().then(function (displays) {
+        // console.log('navigator.getVRDisplays', displays);
+        if (displays.length > 0) {
+          _this2.setEnterVR(displays[0]);
+        } else {
+          _this2.setVRNotFound();
+        }
+      }).catch(function (e) {
+        console.log('getVR.error', e);
+
+        _this2.setVRNotFound();
+      });
+    }
+  }, {
+    key: "getXR",
+    value: function getXR() {
+      var _this3 = this;
+
+      navigator.xr.requestDevice().then(function (device) {
+        device.supportsSession({
+          immersive: true,
+          exclusive: true
+          /* DEPRECATED */
+
+        }).then(function () {
+          _this3.setEnterXR(device);
+        }).catch(function () {
+          return _this3.setVRNotFound();
+        });
+      }).catch(function (e) {
+        console.log('getXR.error', e);
+
+        _this3.setVRNotFound();
+      });
+    }
+  }, {
+    key: "setEnterVR",
+    value: function setEnterVR(device) {
+      this.device = device;
+      this.renderer.vr.setDevice(device);
+      this.session = null;
+      var element = this.element;
+      element.style.display = '';
+      element.style.cursor = 'pointer';
+      element.style.left = 'calc(50% - 50px)';
+      element.style.width = '100px';
+      element.textContent = 'ENTER VR';
+      element.addEventListener('mouseenter', this.onVRMouseEnter);
+      element.addEventListener('mouseleave', this.onVRMouseLeave);
+      element.addEventListener('click', this.onVRClick);
+    }
+  }, {
+    key: "setEnterXR",
+    value: function setEnterXR(device) {
+      this.device = device;
+      this.session = null;
+      var element = this.element;
+      element.style.display = '';
+      element.style.cursor = 'pointer';
+      element.style.left = 'calc(50% - 50px)';
+      element.style.width = '100px';
+      element.textContent = 'ENTER XR'; // !!!
+
+      element.addEventListener('mouseenter', this.onVRMouseEnter);
+      element.addEventListener('mouseleave', this.onVRMouseLeave);
+      element.addEventListener('click', this.onXRClick);
+      this.renderer.vr.setDevice(device);
+    }
+  }, {
+    key: "setVRNotFound",
+    value: function setVRNotFound() {
+      renderer.vr.setDevice(null);
+      var element = this.element;
+      element.style.display = '';
+      element.style.cursor = 'auto';
+      element.style.left = 'calc(50% - 75px)';
+      element.style.width = '150px';
+      element.textContent = 'VR NOT FOUND';
+      element.removeEventListener('mouseenter', this.onVRMouseEnter);
+      element.removeEventListener('mouseleave', this.onVRMouseLeave);
+      element.removeEventListener('click', this.onVRClick);
+      element.removeEventListener('click', this.onXRClick);
+    } // events
+
+  }, {
+    key: "onVRDisplayConnect",
+    value: function onVRDisplayConnect(event) {
+      this.setEnterVR(event.display);
+    }
+  }, {
+    key: "onVRDisplayDisconnect",
+    value: function onVRDisplayDisconnect(event) {
+      this.setVRNotFound();
+    }
+  }, {
+    key: "onVRDisplayPresentChange",
+    value: function onVRDisplayPresentChange(event) {
+      try {
+        var isPresenting = event.display.isPresenting;
+        this.session = isPresenting;
+
+        if (isPresenting) {
+          this.element.textContent = 'EXIT VR';
+          this.emit('presenting');
+        } else {
+          this.element.textContent = 'ENTER VR';
+          this.emit('exit');
+        }
+      } catch (error) {
+        this.emit('error', error);
+      }
+    }
+  }, {
+    key: "onVRDisplayActivate",
+    value: function onVRDisplayActivate(event) {
+      var _this4 = this;
+
+      try {
+        event.display.requestPresent([{
+          source: this.renderer.domElement
+        }]).then(function () {
+          _this4.emit('presenting');
+        }, function (error) {
+          console.log(error);
+
+          _this4.emit('error', error);
+        });
+      } catch (error) {
+        this.emit('error', error);
+      }
+    }
+  }, {
+    key: "onVRMouseEnter",
+    value: function onVRMouseEnter(event) {
+      this.element.style.opacity = '1.0';
+    }
+  }, {
+    key: "onVRMouseLeave",
+    value: function onVRMouseLeave(event) {
+      this.element.style.opacity = '0.5';
+    }
+  }, {
+    key: "onVRClick",
+    value: function onVRClick(event) {
+      var _this5 = this;
+
+      try {
+        var device = this.device;
+
+        if (device.isPresenting) {
+          device.exitPresent();
+        } else {
+          device.requestPresent([{
+            source: this.renderer.domElement
+          }]).then(function () {
+            _this5.emit('presenting');
+          }, function (error) {
+            console.log(error);
+
+            _this5.emit('error', error);
+          });
+        }
+      } catch (error) {
+        this.emit('error', error);
+      }
+    }
+  }, {
+    key: "onXRClick",
+    value: function onXRClick(event) {
+      try {
+        var device = this.device;
+
+        if (this.session === null) {
+          device.requestSession({
+            immersive: true,
+            exclusive: true
+            /* DEPRECATED */
+
+          }).then(this.onXRSessionStarted);
+          /*
+          if (Tone.context.state !== 'running') {
+          	Tone.context.resume();
+          }
+          */
+        } else {
+          this.session.end();
+        }
+      } catch (error) {
+        this.emit('error', error);
+      }
+    }
+  }, {
+    key: "onXRSessionStarted",
+    value: function onXRSessionStarted(session) {
+      try {
+        session.addEventListener('end', this.onXRSessionEnded);
+        this.renderer.vr.setSession(session);
+        this.session = session;
+        this.element.textContent = 'EXIT VR';
+        this.emit('presenting');
+      } catch (error) {
+        this.emit('error', error);
+      }
+    }
+  }, {
+    key: "onXRSessionEnded",
+    value: function onXRSessionEnded(event) {
+      try {
+        this.session.removeEventListener('end', this.onXRSessionEnded);
+        this.renderer.vr.setSession(null);
+        this.session = null;
+        this.element.textContent = 'ENTER VR';
+        this.emit('exit');
+      } catch (error) {
+        this.emit('error', error);
+      }
+    }
+  }]);
+
+  return VR;
+}(_emittable.default);
+/*
+VRDisplays[0]: VRDisplay {
+	capabilities: VRDisplayCapabilities {
+		canPresent: true
+		hasExternalDisplay: false
+		hasOrientation: true
+		hasPosition: true
+		maxLayers: 1
+	}
+	depthFar: 10000
+	depthNear: 0.01
+	displayId: 1
+	displayName: "Oculus Quest"
+	isConnected: true
+	isPresenting: false
+	stageParameters: VRStageParameters {
+		sittingToStandingTransform: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1.649999976158142, 0, 1]
+		sizeX: 0
+		sizeZ: 0
+	}
+}
+*/
+
+
+exports.VR = VR;
+
+},{"../interactive/emittable":204}],208:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.default = void 0;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -20607,7 +20955,7 @@ function () {
 exports.default = LazyScriptDirective;
 LazyScriptDirective.factory.$inject = [];
 
-},{}],208:[function(require,module,exports){
+},{}],209:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20783,7 +21131,7 @@ function () {
 exports.default = LazyDirective;
 LazyDirective.factory.$inject = ['DomService'];
 
-},{"../shared/rect":217,"rxjs/operators":198}],209:[function(require,module,exports){
+},{"../shared/rect":218,"rxjs/operators":198}],210:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20935,7 +21283,7 @@ function () {
 exports.default = OverscrollDirective;
 OverscrollDirective.factory.$inject = ['DomService'];
 
-},{"../shared/rect":217}],210:[function(require,module,exports){
+},{"../shared/rect":218}],211:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20950,7 +21298,7 @@ function TrustedFilter($sce) {
   };
 }
 
-},{}],211:[function(require,module,exports){
+},{}],212:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21022,7 +21370,7 @@ ProductCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService'];
 var _default = ProductCtrl;
 exports.default = _default;
 
-},{}],212:[function(require,module,exports){
+},{}],213:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21291,7 +21639,7 @@ RootCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService', 'WishlistS
 var _default = RootCtrl;
 exports.default = _default;
 
-},{"rxjs":2,"rxjs/operators":198}],213:[function(require,module,exports){
+},{"rxjs":2,"rxjs/operators":198}],214:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21362,7 +21710,7 @@ function () {
 exports.default = ApiService;
 ApiService.factory.$inject = ['$http'];
 
-},{"rxjs":2}],214:[function(require,module,exports){
+},{"rxjs":2}],215:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21760,7 +22108,7 @@ DomService.scroll$ = function () {
 
 DomService.scrollAndRect$ = (0, _rxjs.combineLatest)(DomService.scroll$, DomService.windowRect$);
 
-},{"../shared/rect":217,"rxjs":2,"rxjs/internal/scheduler/animationFrame":161,"rxjs/operators":198}],215:[function(require,module,exports){
+},{"../shared/rect":218,"rxjs":2,"rxjs/internal/scheduler/animationFrame":161,"rxjs/operators":198}],216:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21863,7 +22211,7 @@ function () {
 exports.default = LocationService;
 LocationService.factory.$inject = ['$location'];
 
-},{}],216:[function(require,module,exports){
+},{}],217:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21918,7 +22266,7 @@ function () {
 exports.default = PromiseService;
 PromiseService.factory.$inject = ['$q'];
 
-},{}],217:[function(require,module,exports){
+},{}],218:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22066,7 +22414,7 @@ function () {
 
 exports.default = Rect;
 
-},{}],218:[function(require,module,exports){
+},{}],219:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22259,7 +22607,7 @@ function () {
 exports.default = StateService;
 StateService.factory.$inject = ['$timeout', '$rootScope'];
 
-},{}],219:[function(require,module,exports){
+},{}],220:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
