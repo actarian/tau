@@ -82,6 +82,10 @@
 	<link rel="stylesheet" href="css/tau.css" />
 	<!-- <link rel="stylesheet" href="https://use.typekit.net/ymy5peo.css"> -->
 	<link href="https://fonts.googleapis.com/css?family=Poppins:300,500,600,700&display=swap" rel="stylesheet">
+	<link href="fonts/sofia/stylesheet.css" rel="stylesheet">
+	<link href="fonts/fontawesome/fontawesome.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="slick/slick.css"/>
+	
 
 	<!-- angular puo essere rimosso caricando i partials server side
 	<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.8/angular.min.js"></script>
@@ -116,7 +120,7 @@
 	<ng-include src="'templates/shared/header.html'"></ng-include>
 	<main class="page">
 		<div class="view" ng-cloak>
-			<ng-include src="'templates/pages/product.html'"></ng-include>
+			<ng-include src="'templates/pages/home.html'"></ng-include>
 		</div>
 	</main>
 	<ng-include src="'templates/shared/footer.html'"></ng-include>
@@ -126,6 +130,63 @@
 
 	<script src="js/vendors.js"></script>
 	<script src="js/tau.js"></script>
+	<script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script type="text/javascript" src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+	<script type="text/javascript" src="slick/slick.min.js"></script>
+	<script type="text/javascript" src="js/main.js"></script>
+	
+	<script>
+	$(document).ready(function(){
+		//Slide Prodotti Home
+		$('.section--home-slide-prodotti .slide').slick({
+			arrows: false,
+			dots: true,
+			slidesToShow: 1,
+			slidesToScroll: 1,
+			centerMode: true,
+			focusOnSelect: true,
+			responsive: [
+			{
+			breakpoint: 1441,
+				settings: {
+					slidesToShow: 2,
+					slidesToScroll: 1
+				}
+			},
+			{
+			breakpoint: 1025,
+				settings: {
+					slidesToShow: 2,
+					slidesToScroll: 2
+				}
+			},
+			{
+			breakpoint: 767,
+				settings: {
+					slidesToShow: 1,
+					slidesToScroll: 1
+				}
+			}
+		]
+		});
+		//Slide Testimonial Home
+		$('.section--home-testimonial .slide').slick({
+			arrows: false,
+			dots: true,
+			slidesToShow: 1,
+			slidesToScroll: 1,
+			responsive: [
+			{
+			breakpoint: 767,
+				settings: {
+					slidesToShow: 1,
+					slidesToScroll: 1
+				}
+			}
+		]
+		});
+	});
+	</script>
 </body>
 
 </html>
