@@ -3550,10 +3550,11 @@ footer {
     -webkit-box-align: center;
         -ms-flex-align: center;
             align-items: center;
+    -ms-flex-wrap: nowrap;
+        flex-wrap: nowrap;
     width: calc(100% + 20px);
     height: 40px;
-    -ms-flex-wrap: nowrap;
-        flex-wrap: nowrap; }
+    margin-bottom: 20px; }
     .section--product-info .listing--info .listing__item {
       position: static;
       width: 30px;
@@ -3624,7 +3625,7 @@ footer {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  min-height: calc(90vh - 44px); }
+  min-height: calc(80vh - 44px); }
 
 .section--product-colors .group--inline {
   position: relative;
