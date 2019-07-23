@@ -47,3 +47,64 @@ ng-transclude {
 	border-radius: 2px;
 }
 */
+
+//Slick Dots
+.slick-dots {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	text-align: center;
+
+	li {
+		display: inline-block;
+		padding: 0 10px;
+
+		button {
+			text-indent: -9999px;
+			overflow: hidden;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			background: transparent;
+
+			&:after {
+				content: '';
+				display: block;
+				height: 4px;
+				width: 4px;
+				background: $foreground-secondary;
+				border-radius: 4px;
+			}
+		}
+
+		&.slick-active {
+			
+			button {
+
+				&:after {
+					content: '';
+					display: block;
+					height: 12px;
+					width: 12px;
+					border: 2px solid $foreground-primary;
+					background: #fff;
+					border-radius: 12px;
+				}
+			}
+		}
+	}
+}
+
+//Placeholder style
+::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+	font-family: $font-primary;
+}
+::-moz-placeholder { /* Firefox 19+ */
+	font-family: $font-primary;
+}
+:-ms-input-placeholder { /* IE 10+ */
+	font-family: $font-primary;
+}
+:-moz-placeholder { /* Firefox 18- */
+	font-family: $font-primary;
+}
