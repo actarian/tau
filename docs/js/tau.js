@@ -19740,7 +19740,8 @@ function (_Emittable) {
       return gui;
     }
     /*
-    	tweenTau__(anchor) {
+    
+    tweenTau__(anchor) {
     	// [0, 0, Math.PI / 2]; // 										vertical left
     	// [0, 0, 0]; // 												horizontal right
     	// [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
@@ -19869,6 +19870,7 @@ function (_Emittable) {
     		});
     	}
     }
+    
     
     addLogo__(parent) {
     	const geometry = new THREE.PlaneGeometry(24, 3, 3, 1);
@@ -20017,7 +20019,8 @@ function (_Emittable) {
     		parent.add(group);
     		return group;
     	}
-    	*/
+    
+    */
 
   }]);
 

@@ -24,7 +24,7 @@ function backToTop() {
         $('html, body').stop().animate({ scrollTop: 0 }, 600);
     });
 
-    $(window).on('scroll', _.throttle(checkCondition, 700));
+    //$(window).on('scroll', _.throttle(checkCondition, 700));
 }
 
 /* --------------------------------------------------
