@@ -19285,7 +19285,7 @@ var _rect = _interopRequireDefault(require("../shared/rect"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /* jshint esversion: 6 */
-const DEFAULT_SCROLL_TARGET = document.body; // window
+const DEFAULT_SCROLL_TARGET = window; // document.body; // window
 
 class DomService {
   constructor() {}
