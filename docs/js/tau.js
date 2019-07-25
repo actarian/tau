@@ -18175,11 +18175,11 @@ exports.default = void 0;
 
 var _canvas = _interopRequireDefault(require("./directives/canvas.directive"));
 
-var _vr = require("./threejs/vr/vr");
-
 var _lazyScript = _interopRequireDefault(require("./directives/lazy-script.directive"));
 
 var _lazy = _interopRequireDefault(require("./directives/lazy.directive"));
+
+var _overscrollResponsive = _interopRequireDefault(require("./directives/overscroll-responsive.directive"));
 
 var _overscroll = _interopRequireDefault(require("./directives/overscroll.directive"));
 
@@ -18201,6 +18201,8 @@ var _state = _interopRequireDefault(require("./shared/state.service"));
 
 var _storage = require("./shared/storage.service");
 
+var _vr = require("./threejs/vr/vr");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /* jshint esversion: 6 */
@@ -18210,7 +18212,7 @@ app.config(['$locationProvider', function ($locationProvider) {
   $locationProvider.html5Mode(true).hashPrefix('*');
 }]);
 app.factory('ApiService', _api.default.factory).factory('DomService', _dom.default.factory).factory('LocationService', _location.default.factory).factory('PromiseService', _promise.default.factory).factory('StateService', _state.default.factory).factory('CookieService', _storage.CookieService.factory).factory('LocalStorageService', _storage.LocalStorageService.factory).factory('SessionStorageService', _storage.SessionStorageService.factory);
-app.directive('canvas', _canvas.default.factory).directive('overscroll', _overscroll.default.factory).directive('lazy', _lazy.default.factory).directive('lazyScript', _lazyScript.default.factory);
+app.directive('canvas', _canvas.default.factory).directive('overscroll', _overscroll.default.factory).directive('overscrollResponsive', _overscrollResponsive.default.factory).directive('lazy', _lazy.default.factory).directive('lazyScript', _lazyScript.default.factory);
 app.controller('RootCtrl', _root.default).controller('ProductCtrl', _product.default);
 app.filter('trusted', ['$sce', _trusted.TrustedFilter]);
 app.run(['$rootScope', $rootScope => {
@@ -18220,7 +18222,7 @@ app.run(['$rootScope', $rootScope => {
 var _default = MODULE_NAME;
 exports.default = _default;
 
-},{"./directives/canvas.directive":201,"./directives/lazy-script.directive":202,"./directives/lazy.directive":203,"./directives/overscroll.directive":204,"./filters/trusted.filter":205,"./product/product.controller":206,"./root.controller":207,"./services/api.service":208,"./services/dom.service":209,"./shared/location.service":210,"./shared/promise.service":211,"./shared/state.service":213,"./shared/storage.service":214,"./threejs/vr/vr":221}],201:[function(require,module,exports){
+},{"./directives/canvas.directive":201,"./directives/lazy-script.directive":202,"./directives/lazy.directive":203,"./directives/overscroll-responsive.directive":204,"./directives/overscroll.directive":205,"./filters/trusted.filter":206,"./product/product.controller":207,"./root.controller":208,"./services/api.service":209,"./services/dom.service":210,"./shared/location.service":211,"./shared/promise.service":212,"./shared/state.service":214,"./shared/storage.service":215,"./threejs/vr/vr":222}],201:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18287,13 +18289,25 @@ class CanvasDirective {
     });
     canvas.animate();
     const anchors = [...document.querySelectorAll('[data-anchor]')];
-    const subscription = this.domService.scrollIntersection$(node).subscribe(event => {
-      if (event.rect.top - (event.windowRect.height - event.rect.height) / 2 <= 0) {
-        node.classList.remove('fixed');
-      } else {
-        node.classList.add('fixed');
-      }
+    const rafSubscription = this.domService.rafAndScroll$(node).subscribe(event => {
+      const rect = _rect.default.fromNode(node);
 
+      const top = rect.top - (window.innerHeight - rect.height) / 2;
+      const innerStyle = top <= 0 ? `transform: translateX(-50%) translateY(${top - inner.offsetHeight / 2}px)` : `transform: translateX(-50%) translateY(-50%)`;
+
+      if (element.innerStyle !== innerStyle) {
+        element.innerStyle = innerStyle;
+        inner.style = innerStyle;
+      }
+    });
+    const scrollSubscription = this.domService.scrollIntersection$(node).subscribe(event => {
+      /*
+      if (event.rect.top - (event.windowRect.height - event.rect.height) / 2 <= 0) {
+      	node.classList.remove('fixed');
+      } else {
+      	node.classList.add('fixed');
+      }
+      */
       const anchor = anchors.reduce((p, x, i) => {
         const rect = _rect.default.fromNode(x);
 
@@ -18332,7 +18346,8 @@ class CanvasDirective {
       canvas.color = color;
     });
     element.on('$destroy', () => {
-      subscription.unsubscribe();
+      rafSubscription.unsubscribe();
+      scrollSubscription.unsubscribe();
       canvas.destroy();
     });
   }
@@ -18346,7 +18361,7 @@ class CanvasDirective {
 exports.default = CanvasDirective;
 CanvasDirective.factory.$inject = ['$timeout', 'DomService'];
 
-},{"../shared/rect":212,"../threejs/canvas":215,"../threejs/vr/vr":221}],202:[function(require,module,exports){
+},{"../shared/rect":213,"../threejs/canvas":216,"../threejs/vr/vr":222}],202:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18552,7 +18567,210 @@ class LazyDirective {
 exports.default = LazyDirective;
 LazyDirective.factory.$inject = ['DomService'];
 
-},{"../shared/rect":212,"rxjs/operators":198}],204:[function(require,module,exports){
+},{"../shared/rect":213,"rxjs/operators":198}],204:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _rect = _interopRequireDefault(require("../shared/rect"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* jshint esversion: 6 */
+const MODES = {
+  NONE: 0,
+  FIXED: 1,
+  ABSOLUTE: 2
+};
+
+class OverscrollResponsiveDirective {
+  constructor(DomService) {
+    this.domService = DomService;
+    this.restrict = 'A';
+  }
+
+  link(scope, element, attributes, controller) {
+    const node = element[0];
+    const container = node.querySelector('.container');
+    const overscroll = attributes.overscroll ? parseInt(attributes.overscroll) : 100;
+    const anchors = [...node.querySelectorAll('[data-overscroll-anchor]')];
+
+    const onClick = event => {
+      const index = anchors.indexOf(event.currentTarget);
+
+      const rect = _rect.default.fromNode(node);
+
+      const h = container.offsetHeight;
+      const d = h / 100 * overscroll;
+      const s = d / anchors.length;
+      const top = window.pageYOffset + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
+
+      window.scrollTo(0, top);
+    };
+
+    anchors.forEach(x => {
+      x.addEventListener('click', onClick);
+    });
+    const bulletsHtml = anchors.map(x => `<li class="bullet"></li>`).join('');
+    const navBullets = document.createElement('ul');
+    navBullets.classList.add('nav--bullets');
+    navBullets.innerHTML = bulletsHtml;
+    const bullets = [...navBullets.querySelectorAll('.bullet')];
+
+    const onClickBullet = event => {
+      const index = bullets.indexOf(event.currentTarget);
+      const anchor = anchors[index];
+
+      const rect = _rect.default.fromNode(anchor);
+      /*
+      const h = container.offsetHeight;
+      const d = h / 100 * overscroll;
+      const s = d / anchors.length;
+      */
+
+
+      const top = window.pageYOffset + rect.top; // const top = window.pageYOffset + rect.top + window.innerHeight / 2 + s * index + (s / 2);
+
+      window.scrollTo(0, top);
+    };
+
+    bullets.forEach(x => {
+      x.addEventListener('click', onClickBullet);
+    });
+    node.appendChild(navBullets);
+    let windowRectWidth;
+    const subscription = this.domService.scrollIntersection$(node).subscribe(event => {
+      const rect = event.rect;
+      const top = rect.top;
+
+      if (event.windowRect.width !== windowRectWidth) {
+        windowRectWidth = event.windowRect.width;
+        container.setAttribute('style', '');
+      }
+
+      const h = container.offsetHeight;
+      const d = h / 100 * overscroll;
+      const downSm = window.innerWidth < 860;
+      let y = 0;
+
+      if (top < 0) {
+        y = Math.min(-top + (downSm ? window.innerHeight / 2 : 0), d);
+      }
+
+      let elementStyle;
+
+      if (downSm) {
+        elementStyle = ``;
+
+        if (element.style !== elementStyle) {
+          element.style = elementStyle;
+          node.setAttribute('style', elementStyle);
+        }
+
+        if (element.mode !== MODES.NONE) {
+          element.mode = MODES.NONE;
+          container.setAttribute('style', '');
+        }
+
+        if (y > window.innerHeight / 2 && y < d) {
+          node.classList.add('nav--bullets-active');
+        } else {
+          node.classList.remove('nav--bullets-active');
+        }
+      } else {
+        elementStyle = `position: relative; height: ${h + d}px;`;
+
+        if (element.style !== elementStyle) {
+          element.style = elementStyle;
+          node.setAttribute('style', elementStyle);
+        }
+
+        const containerRect = _rect.default.fromNode(container);
+
+        if (y === d) {
+          if (element.mode !== MODES.ABSOLUTE) {
+            element.mode = MODES.ABSOLUTE;
+            container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
+          }
+        } else if (y > 0) {
+          if (element.mode !== MODES.FIXED) {
+            element.mode = MODES.FIXED;
+            container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
+          }
+        } else {
+          if (element.mode !== MODES.NONE) {
+            element.mode = MODES.NONE;
+            container.setAttribute('style', '');
+          }
+        }
+      }
+
+      if (top < event.windowRect.height / 4 && rect.bottom > event.windowRect.height / 4) {
+        const index = Math.floor(y / d * anchors.length);
+        anchors.forEach((x, i) => {
+          const bullet = bullets[i];
+
+          if (i === index) {
+            const value = x.getAttribute('data-overscroll-anchor');
+
+            if (scope.$root.anchor !== value) {
+              scope.$root.$broadcast('onAnchor', value);
+            }
+
+            if (!x.classList.contains('active')) {
+              x.classList.add('active');
+            }
+
+            if (!bullet.classList.contains('active')) {
+              bullet.classList.add('active');
+            }
+          } else {
+            if (x.classList.contains('active')) {
+              x.classList.remove('active');
+            }
+
+            if (bullet.classList.contains('active')) {
+              bullet.classList.remove('active');
+            }
+          }
+        });
+      } else {
+        anchors.forEach(x => {
+          if (x.classList.contains('active')) {
+            x.classList.remove('active');
+          }
+        });
+        bullets.forEach(x => {
+          if (x.classList.contains('active')) {
+            x.classList.remove('active');
+          }
+        });
+      }
+    });
+    element.on('$destroy', () => {
+      subscription.unsubscribe();
+      anchors.forEach(x => {
+        x.removeEventListener('click', onClick);
+      });
+      bullets.forEach(x => {
+        x.removeEventListener('click', onClickBullet);
+      });
+    });
+  }
+
+  static factory(DomService) {
+    return new OverscrollResponsiveDirective(DomService);
+  }
+
+}
+
+exports.default = OverscrollResponsiveDirective;
+OverscrollResponsiveDirective.factory.$inject = ['DomService'];
+
+},{"../shared/rect":213}],205:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18681,7 +18899,7 @@ class OverscrollDirective {
 exports.default = OverscrollDirective;
 OverscrollDirective.factory.$inject = ['DomService'];
 
-},{"../shared/rect":212}],205:[function(require,module,exports){
+},{"../shared/rect":213}],206:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18696,7 +18914,7 @@ function TrustedFilter($sce) {
   };
 }
 
-},{}],206:[function(require,module,exports){
+},{}],207:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18755,7 +18973,7 @@ ProductCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService'];
 var _default = ProductCtrl;
 exports.default = _default;
 
-},{}],207:[function(require,module,exports){
+},{}],208:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18990,7 +19208,7 @@ RootCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService', 'WishlistS
 var _default = RootCtrl;
 exports.default = _default;
 
-},{"rxjs":2,"rxjs/operators":198}],208:[function(require,module,exports){
+},{"rxjs":2,"rxjs/operators":198}],209:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19048,7 +19266,7 @@ class ApiService {
 exports.default = ApiService;
 ApiService.factory.$inject = ['$http'];
 
-},{"rxjs":2}],209:[function(require,module,exports){
+},{"rxjs":2}],210:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19188,6 +19406,10 @@ class DomService {
 
   scrollAndRect$() {
     return DomService.scrollAndRect$;
+  }
+
+  rafAndScroll$() {
+    return this.raf$().pipe((0, _operators.map)(x => this.scrollTop), (0, _operators.distinctUntilChanged)());
   }
 
   smoothScroll$(selector, friction = 20) {
@@ -19396,7 +19618,7 @@ DomService.scroll$ = function () {
 
 DomService.scrollAndRect$ = (0, _rxjs.combineLatest)(DomService.scroll$, DomService.windowRect$);
 
-},{"../shared/rect":212,"rxjs":2,"rxjs/internal/scheduler/animationFrame":161,"rxjs/operators":198}],210:[function(require,module,exports){
+},{"../shared/rect":213,"rxjs":2,"rxjs/internal/scheduler/animationFrame":161,"rxjs/operators":198}],211:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19480,7 +19702,7 @@ class LocationService {
 exports.default = LocationService;
 LocationService.factory.$inject = ['$location'];
 
-},{}],211:[function(require,module,exports){
+},{}],212:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19519,7 +19741,7 @@ class PromiseService {
 exports.default = PromiseService;
 PromiseService.factory.$inject = ['$q'];
 
-},{}],212:[function(require,module,exports){
+},{}],213:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19645,7 +19867,7 @@ class Rect {
 
 exports.default = Rect;
 
-},{}],213:[function(require,module,exports){
+},{}],214:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19802,7 +20024,7 @@ class StateService {
 exports.default = StateService;
 StateService.factory.$inject = ['$timeout', '$rootScope'];
 
-},{}],214:[function(require,module,exports){
+},{}],215:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20160,7 +20382,7 @@ class SessionStorageService {
 exports.SessionStorageService = SessionStorageService;
 SessionStorageService.factory.$inject = ['PromiseService'];
 
-},{}],215:[function(require,module,exports){
+},{}],216:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21208,8 +21430,7 @@ class Canvas extends _emittable.default {
     return gui;
   }
   /*
-  
-  tweenTau__(anchor) {
+  	tweenTau__(anchor) {
   	// [0, 0, Math.PI / 2]; // 										vertical left
   	// [0, 0, 0]; // 												horizontal right
   	// [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
@@ -21338,7 +21559,6 @@ class Canvas extends _emittable.default {
   		});
   	}
   }
-  
   
   addLogo__(parent) {
   	const geometry = new THREE.PlaneGeometry(24, 3, 3, 1);
@@ -21487,8 +21707,7 @@ class Canvas extends _emittable.default {
   		parent.add(group);
   		return group;
   	}
-  
-  */
+  	*/
 
 
 }
@@ -21572,7 +21791,7 @@ THREE.ShadowShader = {
 	`
 };
 
-},{"./const":216,"./interactive/emittable":217,"./materials/materials":218,"./orbit/orbit":220,"./vr/vr":221,"dat.gui":1}],216:[function(require,module,exports){
+},{"./const":217,"./interactive/emittable":218,"./materials/materials":219,"./orbit/orbit":221,"./vr/vr":222,"dat.gui":1}],217:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21692,7 +21911,7 @@ function cameraToPicture(cubeCamera, renderer, textureW) {
   return images;
 }
 
-},{}],217:[function(require,module,exports){
+},{}],218:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21746,7 +21965,7 @@ class Emittable {
 
 exports.default = Emittable;
 
-},{}],218:[function(require,module,exports){
+},{}],219:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21784,7 +22003,7 @@ class Materials {
   addTextures() {
     const loader = new THREE.TextureLoader();
     const textures = {
-      equirectangular: loader.load('threejs/environment/equirectangular-sm.jpg'),
+      // equirectangular: loader.load('threejs/environment/equirectangular-sm.jpg'),
       matcap00: loader.load('threejs/matcap/matcap-00.jpg'),
       // matcap02: loader.load('threejs/matcap/matcap-02.jpg'),
       matcap06: loader.load('threejs/matcap/matcap-06.jpg'),
@@ -21822,21 +22041,10 @@ class Materials {
 
   getBodyPrimaryClear(texture) {
     let material;
-    let color;
-
-    switch (this.product.modelType) {
-      case _const.MODEL_TYPE.PROFESSIONAL_BLACK:
-        color = 0x84807f; // 0x343231;
-
-        break;
-
-      default:
-        color = 0xf8f8f8;
-    }
 
     if (this.vrenabled) {
       material = new THREE.MeshMatcapMaterial({
-        color: color,
+        color: this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK ? 0x84807f : 0xf8f8f8,
         matcap: this.textures.matcap15,
         transparent: true,
         opacity: this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK ? 0.8 : 0.4,
@@ -21855,7 +22063,7 @@ class Materials {
       });
       */
       material = new THREE.MeshPhongMaterial({
-        color: color,
+        color: this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK ? 0x84807f : 0xf8f8f8,
         envMap: texture,
         transparent: true,
         refractionRatio: 0.6,
@@ -22005,7 +22213,7 @@ class Materials {
 
 exports.default = Materials;
 
-},{"../const":216}],219:[function(require,module,exports){
+},{"../const":217}],220:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22180,7 +22388,7 @@ class DragListener {
 
 exports.default = DragListener;
 
-},{}],220:[function(require,module,exports){
+},{}],221:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22279,7 +22487,7 @@ class Orbit {
 
 exports.default = Orbit;
 
-},{"./drag.listener":219}],221:[function(require,module,exports){
+},{"./drag.listener":220}],222:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22611,5 +22819,5 @@ VRDisplays[0]: VRDisplay {
 
 exports.VR = VR;
 
-},{"../interactive/emittable":217}]},{},[199]);
+},{"../interactive/emittable":218}]},{},[199]);
 //# sourceMappingURL=tau.js.map
