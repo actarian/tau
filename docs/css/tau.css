@@ -2,11 +2,9 @@
   -webkit-box-sizing: border-box;
           box-sizing: border-box; }
 
-/*
 html {
-	scroll-behavior: smooth;
-}
-*/
+  scroll-behavior: smooth; }
+
 html,
 body {
   width: 100%;
@@ -3345,7 +3343,9 @@ footer {
 
 .bullet {
   display: block;
-  position: relative; }
+  position: relative;
+  border-radius: 50%;
+  cursor: pointer; }
   .bullet:before {
     content: '';
     display: block;
@@ -3435,6 +3435,11 @@ footer {
           justify-content: center;
   min-height: calc(90vh - 44px); }
 
+.section--product-info .bullet {
+  border-radius: 50%;
+  -webkit-transition: border ease-in-out 350ms;
+  transition: border ease-in-out 350ms; }
+
 .section--product-info .listing--info {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -3451,10 +3456,6 @@ footer {
         -ms-flex-align: start;
             align-items: flex-start;
     cursor: pointer; }
-    .section--product-info .listing--info .listing__item .bullet {
-      border-radius: 50%;
-      -webkit-transition: border ease-in-out 350ms;
-      transition: border ease-in-out 350ms; }
     .section--product-info .listing--info .listing__item .title {
       position: relative;
       text-align: left;
@@ -3535,14 +3536,71 @@ footer {
       text-align: right; } }
 
 @media (max-width: 1023.98px) {
-  .section--product-info .title {
+  [overscroll-responsive] .title {
     font-size: 20px;
     margin-bottom: 8vh; }
-  .section--product-info .group--vertical-center {
+  [overscroll-responsive] .listing--info .listing__item {
+    min-height: 100vh;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center; }
+    [overscroll-responsive] .listing--info .listing__item .bullet {
+      display: none; }
+    [overscroll-responsive] .listing--info .listing__item .title {
+      font-size: 36px;
+      margin-bottom: 15px; }
+    [overscroll-responsive] .listing--info .listing__item .abstract {
+      font-size: 16px;
+      margin-bottom: 20px; }
+  [overscroll-responsive] .nav--bullets {
+    position: fixed;
+    top: 50%;
+    right: 40px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    -webkit-transition: opacity ease-in-out 350ms;
+    transition: opacity ease-in-out 350ms; }
+    [overscroll-responsive] .nav--bullets .bullet {
+      width: 4px;
+      height: 4px;
+      background: #121212; }
+      [overscroll-responsive] .nav--bullets .bullet:before {
+        width: 12px;
+        height: 12px;
+        border-width: 1px; }
+      [overscroll-responsive] .nav--bullets .bullet:hover:before {
+        border-color: #e10000; }
+      [overscroll-responsive] .nav--bullets .bullet.active:before {
+        -webkit-transition: none;
+        transition: none;
+        -webkit-animation: pulse 1s infinite;
+                animation: pulse 1s infinite; }
+    [overscroll-responsive] .nav--bullets > .bullet + .bullet {
+      margin-top: 24px; }
+  [overscroll-responsive].nav--bullets-active .nav--bullets {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: all; } }
+
+@media (max-width: 1023.98px) {
+  [overscroll] .title {
+    font-size: 20px;
+    margin-bottom: 8vh; }
+  [overscroll] .group--vertical-center {
     -webkit-box-pack: end;
         -ms-flex-pack: end;
             justify-content: flex-end; }
-  .section--product-info .listing--info {
+  [overscroll] .listing--info {
     position: relative;
     -webkit-box-pack: center;
         -ms-flex-pack: center;
@@ -3555,12 +3613,12 @@ footer {
     width: calc(100% + 20px);
     height: 40px;
     margin-bottom: 5vh; }
-    .section--product-info .listing--info .listing__item {
+    [overscroll] .listing--info .listing__item {
       position: static;
       width: 30px;
       height: 20px;
       padding: 0; }
-      .section--product-info .listing--info .listing__item .bullet {
+      [overscroll] .listing--info .listing__item .bullet {
         position: relative;
         left: 50%;
         top: 8px;
@@ -3568,11 +3626,11 @@ footer {
         width: 4px;
         height: 4px;
         background: #121212; }
-        .section--product-info .listing--info .listing__item .bullet:before {
+        [overscroll] .listing--info .listing__item .bullet:before {
           width: 12px;
           height: 12px;
           border-width: 1px; }
-      .section--product-info .listing--info .listing__item .group--info {
+      [overscroll] .listing--info .listing__item .group--info {
         position: absolute;
         visibility: hidden;
         opacity: 0;
@@ -3583,19 +3641,19 @@ footer {
         pointer-events: none;
         -webkit-transition: opacity ease-in-out 350ms;
         transition: opacity ease-in-out 350ms; }
-      .section--product-info .listing--info .listing__item .title,
-      .section--product-info .listing--info .listing__item .abstract {
+      [overscroll] .listing--info .listing__item .title,
+      [overscroll] .listing--info .listing__item .abstract {
         max-width: none;
         text-align: center; }
-      .section--product-info .listing--info .listing__item .title {
+      [overscroll] .listing--info .listing__item .title {
         margin-bottom: 10px;
         font-size: 18px; }
-      .section--product-info .listing--info .listing__item .abstract {
+      [overscroll] .listing--info .listing__item .abstract {
         margin-bottom: 30px;
         font-size: 14px;
         line-height: 1.2;
         color: #797a82; }
-      .section--product-info .listing--info .listing__item.active .group--info {
+      [overscroll] .listing--info .listing__item.active .group--info {
         visibility: visible;
         opacity: 1; } }
 
@@ -3921,8 +3979,8 @@ footer {
   -webkit-transform: translateX(-50%) translateY(-50%);
           transform: translateX(-50%) translateY(-50%); }
   .interactive .icon--rotate {
-    -webkit-animation: 6s 1s icon-rotate;
-            animation: 6s 1s icon-rotate; }
+    -webkit-animation: 4s 1s icon-rotate;
+            animation: 4s 1s icon-rotate; }
     .interactive .icon--rotate .icon--rotate__ellipse {
       fill: none;
       stroke: #E10000;

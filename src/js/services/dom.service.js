@@ -116,6 +116,13 @@ export default class DomService {
 		return DomService.scrollAndRect$;
 	}
 
+	rafAndScroll$() {
+		return this.raf$().pipe(
+			map(x => this.scrollTop),
+			distinctUntilChanged()
+		);
+	}
+
 	smoothScroll$(selector, friction = 20) {
 		const body = document.querySelector('body');
 		const node = document.querySelector(selector);

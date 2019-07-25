@@ -53,12 +53,23 @@ export default class CanvasDirective {
 		});
 		canvas.animate();
 		const anchors = [...document.querySelectorAll('[data-anchor]')];
-		const subscription = this.domService.scrollIntersection$(node).subscribe(event => {
+		const rafSubscription = this.domService.rafAndScroll$(node).subscribe(event => {
+			const rect = Rect.fromNode(node);
+			const top = rect.top - (window.innerHeight - rect.height) / 2;
+			const innerStyle = top <= 0 ? `transform: translateX(-50%) translateY(${top - inner.offsetHeight / 2}px)` : `transform: translateX(-50%) translateY(-50%)`;
+			if (element.innerStyle !== innerStyle) {
+				element.innerStyle = innerStyle;
+				inner.style = innerStyle;
+			}
+		});
+		const scrollSubscription = this.domService.scrollIntersection$(node).subscribe(event => {
+			/*
 			if (event.rect.top - (event.windowRect.height - event.rect.height) / 2 <= 0) {
 				node.classList.remove('fixed');
 			} else {
 				node.classList.add('fixed');
 			}
+			*/
 			const anchor = anchors.reduce((p, x, i) => {
 				const rect = Rect.fromNode(x);
 				if (rect.top < event.windowRect.height / 4 && rect.bottom > event.windowRect.height / 4) {
@@ -94,7 +105,8 @@ export default class CanvasDirective {
 			canvas.color = color;
 		});
 		element.on('$destroy', () => {
-			subscription.unsubscribe();
+			rafSubscription.unsubscribe();
+			scrollSubscription.unsubscribe();
 			canvas.destroy();
 		});
 	}
