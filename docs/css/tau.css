@@ -4074,6 +4074,10 @@ footer {
       stroke-dashoffset: -5%;
       -webkit-animation: 8s linear 0s infinite normal none running dash;
               animation: 8s linear 0s infinite normal none running dash; }
+  @media (max-width: 1023.98px) {
+    .icon--rotate {
+      -webkit-transform: translateX(-50%) translateY(-50%) scale(0.5);
+              transform: translateX(-50%) translateY(-50%) scale(0.5); } }
 
 .section--product-consigli {
   padding: 100px 0; }
@@ -4440,7 +4444,7 @@ footer {
       background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(0, 0, 0, 0)), color-stop(100%, black));
       background: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0)), to(black));
       background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, black 100%);
-      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#000000', endColorstr='#000000', GradientType=0 ); }
+      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#000000', endColorstr='#000000', GradientType=0); }
     .section--product-inclinazioni .box .caption {
       position: absolute;
       z-index: 2;

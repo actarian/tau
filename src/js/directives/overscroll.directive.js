@@ -30,7 +30,7 @@ export default class OverscrollDirective {
 			const s = d / anchors.length;
 			const top = this.domService.scrollTop + rect.top + s * index + (s / 2);
 			// console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
-			window.scrollTo(0, top);
+			this.domService.scrollTo(0, top);
 		};
 		anchors.forEach(x => {
 			x.addEventListener('click', onClick);

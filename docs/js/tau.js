@@ -18606,9 +18606,9 @@ class OverscrollResponsiveDirective {
       const h = container.offsetHeight;
       const d = h / 100 * overscroll;
       const s = d / anchors.length;
-      const top = window.pageYOffset + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
+      const top = this.domService.scrollTop + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
 
-      window.scrollTo(0, top);
+      this.domService.scrollTo(0, top);
     };
 
     anchors.forEach(x => {
@@ -18632,9 +18632,9 @@ class OverscrollResponsiveDirective {
       */
 
 
-      const top = window.pageYOffset + rect.top; // const top = window.pageYOffset + rect.top + window.innerHeight / 2 + s * index + (s / 2);
+      const top = this.domService.scrollTop + rect.top; // const top = this.domService.scrollTop + rect.top + window.innerHeight / 2 + s * index + (s / 2);
 
-      window.scrollTo(0, top);
+      this.domService.scrollTo(0, top);
     };
 
     bullets.forEach(x => {
@@ -18811,7 +18811,7 @@ class OverscrollDirective {
       const s = d / anchors.length;
       const top = this.domService.scrollTop + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
 
-      window.scrollTo(0, top);
+      this.domService.scrollTo(0, top);
     };
 
     anchors.forEach(x => {
@@ -19296,6 +19296,10 @@ class DomService {
 
   get scrollLeft() {
     return DomService.getScrollLeft(DEFAULT_SCROLL_TARGET);
+  }
+
+  scrollTo(left, top) {
+    DEFAULT_SCROLL_TARGET.scrollTo(0, top);
   }
 
   hasWebglSupport() {

@@ -21,6 +21,10 @@ export default class DomService {
 		return DomService.getScrollLeft(DEFAULT_SCROLL_TARGET);
 	}
 
+	scrollTo(left, top) {
+		DEFAULT_SCROLL_TARGET.scrollTo(0, top);
+	}
+
 	hasWebglSupport() {
 		if (this.isIE()) {
 			return false;
