@@ -18809,7 +18809,7 @@ class OverscrollDirective {
       const h = container.offsetHeight;
       const d = h / 100 * overscroll;
       const s = d / anchors.length;
-      const top = window.pageYOffset + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
+      const top = this.domService.scrollTop + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
 
       window.scrollTo(0, top);
     };
@@ -19285,15 +19285,17 @@ var _rect = _interopRequireDefault(require("../shared/rect"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /* jshint esversion: 6 */
+const DEFAULT_SCROLL_TARGET = document.body; // window
+
 class DomService {
   constructor() {}
 
   get scrollTop() {
-    return DomService.getScrollTop(window);
+    return DomService.getScrollTop(DEFAULT_SCROLL_TARGET);
   }
 
   get scrollLeft() {
-    return DomService.getScrollLeft(window);
+    return DomService.getScrollLeft(DEFAULT_SCROLL_TARGET);
   }
 
   hasWebglSupport() {
@@ -19582,7 +19584,7 @@ DomService.windowRect$ = function () {
 DomService.rafAndRect$ = (0, _rxjs.combineLatest)(DomService.raf$, DomService.windowRect$);
 
 DomService.scroll$ = function () {
-  const target = window;
+  const target = DEFAULT_SCROLL_TARGET;
   let previousTop = DomService.getScrollTop(target);
   const event = {
     /*

@@ -12,6 +12,10 @@ body {
   padding: 0;
   margin: 0; }
 
+html {
+  height: 100%;
+  overflow: hidden; }
+
 body {
   overflow-x: hidden;
   overflow-y: auto;
@@ -20,6 +24,11 @@ body {
   body.opened {
     height: 100vh !important;
     overflow: hidden; }
+
+body {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto; }
 
 ng-transclude {
   display: block;

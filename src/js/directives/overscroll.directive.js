@@ -28,7 +28,7 @@ export default class OverscrollDirective {
 			const h = container.offsetHeight;
 			const d = h / 100 * overscroll;
 			const s = d / anchors.length;
-			const top = window.pageYOffset + rect.top + s * index + (s / 2);
+			const top = this.domService.scrollTop + rect.top + s * index + (s / 2);
 			// console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
 			window.scrollTo(0, top);
 		};

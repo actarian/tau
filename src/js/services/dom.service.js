@@ -5,6 +5,8 @@ import { animationFrame } from 'rxjs/internal/scheduler/animationFrame';
 import { auditTime, distinctUntilChanged, filter, first, map, shareReplay, startWith } from 'rxjs/operators';
 import Rect from '../shared/rect';
 
+const DEFAULT_SCROLL_TARGET = document.body; // window
+
 export default class DomService {
 
 	constructor() {
@@ -12,11 +14,11 @@ export default class DomService {
 	}
 
 	get scrollTop() {
-		return DomService.getScrollTop(window);
+		return DomService.getScrollTop(DEFAULT_SCROLL_TARGET);
 	}
 
 	get scrollLeft() {
-		return DomService.getScrollLeft(window);
+		return DomService.getScrollLeft(DEFAULT_SCROLL_TARGET);
 	}
 
 	hasWebglSupport() {
@@ -300,7 +302,7 @@ DomService.windowRect$ = function() {
 }();
 DomService.rafAndRect$ = combineLatest(DomService.raf$, DomService.windowRect$);
 DomService.scroll$ = function() {
-	const target = window;
+	const target = DEFAULT_SCROLL_TARGET;
 	let previousTop = DomService.getScrollTop(target);
 	const event = {
 		/*
