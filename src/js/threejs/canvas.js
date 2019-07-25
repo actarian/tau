@@ -8,8 +8,13 @@ import Orbit from './orbit/orbit';
 import { VR } from './vr/vr';
 
 const CAMERA_DISTANCE = 2;
-const COMPOSER_ENABLED = true; // !!!
-const USE_CUBE_CAMERA = true;
+const USE_CUBE_CAMERA = false;
+const ANTIALIAS_ENABLED = false;
+const COMPOSER_ENABLED = true;
+const TAA_ENABLED = true;
+const MIN_DEVICE_PIXEL_RATIO = 1;
+
+let baseZoom = 1;
 
 export default class Canvas extends Emittable {
 
@@ -57,7 +62,7 @@ export default class Canvas extends Emittable {
 		} else {
 			r = s / 640;
 		}
-		return (this.zoom_ + r);
+		return (this.zoom_ + r * baseZoom);
 	}
 
 	constructor(container, product) {
@@ -99,7 +104,7 @@ export default class Canvas extends Emittable {
 		// const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
 		// this.addText('Scalare 33', scene);
 		// const materials = this.materials = this.addMaterials(texture);
-		const materials = this.materials = new Materials(product, VR_ENABLED && vr.mode !== VR_MODE.NONE, texture);
+		const materials = this.materials = new Materials(product, !USE_CUBE_CAMERA || VR_ENABLED && vr.mode !== VR_MODE.NONE, texture);
 		const toothbrush = this.toothbrush = this.addToothbrush(scene, texture);
 		const lights = this.lights = this.addLights(scene);
 		// this.tweenTau();
@@ -124,7 +129,7 @@ export default class Canvas extends Emittable {
 
 	addRenderer() {
 		const renderer = new THREE.WebGLRenderer({
-			antialias: true,
+			antialias: ANTIALIAS_ENABLED,
 			// localClippingEnabled: true,
 			// logarithmicDepthBuffer: true,
 			// premultipliedAlpha: true,
@@ -134,7 +139,7 @@ export default class Canvas extends Emittable {
 		this.renderer = renderer;
 		renderer.setClearColor(0xffffff, 0);
 		// renderer.setPixelRatio(window.devicePixelRatio);
-		const pixelRatio = this.pixelRatio = 1; // Math.max(window.devicePixelRatio, 1.4);
+		const pixelRatio = this.pixelRatio = Math.max(window.devicePixelRatio, MIN_DEVICE_PIXEL_RATIO);
 		renderer.setPixelRatio(pixelRatio);
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		// renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
@@ -195,7 +200,8 @@ export default class Canvas extends Emittable {
 	}
 
 	addCamera() {
-		const camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, 2000);
+		baseZoom = 1;
+		const camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 0.01, 2000);
 		camera.position.set(0, 0, CAMERA_DISTANCE);
 		camera.target = new THREE.Vector3();
 		camera.zoom = this.zoom;
@@ -235,12 +241,15 @@ export default class Canvas extends Emittable {
 			const scene = this.scene;
 			const camera = this.camera;
 			const composer = new THREE.EffectComposer(renderer);
-			// const renderPass = new THREE.RenderPass(scene, camera);
-			// composer.addPass(renderPass);
-			const taaRenderPass = new THREE.TAARenderPass(scene, camera);
-			taaRenderPass.sampleLevel = 2;
-			taaRenderPass.unbiased = true;
-			composer.addPass(taaRenderPass);
+			if (TAA_ENABLED) {
+				const taaRenderPass = new THREE.TAARenderPass(scene, camera);
+				taaRenderPass.sampleLevel = 2;
+				taaRenderPass.unbiased = true;
+				composer.addPass(taaRenderPass);
+			} else {
+				const renderPass = new THREE.RenderPass(scene, camera);
+				composer.addPass(renderPass);
+			}
 			const shaderPass = new THREE.ShaderPass(THREE.ShadowShader);
 			composer.addPass(shaderPass);
 			return composer;
@@ -250,7 +259,8 @@ export default class Canvas extends Emittable {
 	addLights(parent) {
 		const lights = new THREE.Group();
 
-		const light0 = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.8);
+		// const light0 = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.8);
+		const light0 = new THREE.HemisphereLight(0xffffff, 0x666666, 0.6);
 		light0.position.set(0, 2, 0);
 		lights.add(light0);
 		/*
@@ -448,9 +458,9 @@ export default class Canvas extends Emittable {
 				this.container.classList.remove('interactive');
 				break;
 			case 'testina':
-				position = [0, 0, 0];
-				rotation = [0, deg(90), deg(-5)]; // 							testina vista dietro
-				this.zoom_ = sm ? 0.6 : 0.2;
+				position = [0, cm(-8), 0];
+				rotation = [0, deg(-90), deg(-90)]; // 										vertical left;
+				this.zoom_ = 0.2;
 				this.container.classList.remove('interactive');
 				break;
 			case 'setole':
@@ -472,9 +482,9 @@ export default class Canvas extends Emittable {
 				this.container.classList.remove('interactive');
 				break;
 			case 'setole-tynex':
-				position = [0, cm(-7), 0];
-				rotation = [0, deg(-180), deg(-90)]; // 										vertical left;
-				this.zoom_ = 0.2;
+				position = [0, 0, 0];
+				rotation = [0, deg(90), deg(10)]; // 							testina vista dietro
+				this.zoom_ = sm ? 0.6 : 0.2;
 				this.container.classList.remove('interactive');
 				break;
 			case 'colors':

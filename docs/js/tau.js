@@ -20186,9 +20186,12 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 /* jshint esversion: 6 */
 const CAMERA_DISTANCE = 2;
-const COMPOSER_ENABLED = true; // !!!
-
-const USE_CUBE_CAMERA = true;
+const USE_CUBE_CAMERA = false;
+const ANTIALIAS_ENABLED = false;
+const COMPOSER_ENABLED = true;
+const TAA_ENABLED = true;
+const MIN_DEVICE_PIXEL_RATIO = 1;
+let baseZoom = 1;
 
 class Canvas extends _emittable.default {
   get anchor() {
@@ -20238,7 +20241,7 @@ class Canvas extends _emittable.default {
       r = s / 640;
     }
 
-    return this.zoom_ + r;
+    return this.zoom_ + r * baseZoom;
   }
 
   constructor(container, product) {
@@ -20285,7 +20288,7 @@ class Canvas extends _emittable.default {
     // const materials = this.materials = this.addMaterials(texture);
 
 
-    const materials = this.materials = new _materials.default(product, _const.VR_ENABLED && vr.mode !== VR_MODE.NONE, texture);
+    const materials = this.materials = new _materials.default(product, !USE_CUBE_CAMERA || _const.VR_ENABLED && vr.mode !== VR_MODE.NONE, texture);
     const toothbrush = this.toothbrush = this.addToothbrush(scene, texture);
     const lights = this.lights = this.addLights(scene); // this.tweenTau();
     // });
@@ -20305,7 +20308,7 @@ class Canvas extends _emittable.default {
 
   addRenderer() {
     const renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: ANTIALIAS_ENABLED,
       // localClippingEnabled: true,
       // logarithmicDepthBuffer: true,
       // premultipliedAlpha: true,
@@ -20315,8 +20318,7 @@ class Canvas extends _emittable.default {
     this.renderer = renderer;
     renderer.setClearColor(0xffffff, 0); // renderer.setPixelRatio(window.devicePixelRatio);
 
-    const pixelRatio = this.pixelRatio = 1; // Math.max(window.devicePixelRatio, 1.4);
-
+    const pixelRatio = this.pixelRatio = Math.max(window.devicePixelRatio, MIN_DEVICE_PIXEL_RATIO);
     renderer.setPixelRatio(pixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight); // renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
     // container.innerHTML = '';
@@ -20374,7 +20376,8 @@ class Canvas extends _emittable.default {
   }
 
   addCamera() {
-    const camera = new THREE.PerspectiveCamera(8, window.innerWidth / window.innerHeight, 0.01, 2000);
+    baseZoom = 1;
+    const camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 0.01, 2000);
     camera.position.set(0, 0, CAMERA_DISTANCE);
     camera.target = new THREE.Vector3();
     camera.zoom = this.zoom;
@@ -20413,13 +20416,18 @@ class Canvas extends _emittable.default {
       const renderer = this.renderer;
       const scene = this.scene;
       const camera = this.camera;
-      const composer = new THREE.EffectComposer(renderer); // const renderPass = new THREE.RenderPass(scene, camera);
-      // composer.addPass(renderPass);
+      const composer = new THREE.EffectComposer(renderer);
 
-      const taaRenderPass = new THREE.TAARenderPass(scene, camera);
-      taaRenderPass.sampleLevel = 2;
-      taaRenderPass.unbiased = true;
-      composer.addPass(taaRenderPass);
+      if (TAA_ENABLED) {
+        const taaRenderPass = new THREE.TAARenderPass(scene, camera);
+        taaRenderPass.sampleLevel = 2;
+        taaRenderPass.unbiased = true;
+        composer.addPass(taaRenderPass);
+      } else {
+        const renderPass = new THREE.RenderPass(scene, camera);
+        composer.addPass(renderPass);
+      }
+
       const shaderPass = new THREE.ShaderPass(THREE.ShadowShader);
       composer.addPass(shaderPass);
       return composer;
@@ -20427,8 +20435,9 @@ class Canvas extends _emittable.default {
   }
 
   addLights(parent) {
-    const lights = new THREE.Group();
-    const light0 = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.8);
+    const lights = new THREE.Group(); // const light0 = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.8);
+
+    const light0 = new THREE.HemisphereLight(0xffffff, 0x666666, 0.6);
     light0.position.set(0, 2, 0);
     lights.add(light0);
     /*
@@ -20640,10 +20649,10 @@ class Canvas extends _emittable.default {
         break;
 
       case 'testina':
-        position = [0, 0, 0];
-        rotation = [0, (0, _const.deg)(90), (0, _const.deg)(-5)]; // 							testina vista dietro
+        position = [0, (0, _const.cm)(-8), 0];
+        rotation = [0, (0, _const.deg)(-90), (0, _const.deg)(-90)]; // 										vertical left;
 
-        this.zoom_ = sm ? 0.6 : 0.2;
+        this.zoom_ = 0.2;
         this.container.classList.remove('interactive');
         break;
 
@@ -20672,10 +20681,10 @@ class Canvas extends _emittable.default {
         break;
 
       case 'setole-tynex':
-        position = [0, (0, _const.cm)(-7), 0];
-        rotation = [0, (0, _const.deg)(-180), (0, _const.deg)(-90)]; // 										vertical left;
+        position = [0, 0, 0];
+        rotation = [0, (0, _const.deg)(90), (0, _const.deg)(10)]; // 							testina vista dietro
 
-        this.zoom_ = 0.2;
+        this.zoom_ = sm ? 0.6 : 0.2;
         this.container.classList.remove('interactive');
         break;
 
@@ -21777,9 +21786,16 @@ class Materials {
     const textures = {
       equirectangular: loader.load('threejs/environment/equirectangular-sm.jpg'),
       matcap00: loader.load('threejs/matcap/matcap-00.jpg'),
-      matcap02: loader.load('threejs/matcap/matcap-02.jpg'),
+      // matcap02: loader.load('threejs/matcap/matcap-02.jpg'),
       matcap06: loader.load('threejs/matcap/matcap-06.jpg'),
-      matcap11: loader.load('threejs/matcap/matcap-11.jpg'),
+      // matcap11: loader.load('threejs/matcap/matcap-11.jpg'),
+      // matcap13: loader.load('threejs/matcap/matcap-13.jpg'),
+      matcap14: loader.load('threejs/matcap/matcap-14.jpg'),
+      matcap15: loader.load('threejs/matcap/matcap-15.jpg'),
+      // matcap16: loader.load('threejs/matcap/matcap-16.jpg'),
+      // matcap17: loader.load('threejs/matcap/matcap-17.jpg'),
+      bristlesLight: loader.load('threejs/models/toothbrush/bristles-light.jpg'),
+      bristlesWhite: loader.load('threejs/models/toothbrush/bristles-white.jpg'),
       toothbrushLogo: loader.load('threejs/models/toothbrush/toothbrush-logo.png')
     };
     return textures;
@@ -21810,19 +21826,20 @@ class Materials {
 
     switch (this.product.modelType) {
       case _const.MODEL_TYPE.PROFESSIONAL_BLACK:
-        color = 0x343333;
+        color = 0x84807f; // 0x343231;
+
         break;
 
       default:
-        color = 0xfffffff;
+        color = 0xf8f8f8;
     }
 
     if (this.vrenabled) {
       material = new THREE.MeshMatcapMaterial({
         color: color,
-        matcap: this.textures.matcap11,
+        matcap: this.textures.matcap15,
         transparent: true,
-        opacity: this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK ? 0.6 : 0.4,
+        opacity: this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK ? 0.8 : 0.4,
         alphaTest: 0.2,
         side: THREE.DoubleSide
       });
@@ -21861,10 +21878,16 @@ class Materials {
     let material;
 
     if (this.vrenabled) {
-      material = new THREE.MeshMatcapMaterial({
+      material = new THREE.MeshPhongMaterial({
         color: this.product.colors[0].colors[0],
-        matcap: this.textures.matcap11
+        shininess: 100
       });
+      /*
+      material = new THREE.MeshMatcapMaterial({
+      	color: this.product.colors[0].colors[0],
+      	matcap: this.textures.matcap13,
+      });
+      */
     } else {
       material = new THREE.MeshStandardMaterial({
         color: this.product.colors[0].colors[0],
@@ -21889,7 +21912,7 @@ class Materials {
     if (this.vrenabled) {
       material = new THREE.MeshMatcapMaterial({
         color: this.product.bristles[0].colors[0],
-        matcap: this.textures.matcap02
+        matcap: this.textures.matcap14
       });
     } else {
       material = new THREE.MeshStandardMaterial({
@@ -21904,6 +21927,12 @@ class Materials {
       });
     }
 
+    if (this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_WHITE) {
+      material.map = this.textures.bristlesWhite;
+    } else {
+      material.map = this.textures.bristlesLight;
+    }
+
     return material;
   }
 
@@ -21913,12 +21942,14 @@ class Materials {
     if (this.vrenabled) {
       material = new THREE.MeshMatcapMaterial({
         color: this.product.bristles[0].colors[1],
-        matcap: this.textures.matcap02
+        map: this.textures.bristlesLight,
+        matcap: this.textures.matcap14
       });
     } else {
       material = new THREE.MeshStandardMaterial({
         color: this.product.bristles[0].colors[1],
         // 0x1aac4e,
+        map: this.textures.bristlesLight,
         // emissive: 0x333333,
         // map: lightMap,
         // normalMap: lightMap,
