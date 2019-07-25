@@ -1,6 +1,8 @@
 .bullet {
 	display: block;
 	position: relative;
+	border-radius: 50%;
+	cursor: pointer;
 
 	&:before {
 		content: '';
@@ -98,6 +100,11 @@
 		min-height: calc(90vh - 44px);
 	}
 
+	.bullet {
+		border-radius: 50%;
+		transition: border ease-in-out 350ms;
+	}
+
 	.listing--info {
 		display: flex;
 
@@ -106,11 +113,6 @@
 			flex-direction: column;
 			align-items: flex-start;
 			cursor: pointer;
-
-			.bullet {
-				border-radius: 50%;
-				transition: border ease-in-out 350ms;
-			}
 
 			.title {
 				position: relative;
@@ -235,6 +237,93 @@
 		}
 	}
 
+}
+
+[overscroll-responsive] {
+	@include media-breakpoint-down(sm) {
+
+		.title {
+			font-size: 20px;
+			margin-bottom: 8vh;
+		}
+
+		.listing--info {
+			.listing__item {
+				min-height: 100vh;
+				justify-content: center;
+
+				.bullet {
+					display: none;
+				}
+
+				.title {
+					font-size: 36px;
+					margin-bottom: 15px;
+				}
+
+				.abstract {
+					font-size: 16px;
+					margin-bottom: 20px;
+				}
+			}
+		}
+
+		.nav--bullets {
+			position: fixed;
+			top: 50%;
+			right: 40px;
+			display: flex;
+			flex-direction: column;
+			transform: translateY(-50%);
+
+			visibility: hidden;
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity ease-in-out 350ms;
+
+			.bullet {
+				width: 4px;
+				height: 4px;
+				background: #121212;
+
+				&:before {
+					width: 12px;
+					height: 12px;
+					border-width: 1px;
+				}
+
+				&:hover {
+					&:before {
+						border-color: $foreground-primary;
+					}
+				}
+
+				&.active {
+					&:before {
+						transition: none;
+						animation: pulse 1s infinite;
+					}
+				}
+
+			}
+
+			&>.bullet+.bullet {
+				margin-top: 24px;
+			}
+		}
+
+		&.nav--bullets-active {
+			.nav--bullets {
+				visibility: visible;
+				opacity: 1;
+				pointer-events: all;
+			}
+		}
+	}
+}
+
+
+[overscroll] {
 	@include media-breakpoint-down(sm) {
 
 		.title {
@@ -308,7 +397,6 @@
 				}
 
 				&.active {
-
 					.group--info {
 						visibility: visible;
 						opacity: 1;
@@ -699,7 +787,7 @@
 	transform: translateX(-50%) translateY(-50%);
 
 	.interactive & {
-		animation: 6s 1s icon-rotate;
+		animation: 4s 1s icon-rotate;
 
 		.icon--rotate__ellipse {
 			fill: none;

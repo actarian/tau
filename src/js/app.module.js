@@ -1,9 +1,9 @@
 ﻿/* jshint esversion: 6 */
 
 import CanvasDirective from './directives/canvas.directive';
-import { VR_MODE } from './threejs/vr/vr';
 import LazyScriptDirective from './directives/lazy-script.directive';
 import LazyDirective from './directives/lazy.directive';
+import OverscrollResponsiveDirective from './directives/overscroll-responsive.directive';
 import OverscrollDirective from './directives/overscroll.directive';
 import { TrustedFilter } from './filters/trusted.filter';
 import ProductCtrl from './product/product.controller';
@@ -14,6 +14,7 @@ import LocationService from './shared/location.service';
 import PromiseService from './shared/promise.service';
 import StateService from './shared/state.service';
 import { CookieService, LocalStorageService, SessionStorageService } from './shared/storage.service';
+import { VR_MODE } from './threejs/vr/vr';
 
 const MODULE_NAME = 'tau';
 
@@ -34,6 +35,7 @@ app.factory('ApiService', ApiService.factory)
 
 app.directive('canvas', CanvasDirective.factory)
 	.directive('overscroll', OverscrollDirective.factory)
+	.directive('overscrollResponsive', OverscrollResponsiveDirective.factory)
 	.directive('lazy', LazyDirective.factory)
 	.directive('lazyScript', LazyScriptDirective.factory);
 

@@ -1,8 +1,6 @@
-/*
 html {
 	scroll-behavior: smooth;
 }
-*/
 
 html,
 body {
@@ -78,7 +76,7 @@ ng-transclude {
 		}
 
 		&.slick-active {
-			
+
 			button {
 
 				&:after {
@@ -96,15 +94,22 @@ ng-transclude {
 }
 
 //Placeholder style
-::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+::-webkit-input-placeholder {
+	/* Chrome/Opera/Safari */
 	font-family: $font-primary;
 }
-::-moz-placeholder { /* Firefox 19+ */
+
+::-moz-placeholder {
+	/* Firefox 19+ */
 	font-family: $font-primary;
 }
-:-ms-input-placeholder { /* IE 10+ */
+
+:-ms-input-placeholder {
+	/* IE 10+ */
 	font-family: $font-primary;
 }
-:-moz-placeholder { /* Firefox 18- */
+
+:-moz-placeholder {
+	/* Firefox 18- */
 	font-family: $font-primary;
 }

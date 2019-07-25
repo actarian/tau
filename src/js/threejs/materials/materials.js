@@ -31,7 +31,7 @@ export default class Materials {
 	addTextures() {
 		const loader = new THREE.TextureLoader();
 		const textures = {
-			equirectangular: loader.load('threejs/environment/equirectangular-sm.jpg'),
+			// equirectangular: loader.load('threejs/environment/equirectangular-sm.jpg'),
 			matcap00: loader.load('threejs/matcap/matcap-00.jpg'),
 			// matcap02: loader.load('threejs/matcap/matcap-02.jpg'),
 			matcap06: loader.load('threejs/matcap/matcap-06.jpg'),
@@ -67,17 +67,9 @@ export default class Materials {
 
 	getBodyPrimaryClear(texture) {
 		let material;
-		let color;
-		switch (this.product.modelType) {
-			case MODEL_TYPE.PROFESSIONAL_BLACK:
-				color = 0x84807f; // 0x343231;
-				break;
-			default:
-				color = 0xf8f8f8;
-		}
 		if (this.vrenabled) {
 			material = new THREE.MeshMatcapMaterial({
-				color: color,
+				color: this.product.modelType === MODEL_TYPE.PROFESSIONAL_BLACK ? 0x84807f : 0xf8f8f8,
 				matcap: this.textures.matcap15,
 				transparent: true,
 				opacity: this.product.modelType === MODEL_TYPE.PROFESSIONAL_BLACK ? 0.8 : 0.4,
@@ -96,7 +88,7 @@ export default class Materials {
 			});
 			*/
 			material = new THREE.MeshPhongMaterial({
-				color: color,
+				color: this.product.modelType === MODEL_TYPE.PROFESSIONAL_BLACK ? 0x84807f : 0xf8f8f8,
 				envMap: texture,
 				transparent: true,
 				refractionRatio: 0.6,
