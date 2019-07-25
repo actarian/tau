@@ -88,6 +88,15 @@
 </head>
 
 <body>
+	<section class="section--search">
+		<div class="container">
+			<div class="close-search"><i class="fa fa-times"></i></div>
+			<div class="search-group">
+				<input type="text" placeholder="Cerca nel sito">
+				<a class="btn btn--primary"><span>Cerca</span></a>
+			</div>
+		</div>
+	</section>
 	<ng-include src="'templates/shared/svg.html'"></ng-include>
 	<ng-include src="'templates/shared/header.html'"></ng-include>
 	<main class="page">
@@ -108,58 +117,131 @@
 	<script type="text/javascript" src="js/main.js"></script>
 
 	<script>
-		$(document).ready(function() {
-			//Slide Prodotti Home
-			$('.section--home-slide-prodotti .slide').slick({
-				arrows: false,
-				dots: true,
-				slidesToShow: 1,
-				slidesToScroll: 1,
-				centerMode: true,
-				focusOnSelect: true,
-				responsive: [
-					{
-						breakpoint: 1441,
-						settings: {
-							slidesToShow: 2,
-							slidesToScroll: 1
+			$(document).ready(function() {
+				//Search Full
+				$('.main-search').on('click', function(e){
+					$('.section--search').toggleClass('show');
+					e.preventDefault();
+				});
+				//Close Search
+				$('.close-search').on('click', function(e){
+					$('.section--search').removeClass('show');
+					e.preventDefault();
+				});
+				//Slide Prodotti Home
+				$('.section--home-slide-prodotti .slide').slick({
+					arrows: false,
+					dots: true,
+					slidesToShow: 1,
+					slidesToScroll: 1,
+					centerMode: true,
+					focusOnSelect: true,
+					responsive: [
+								{
+									breakpoint: 1441,
+									settings: {
+										slidesToShow: 2,
+										slidesToScroll: 1
+									}
+						},
+								{
+									breakpoint: 1025,
+									settings: {
+										slidesToShow: 2,
+										slidesToScroll: 2
+									}
+						},
+								{
+									breakpoint: 767,
+									settings: {
+										slidesToShow: 1,
+										slidesToScroll: 1
+									}
 						}
-			},
-					{
-						breakpoint: 1025,
-						settings: {
-							slidesToShow: 2,
-							slidesToScroll: 2
+					]
+				});
+				//Slide Prodotti Correlati
+				$('.section--product-related .slide').slick({
+					arrows: false,
+					dots: true,
+					slidesToShow: 1,
+					slidesToScroll: 1,
+					centerMode: true,
+					focusOnSelect: true,
+					responsive: [
+								{
+									breakpoint: 1441,
+									settings: {
+										slidesToShow: 2,
+										slidesToScroll: 1
+									}
+						},
+								{
+									breakpoint: 1025,
+									settings: {
+										slidesToShow: 2,
+										slidesToScroll: 2
+									}
+						},
+								{
+									breakpoint: 767,
+									settings: {
+										slidesToShow: 1,
+										slidesToScroll: 1
+									}
 						}
-			},
-					{
-						breakpoint: 767,
-						settings: {
-							slidesToShow: 1,
-							slidesToScroll: 1
+					]
+				});
+				//Slide Prodotti Abbinamento
+				$('.section--product-abbinamento .slide').slick({
+					arrows: false,
+					dots: true,
+					slidesToShow: 1,
+					slidesToScroll: 1,
+					centerMode: true,
+					focusOnSelect: true,
+					responsive: [
+								{
+									breakpoint: 1441,
+									settings: {
+										slidesToShow: 2,
+										slidesToScroll: 1
+									}
+						},
+								{
+									breakpoint: 1025,
+									settings: {
+										slidesToShow: 2,
+										slidesToScroll: 2
+									}
+						},
+								{
+									breakpoint: 767,
+									settings: {
+										slidesToShow: 1,
+										slidesToScroll: 1
+									}
 						}
-			}
-		]
+					]
+				});
+				//Slide Testimonial Home
+				$('.section--home-testimonial .slide').slick({
+					arrows: false,
+					dots: true,
+					slidesToShow: 1,
+					slidesToScroll: 1,
+					responsive: [
+						{
+							breakpoint: 767,
+							settings: {
+								slidesToShow: 1,
+								slidesToScroll: 1
+							}
+				}
+			]
+				});
 			});
-			//Slide Testimonial Home
-			$('.section--home-testimonial .slide').slick({
-				arrows: false,
-				dots: true,
-				slidesToShow: 1,
-				slidesToScroll: 1,
-				responsive: [
-					{
-						breakpoint: 767,
-						settings: {
-							slidesToShow: 1,
-							slidesToScroll: 1
-						}
-			}
-		]
-			});
-		});
-
-	</script>
+		</script>
 </body>
 
 </html>

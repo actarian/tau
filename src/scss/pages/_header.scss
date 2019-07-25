@@ -1,5 +1,17 @@
 header {
 
+	.section--header-topbar {
+		background: $foreground-primary;
+		text-align: center;
+		color: #fff;
+		font-size: 16px;
+		font-weight: $font-semibold;
+		line-height: 20px;
+		padding: 10px;
+		margin-bottom: 20px;
+		margin-top: -31px;
+	}
+
 	.row {
 		align-items: center;
 		justify-content: space-between;
@@ -101,4 +113,75 @@ header {
 	@include media-breakpoint-up(sm) {}
 
 	@include media-breakpoint-down(xs) {}
+}
+
+.section--search {
+	display: none;
+	height: 100vh;
+	background: #fff;
+	position: relative;
+	left: 0;
+	top: 0;
+	width: 100%;
+	z-index: 200;
+
+	&.show {
+		display: block;
+	}
+
+	.close-search {
+		position: absolute;
+		right: 20px;
+		top: 20px;
+
+		i {
+			font-size: 24px;
+			color: $foreground-secondary;
+			cursor: pointer;
+		}
+	}
+
+	.search-group {
+		height: 100vh;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		
+		@include media-breakpoint-down(sm) {
+			flex-direction: column;
+		}
+
+		input {
+			border: 0;
+			padding: 20px;
+			font-size: 16px;
+			width: 500px;
+			border-bottom: 1px dashed #ccc;
+			font-family: $font-primary;
+
+			@include media-breakpoint-down(sm) {
+				width: 100%;
+			}
+
+			&:hover, &:focus {
+				outline: none;
+			}
+		}
+
+		.btn {
+
+			@include media-breakpoint-down(sm) {
+				margin-top: 20px;
+				width: 100%;
+			}
+
+			span {
+
+				@include media-breakpoint-down(sm) {
+					width: 100%;
+					text-align: center;
+				}
+			}
+		}
+	}
 }

@@ -1,0 +1,73 @@
+.section--store-locator-dove-acquistare {
+    min-height: 80vh;
+	padding: 100px 0;
+	text-align: center;
+
+	.title {
+		color: $foreground-primary;
+		font-weight: $font-semibold;
+		font-size: 14px;
+		line-height: 20px;
+		text-transform: uppercase;
+	}
+
+	.abstract {
+		font-size: 36px;
+		line-height: 54px;
+		font-weight: $font-semibold;
+		color: $foreground-secondary;
+		margin: 30px 0;
+
+		@include media-breakpoint-down(xs) {
+			font-size: 28px;
+			line-height: 36px;
+		}
+	}
+
+	.form {
+
+		input {
+			padding: 20px;
+			background: #fff;
+			border: 1px solid #ddd;
+			border-radius: 500px;
+			width: 400px;
+
+			&:hover, &:focus {
+				outline: none;
+			}
+
+			@include media-breakpoint-down(xs) {
+				width: 100%;
+			}
+		}
+
+		button {
+			background: transparent;
+
+			@include media-breakpoint-down(xs) {
+				width: 100%;
+				margin-top: 10px;
+			}
+
+			span {
+
+				@include media-breakpoint-down(xs) {
+					width: 100%;
+				}
+			}
+		}
+    }
+    
+    .check-position {
+        margin-top: 50px;
+    }
+}
+
+.section--store-locator-results {
+
+    .intro {
+        padding: 20px 0;
+        text-align: center;
+    }
+}

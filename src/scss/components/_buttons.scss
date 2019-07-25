@@ -34,6 +34,16 @@ button,
 .btn--primary {
 	display: inline-block;
 
+	&:hover, &:focus {
+
+		span {
+			color: #fff;
+			border-color: $foreground-primary;
+			background: $foreground-primary;
+			transition: all ease-in-out .2s;
+		}
+	}
+
 	span {
 		display: inline-block;
 		padding: 15px 50px;
@@ -43,17 +53,8 @@ button,
 		color: $foreground-primary;
 		border: 2px solid $foreground-primary;
 		border-radius: 500px;
-	}
-
-	&,
-	&:active,
-	&:focus,
-	&:hover,
-	&:visited {
-		span {
-			color: $foreground-primary;
-			border-color: $foreground-primary;
-		}
+		transition: all ease-in-out .2s;
+		font-family: $font-primary;
 	}
 
 	.section--negative & {
@@ -91,6 +92,7 @@ button,
 		color: #fff;
 		background: $foreground-primary;
 		border-radius: 50px;
+		font-family: $font-primary;
 	}
 
 	&,
