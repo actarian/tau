@@ -92,13 +92,14 @@
 	<ng-include src="'templates/shared/header.html'"></ng-include>
 	<main class="page">
 		<div class="view" ng-cloak>
-			<ng-include src="'templates/pages/product.html'"></ng-include>
+			<ng-include src="'templates/pages/home.html'"></ng-include>
 		</div>
 	</main>
 	<ng-include src="'templates/shared/footer.html'"></ng-include>
-	<!-- Polyfill for legacy browsers
-	<script src="//unpkg.com/core-js-bundle@3.1.4/minified.js"></script>
-	-->
+	<!--[if IE ]>
+	<script src="js/polyfills.js"></script>
+	<![endif]-->
+
 	<script src="js/vendors.js"></script>
 	<script src="js/tau.js"></script>
 	<script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.min.js"></script>

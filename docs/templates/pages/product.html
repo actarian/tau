@@ -1,6 +1,7 @@
 <script type="text/javascript" lazy-script>
-	window.product = {
-		model: 'models/professional-27.fbx',
+	var professional27 = {
+		modelType: 1,
+		model: 'threejs/models/toothbrush/professional-27.fbx',
 		bristles: [{
 			name: 'Dure',
 			key: 'hard',
@@ -36,6 +37,77 @@
 			colors: ['#3d6d4f']
 		}]
 	}
+
+	var professionalBlack = {
+		modelType: 2,
+		model: 'threejs/models/toothbrush/professional-27.fbx',
+		bristles: [{
+			name: 'Dure',
+			key: 'hard',
+			colors: ['#343333', '#343333']
+		}],
+		colors: [{
+			name: 'Nero',
+			key: 'black',
+			colors: ['#343333']
+		}]
+	}
+
+	var professionalWhite = {
+		modelType: 3,
+		model: 'threejs/models/toothbrush/professional-27.fbx',
+		bristles: [{
+			name: 'Dure',
+			key: 'hard',
+			colors: ['#eeeeff', '#ffffff']
+		}],
+		colors: [{
+			name: 'Bianco',
+			key: 'white',
+			colors: ['#ffffff']
+		}]
+	}
+
+	var scalare33 = {
+		modelType: 4,
+		model: 'threejs/models/toothbrush/scalare-33.fbx',
+		bristles: [{
+			name: 'Dure',
+			key: 'hard',
+			colors: ['#024c99', '#e13334']
+		}, {
+			name: 'Medie',
+			key: 'medium',
+			colors: ['#024c99', '#42a644']
+		}, {
+			name: 'Morbide',
+			key: 'soft',
+			colors: ['#024c99', '#60b9f3']
+		}, {
+			name: 'Molto Morbide',
+			key: 'softer',
+			colors: ['#024c99', '#15b29a']
+		}],
+		colors: [{
+			name: 'Rosso',
+			key: 'red',
+			colors: ['#e13334']
+		}, {
+			name: 'Bianco',
+			key: 'white',
+			colors: ['#ebe8e1']
+		}, {
+			name: 'Blu',
+			key: 'blue',
+			colors: ['#0e38b1']
+		}, {
+			name: 'Verde',
+			key: 'green',
+			colors: ['#3d6d4f']
+		}]
+	}
+
+	window.product = professional27;
 
 </script>
 
@@ -112,19 +184,19 @@
 				<div class="row">
 					<div class="col-lg-8 offset-lg-2">
 						<div class="group--inline">
-							<div class="group--nav">
+							<div class="group--nav group--nav--bristles">
 								<div class="label">Setole:</div>
 								<ul class="nav--types">
 									<li ng-class="{ active: productCtrl.bristle == item}" ng-click="productCtrl.bristle = item" ng-repeat="item in productCtrl.product.bristles track by $index"><span class="name" ng-bind="item.name"></span></li>
 								</ul>
 							</div>
-							<div class="group--nav">
+							<div class="group--nav group--nav--color">
 								<div class="label">Colore:</div>
 								<ul class="nav--colors">
 									<li class="color color--{{item.key}}" ng-class="{ active: productCtrl.color == item}" ng-click="productCtrl.color = item" ng-repeat="item in productCtrl.product.colors track by $index"><span class="bullet"></span><span class="name" ng-bind="item.name"></span></li>
 								</ul>
 							</div>
-							<div class="group--nav">
+							<div class="group--nav group--nav--vr">
 								<div class="label">
 									<span class="label--enabled" ng-if="vrmode == vrmodes.NONE">VR non connesso:</span>
 									<span class="label--disabled" ng-if="vrmode != vrmodes.NONE">Provalo in VR:</span>
@@ -142,6 +214,15 @@
 		</div>
 		<div class="inner">
 			<div class="debug__info"></div>
+			<svg class="icon--rotate" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 173 173">
+				<path id="path" class="icon--rotate__ellipse" d="M164.7,165.7
+	c-15.5,15.5-63.6-7.3-107.4-51.1S-9.3,22.8,6.3,7.3s63.6,7.3,107.4,51.1S180.3,150.2,164.7,165.7z" />
+				<path style="fill:#E10000;" d="M-2.1-5.1L2.1-1l1.2,1.2L2.1,1.5l-3.6,3.6l-1.2-1.2l3.6-3.6l-4.2-4.2L-2.1-5.1z">
+					<animateMotion dur="8s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" rotate="auto">
+						<mpath xlink:href="#path"></mpath>
+					</animateMotion>
+				</path>
+			</svg>
 		</div>
 	</section>
 

@@ -1,7 +1,7 @@
 ﻿/* jshint esversion: 6 */
 
 import CanvasDirective from './directives/canvas.directive';
-import { VR_MODE } from './directives/canvas/three/vr/vr';
+import { VR_MODE } from './threejs/vr/vr';
 import LazyScriptDirective from './directives/lazy-script.directive';
 import LazyDirective from './directives/lazy.directive';
 import OverscrollDirective from './directives/overscroll.directive';
