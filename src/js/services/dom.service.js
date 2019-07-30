@@ -5,7 +5,7 @@ import { animationFrame } from 'rxjs/internal/scheduler/animationFrame';
 import { distinctUntilChanged, filter, first, map, shareReplay, startWith } from 'rxjs/operators';
 import Rect from '../shared/rect';
 
-const DEFAULT_SCROLL_TARGET = document.body; // window
+const DEFAULT_SCROLL_TARGET = window; // document.body; // window
 
 export default class DomService {
 

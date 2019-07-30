@@ -19284,7 +19284,7 @@ var _rect = _interopRequireDefault(require("../shared/rect"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /* jshint esversion: 6 */
-const DEFAULT_SCROLL_TARGET = document.body; // window
+const DEFAULT_SCROLL_TARGET = window; // document.body; // window
 
 class DomService {
   constructor() {}
@@ -20522,10 +20522,6 @@ class Canvas extends _emittable.default {
 
     const controls = this.controls = this.addControls(); // const orbit = this.orbit = this.addOrbit(container);
 
-    renderer.domElement.addEventListener('touchstart', this.onTouchStart, false);
-    renderer.domElement.addEventListener('touchend', this.onTouchEnd, false);
-    renderer.domElement.addEventListener('mousedown', this.onTouchStart, false);
-    renderer.domElement.addEventListener('mouseup', this.onTouchEnd, false);
     window.addEventListener('resize', this.onWindowResize, false); // document.addEventListener('wheel', this.onMouseWheel, false);
     // this.debugSave.addEventListener('click', this.onSave, false);
     // this.section.classList.add('init');
@@ -20618,6 +20614,10 @@ class Canvas extends _emittable.default {
     // const target = renderer.domElement;
 
     const target = document.querySelector('.orbit-control');
+    target.addEventListener('touchstart', this.onTouchStart, false);
+    target.addEventListener('touchend', this.onTouchEnd, false);
+    target.addEventListener('mousedown', this.onTouchStart, false);
+    target.addEventListener('mouseup', this.onTouchEnd, false);
     const controls = new THREE.OrbitControls(camera, target);
     controls.enablePan = false;
     controls.enableZoom = false; // controls.enableDamping = true;

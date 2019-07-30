@@ -113,10 +113,6 @@ export default class Canvas extends Emittable {
 		const controls = this.controls = this.addControls();
 		// const orbit = this.orbit = this.addOrbit(container);
 
-		renderer.domElement.addEventListener('touchstart', this.onTouchStart, false);
-		renderer.domElement.addEventListener('touchend', this.onTouchEnd, false);
-		renderer.domElement.addEventListener('mousedown', this.onTouchStart, false);
-		renderer.domElement.addEventListener('mouseup', this.onTouchEnd, false);
 		window.addEventListener('resize', this.onWindowResize, false);
 
 		// document.addEventListener('wheel', this.onMouseWheel, false);
@@ -215,6 +211,10 @@ export default class Canvas extends Emittable {
 		// camera.lookAt(camera.target);
 		// const target = renderer.domElement;
 		const target = document.querySelector('.orbit-control');
+		target.addEventListener('touchstart', this.onTouchStart, false);
+		target.addEventListener('touchend', this.onTouchEnd, false);
+		target.addEventListener('mousedown', this.onTouchStart, false);
+		target.addEventListener('mouseup', this.onTouchEnd, false);
 		const controls = new THREE.OrbitControls(camera, target);
 		controls.enablePan = false;
 		controls.enableZoom = false;
