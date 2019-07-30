@@ -240,6 +240,15 @@
 }
 
 [overscroll-responsive] {
+
+	@include media-breakpoint-up(md) {
+
+		.nav--bullets {
+			display: none;
+		}
+
+	}
+
 	@include media-breakpoint-down(sm) {
 
 		.title {
@@ -438,7 +447,7 @@
 		justify-content: space-between;
 		align-items: center;
 		width: 100%;
-		z-index: 101;
+		// z-index: 101;
 	}
 
 	.group--nav {
@@ -555,6 +564,27 @@
 			&:last-child {
 				margin: 0;
 			}
+		}
+	}
+
+	.orbit-control {
+		display: none;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		width: 200px;
+		height: 200px;
+		border-radius: 50%;
+		transform: translateX(-50%) translateY(-50%);
+		z-index: 100000;
+		font-size: 0;
+		color: transparent;
+		// background: red;
+	}
+
+	&.interactive {
+		.orbit-control {
+			display: block;
 		}
 	}
 
@@ -688,8 +718,8 @@
 		}
 		*/
 
-		&.interactive {
-			pointer-events: all;
+		.interactive>& {
+			// pointer-events: all;
 		}
 
 		canvas {
@@ -804,7 +834,6 @@
 	}
 
 }
-
 
 //Prodotto Consigli D'uso
 .section--product-consigli {

@@ -20,7 +20,7 @@ export default class OverscrollResponsiveDirective {
 	link(scope, element, attributes, controller) {
 		const node = element[0];
 		const container = node.querySelector('.container');
-		const overscroll = attributes.overscroll ? parseInt(attributes.overscroll) : 100;
+		const overscroll = attributes.overscrollResponsive ? parseInt(attributes.overscrollResponsive) : 100;
 		const anchors = [...node.querySelectorAll('[data-overscroll-anchor]')];
 		const onClick = (event) => {
 			const index = anchors.indexOf(event.currentTarget);
@@ -32,6 +32,7 @@ export default class OverscrollResponsiveDirective {
 			// console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
 			this.domService.scrollTo(0, top);
 		};
+		console.log('overscroll', overscroll);
 		anchors.forEach(x => {
 			x.addEventListener('click', onClick);
 		});
@@ -67,13 +68,13 @@ export default class OverscrollResponsiveDirective {
 			}
 			const h = container.offsetHeight;
 			const d = h / 100 * overscroll;
-			const downSm = window.innerWidth < 860;
+			const breakpointDownSm = window.innerWidth < 860;
 			let y = 0;
 			if (top < 0) {
-				y = Math.min(-top + (downSm ? window.innerHeight / 2 : 0), d);
+				y = Math.min(-top + (breakpointDownSm ? window.innerHeight / 2 : 0), d);
 			}
 			let elementStyle;
-			if (downSm) {
+			if (breakpointDownSm) {
 				elementStyle = ``;
 				if (element.style !== elementStyle) {
 					element.style = elementStyle;
@@ -94,21 +95,29 @@ export default class OverscrollResponsiveDirective {
 					element.style = elementStyle;
 					node.setAttribute('style', elementStyle);
 				}
-				const containerRect = Rect.fromNode(container);
+				// const containerRect = Rect.fromNode(container);
 				if (y === d) {
 					if (element.mode !== MODES.ABSOLUTE) {
 						element.mode = MODES.ABSOLUTE;
-						container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
+						// container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
+						container.style.position = `relative`;
+						container.style.transform = `translateY(${y}px)`;
+						// container.setAttribute('style', `position: relative; transform: translateY(${d}px);`);
 					}
 				} else if (y > 0) {
 					if (element.mode !== MODES.FIXED) {
 						element.mode = MODES.FIXED;
-						container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
+						// container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
+						container.style.position = `relative`;
+						// container.setAttribute('style', `position: relative; transform: translateY(${y}px);`);
 					}
+					container.style.transform = `translateY(${y}px)`;
 				} else {
 					if (element.mode !== MODES.NONE) {
 						element.mode = MODES.NONE;
-						container.setAttribute('style', '');
+						// container.setAttribute('style', '');
+						container.style.position = `relative`;
+						container.style.transform = `none`;
 					}
 				}
 			}

@@ -2,10 +2,10 @@
 
 import { combineLatest, fromEvent, range } from 'rxjs';
 import { animationFrame } from 'rxjs/internal/scheduler/animationFrame';
-import { auditTime, distinctUntilChanged, filter, first, map, shareReplay, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, shareReplay, startWith } from 'rxjs/operators';
 import Rect from '../shared/rect';
 
-const DEFAULT_SCROLL_TARGET = window; // document.body; // window
+const DEFAULT_SCROLL_TARGET = document.body; // window
 
 export default class DomService {
 
@@ -322,7 +322,7 @@ DomService.scroll$ = function() {
 	};
 	return fromEvent(target, 'scroll').pipe(
 		startWith(event),
-		auditTime(33), // 30 fps
+		// auditTime(16), // 60 fps
 		map((originalEvent) => {
 			/*
 			event.top = target.offsetTop || 0;

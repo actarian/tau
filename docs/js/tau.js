@@ -18256,14 +18256,6 @@ class CanvasDirective {
 
     const node = element[0];
     const inner = node.querySelector('.inner');
-    /*
-    const product = scope.product || {
-    	model: 'threejs/models/toothbrush/....fbx',
-    	bristles: [],
-    	colors: []
-    };
-    */
-
     const canvas = new _canvas.default(inner, product);
     canvas.on('vrmode', vrmode => {
       let vrMode;
@@ -18342,7 +18334,7 @@ class CanvasDirective {
       canvas.bristle = bristle;
     });
     scope.$on('onColor', ($scope, color) => {
-      console.log('onColor', color);
+      // console.log('onColor', color);
       canvas.color = color;
     });
     element.on('$destroy', () => {
@@ -18595,7 +18587,7 @@ class OverscrollResponsiveDirective {
   link(scope, element, attributes, controller) {
     const node = element[0];
     const container = node.querySelector('.container');
-    const overscroll = attributes.overscroll ? parseInt(attributes.overscroll) : 100;
+    const overscroll = attributes.overscrollResponsive ? parseInt(attributes.overscrollResponsive) : 100;
     const anchors = [...node.querySelectorAll('[data-overscroll-anchor]')];
 
     const onClick = event => {
@@ -18611,6 +18603,7 @@ class OverscrollResponsiveDirective {
       this.domService.scrollTo(0, top);
     };
 
+    console.log('overscroll', overscroll);
     anchors.forEach(x => {
       x.addEventListener('click', onClick);
     });
@@ -18653,16 +18646,16 @@ class OverscrollResponsiveDirective {
 
       const h = container.offsetHeight;
       const d = h / 100 * overscroll;
-      const downSm = window.innerWidth < 860;
+      const breakpointDownSm = window.innerWidth < 860;
       let y = 0;
 
       if (top < 0) {
-        y = Math.min(-top + (downSm ? window.innerHeight / 2 : 0), d);
+        y = Math.min(-top + (breakpointDownSm ? window.innerHeight / 2 : 0), d);
       }
 
       let elementStyle;
 
-      if (downSm) {
+      if (breakpointDownSm) {
         elementStyle = ``;
 
         if (element.style !== elementStyle) {
@@ -18686,24 +18679,30 @@ class OverscrollResponsiveDirective {
         if (element.style !== elementStyle) {
           element.style = elementStyle;
           node.setAttribute('style', elementStyle);
-        }
+        } // const containerRect = Rect.fromNode(container);
 
-        const containerRect = _rect.default.fromNode(container);
 
         if (y === d) {
           if (element.mode !== MODES.ABSOLUTE) {
-            element.mode = MODES.ABSOLUTE;
-            container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
+            element.mode = MODES.ABSOLUTE; // container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
+
+            container.style.position = `relative`;
+            container.style.transform = `translateY(${y}px)`; // container.setAttribute('style', `position: relative; transform: translateY(${d}px);`);
           }
         } else if (y > 0) {
           if (element.mode !== MODES.FIXED) {
-            element.mode = MODES.FIXED;
-            container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
+            element.mode = MODES.FIXED; // container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
+
+            container.style.position = `relative`; // container.setAttribute('style', `position: relative; transform: translateY(${y}px);`);
           }
+
+          container.style.transform = `translateY(${y}px)`;
         } else {
           if (element.mode !== MODES.NONE) {
-            element.mode = MODES.NONE;
-            container.setAttribute('style', '');
+            element.mode = MODES.NONE; // container.setAttribute('style', '');
+
+            container.style.position = `relative`;
+            container.style.transform = `none`;
           }
         }
       }
@@ -19285,7 +19284,7 @@ var _rect = _interopRequireDefault(require("../shared/rect"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /* jshint esversion: 6 */
-const DEFAULT_SCROLL_TARGET = window; // document.body; // window
+const DEFAULT_SCROLL_TARGET = document.body; // window
 
 class DomService {
   constructor() {}
@@ -19602,7 +19601,7 @@ DomService.scroll$ = function () {
     direction: 0,
     originalEvent: null
   };
-  return (0, _rxjs.fromEvent)(target, 'scroll').pipe((0, _operators.startWith)(event), (0, _operators.auditTime)(33), // 30 fps
+  return (0, _rxjs.fromEvent)(target, 'scroll').pipe((0, _operators.startWith)(event), // auditTime(16), // 60 fps
   (0, _operators.map)(originalEvent => {
     /*
     event.top = target.offsetTop || 0;
@@ -20616,8 +20615,10 @@ class Canvas extends _emittable.default {
     const camera = this.camera;
     const renderer = this.renderer; // camera.target.z = ROOM_RADIUS;
     // camera.lookAt(camera.target);
+    // const target = renderer.domElement;
 
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    const target = document.querySelector('.orbit-control');
+    const controls = new THREE.OrbitControls(camera, target);
     controls.enablePan = false;
     controls.enableZoom = false; // controls.enableDamping = true;
 
@@ -20865,7 +20866,7 @@ class Canvas extends _emittable.default {
 
         this.zoom_ = 0;
         this.container.classList.remove('lefted');
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'manico':
@@ -20873,7 +20874,7 @@ class Canvas extends _emittable.default {
         rotation = [0, 0, (0, _const.deg)(-90)]; // 								vertical right;
 
         this.zoom_ = 0;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'testina':
@@ -20881,7 +20882,7 @@ class Canvas extends _emittable.default {
         rotation = [0, (0, _const.deg)(-90), (0, _const.deg)(-90)]; // 										vertical left;
 
         this.zoom_ = 0.2;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'setole':
@@ -20889,7 +20890,7 @@ class Canvas extends _emittable.default {
         rotation = [0, (0, _const.deg)(-30), (0, _const.deg)(-90)]; // 								vertical right tre quarti;
 
         this.zoom_ = 0.4;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'scalare':
@@ -20897,7 +20898,7 @@ class Canvas extends _emittable.default {
         rotation = [0, 0, (0, _const.deg)(-90)]; // 								vertical right;
 
         this.zoom_ = 0.4;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'italy':
@@ -20905,7 +20906,7 @@ class Canvas extends _emittable.default {
         rotation = [0, (0, _const.deg)(-60), (0, _const.deg)(-60)]; // 							tre quarti sinistra
 
         this.zoom_ = 0;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'setole-tynex':
@@ -20913,14 +20914,14 @@ class Canvas extends _emittable.default {
         rotation = [0, (0, _const.deg)(90), (0, _const.deg)(10)]; // 							testina vista dietro
 
         this.zoom_ = sm ? 0.6 : 0.2;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'colors':
         position = [0, 0, 0];
         rotation = [0, 0, 0];
         this.zoom_ = sm ? -0.2 : 0;
-        this.container.classList.add('interactive');
+        this.container.parentNode.classList.add('interactive');
         break;
 
       default:
@@ -20928,7 +20929,7 @@ class Canvas extends _emittable.default {
         rotation = [0, (0, _const.deg)(-60), (0, _const.deg)(-60)]; // 		tre quarti sinistra
 
         this.zoom_ = 0;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
     }
 
     const toothbrush = this.toothbrush;
@@ -21191,7 +21192,7 @@ class Canvas extends _emittable.default {
   }
 
   onTouchStart() {
-    if (this.container.classList.contains('interactive')) {
+    if (this.container.parentNode.classList.contains('interactive')) {
       const sm = this.container.offsetWidth < 768;
       this.zoom_ = sm ? 0.6 : 0.2;
       TweenMax.to(this.camera, 0.6, {
@@ -21205,7 +21206,7 @@ class Canvas extends _emittable.default {
   }
 
   onTouchEnd() {
-    if (this.container.classList.contains('interactive')) {
+    if (this.container.parentNode.classList.contains('interactive')) {
       const sm = this.container.offsetWidth < 768;
       this.zoom_ = sm ? -0.2 : 0;
       TweenMax.to(this.camera, 0.6, {

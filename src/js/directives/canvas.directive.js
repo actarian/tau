@@ -24,13 +24,6 @@ export default class CanvasDirective {
 		}
 		const node = element[0];
 		const inner = node.querySelector('.inner');
-		/*
-		const product = scope.product || {
-			model: 'threejs/models/toothbrush/....fbx',
-			bristles: [],
-			colors: []
-		};
-		*/
 		const canvas = new Canvas(inner, product);
 		canvas.on('vrmode', (vrmode) => {
 			let vrMode;
@@ -101,7 +94,7 @@ export default class CanvasDirective {
 			canvas.bristle = bristle;
 		});
 		scope.$on('onColor', ($scope, color) => {
-			console.log('onColor', color);
+			// console.log('onColor', color);
 			canvas.color = color;
 		});
 		element.on('$destroy', () => {
