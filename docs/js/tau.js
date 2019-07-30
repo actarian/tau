@@ -18644,9 +18644,9 @@ class OverscrollResponsiveDirective {
         container.setAttribute('style', '');
       }
 
-      const h = container.offsetHeight;
-      const d = h / 100 * overscroll;
       const breakpointDownSm = window.innerWidth < 860;
+      const h = container.offsetHeight;
+      const d = breakpointDownSm ? h : h / 100 * overscroll;
       let y = 0;
 
       if (top < 0) {
