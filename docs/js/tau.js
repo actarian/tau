@@ -18596,12 +18596,13 @@ class OverscrollResponsiveDirective {
     const anchors = [...node.querySelectorAll('[data-overscroll-anchor]')];
 
     const onClick = event => {
+      const breakpointDownSm = window.innerWidth < 860;
       const index = anchors.indexOf(event.currentTarget);
 
       const rect = _rect.default.fromNode(node);
 
       const h = container.offsetHeight;
-      const d = h / 100 * overscroll;
+      const d = breakpointDownSm ? h : h / 100 * overscroll;
       const s = d / anchors.length;
       const top = this.domService.scrollTop + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
 
