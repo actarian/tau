@@ -2,8 +2,10 @@
 
 import { combineLatest, fromEvent, range } from 'rxjs';
 import { animationFrame } from 'rxjs/internal/scheduler/animationFrame';
-import { auditTime, distinctUntilChanged, filter, first, map, shareReplay, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, shareReplay, startWith } from 'rxjs/operators';
 import Rect from '../shared/rect';
+
+const DEFAULT_SCROLL_TARGET = window; // document.body; // window
 
 export default class DomService {
 
@@ -12,11 +14,15 @@ export default class DomService {
 	}
 
 	get scrollTop() {
-		return DomService.getScrollTop(window);
+		return DomService.getScrollTop(DEFAULT_SCROLL_TARGET);
 	}
 
 	get scrollLeft() {
-		return DomService.getScrollLeft(window);
+		return DomService.getScrollLeft(DEFAULT_SCROLL_TARGET);
+	}
+
+	scrollTo(left, top) {
+		DEFAULT_SCROLL_TARGET.scrollTo(0, top);
 	}
 
 	hasWebglSupport() {
@@ -300,7 +306,7 @@ DomService.windowRect$ = function() {
 }();
 DomService.rafAndRect$ = combineLatest(DomService.raf$, DomService.windowRect$);
 DomService.scroll$ = function() {
-	const target = window;
+	const target = DEFAULT_SCROLL_TARGET;
 	let previousTop = DomService.getScrollTop(target);
 	const event = {
 		/*
@@ -316,7 +322,7 @@ DomService.scroll$ = function() {
 	};
 	return fromEvent(target, 'scroll').pipe(
 		startWith(event),
-		auditTime(33), // 30 fps
+		// auditTime(16), // 60 fps
 		map((originalEvent) => {
 			/*
 			event.top = target.offsetTop || 0;

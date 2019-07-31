@@ -113,10 +113,6 @@ export default class Canvas extends Emittable {
 		const controls = this.controls = this.addControls();
 		// const orbit = this.orbit = this.addOrbit(container);
 
-		renderer.domElement.addEventListener('touchstart', this.onTouchStart, false);
-		renderer.domElement.addEventListener('touchend', this.onTouchEnd, false);
-		renderer.domElement.addEventListener('mousedown', this.onTouchStart, false);
-		renderer.domElement.addEventListener('mouseup', this.onTouchEnd, false);
 		window.addEventListener('resize', this.onWindowResize, false);
 
 		// document.addEventListener('wheel', this.onMouseWheel, false);
@@ -213,7 +209,13 @@ export default class Canvas extends Emittable {
 		const renderer = this.renderer;
 		// camera.target.z = ROOM_RADIUS;
 		// camera.lookAt(camera.target);
-		const controls = new THREE.OrbitControls(camera, renderer.domElement);
+		// const target = renderer.domElement;
+		const target = document.querySelector('.orbit-control');
+		target.addEventListener('touchstart', this.onTouchStart, false);
+		target.addEventListener('touchend', this.onTouchEnd, false);
+		target.addEventListener('mousedown', this.onTouchStart, false);
+		target.addEventListener('mouseup', this.onTouchEnd, false);
+		const controls = new THREE.OrbitControls(camera, target);
 		controls.enablePan = false;
 		controls.enableZoom = false;
 		// controls.enableDamping = true;
@@ -449,55 +451,55 @@ export default class Canvas extends Emittable {
 				rotation = [0, deg(-60), deg(-60)]; // 		tre quarti sinistra
 				this.zoom_ = 0;
 				this.container.classList.remove('lefted');
-				this.container.classList.remove('interactive');
+				this.container.parentNode.classList.remove('interactive');
 				break;
 			case 'manico':
 				position = [0, 0, 0];
 				rotation = [0, 0, deg(-90)]; // 								vertical right;
 				this.zoom_ = 0;
-				this.container.classList.remove('interactive');
+				this.container.parentNode.classList.remove('interactive');
 				break;
 			case 'testina':
 				position = [0, cm(-8), 0];
 				rotation = [0, deg(-90), deg(-90)]; // 										vertical left;
 				this.zoom_ = 0.2;
-				this.container.classList.remove('interactive');
+				this.container.parentNode.classList.remove('interactive');
 				break;
 			case 'setole':
 				position = [0, cm(-12), 0];
 				rotation = [0, deg(-30), deg(-90)]; // 								vertical right tre quarti;
 				this.zoom_ = 0.4;
-				this.container.classList.remove('interactive');
+				this.container.parentNode.classList.remove('interactive');
 				break;
 			case 'scalare':
 				position = [0, cm(-12), 0];
 				rotation = [0, 0, deg(-90)]; // 								vertical right;
 				this.zoom_ = 0.4;
-				this.container.classList.remove('interactive');
+				this.container.parentNode.classList.remove('interactive');
 				break;
 			case 'italy':
 				position = [0, 0, 0];
 				rotation = [0, deg(-60), deg(-60)]; // 							tre quarti sinistra
 				this.zoom_ = 0;
-				this.container.classList.remove('interactive');
+				this.container.parentNode.classList.remove('interactive');
 				break;
 			case 'setole-tynex':
 				position = [0, 0, 0];
 				rotation = [0, deg(90), deg(10)]; // 							testina vista dietro
 				this.zoom_ = sm ? 0.6 : 0.2;
-				this.container.classList.remove('interactive');
+				this.container.parentNode.classList.remove('interactive');
 				break;
 			case 'colors':
 				position = [0, 0, 0];
 				rotation = [0, 0, 0];
 				this.zoom_ = sm ? -0.2 : 0;
-				this.container.classList.add('interactive');
+				this.container.parentNode.classList.add('interactive');
 				break;
 			default:
 				position = [0, 0, 0];
 				rotation = [0, deg(-60), deg(-60)]; // 		tre quarti sinistra
 				this.zoom_ = 0;
-				this.container.classList.remove('interactive');
+				this.container.parentNode.classList.remove('interactive');
 		}
 		const toothbrush = this.toothbrush;
 		TweenMax.to(toothbrush.position, 0.8, {
@@ -744,7 +746,7 @@ export default class Canvas extends Emittable {
 	}
 
 	onTouchStart() {
-		if (this.container.classList.contains('interactive')) {
+		if (this.container.parentNode.classList.contains('interactive')) {
 			const sm = this.container.offsetWidth < 768;
 			this.zoom_ = sm ? 0.6 : 0.2;
 			TweenMax.to(this.camera, 0.6, {
@@ -758,7 +760,7 @@ export default class Canvas extends Emittable {
 	}
 
 	onTouchEnd() {
-		if (this.container.classList.contains('interactive')) {
+		if (this.container.parentNode.classList.contains('interactive')) {
 			const sm = this.container.offsetWidth < 768;
 			this.zoom_ = sm ? -0.2 : 0;
 			TweenMax.to(this.camera, 0.6, {
