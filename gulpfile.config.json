@@ -12,6 +12,12 @@
 			}],
 			"bundle": [{
 				"input": [
+					"src/js/main.js"
+				],
+				"output": "docs/js/main.js",
+				"minify": false
+			}, {
+				"input": [
 					"node_modules/whatwg-fetch/dist/fetch.umd.js",
 					"node_modules/promise-polyfill/dist/polyfill.js",
 					"src/polyfills/polyfills.js"

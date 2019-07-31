@@ -1,5 +1,4 @@
 .section--store-locator-dove-acquistare {
-    min-height: 80vh;
 	padding: 100px 0;
 	text-align: center;
 
@@ -64,10 +63,61 @@
     }
 }
 
-.section--store-locator-results {
+.section--store-locator-intro {
 
-    .intro {
+	.intro {
         padding: 20px 0;
-        text-align: center;
-    }
+		text-align: center;
+		background: #fff;
+		border-top: 1px solid #eeefef;
+		border-bottom: 1px solid #eeefef;
+
+		strong {
+			color: $foreground-primary;
+		}
+	}
+}
+
+.section--store-locator-results {
+	background: #f9fafb;
+	padding: 50px 0;
+	
+	.box {
+		background: #fff;
+		border: 1px solid #dedfe0;
+		padding: 30px;
+		margin-bottom: 30px;
+
+		@include media-breakpoint-down(sm) {
+			margin-bottom: 30px;
+		}
+
+		.title {
+			color: $foreground-primary;
+			font-size: 21px;
+			line-height: 36px;
+			font-weight: $font-medium;
+		}
+
+		.indirizzo {
+			font-size: 18px;
+			line-height: 30px;
+			color: $foreground-secondary;
+			font-weight: $font-regular;
+		}
+
+		.distanza {
+			color: #797a82;
+			font-size: 18px;
+			line-height: 30px;
+		}
+
+		.cta {
+
+			a {
+				color: $foreground-primary;
+				font-weight: $font-semibold;
+			}
+		}
+	}
 }

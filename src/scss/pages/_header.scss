@@ -23,6 +23,13 @@ header {
 		max-width: 100%;
 	}
 
+	.col-logo {
+
+		@include media-breakpoint-down(xs) {
+			width: 50%;
+		}
+	}
+
 	//Main Menu
 	.main-menu {
 		text-align: center;
@@ -73,9 +80,12 @@ header {
 			margin-right: 10px;
 			font-size: 14px;
 		}
-		
+
 		@include media-breakpoint-down(xs) {
-			display: none;
+			margin-right: 10px;
+			font-size: 20px;
+			position: relative;
+			top: -5px;
 		}
 	}
 
@@ -99,6 +109,13 @@ header {
 	.hamburger {
 		display: none;
 
+		&.active {
+
+			.icon--hamburger {
+				fill: $foreground-secondary;
+			}
+		}
+
 		.icon--hamburger { 
 			width: 50px;
 			height: 26px;
@@ -106,6 +123,57 @@ header {
 		}
 
 		@include media-breakpoint-down(xs) {
+			display: inline-block;
+			cursor: pointer;
+		}
+	}
+
+	.mobile-menu {
+		display: none;
+		background: #f9fafb;
+		margin-top: 10px;
+
+		ul {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+
+			li {
+				display: block;
+
+				a {
+					padding: 10px 20px;
+					border-top: 1px solid #ddd;
+					display: block;
+					color: $foreground-secondary;
+					font-weight: $font-medium;
+				}
+
+				&.active {
+
+					a {
+						color: $foreground-primary;
+					}
+				}
+
+				&:last-child {
+
+					a {
+						border-bottom: 1px solid #ddd;
+					}
+				}
+
+				&.cta {
+					
+					a {
+						background: $foreground-primary;
+						color: #fff;
+					}
+				}
+			}
+		}
+
+		&.show {
 			display: block;
 		}
 	}

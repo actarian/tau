@@ -1,0 +1,188 @@
+.section--contatti-intro {
+	padding: 100px 0;
+    text-align: center;
+    min-height: 60vh;
+    display: flex;
+    justify-content: center;
+	align-items: center;
+	
+	@include media-breakpoint-down(sm) {
+		min-height: 40vh;
+	}
+
+	.title {
+		color: $foreground-primary;
+		font-size: 60px;
+		font-weight: $font-semibold;
+
+		@include media-breakpoint-down(sm) {
+			font-size: 42px;
+			line-height: 52px;
+		}
+
+		@include media-breakpoint-down(xs) {
+			font-size: 32px;
+			line-height: 42px;
+		}
+	}
+
+	.abstract {
+		color: $foreground-secondary;
+		font-size: 40px;
+		font-weight: $font-regular;
+		line-height: 40px;
+		letter-spacing: 0.2px;
+
+		@include media-breakpoint-down(sm) {
+			font-size: 28px;
+			line-height: 28px;
+		}
+
+		@include media-breakpoint-down(xs) {
+			font-size: 24px;
+			line-height: 24px;
+		}
+	}
+}
+
+.section--contatti-form {
+	padding: 0 0 100px;
+
+	.form-contatti {
+		order: 0;
+
+		@include media-breakpoint-down(sm) {
+			order: 1;
+		}
+
+		h3 {
+			color: $foreground-secondary;
+			font-size: 24px;
+			font-weight: $font-regular;
+			line-height: 44px;
+			letter-spacing: 0.2px;
+		}
+
+		form {
+
+			select, input[type="text"], input[type="email"], textarea {
+				display: block;
+				width: 100%;
+				padding: 20px;
+				border: 1px solid #dedfe0;
+				margin-bottom: 20px;
+				font-size: 16px;
+				color: #797a82;
+				letter-spacing: 0.2px;
+				font-weight: $font-regular;
+				line-height: 30px;
+				font-family: $font-primary;
+			}
+
+			textarea {
+				margin-bottom: 0;
+			}
+
+			.privacy {
+				padding: 20px;
+				font-size: 12px;
+				line-height: 16px;
+				margin: 10px 0;
+				color: #797a82;
+				font-weight: $font-regular;
+				display: flex;
+				align-items: center;
+
+				input[type="checkbox"] {
+					width: 50px;
+				}
+
+				p {
+					margin: 0;
+				}
+
+				a {
+					color: $foreground-primary;
+					text-decoration: underline;	
+				}
+			}
+
+			.btn {
+				display: block;
+				background-color: $foreground-primary;
+				width: 100%;
+				color: #fff;
+				border-radius: 500px;
+				padding: 20px;
+				font-family: $font-primary;
+				font-size: 14px;
+				text-transform: uppercase;
+				text-align: center;
+				letter-spacing: 0.5px;
+				line-height: 20px;
+				font-weight: $font-semibold;
+			}
+		}
+	}
+
+	.list-contatti {
+		order: 1;
+
+		@include media-breakpoint-down(sm) {
+			order: 0;
+		}
+
+		div {
+			margin-bottom: 50px;
+
+			h4 {
+				font-size: 16px;
+				text-transform: uppercase;
+				color: $foreground-secondary;
+				font-weight: $font-semibold;
+				line-height: 20px;
+				letter-spacing: 0.5px;
+				margin-bottom: 0;
+			}
+	
+			p {
+				font-size: 16px;
+				line-height: 24px;
+				letter-spacing: 0.2px;
+				font-weight: $font-regular;
+	
+				a {
+					color: $foreground-primary;
+				}
+			}
+	
+			ul {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				margin-top: 30px;
+	
+				li {
+					display: inline-block;
+					padding: 0 20px;
+	
+					&:first-child {
+						padding-left: 0;
+					}
+	
+					svg {
+						fill: #919191;
+						height: 18px;
+						width: 20px;
+						transition: all ease-in-out .3s;
+
+						&:hover, &:focus {
+							fill: $foreground-primary;
+							transition: all ease-in-out .3s;
+						}
+					}
+				}
+			}
+		}
+	}
+}
