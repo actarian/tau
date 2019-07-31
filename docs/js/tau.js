@@ -18256,14 +18256,6 @@ class CanvasDirective {
 
     const node = element[0];
     const inner = node.querySelector('.inner');
-    /*
-    const product = scope.product || {
-    	model: 'threejs/models/toothbrush/....fbx',
-    	bristles: [],
-    	colors: []
-    };
-    */
-
     const canvas = new _canvas.default(inner, product);
     canvas.on('vrmode', vrmode => {
       let vrMode;
@@ -18289,25 +18281,30 @@ class CanvasDirective {
     });
     canvas.animate();
     const anchors = [...document.querySelectorAll('[data-anchor]')];
+    /*
     const rafSubscription = this.domService.rafAndScroll$(node).subscribe(event => {
-      const rect = _rect.default.fromNode(node);
-
-      const top = rect.top - (window.innerHeight - rect.height) / 2;
-      const innerStyle = top <= 0 ? `transform: translateX(-50%) translateY(${top - inner.offsetHeight / 2}px)` : `transform: translateX(-50%) translateY(-50%)`;
-
-      if (element.innerStyle !== innerStyle) {
-        element.innerStyle = innerStyle;
-        inner.style = innerStyle;
-      }
+    	const rect = Rect.fromNode(node);
+    	const top = rect.top - (window.innerHeight - rect.height) / 2;
+    	if (top <= 0) {
+    		node.classList.remove('fixed');
+    	} else {
+    		node.classList.add('fixed');
+    	}
+    	const innerStyle = top <= 0 ? `transform: translateX(-50%) translateY(${top - inner.offsetHeight / 2}px)` : `transform: translateX(-50%) translateY(-50%)`;
+    	if (element.innerStyle !== innerStyle) {
+    		element.innerStyle = innerStyle;
+    		inner.style = innerStyle;
+    	}
     });
+    */
+
     const scrollSubscription = this.domService.scrollIntersection$(node).subscribe(event => {
-      /*
       if (event.rect.top - (event.windowRect.height - event.rect.height) / 2 <= 0) {
-      	node.classList.remove('fixed');
+        node.classList.remove('fixed');
       } else {
-      	node.classList.add('fixed');
+        node.classList.add('fixed');
       }
-      */
+
       const anchor = anchors.reduce((p, x, i) => {
         const rect = _rect.default.fromNode(x);
 
@@ -18342,11 +18339,11 @@ class CanvasDirective {
       canvas.bristle = bristle;
     });
     scope.$on('onColor', ($scope, color) => {
-      console.log('onColor', color);
+      // console.log('onColor', color);
       canvas.color = color;
     });
     element.on('$destroy', () => {
-      rafSubscription.unsubscribe();
+      // rafSubscription.unsubscribe();
       scrollSubscription.unsubscribe();
       canvas.destroy();
     });
@@ -18595,22 +18592,24 @@ class OverscrollResponsiveDirective {
   link(scope, element, attributes, controller) {
     const node = element[0];
     const container = node.querySelector('.container');
-    const overscroll = attributes.overscroll ? parseInt(attributes.overscroll) : 100;
+    const overscroll = attributes.overscrollResponsive ? parseInt(attributes.overscrollResponsive) : 100;
     const anchors = [...node.querySelectorAll('[data-overscroll-anchor]')];
 
     const onClick = event => {
+      const breakpointDownSm = window.innerWidth < 860;
       const index = anchors.indexOf(event.currentTarget);
 
       const rect = _rect.default.fromNode(node);
 
       const h = container.offsetHeight;
-      const d = h / 100 * overscroll;
+      const d = breakpointDownSm ? h : h / 100 * overscroll;
       const s = d / anchors.length;
-      const top = window.pageYOffset + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
+      const top = this.domService.scrollTop + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
 
-      window.scrollTo(0, top);
+      this.domService.scrollTo(0, top);
     };
 
+    console.log('overscroll', overscroll);
     anchors.forEach(x => {
       x.addEventListener('click', onClick);
     });
@@ -18632,9 +18631,9 @@ class OverscrollResponsiveDirective {
       */
 
 
-      const top = window.pageYOffset + rect.top; // const top = window.pageYOffset + rect.top + window.innerHeight / 2 + s * index + (s / 2);
+      const top = this.domService.scrollTop + rect.top; // const top = this.domService.scrollTop + rect.top + window.innerHeight / 2 + s * index + (s / 2);
 
-      window.scrollTo(0, top);
+      this.domService.scrollTo(0, top);
     };
 
     bullets.forEach(x => {
@@ -18651,18 +18650,18 @@ class OverscrollResponsiveDirective {
         container.setAttribute('style', '');
       }
 
+      const breakpointDownSm = window.innerWidth < 860;
       const h = container.offsetHeight;
-      const d = h / 100 * overscroll;
-      const downSm = window.innerWidth < 860;
+      const d = breakpointDownSm ? h : h / 100 * overscroll;
       let y = 0;
 
       if (top < 0) {
-        y = Math.min(-top + (downSm ? window.innerHeight / 2 : 0), d);
+        y = Math.min(-top + (breakpointDownSm ? window.innerHeight / 2 : 0), d);
       }
 
       let elementStyle;
 
-      if (downSm) {
+      if (breakpointDownSm) {
         elementStyle = ``;
 
         if (element.style !== elementStyle) {
@@ -18694,16 +18693,27 @@ class OverscrollResponsiveDirective {
           if (element.mode !== MODES.ABSOLUTE) {
             element.mode = MODES.ABSOLUTE;
             container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
+            /*
+            container.style.position = `relative`;
+            container.style.transform = `translateY(${y}px)`;
+            */
+            // container.setAttribute('style', `position: relative; transform: translateY(${d}px);`);
           }
         } else if (y > 0) {
           if (element.mode !== MODES.FIXED) {
             element.mode = MODES.FIXED;
             container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
-          }
+            /*
+            container.style.position = `relative`;
+            */
+            // container.setAttribute('style', `position: relative; transform: translateY(${y}px);`);
+          } // container.style.transform = `translateY(${y}px)`;
+
         } else {
           if (element.mode !== MODES.NONE) {
             element.mode = MODES.NONE;
-            container.setAttribute('style', '');
+            container.setAttribute('style', ''); // container.style.position = `relative`;
+            // container.style.transform = `none`;
           }
         }
       }
@@ -18809,9 +18819,9 @@ class OverscrollDirective {
       const h = container.offsetHeight;
       const d = h / 100 * overscroll;
       const s = d / anchors.length;
-      const top = window.pageYOffset + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
+      const top = this.domService.scrollTop + rect.top + s * index + s / 2; // console.log(`index ${index} h ${h} overscroll ${overscroll} d ${d} top ${top}`);
 
-      window.scrollTo(0, top);
+      this.domService.scrollTo(0, top);
     };
 
     anchors.forEach(x => {
@@ -19285,15 +19295,21 @@ var _rect = _interopRequireDefault(require("../shared/rect"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /* jshint esversion: 6 */
+const DEFAULT_SCROLL_TARGET = window; // document.body; // window
+
 class DomService {
   constructor() {}
 
   get scrollTop() {
-    return DomService.getScrollTop(window);
+    return DomService.getScrollTop(DEFAULT_SCROLL_TARGET);
   }
 
   get scrollLeft() {
-    return DomService.getScrollLeft(window);
+    return DomService.getScrollLeft(DEFAULT_SCROLL_TARGET);
+  }
+
+  scrollTo(left, top) {
+    DEFAULT_SCROLL_TARGET.scrollTo(0, top);
   }
 
   hasWebglSupport() {
@@ -19582,7 +19598,7 @@ DomService.windowRect$ = function () {
 DomService.rafAndRect$ = (0, _rxjs.combineLatest)(DomService.raf$, DomService.windowRect$);
 
 DomService.scroll$ = function () {
-  const target = window;
+  const target = DEFAULT_SCROLL_TARGET;
   let previousTop = DomService.getScrollTop(target);
   const event = {
     /*
@@ -19596,7 +19612,7 @@ DomService.scroll$ = function () {
     direction: 0,
     originalEvent: null
   };
-  return (0, _rxjs.fromEvent)(target, 'scroll').pipe((0, _operators.startWith)(event), (0, _operators.auditTime)(33), // 30 fps
+  return (0, _rxjs.fromEvent)(target, 'scroll').pipe((0, _operators.startWith)(event), // auditTime(16), // 60 fps
   (0, _operators.map)(originalEvent => {
     /*
     event.top = target.offsetTop || 0;
@@ -20517,10 +20533,6 @@ class Canvas extends _emittable.default {
 
     const controls = this.controls = this.addControls(); // const orbit = this.orbit = this.addOrbit(container);
 
-    renderer.domElement.addEventListener('touchstart', this.onTouchStart, false);
-    renderer.domElement.addEventListener('touchend', this.onTouchEnd, false);
-    renderer.domElement.addEventListener('mousedown', this.onTouchStart, false);
-    renderer.domElement.addEventListener('mouseup', this.onTouchEnd, false);
     window.addEventListener('resize', this.onWindowResize, false); // document.addEventListener('wheel', this.onMouseWheel, false);
     // this.debugSave.addEventListener('click', this.onSave, false);
     // this.section.classList.add('init');
@@ -20610,8 +20622,14 @@ class Canvas extends _emittable.default {
     const camera = this.camera;
     const renderer = this.renderer; // camera.target.z = ROOM_RADIUS;
     // camera.lookAt(camera.target);
+    // const target = renderer.domElement;
 
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    const target = document.querySelector('.orbit-control');
+    target.addEventListener('touchstart', this.onTouchStart, false);
+    target.addEventListener('touchend', this.onTouchEnd, false);
+    target.addEventListener('mousedown', this.onTouchStart, false);
+    target.addEventListener('mouseup', this.onTouchEnd, false);
+    const controls = new THREE.OrbitControls(camera, target);
     controls.enablePan = false;
     controls.enableZoom = false; // controls.enableDamping = true;
 
@@ -20859,7 +20877,7 @@ class Canvas extends _emittable.default {
 
         this.zoom_ = 0;
         this.container.classList.remove('lefted');
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'manico':
@@ -20867,7 +20885,7 @@ class Canvas extends _emittable.default {
         rotation = [0, 0, (0, _const.deg)(-90)]; // 								vertical right;
 
         this.zoom_ = 0;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'testina':
@@ -20875,7 +20893,7 @@ class Canvas extends _emittable.default {
         rotation = [0, (0, _const.deg)(-90), (0, _const.deg)(-90)]; // 										vertical left;
 
         this.zoom_ = 0.2;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'setole':
@@ -20883,7 +20901,7 @@ class Canvas extends _emittable.default {
         rotation = [0, (0, _const.deg)(-30), (0, _const.deg)(-90)]; // 								vertical right tre quarti;
 
         this.zoom_ = 0.4;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'scalare':
@@ -20891,7 +20909,7 @@ class Canvas extends _emittable.default {
         rotation = [0, 0, (0, _const.deg)(-90)]; // 								vertical right;
 
         this.zoom_ = 0.4;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'italy':
@@ -20899,7 +20917,7 @@ class Canvas extends _emittable.default {
         rotation = [0, (0, _const.deg)(-60), (0, _const.deg)(-60)]; // 							tre quarti sinistra
 
         this.zoom_ = 0;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'setole-tynex':
@@ -20907,14 +20925,14 @@ class Canvas extends _emittable.default {
         rotation = [0, (0, _const.deg)(90), (0, _const.deg)(10)]; // 							testina vista dietro
 
         this.zoom_ = sm ? 0.6 : 0.2;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
         break;
 
       case 'colors':
         position = [0, 0, 0];
         rotation = [0, 0, 0];
         this.zoom_ = sm ? -0.2 : 0;
-        this.container.classList.add('interactive');
+        this.container.parentNode.classList.add('interactive');
         break;
 
       default:
@@ -20922,7 +20940,7 @@ class Canvas extends _emittable.default {
         rotation = [0, (0, _const.deg)(-60), (0, _const.deg)(-60)]; // 		tre quarti sinistra
 
         this.zoom_ = 0;
-        this.container.classList.remove('interactive');
+        this.container.parentNode.classList.remove('interactive');
     }
 
     const toothbrush = this.toothbrush;
@@ -21185,7 +21203,7 @@ class Canvas extends _emittable.default {
   }
 
   onTouchStart() {
-    if (this.container.classList.contains('interactive')) {
+    if (this.container.parentNode.classList.contains('interactive')) {
       const sm = this.container.offsetWidth < 768;
       this.zoom_ = sm ? 0.6 : 0.2;
       TweenMax.to(this.camera, 0.6, {
@@ -21199,7 +21217,7 @@ class Canvas extends _emittable.default {
   }
 
   onTouchEnd() {
-    if (this.container.classList.contains('interactive')) {
+    if (this.container.parentNode.classList.contains('interactive')) {
       const sm = this.container.offsetWidth < 768;
       this.zoom_ = sm ? -0.2 : 0;
       TweenMax.to(this.camera, 0.6, {
@@ -21430,8 +21448,7 @@ class Canvas extends _emittable.default {
     return gui;
   }
   /*
-  
-  tweenTau__(anchor) {
+  	tweenTau__(anchor) {
   	// [0, 0, Math.PI / 2]; // 										vertical left
   	// [0, 0, 0]; // 												horizontal right
   	// [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
@@ -21560,7 +21577,6 @@ class Canvas extends _emittable.default {
   		});
   	}
   }
-  
   
   addLogo__(parent) {
   	const geometry = new THREE.PlaneGeometry(24, 3, 3, 1);
@@ -21709,8 +21725,7 @@ class Canvas extends _emittable.default {
   		parent.add(group);
   		return group;
   	}
-  
-  */
+  	*/
 
 
 }

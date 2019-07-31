@@ -96,29 +96,33 @@ export default class OverscrollResponsiveDirective {
 					element.style = elementStyle;
 					node.setAttribute('style', elementStyle);
 				}
-				// const containerRect = Rect.fromNode(container);
+				const containerRect = Rect.fromNode(container);
 				if (y === d) {
 					if (element.mode !== MODES.ABSOLUTE) {
 						element.mode = MODES.ABSOLUTE;
-						// container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
+						container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
+						/*
 						container.style.position = `relative`;
 						container.style.transform = `translateY(${y}px)`;
+						*/
 						// container.setAttribute('style', `position: relative; transform: translateY(${d}px);`);
 					}
 				} else if (y > 0) {
 					if (element.mode !== MODES.FIXED) {
 						element.mode = MODES.FIXED;
-						// container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
+						container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
+						/*
 						container.style.position = `relative`;
+						*/
 						// container.setAttribute('style', `position: relative; transform: translateY(${y}px);`);
 					}
-					container.style.transform = `translateY(${y}px)`;
+					// container.style.transform = `translateY(${y}px)`;
 				} else {
 					if (element.mode !== MODES.NONE) {
 						element.mode = MODES.NONE;
-						// container.setAttribute('style', '');
-						container.style.position = `relative`;
-						container.style.transform = `none`;
+						container.setAttribute('style', '');
+						// container.style.position = `relative`;
+						// container.style.transform = `none`;
 					}
 				}
 			}
