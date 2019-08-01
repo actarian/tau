@@ -3853,6 +3853,30 @@ footer {
     line-height: 1;
     padding-top: 3px; }
 
+.section--product-colors .group--nav--vr:not(.vr--not-supported):not(.vr--not-found) .label__disabled {
+  display: none; }
+
+.section--product-colors .group--nav--vr:not(.vr--enter) .label__enter {
+  display: none; }
+
+.section--product-colors .group--nav--vr:not(.vr--exit) .label__exit {
+  display: none; }
+
+.section--product-colors .group--nav--vr.vr--enter {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  padding: 12px 6px 10px 28px;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  z-index: 1;
+  background: white;
+  border: 1px solid #e4e4e6;
+  border-radius: 45px; }
+  .section--product-colors .group--nav--vr.vr--enter .label {
+    font-size: 12px;
+    margin-right: 10px; }
+
 .section--product-colors .nav--types {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -4021,7 +4045,7 @@ footer {
     transition: fill ease-in-out 350ms; }
   .btn--vr .icon--vr, .btn--vr:active .icon--vr, .btn--vr:focus .icon--vr, .btn--vr:hover .icon--vr, .btn--vr:visited .icon--vr {
     fill: #bbb; }
-  .btn--vr.active:hover .icon--vr {
+  .vr--enter .btn--vr:hover .icon--vr, .btn--vr.active:hover .icon--vr {
     fill: #E11E26; }
 
 [canvas] {

@@ -2,7 +2,7 @@
 /* global window, document */
 
 export const TEST_ENABLED = false;
-export const VR_ENABLED = false;
+export const VR_ENABLED = true;
 export const ROOM_RADIUS = 200;
 export const PANEL_RADIUS = 100;
 export const POINT_RADIUS = 99;

@@ -128,7 +128,7 @@ export default class Controller extends EmittableGroup {
 	addModel(hand) {
 		const geometry = new THREE.CylinderBufferGeometry(cm(2), cm(2), cm(12), 24);
 		geometry.rotateX(Math.PI / 2);
-		const texture = new THREE.TextureLoader().load('threejs/matcap.jpg');
+		const texture = new THREE.TextureLoader().load('threejs/matcap/matcap-12.jpg');
 		const material = new THREE.MeshMatcapMaterial({
 			color: this.hand === GAMEPAD_HANDS.RIGHT ? 0x991111 : 0x111199,
 			matcap: texture,

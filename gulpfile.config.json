@@ -18,6 +18,29 @@
 				"minify": false
 			}, {
 				"input": [
+					"node_modules/ammo.js/builds/ammo.js"
+				],
+				"output": "docs/js/ammo.js",
+				"minify": false
+			}, {
+				"input": [
+					"node_modules/ammo.js/builds/ammo.wasm.js"
+				],
+				"output": "docs/js/ammo.wasm.js",
+				"minify": false
+			}, {
+				"input": [
+					"node_modules/ammo.js/builds/ammo.wasm.wasm"
+				],
+				"output": "docs/js"
+			}, {
+				"input": [
+					"src/js/threejs/physics/worker.wasm.js"
+				],
+				"output": "docs/js/worker.wasm.js",
+				"minify": false
+			}, {
+				"input": [
 					"node_modules/whatwg-fetch/dist/fetch.umd.js",
 					"node_modules/promise-polyfill/dist/polyfill.js",
 					"src/polyfills/polyfills.js"
@@ -64,6 +87,12 @@
 				],
 				"output": "docs/js/vendors.js",
 				"minify": false
+			}],
+			"resource": [{
+				"input": [
+					"node_modules/ammo.js/builds/ammo.wasm.wasm"
+				],
+				"output": "docs/js"
 			}]
 		}
 	},
@@ -72,7 +101,8 @@
 		"server": {
 			"src": "./docs",
 			"path": "/tau/",
-			"port": 7777
+			"host": "0.0.0.0",
+			"port": 41600
 		}
 	}
 }
