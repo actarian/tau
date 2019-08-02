@@ -111,17 +111,19 @@ export default class Canvas extends Emittable {
 		const vr = this.vr = this.addVR();
 		// vr.mode = VR_MODE.VR;
 		if (!VR_ENABLED || vr.mode === VR_MODE.NONE) {
-			// const composer = this.composer = this.addComposer();
+			const composer = this.composer = this.addComposer();
 			// const addons = this.addons = this.addSpheres();
 			// scene.add(addons);
 			// texture = this.getCubeCamera();
 			const toothbrush = this.toothbrush = this.addToothbrush(scene);
+			/*
 			setTimeout(() => {
 				vr.enabled = true;
 				setTimeout(() => {
 					vr.enabled = false;
 				}, 4000);
 			}, 4000);
+			*/
 		} else {
 			renderer.shadowMap.enabled = true;
 			renderer.shadowMap.type = THREE.PCFShadowMap; // THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
@@ -226,10 +228,11 @@ export default class Canvas extends Emittable {
 			scene.add(stand);
 			physics.addBox(stand, stand.userData.size);
 			toothbrush.userData.previousPosition = toothbrush.position.clone();
-			toothbrush.userData.previousRotation = toothbrush.rotation.clone();
+			toothbrush.userData.previousQuaternion = toothbrush.quaternion.clone();
+			toothbrush.quaternion.setFromEuler(this.getEulerFromArray([0, 0, deg(10)]));
+			// toothbrush.rotation.set(0, 0, deg(10));
 			toothbrush.defaultY = stand.position.y + cm(50);
 			toothbrush.position.set(0, toothbrush.defaultY, cm(-60));
-			toothbrush.rotation.set(0, 0, deg(10));
 			physics.addBox(toothbrush, toothbrush.userData.size, 1);
 			lights.remove(lights.light0);
 			lights.remove(lights.light1);
@@ -247,9 +250,9 @@ export default class Canvas extends Emittable {
 			renderer.setClearColor(0xffffff, 0);
 			scene.remove(floor);
 			scene.remove(stand);
-			if (toothbrush.userData.previousPosition && toothbrush.userData.previousRotation) {
+			if (toothbrush.userData.previousPosition && toothbrush.userData.previousQuaternion) {
 				toothbrush.position.copy(toothbrush.userData.previousPosition);
-				toothbrush.rotation.copy(toothbrush.userData.previousRotation);
+				toothbrush.quaternion.copy(toothbrush.userData.previousQuaternion);
 			}
 		}
 	}
@@ -448,7 +451,8 @@ export default class Canvas extends Emittable {
 				console.log('An error happened', error);
 			}
 		);
-		toothbrush.rotation.set(0, deg(-60), deg(-60)); // 		tre quarti sinistra
+		toothbrush.quaternion.setFromEuler(this.getEulerFromArray([0, deg(-60), deg(-60)])); // tre quarti sinistra
+		// toothbrush.rotation.set(0, deg(-60), deg(-60)); // 		tre quarti sinistra
 		toothbrush.on('grab', (controller) => {
 			console.log('toothbrush.on.grab');
 			if (this.physics) {
@@ -462,11 +466,13 @@ export default class Canvas extends Emittable {
 			target.worldToLocal(position);
 			toothbrush.parent.remove(toothbrush);
 			if (controller.gamepad.hand === GAMEPAD_HANDS.LEFT) {
+				// toothbrush.rotation.set(deg(180), deg(0), deg(115));
+				toothbrush.quaternion.setFromEuler(this.getEulerFromArray([deg(180), deg(0), deg(115)]));
 				toothbrush.position.set(cm(1), cm(2), cm(0));
-				toothbrush.rotation.set(deg(180), deg(0), deg(115));
 			} else {
+				// toothbrush.rotation.set(0, deg(10), deg(-60));
+				toothbrush.quaternion.setFromEuler(this.getEulerFromArray([0, deg(10), deg(-60)]));
 				toothbrush.position.set(cm(-1), cm(3), cm(-1));
-				toothbrush.rotation.set(0, deg(10), deg(-60));
 			}
 			target.add(toothbrush);
 			TweenMax.to(controller.material, 0.4, {
@@ -505,8 +511,9 @@ export default class Canvas extends Emittable {
 			}
 			toothbrush.parent.remove(toothbrush);
 			setTimeout(() => {
+				// toothbrush.rotation.set(0, 0, deg(10));
+				toothbrush.quaternion.setFromEuler(this.getEulerFromArray([0, 0, deg(10)]));
 				toothbrush.position.set(0, toothbrush.defaultY, cm(-60));
-				toothbrush.rotation.set(0, 0, deg(10));
 				this.scene.add(toothbrush);
 				if (this.physics) {
 					this.physics.addBox(toothbrush, toothbrush.userData.size, 1);
@@ -592,6 +599,7 @@ export default class Canvas extends Emittable {
 				this.container.parentNode.classList.remove('interactive');
 		}
 		const toothbrush = this.toothbrush;
+		const quaternion = this.getQuaternionFromArray(rotation);
 		if (toothbrush) {
 			TweenMax.to(toothbrush.position, 0.8, {
 				x: position[0],
@@ -599,10 +607,19 @@ export default class Canvas extends Emittable {
 				z: position[2],
 				ease: Power2.easeInOut,
 			});
+			/*
 			TweenMax.to(toothbrush.rotation, 1.2, {
 				x: rotation[0],
 				y: rotation[1],
 				z: rotation[2],
+				ease: Power2.easeInOut,
+			});
+			*/
+			TweenMax.to(toothbrush.quaternion, 1.2, {
+				x: quaternion.x,
+				y: quaternion.y,
+				z: quaternion.z,
+				w: quaternion.w,
 				ease: Power2.easeInOut,
 			});
 			TweenMax.to(this.camera, 0.6, {
@@ -625,6 +642,18 @@ export default class Canvas extends Emittable {
 				}
 			});
 		}
+	}
+
+	getQuaternionFromEuler(euler) {
+		return new THREE.Quaternion().setFromEuler(euler);
+	}
+
+	getEulerFromArray(array, axis = 'XYZ') {
+		return new THREE.Euler(array[0], array[1], array[2], axis);
+	}
+
+	getQuaternionFromArray(array, axis = 'XYZ') {
+		return this.getQuaternionFromEuler(this.getEulerFromArray(array, axis));
 	}
 
 	tweenColor(material, colorValue) {

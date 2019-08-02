@@ -17628,17 +17628,19 @@ class Canvas extends _emittable.default {
     const vr = this.vr = this.addVR(); // vr.mode = VR_MODE.VR;
 
     if (!_const.VR_ENABLED || vr.mode === _vr.VR_MODE.NONE) {
-      // const composer = this.composer = this.addComposer();
-      // const addons = this.addons = this.addSpheres();
+      const composer = this.composer = this.addComposer(); // const addons = this.addons = this.addSpheres();
       // scene.add(addons);
       // texture = this.getCubeCamera();
+
       const toothbrush = this.toothbrush = this.addToothbrush(scene);
+      /*
       setTimeout(() => {
-        vr.enabled = true;
-        setTimeout(() => {
-          vr.enabled = false;
-        }, 4000);
+      	vr.enabled = true;
+      	setTimeout(() => {
+      		vr.enabled = false;
+      	}, 4000);
       }, 4000);
+      */
     } else {
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFShadowMap; // THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
@@ -17747,10 +17749,11 @@ class Canvas extends _emittable.default {
       scene.add(stand);
       physics.addBox(stand, stand.userData.size);
       toothbrush.userData.previousPosition = toothbrush.position.clone();
-      toothbrush.userData.previousRotation = toothbrush.rotation.clone();
+      toothbrush.userData.previousQuaternion = toothbrush.quaternion.clone();
+      toothbrush.quaternion.setFromEuler(this.getEulerFromArray([0, 0, (0, _const.deg)(10)])); // toothbrush.rotation.set(0, 0, deg(10));
+
       toothbrush.defaultY = stand.position.y + (0, _const.cm)(50);
       toothbrush.position.set(0, toothbrush.defaultY, (0, _const.cm)(-60));
-      toothbrush.rotation.set(0, 0, (0, _const.deg)(10));
       physics.addBox(toothbrush, toothbrush.userData.size, 1);
       lights.remove(lights.light0);
       lights.remove(lights.light1);
@@ -17772,9 +17775,9 @@ class Canvas extends _emittable.default {
       scene.remove(floor);
       scene.remove(stand);
 
-      if (toothbrush.userData.previousPosition && toothbrush.userData.previousRotation) {
+      if (toothbrush.userData.previousPosition && toothbrush.userData.previousQuaternion) {
         toothbrush.position.copy(toothbrush.userData.previousPosition);
-        toothbrush.rotation.copy(toothbrush.userData.previousRotation);
+        toothbrush.quaternion.copy(toothbrush.userData.previousQuaternion);
       }
     }
   }
@@ -17978,7 +17981,8 @@ class Canvas extends _emittable.default {
     }, error => {
       console.log('An error happened', error);
     });
-    toothbrush.rotation.set(0, (0, _const.deg)(-60), (0, _const.deg)(-60)); // 		tre quarti sinistra
+    toothbrush.quaternion.setFromEuler(this.getEulerFromArray([0, (0, _const.deg)(-60), (0, _const.deg)(-60)])); // tre quarti sinistra
+    // toothbrush.rotation.set(0, deg(-60), deg(-60)); // 		tre quarti sinistra
 
     toothbrush.on('grab', controller => {
       console.log('toothbrush.on.grab');
@@ -17996,11 +18000,13 @@ class Canvas extends _emittable.default {
       toothbrush.parent.remove(toothbrush);
 
       if (controller.gamepad.hand === _gamepads.GAMEPAD_HANDS.LEFT) {
+        // toothbrush.rotation.set(deg(180), deg(0), deg(115));
+        toothbrush.quaternion.setFromEuler(this.getEulerFromArray([(0, _const.deg)(180), (0, _const.deg)(0), (0, _const.deg)(115)]));
         toothbrush.position.set((0, _const.cm)(1), (0, _const.cm)(2), (0, _const.cm)(0));
-        toothbrush.rotation.set((0, _const.deg)(180), (0, _const.deg)(0), (0, _const.deg)(115));
       } else {
+        // toothbrush.rotation.set(0, deg(10), deg(-60));
+        toothbrush.quaternion.setFromEuler(this.getEulerFromArray([0, (0, _const.deg)(10), (0, _const.deg)(-60)]));
         toothbrush.position.set((0, _const.cm)(-1), (0, _const.cm)(3), (0, _const.cm)(-1));
-        toothbrush.rotation.set(0, (0, _const.deg)(10), (0, _const.deg)(-60));
       }
 
       target.add(toothbrush);
@@ -18046,8 +18052,9 @@ class Canvas extends _emittable.default {
 
       toothbrush.parent.remove(toothbrush);
       setTimeout(() => {
+        // toothbrush.rotation.set(0, 0, deg(10));
+        toothbrush.quaternion.setFromEuler(this.getEulerFromArray([0, 0, (0, _const.deg)(10)]));
         toothbrush.position.set(0, toothbrush.defaultY, (0, _const.cm)(-60));
-        toothbrush.rotation.set(0, 0, (0, _const.deg)(10));
         this.scene.add(toothbrush);
 
         if (this.physics) {
@@ -18154,6 +18161,7 @@ class Canvas extends _emittable.default {
     }
 
     const toothbrush = this.toothbrush;
+    const quaternion = this.getQuaternionFromArray(rotation);
 
     if (toothbrush) {
       TweenMax.to(toothbrush.position, 0.8, {
@@ -18162,10 +18170,20 @@ class Canvas extends _emittable.default {
         z: position[2],
         ease: Power2.easeInOut
       });
+      /*
       TweenMax.to(toothbrush.rotation, 1.2, {
-        x: rotation[0],
-        y: rotation[1],
-        z: rotation[2],
+      	x: rotation[0],
+      	y: rotation[1],
+      	z: rotation[2],
+      	ease: Power2.easeInOut,
+      });
+      */
+
+      TweenMax.to(toothbrush.quaternion, 1.2, {
+        x: quaternion.x,
+        y: quaternion.y,
+        z: quaternion.z,
+        w: quaternion.w,
         ease: Power2.easeInOut
       });
       TweenMax.to(this.camera, 0.6, {
@@ -18189,6 +18207,18 @@ class Canvas extends _emittable.default {
         }
       });
     }
+  }
+
+  getQuaternionFromEuler(euler) {
+    return new THREE.Quaternion().setFromEuler(euler);
+  }
+
+  getEulerFromArray(array, axis = 'XYZ') {
+    return new THREE.Euler(array[0], array[1], array[2], axis);
+  }
+
+  getQuaternionFromArray(array, axis = 'XYZ') {
+    return this.getQuaternionFromEuler(this.getEulerFromArray(array, axis));
   }
 
   tweenColor(material, colorValue) {
@@ -21339,6 +21369,7 @@ class VR extends _emittable.default {
 
   onVRDisplayActivate(event) {
     try {
+      this.emit('beforepresenting');
       event.display.requestPresent([{
         source: this.renderer.domElement
       }]).then(() => {
@@ -21365,9 +21396,11 @@ class VR extends _emittable.default {
       const device = this.device;
 
       if (device.isPresenting) {
+        this.emit('beforeexiting');
         device.exitPresent();
         this.enabled = false;
       } else {
+        this.emit('beforepresenting');
         this.enabled = true;
         device.requestPresent([{
           source: this.renderer.domElement
@@ -21388,6 +21421,7 @@ class VR extends _emittable.default {
       const device = this.device;
 
       if (this.session === null) {
+        this.emit('beforepresenting');
         this.enabled = true;
         device.requestSession({
           immersive: true,
@@ -21401,6 +21435,7 @@ class VR extends _emittable.default {
         }
         */
       } else {
+        this.emit('beforeexiting');
         this.session.end();
         this.enabled = false;
       }
