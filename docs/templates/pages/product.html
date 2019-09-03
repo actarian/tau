@@ -198,10 +198,11 @@
 							</div>
 							<div class="group--nav group--nav--vr">
 								<div class="label">
-									<span class="label--enabled" ng-if="vrmode == vrmodes.NONE">VR non connesso:</span>
-									<span class="label--disabled" ng-if="vrmode != vrmodes.NONE">Provalo in VR:</span>
+									<span class="label__disabled">VR non connesso:</span>
+									<span class="label__enter">Provalo in VR:</span>
+									<span class="label__exit">Termina VR:</span>
 								</div>
-								<button class="btn btn--vr" ng-class="{ active: vrmode != vrmodes.NONE }">
+								<button class="btn btn--vr">
 									<svg class="icon icon--vr">
 										<use xlink:href="#icon--vr"></use>
 									</svg>
