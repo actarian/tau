@@ -5,9 +5,7 @@
 	<base href="/tau/">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	<!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
-	<!-- <meta name="viewport" content="initial-scale=1.0, user-scalable=no" /> -->
-	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="Content-Language" content="it" />
 	<meta name="robots" content="noindex,nofollow" />
 
@@ -87,16 +85,15 @@
 	<link href="fonts/sofia/stylesheet.css" rel="stylesheet">
 	<link href="fonts/fontawesome/fontawesome.css" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="slick/slick.css" />
-
 </head>
 
-<body>
+<body class="landing">
 	<ng-include src="'templates/shared/full-search.html'"></ng-include>
 	<ng-include src="'templates/shared/svg.html'"></ng-include>
 	<ng-include src="'templates/shared/header.html'"></ng-include>
 	<main class="page">
 		<div class="view" ng-cloak>
-			<ng-include src="'templates/pages/product.html'"></ng-include>
+			<ng-include src="'templates/pages/landing1.html'"></ng-include>
 		</div>
 	</main>
 	<ng-include src="'templates/shared/footer.html'"></ng-include>

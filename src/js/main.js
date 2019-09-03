@@ -176,6 +176,18 @@ function slideProdAbbinamento() {
 }
 
 /* --------------------------------------------------
+  Slide Info Listing Prodotto
+-------------------------------------------------- */
+function slideInfoListingProd() {
+    $('.listing--info--slide').slick({
+        arrows: false,
+        dots: true,
+        slidesToShow: 1,
+        slidesToScroll: 1
+    });
+}
+
+/* --------------------------------------------------
   Mobile Menu
 -------------------------------------------------- */
 function mobileMenu() {
@@ -197,5 +209,6 @@ $(function () {
     slideTestimonialHome();
     slideProdCorrelati();
     slideProdAbbinamento();
+    slideInfoListingProd();
     mobileMenu();
 });
