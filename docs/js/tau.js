@@ -1,2917 +1,6 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
-/**
- * dat-gui JavaScript Controller Library
- * http://code.google.com/p/dat-gui
- *
- * Copyright 2011 Data Arts Team, Google Creative Lab
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- */
-(function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) : typeof define === 'function' && define.amd ? define(['exports'], factory) : factory(global.dat = {});
-})(void 0, function (exports) {
-  'use strict';
-
-  function ___$insertStyle(css) {
-    if (!css) {
-      return;
-    }
-
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    var style = document.createElement('style');
-    style.setAttribute('type', 'text/css');
-    style.innerHTML = css;
-    document.head.appendChild(style);
-    return css;
-  }
-
-  function colorToString(color, forceCSSHex) {
-    var colorFormat = color.__state.conversionName.toString();
-
-    var r = Math.round(color.r);
-    var g = Math.round(color.g);
-    var b = Math.round(color.b);
-    var a = color.a;
-    var h = Math.round(color.h);
-    var s = color.s.toFixed(1);
-    var v = color.v.toFixed(1);
-
-    if (forceCSSHex || colorFormat === 'THREE_CHAR_HEX' || colorFormat === 'SIX_CHAR_HEX') {
-      var str = color.hex.toString(16);
-
-      while (str.length < 6) {
-        str = '0' + str;
-      }
-
-      return '#' + str;
-    } else if (colorFormat === 'CSS_RGB') {
-      return 'rgb(' + r + ',' + g + ',' + b + ')';
-    } else if (colorFormat === 'CSS_RGBA') {
-      return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
-    } else if (colorFormat === 'HEX') {
-      return '0x' + color.hex.toString(16);
-    } else if (colorFormat === 'RGB_ARRAY') {
-      return '[' + r + ',' + g + ',' + b + ']';
-    } else if (colorFormat === 'RGBA_ARRAY') {
-      return '[' + r + ',' + g + ',' + b + ',' + a + ']';
-    } else if (colorFormat === 'RGB_OBJ') {
-      return '{r:' + r + ',g:' + g + ',b:' + b + '}';
-    } else if (colorFormat === 'RGBA_OBJ') {
-      return '{r:' + r + ',g:' + g + ',b:' + b + ',a:' + a + '}';
-    } else if (colorFormat === 'HSV_OBJ') {
-      return '{h:' + h + ',s:' + s + ',v:' + v + '}';
-    } else if (colorFormat === 'HSVA_OBJ') {
-      return '{h:' + h + ',s:' + s + ',v:' + v + ',a:' + a + '}';
-    }
-
-    return 'unknown format';
-  }
-
-  var ARR_EACH = Array.prototype.forEach;
-  var ARR_SLICE = Array.prototype.slice;
-  var Common = {
-    BREAK: {},
-    extend: function extend(target) {
-      this.each(ARR_SLICE.call(arguments, 1), function (obj) {
-        var keys = this.isObject(obj) ? Object.keys(obj) : [];
-        keys.forEach(function (key) {
-          if (!this.isUndefined(obj[key])) {
-            target[key] = obj[key];
-          }
-        }.bind(this));
-      }, this);
-      return target;
-    },
-    defaults: function defaults(target) {
-      this.each(ARR_SLICE.call(arguments, 1), function (obj) {
-        var keys = this.isObject(obj) ? Object.keys(obj) : [];
-        keys.forEach(function (key) {
-          if (this.isUndefined(target[key])) {
-            target[key] = obj[key];
-          }
-        }.bind(this));
-      }, this);
-      return target;
-    },
-    compose: function compose() {
-      var toCall = ARR_SLICE.call(arguments);
-      return function () {
-        var args = ARR_SLICE.call(arguments);
-
-        for (var i = toCall.length - 1; i >= 0; i--) {
-          args = [toCall[i].apply(this, args)];
-        }
-
-        return args[0];
-      };
-    },
-    each: function each(obj, itr, scope) {
-      if (!obj) {
-        return;
-      }
-
-      if (ARR_EACH && obj.forEach && obj.forEach === ARR_EACH) {
-        obj.forEach(itr, scope);
-      } else if (obj.length === obj.length + 0) {
-        var key = void 0;
-        var l = void 0;
-
-        for (key = 0, l = obj.length; key < l; key++) {
-          if (key in obj && itr.call(scope, obj[key], key) === this.BREAK) {
-            return;
-          }
-        }
-      } else {
-        for (var _key in obj) {
-          if (itr.call(scope, obj[_key], _key) === this.BREAK) {
-            return;
-          }
-        }
-      }
-    },
-    defer: function defer(fnc) {
-      setTimeout(fnc, 0);
-    },
-    debounce: function debounce(func, threshold, callImmediately) {
-      var timeout = void 0;
-      return function () {
-        var obj = this;
-        var args = arguments;
-
-        function delayed() {
-          timeout = null;
-          if (!callImmediately) func.apply(obj, args);
-        }
-
-        var callNow = callImmediately || !timeout;
-        clearTimeout(timeout);
-        timeout = setTimeout(delayed, threshold);
-
-        if (callNow) {
-          func.apply(obj, args);
-        }
-      };
-    },
-    toArray: function toArray(obj) {
-      if (obj.toArray) return obj.toArray();
-      return ARR_SLICE.call(obj);
-    },
-    isUndefined: function isUndefined(obj) {
-      return obj === undefined;
-    },
-    isNull: function isNull(obj) {
-      return obj === null;
-    },
-    isNaN: function (_isNaN) {
-      function isNaN(_x) {
-        return _isNaN.apply(this, arguments);
-      }
-
-      isNaN.toString = function () {
-        return _isNaN.toString();
-      };
-
-      return isNaN;
-    }(function (obj) {
-      return isNaN(obj);
-    }),
-    isArray: Array.isArray || function (obj) {
-      return obj.constructor === Array;
-    },
-    isObject: function isObject(obj) {
-      return obj === Object(obj);
-    },
-    isNumber: function isNumber(obj) {
-      return obj === obj + 0;
-    },
-    isString: function isString(obj) {
-      return obj === obj + '';
-    },
-    isBoolean: function isBoolean(obj) {
-      return obj === false || obj === true;
-    },
-    isFunction: function isFunction(obj) {
-      return Object.prototype.toString.call(obj) === '[object Function]';
-    }
-  };
-  var INTERPRETATIONS = [{
-    litmus: Common.isString,
-    conversions: {
-      THREE_CHAR_HEX: {
-        read: function read(original) {
-          var test = original.match(/^#([A-F0-9])([A-F0-9])([A-F0-9])$/i);
-
-          if (test === null) {
-            return false;
-          }
-
-          return {
-            space: 'HEX',
-            hex: parseInt('0x' + test[1].toString() + test[1].toString() + test[2].toString() + test[2].toString() + test[3].toString() + test[3].toString(), 0)
-          };
-        },
-        write: colorToString
-      },
-      SIX_CHAR_HEX: {
-        read: function read(original) {
-          var test = original.match(/^#([A-F0-9]{6})$/i);
-
-          if (test === null) {
-            return false;
-          }
-
-          return {
-            space: 'HEX',
-            hex: parseInt('0x' + test[1].toString(), 0)
-          };
-        },
-        write: colorToString
-      },
-      CSS_RGB: {
-        read: function read(original) {
-          var test = original.match(/^rgb\(\s*(.+)\s*,\s*(.+)\s*,\s*(.+)\s*\)/);
-
-          if (test === null) {
-            return false;
-          }
-
-          return {
-            space: 'RGB',
-            r: parseFloat(test[1]),
-            g: parseFloat(test[2]),
-            b: parseFloat(test[3])
-          };
-        },
-        write: colorToString
-      },
-      CSS_RGBA: {
-        read: function read(original) {
-          var test = original.match(/^rgba\(\s*(.+)\s*,\s*(.+)\s*,\s*(.+)\s*,\s*(.+)\s*\)/);
-
-          if (test === null) {
-            return false;
-          }
-
-          return {
-            space: 'RGB',
-            r: parseFloat(test[1]),
-            g: parseFloat(test[2]),
-            b: parseFloat(test[3]),
-            a: parseFloat(test[4])
-          };
-        },
-        write: colorToString
-      }
-    }
-  }, {
-    litmus: Common.isNumber,
-    conversions: {
-      HEX: {
-        read: function read(original) {
-          return {
-            space: 'HEX',
-            hex: original,
-            conversionName: 'HEX'
-          };
-        },
-        write: function write(color) {
-          return color.hex;
-        }
-      }
-    }
-  }, {
-    litmus: Common.isArray,
-    conversions: {
-      RGB_ARRAY: {
-        read: function read(original) {
-          if (original.length !== 3) {
-            return false;
-          }
-
-          return {
-            space: 'RGB',
-            r: original[0],
-            g: original[1],
-            b: original[2]
-          };
-        },
-        write: function write(color) {
-          return [color.r, color.g, color.b];
-        }
-      },
-      RGBA_ARRAY: {
-        read: function read(original) {
-          if (original.length !== 4) return false;
-          return {
-            space: 'RGB',
-            r: original[0],
-            g: original[1],
-            b: original[2],
-            a: original[3]
-          };
-        },
-        write: function write(color) {
-          return [color.r, color.g, color.b, color.a];
-        }
-      }
-    }
-  }, {
-    litmus: Common.isObject,
-    conversions: {
-      RGBA_OBJ: {
-        read: function read(original) {
-          if (Common.isNumber(original.r) && Common.isNumber(original.g) && Common.isNumber(original.b) && Common.isNumber(original.a)) {
-            return {
-              space: 'RGB',
-              r: original.r,
-              g: original.g,
-              b: original.b,
-              a: original.a
-            };
-          }
-
-          return false;
-        },
-        write: function write(color) {
-          return {
-            r: color.r,
-            g: color.g,
-            b: color.b,
-            a: color.a
-          };
-        }
-      },
-      RGB_OBJ: {
-        read: function read(original) {
-          if (Common.isNumber(original.r) && Common.isNumber(original.g) && Common.isNumber(original.b)) {
-            return {
-              space: 'RGB',
-              r: original.r,
-              g: original.g,
-              b: original.b
-            };
-          }
-
-          return false;
-        },
-        write: function write(color) {
-          return {
-            r: color.r,
-            g: color.g,
-            b: color.b
-          };
-        }
-      },
-      HSVA_OBJ: {
-        read: function read(original) {
-          if (Common.isNumber(original.h) && Common.isNumber(original.s) && Common.isNumber(original.v) && Common.isNumber(original.a)) {
-            return {
-              space: 'HSV',
-              h: original.h,
-              s: original.s,
-              v: original.v,
-              a: original.a
-            };
-          }
-
-          return false;
-        },
-        write: function write(color) {
-          return {
-            h: color.h,
-            s: color.s,
-            v: color.v,
-            a: color.a
-          };
-        }
-      },
-      HSV_OBJ: {
-        read: function read(original) {
-          if (Common.isNumber(original.h) && Common.isNumber(original.s) && Common.isNumber(original.v)) {
-            return {
-              space: 'HSV',
-              h: original.h,
-              s: original.s,
-              v: original.v
-            };
-          }
-
-          return false;
-        },
-        write: function write(color) {
-          return {
-            h: color.h,
-            s: color.s,
-            v: color.v
-          };
-        }
-      }
-    }
-  }];
-  var result = void 0;
-  var toReturn = void 0;
-
-  var interpret = function interpret() {
-    toReturn = false;
-    var original = arguments.length > 1 ? Common.toArray(arguments) : arguments[0];
-    Common.each(INTERPRETATIONS, function (family) {
-      if (family.litmus(original)) {
-        Common.each(family.conversions, function (conversion, conversionName) {
-          result = conversion.read(original);
-
-          if (toReturn === false && result !== false) {
-            toReturn = result;
-            result.conversionName = conversionName;
-            result.conversion = conversion;
-            return Common.BREAK;
-          }
-        });
-        return Common.BREAK;
-      }
-    });
-    return toReturn;
-  };
-
-  var tmpComponent = void 0;
-  var ColorMath = {
-    hsv_to_rgb: function hsv_to_rgb(h, s, v) {
-      var hi = Math.floor(h / 60) % 6;
-      var f = h / 60 - Math.floor(h / 60);
-      var p = v * (1.0 - s);
-      var q = v * (1.0 - f * s);
-      var t = v * (1.0 - (1.0 - f) * s);
-      var c = [[v, t, p], [q, v, p], [p, v, t], [p, q, v], [t, p, v], [v, p, q]][hi];
-      return {
-        r: c[0] * 255,
-        g: c[1] * 255,
-        b: c[2] * 255
-      };
-    },
-    rgb_to_hsv: function rgb_to_hsv(r, g, b) {
-      var min = Math.min(r, g, b);
-      var max = Math.max(r, g, b);
-      var delta = max - min;
-      var h = void 0;
-      var s = void 0;
-
-      if (max !== 0) {
-        s = delta / max;
-      } else {
-        return {
-          h: NaN,
-          s: 0,
-          v: 0
-        };
-      }
-
-      if (r === max) {
-        h = (g - b) / delta;
-      } else if (g === max) {
-        h = 2 + (b - r) / delta;
-      } else {
-        h = 4 + (r - g) / delta;
-      }
-
-      h /= 6;
-
-      if (h < 0) {
-        h += 1;
-      }
-
-      return {
-        h: h * 360,
-        s: s,
-        v: max / 255
-      };
-    },
-    rgb_to_hex: function rgb_to_hex(r, g, b) {
-      var hex = this.hex_with_component(0, 2, r);
-      hex = this.hex_with_component(hex, 1, g);
-      hex = this.hex_with_component(hex, 0, b);
-      return hex;
-    },
-    component_from_hex: function component_from_hex(hex, componentIndex) {
-      return hex >> componentIndex * 8 & 0xFF;
-    },
-    hex_with_component: function hex_with_component(hex, componentIndex, value) {
-      return value << (tmpComponent = componentIndex * 8) | hex & ~(0xFF << tmpComponent);
-    }
-  };
-
-  var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-    return typeof obj;
-  } : function (obj) {
-    return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-  };
-
-  var classCallCheck = function (instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  };
-
-  var createClass = function () {
-    function defineProperties(target, props) {
-      for (var i = 0; i < props.length; i++) {
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ("value" in descriptor) descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
-      }
-    }
-
-    return function (Constructor, protoProps, staticProps) {
-      if (protoProps) defineProperties(Constructor.prototype, protoProps);
-      if (staticProps) defineProperties(Constructor, staticProps);
-      return Constructor;
-    };
-  }();
-
-  var get = function get(object, property, receiver) {
-    if (object === null) object = Function.prototype;
-    var desc = Object.getOwnPropertyDescriptor(object, property);
-
-    if (desc === undefined) {
-      var parent = Object.getPrototypeOf(object);
-
-      if (parent === null) {
-        return undefined;
-      } else {
-        return get(parent, property, receiver);
-      }
-    } else if ("value" in desc) {
-      return desc.value;
-    } else {
-      var getter = desc.get;
-
-      if (getter === undefined) {
-        return undefined;
-      }
-
-      return getter.call(receiver);
-    }
-  };
-
-  var inherits = function (subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-    }
-
-    subClass.prototype = Object.create(superClass && superClass.prototype, {
-      constructor: {
-        value: subClass,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-    if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-  };
-
-  var possibleConstructorReturn = function (self, call) {
-    if (!self) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-
-    return call && (typeof call === "object" || typeof call === "function") ? call : self;
-  };
-
-  var Color = function () {
-    function Color() {
-      classCallCheck(this, Color);
-      this.__state = interpret.apply(this, arguments);
-
-      if (this.__state === false) {
-        throw new Error('Failed to interpret color arguments');
-      }
-
-      this.__state.a = this.__state.a || 1;
-    }
-
-    createClass(Color, [{
-      key: 'toString',
-      value: function toString() {
-        return colorToString(this);
-      }
-    }, {
-      key: 'toHexString',
-      value: function toHexString() {
-        return colorToString(this, true);
-      }
-    }, {
-      key: 'toOriginal',
-      value: function toOriginal() {
-        return this.__state.conversion.write(this);
-      }
-    }]);
-    return Color;
-  }();
-
-  function defineRGBComponent(target, component, componentHexIndex) {
-    Object.defineProperty(target, component, {
-      get: function get$$1() {
-        if (this.__state.space === 'RGB') {
-          return this.__state[component];
-        }
-
-        Color.recalculateRGB(this, component, componentHexIndex);
-        return this.__state[component];
-      },
-      set: function set$$1(v) {
-        if (this.__state.space !== 'RGB') {
-          Color.recalculateRGB(this, component, componentHexIndex);
-          this.__state.space = 'RGB';
-        }
-
-        this.__state[component] = v;
-      }
-    });
-  }
-
-  function defineHSVComponent(target, component) {
-    Object.defineProperty(target, component, {
-      get: function get$$1() {
-        if (this.__state.space === 'HSV') {
-          return this.__state[component];
-        }
-
-        Color.recalculateHSV(this);
-        return this.__state[component];
-      },
-      set: function set$$1(v) {
-        if (this.__state.space !== 'HSV') {
-          Color.recalculateHSV(this);
-          this.__state.space = 'HSV';
-        }
-
-        this.__state[component] = v;
-      }
-    });
-  }
-
-  Color.recalculateRGB = function (color, component, componentHexIndex) {
-    if (color.__state.space === 'HEX') {
-      color.__state[component] = ColorMath.component_from_hex(color.__state.hex, componentHexIndex);
-    } else if (color.__state.space === 'HSV') {
-      Common.extend(color.__state, ColorMath.hsv_to_rgb(color.__state.h, color.__state.s, color.__state.v));
-    } else {
-      throw new Error('Corrupted color state');
-    }
-  };
-
-  Color.recalculateHSV = function (color) {
-    var result = ColorMath.rgb_to_hsv(color.r, color.g, color.b);
-    Common.extend(color.__state, {
-      s: result.s,
-      v: result.v
-    });
-
-    if (!Common.isNaN(result.h)) {
-      color.__state.h = result.h;
-    } else if (Common.isUndefined(color.__state.h)) {
-      color.__state.h = 0;
-    }
-  };
-
-  Color.COMPONENTS = ['r', 'g', 'b', 'h', 's', 'v', 'hex', 'a'];
-  defineRGBComponent(Color.prototype, 'r', 2);
-  defineRGBComponent(Color.prototype, 'g', 1);
-  defineRGBComponent(Color.prototype, 'b', 0);
-  defineHSVComponent(Color.prototype, 'h');
-  defineHSVComponent(Color.prototype, 's');
-  defineHSVComponent(Color.prototype, 'v');
-  Object.defineProperty(Color.prototype, 'a', {
-    get: function get$$1() {
-      return this.__state.a;
-    },
-    set: function set$$1(v) {
-      this.__state.a = v;
-    }
-  });
-  Object.defineProperty(Color.prototype, 'hex', {
-    get: function get$$1() {
-      if (!this.__state.space !== 'HEX') {
-        this.__state.hex = ColorMath.rgb_to_hex(this.r, this.g, this.b);
-      }
-
-      return this.__state.hex;
-    },
-    set: function set$$1(v) {
-      this.__state.space = 'HEX';
-      this.__state.hex = v;
-    }
-  });
-
-  var Controller = function () {
-    function Controller(object, property) {
-      classCallCheck(this, Controller);
-      this.initialValue = object[property];
-      this.domElement = document.createElement('div');
-      this.object = object;
-      this.property = property;
-      this.__onChange = undefined;
-      this.__onFinishChange = undefined;
-    }
-
-    createClass(Controller, [{
-      key: 'onChange',
-      value: function onChange(fnc) {
-        this.__onChange = fnc;
-        return this;
-      }
-    }, {
-      key: 'onFinishChange',
-      value: function onFinishChange(fnc) {
-        this.__onFinishChange = fnc;
-        return this;
-      }
-    }, {
-      key: 'setValue',
-      value: function setValue(newValue) {
-        this.object[this.property] = newValue;
-
-        if (this.__onChange) {
-          this.__onChange.call(this, newValue);
-        }
-
-        this.updateDisplay();
-        return this;
-      }
-    }, {
-      key: 'getValue',
-      value: function getValue() {
-        return this.object[this.property];
-      }
-    }, {
-      key: 'updateDisplay',
-      value: function updateDisplay() {
-        return this;
-      }
-    }, {
-      key: 'isModified',
-      value: function isModified() {
-        return this.initialValue !== this.getValue();
-      }
-    }]);
-    return Controller;
-  }();
-
-  var EVENT_MAP = {
-    HTMLEvents: ['change'],
-    MouseEvents: ['click', 'mousemove', 'mousedown', 'mouseup', 'mouseover'],
-    KeyboardEvents: ['keydown']
-  };
-  var EVENT_MAP_INV = {};
-  Common.each(EVENT_MAP, function (v, k) {
-    Common.each(v, function (e) {
-      EVENT_MAP_INV[e] = k;
-    });
-  });
-  var CSS_VALUE_PIXELS = /(\d+(\.\d+)?)px/;
-
-  function cssValueToPixels(val) {
-    if (val === '0' || Common.isUndefined(val)) {
-      return 0;
-    }
-
-    var match = val.match(CSS_VALUE_PIXELS);
-
-    if (!Common.isNull(match)) {
-      return parseFloat(match[1]);
-    }
-
-    return 0;
-  }
-
-  var dom = {
-    makeSelectable: function makeSelectable(elem, selectable) {
-      if (elem === undefined || elem.style === undefined) return;
-      elem.onselectstart = selectable ? function () {
-        return false;
-      } : function () {};
-      elem.style.MozUserSelect = selectable ? 'auto' : 'none';
-      elem.style.KhtmlUserSelect = selectable ? 'auto' : 'none';
-      elem.unselectable = selectable ? 'on' : 'off';
-    },
-    makeFullscreen: function makeFullscreen(elem, hor, vert) {
-      var vertical = vert;
-      var horizontal = hor;
-
-      if (Common.isUndefined(horizontal)) {
-        horizontal = true;
-      }
-
-      if (Common.isUndefined(vertical)) {
-        vertical = true;
-      }
-
-      elem.style.position = 'absolute';
-
-      if (horizontal) {
-        elem.style.left = 0;
-        elem.style.right = 0;
-      }
-
-      if (vertical) {
-        elem.style.top = 0;
-        elem.style.bottom = 0;
-      }
-    },
-    fakeEvent: function fakeEvent(elem, eventType, pars, aux) {
-      var params = pars || {};
-      var className = EVENT_MAP_INV[eventType];
-
-      if (!className) {
-        throw new Error('Event type ' + eventType + ' not supported.');
-      }
-
-      var evt = document.createEvent(className);
-
-      switch (className) {
-        case 'MouseEvents':
-          {
-            var clientX = params.x || params.clientX || 0;
-            var clientY = params.y || params.clientY || 0;
-            evt.initMouseEvent(eventType, params.bubbles || false, params.cancelable || true, window, params.clickCount || 1, 0, 0, clientX, clientY, false, false, false, false, 0, null);
-            break;
-          }
-
-        case 'KeyboardEvents':
-          {
-            var init = evt.initKeyboardEvent || evt.initKeyEvent;
-            Common.defaults(params, {
-              cancelable: true,
-              ctrlKey: false,
-              altKey: false,
-              shiftKey: false,
-              metaKey: false,
-              keyCode: undefined,
-              charCode: undefined
-            });
-            init(eventType, params.bubbles || false, params.cancelable, window, params.ctrlKey, params.altKey, params.shiftKey, params.metaKey, params.keyCode, params.charCode);
-            break;
-          }
-
-        default:
-          {
-            evt.initEvent(eventType, params.bubbles || false, params.cancelable || true);
-            break;
-          }
-      }
-
-      Common.defaults(evt, aux);
-      elem.dispatchEvent(evt);
-    },
-    bind: function bind(elem, event, func, newBool) {
-      var bool = newBool || false;
-
-      if (elem.addEventListener) {
-        elem.addEventListener(event, func, bool);
-      } else if (elem.attachEvent) {
-        elem.attachEvent('on' + event, func);
-      }
-
-      return dom;
-    },
-    unbind: function unbind(elem, event, func, newBool) {
-      var bool = newBool || false;
-
-      if (elem.removeEventListener) {
-        elem.removeEventListener(event, func, bool);
-      } else if (elem.detachEvent) {
-        elem.detachEvent('on' + event, func);
-      }
-
-      return dom;
-    },
-    addClass: function addClass(elem, className) {
-      if (elem.className === undefined) {
-        elem.className = className;
-      } else if (elem.className !== className) {
-        var classes = elem.className.split(/ +/);
-
-        if (classes.indexOf(className) === -1) {
-          classes.push(className);
-          elem.className = classes.join(' ').replace(/^\s+/, '').replace(/\s+$/, '');
-        }
-      }
-
-      return dom;
-    },
-    removeClass: function removeClass(elem, className) {
-      if (className) {
-        if (elem.className === className) {
-          elem.removeAttribute('class');
-        } else {
-          var classes = elem.className.split(/ +/);
-          var index = classes.indexOf(className);
-
-          if (index !== -1) {
-            classes.splice(index, 1);
-            elem.className = classes.join(' ');
-          }
-        }
-      } else {
-        elem.className = undefined;
-      }
-
-      return dom;
-    },
-    hasClass: function hasClass(elem, className) {
-      return new RegExp('(?:^|\\s+)' + className + '(?:\\s+|$)').test(elem.className) || false;
-    },
-    getWidth: function getWidth(elem) {
-      var style = getComputedStyle(elem);
-      return cssValueToPixels(style['border-left-width']) + cssValueToPixels(style['border-right-width']) + cssValueToPixels(style['padding-left']) + cssValueToPixels(style['padding-right']) + cssValueToPixels(style.width);
-    },
-    getHeight: function getHeight(elem) {
-      var style = getComputedStyle(elem);
-      return cssValueToPixels(style['border-top-width']) + cssValueToPixels(style['border-bottom-width']) + cssValueToPixels(style['padding-top']) + cssValueToPixels(style['padding-bottom']) + cssValueToPixels(style.height);
-    },
-    getOffset: function getOffset(el) {
-      var elem = el;
-      var offset = {
-        left: 0,
-        top: 0
-      };
-
-      if (elem.offsetParent) {
-        do {
-          offset.left += elem.offsetLeft;
-          offset.top += elem.offsetTop;
-          elem = elem.offsetParent;
-        } while (elem);
-      }
-
-      return offset;
-    },
-    isActive: function isActive(elem) {
-      return elem === document.activeElement && (elem.type || elem.href);
-    }
-  };
-
-  var BooleanController = function (_Controller) {
-    inherits(BooleanController, _Controller);
-
-    function BooleanController(object, property) {
-      classCallCheck(this, BooleanController);
-
-      var _this2 = possibleConstructorReturn(this, (BooleanController.__proto__ || Object.getPrototypeOf(BooleanController)).call(this, object, property));
-
-      var _this = _this2;
-      _this2.__prev = _this2.getValue();
-      _this2.__checkbox = document.createElement('input');
-
-      _this2.__checkbox.setAttribute('type', 'checkbox');
-
-      function onChange() {
-        _this.setValue(!_this.__prev);
-      }
-
-      dom.bind(_this2.__checkbox, 'change', onChange, false);
-
-      _this2.domElement.appendChild(_this2.__checkbox);
-
-      _this2.updateDisplay();
-
-      return _this2;
-    }
-
-    createClass(BooleanController, [{
-      key: 'setValue',
-      value: function setValue(v) {
-        var toReturn = get(BooleanController.prototype.__proto__ || Object.getPrototypeOf(BooleanController.prototype), 'setValue', this).call(this, v);
-
-        if (this.__onFinishChange) {
-          this.__onFinishChange.call(this, this.getValue());
-        }
-
-        this.__prev = this.getValue();
-        return toReturn;
-      }
-    }, {
-      key: 'updateDisplay',
-      value: function updateDisplay() {
-        if (this.getValue() === true) {
-          this.__checkbox.setAttribute('checked', 'checked');
-
-          this.__checkbox.checked = true;
-          this.__prev = true;
-        } else {
-          this.__checkbox.checked = false;
-          this.__prev = false;
-        }
-
-        return get(BooleanController.prototype.__proto__ || Object.getPrototypeOf(BooleanController.prototype), 'updateDisplay', this).call(this);
-      }
-    }]);
-    return BooleanController;
-  }(Controller);
-
-  var OptionController = function (_Controller) {
-    inherits(OptionController, _Controller);
-
-    function OptionController(object, property, opts) {
-      classCallCheck(this, OptionController);
-
-      var _this2 = possibleConstructorReturn(this, (OptionController.__proto__ || Object.getPrototypeOf(OptionController)).call(this, object, property));
-
-      var options = opts;
-      var _this = _this2;
-      _this2.__select = document.createElement('select');
-
-      if (Common.isArray(options)) {
-        var map = {};
-        Common.each(options, function (element) {
-          map[element] = element;
-        });
-        options = map;
-      }
-
-      Common.each(options, function (value, key) {
-        var opt = document.createElement('option');
-        opt.innerHTML = key;
-        opt.setAttribute('value', value);
-
-        _this.__select.appendChild(opt);
-      });
-
-      _this2.updateDisplay();
-
-      dom.bind(_this2.__select, 'change', function () {
-        var desiredValue = this.options[this.selectedIndex].value;
-
-        _this.setValue(desiredValue);
-      });
-
-      _this2.domElement.appendChild(_this2.__select);
-
-      return _this2;
-    }
-
-    createClass(OptionController, [{
-      key: 'setValue',
-      value: function setValue(v) {
-        var toReturn = get(OptionController.prototype.__proto__ || Object.getPrototypeOf(OptionController.prototype), 'setValue', this).call(this, v);
-
-        if (this.__onFinishChange) {
-          this.__onFinishChange.call(this, this.getValue());
-        }
-
-        return toReturn;
-      }
-    }, {
-      key: 'updateDisplay',
-      value: function updateDisplay() {
-        if (dom.isActive(this.__select)) return this;
-        this.__select.value = this.getValue();
-        return get(OptionController.prototype.__proto__ || Object.getPrototypeOf(OptionController.prototype), 'updateDisplay', this).call(this);
-      }
-    }]);
-    return OptionController;
-  }(Controller);
-
-  var StringController = function (_Controller) {
-    inherits(StringController, _Controller);
-
-    function StringController(object, property) {
-      classCallCheck(this, StringController);
-
-      var _this2 = possibleConstructorReturn(this, (StringController.__proto__ || Object.getPrototypeOf(StringController)).call(this, object, property));
-
-      var _this = _this2;
-
-      function onChange() {
-        _this.setValue(_this.__input.value);
-      }
-
-      function onBlur() {
-        if (_this.__onFinishChange) {
-          _this.__onFinishChange.call(_this, _this.getValue());
-        }
-      }
-
-      _this2.__input = document.createElement('input');
-
-      _this2.__input.setAttribute('type', 'text');
-
-      dom.bind(_this2.__input, 'keyup', onChange);
-      dom.bind(_this2.__input, 'change', onChange);
-      dom.bind(_this2.__input, 'blur', onBlur);
-      dom.bind(_this2.__input, 'keydown', function (e) {
-        if (e.keyCode === 13) {
-          this.blur();
-        }
-      });
-
-      _this2.updateDisplay();
-
-      _this2.domElement.appendChild(_this2.__input);
-
-      return _this2;
-    }
-
-    createClass(StringController, [{
-      key: 'updateDisplay',
-      value: function updateDisplay() {
-        if (!dom.isActive(this.__input)) {
-          this.__input.value = this.getValue();
-        }
-
-        return get(StringController.prototype.__proto__ || Object.getPrototypeOf(StringController.prototype), 'updateDisplay', this).call(this);
-      }
-    }]);
-    return StringController;
-  }(Controller);
-
-  function numDecimals(x) {
-    var _x = x.toString();
-
-    if (_x.indexOf('.') > -1) {
-      return _x.length - _x.indexOf('.') - 1;
-    }
-
-    return 0;
-  }
-
-  var NumberController = function (_Controller) {
-    inherits(NumberController, _Controller);
-
-    function NumberController(object, property, params) {
-      classCallCheck(this, NumberController);
-
-      var _this = possibleConstructorReturn(this, (NumberController.__proto__ || Object.getPrototypeOf(NumberController)).call(this, object, property));
-
-      var _params = params || {};
-
-      _this.__min = _params.min;
-      _this.__max = _params.max;
-      _this.__step = _params.step;
-
-      if (Common.isUndefined(_this.__step)) {
-        if (_this.initialValue === 0) {
-          _this.__impliedStep = 1;
-        } else {
-          _this.__impliedStep = Math.pow(10, Math.floor(Math.log(Math.abs(_this.initialValue)) / Math.LN10)) / 10;
-        }
-      } else {
-        _this.__impliedStep = _this.__step;
-      }
-
-      _this.__precision = numDecimals(_this.__impliedStep);
-      return _this;
-    }
-
-    createClass(NumberController, [{
-      key: 'setValue',
-      value: function setValue(v) {
-        var _v = v;
-
-        if (this.__min !== undefined && _v < this.__min) {
-          _v = this.__min;
-        } else if (this.__max !== undefined && _v > this.__max) {
-          _v = this.__max;
-        }
-
-        if (this.__step !== undefined && _v % this.__step !== 0) {
-          _v = Math.round(_v / this.__step) * this.__step;
-        }
-
-        return get(NumberController.prototype.__proto__ || Object.getPrototypeOf(NumberController.prototype), 'setValue', this).call(this, _v);
-      }
-    }, {
-      key: 'min',
-      value: function min(minValue) {
-        this.__min = minValue;
-        return this;
-      }
-    }, {
-      key: 'max',
-      value: function max(maxValue) {
-        this.__max = maxValue;
-        return this;
-      }
-    }, {
-      key: 'step',
-      value: function step(stepValue) {
-        this.__step = stepValue;
-        this.__impliedStep = stepValue;
-        this.__precision = numDecimals(stepValue);
-        return this;
-      }
-    }]);
-    return NumberController;
-  }(Controller);
-
-  function roundToDecimal(value, decimals) {
-    var tenTo = Math.pow(10, decimals);
-    return Math.round(value * tenTo) / tenTo;
-  }
-
-  var NumberControllerBox = function (_NumberController) {
-    inherits(NumberControllerBox, _NumberController);
-
-    function NumberControllerBox(object, property, params) {
-      classCallCheck(this, NumberControllerBox);
-
-      var _this2 = possibleConstructorReturn(this, (NumberControllerBox.__proto__ || Object.getPrototypeOf(NumberControllerBox)).call(this, object, property, params));
-
-      _this2.__truncationSuspended = false;
-      var _this = _this2;
-      var prevY = void 0;
-
-      function onChange() {
-        var attempted = parseFloat(_this.__input.value);
-
-        if (!Common.isNaN(attempted)) {
-          _this.setValue(attempted);
-        }
-      }
-
-      function onFinish() {
-        if (_this.__onFinishChange) {
-          _this.__onFinishChange.call(_this, _this.getValue());
-        }
-      }
-
-      function onBlur() {
-        onFinish();
-      }
-
-      function onMouseDrag(e) {
-        var diff = prevY - e.clientY;
-
-        _this.setValue(_this.getValue() + diff * _this.__impliedStep);
-
-        prevY = e.clientY;
-      }
-
-      function onMouseUp() {
-        dom.unbind(window, 'mousemove', onMouseDrag);
-        dom.unbind(window, 'mouseup', onMouseUp);
-        onFinish();
-      }
-
-      function onMouseDown(e) {
-        dom.bind(window, 'mousemove', onMouseDrag);
-        dom.bind(window, 'mouseup', onMouseUp);
-        prevY = e.clientY;
-      }
-
-      _this2.__input = document.createElement('input');
-
-      _this2.__input.setAttribute('type', 'text');
-
-      dom.bind(_this2.__input, 'change', onChange);
-      dom.bind(_this2.__input, 'blur', onBlur);
-      dom.bind(_this2.__input, 'mousedown', onMouseDown);
-      dom.bind(_this2.__input, 'keydown', function (e) {
-        if (e.keyCode === 13) {
-          _this.__truncationSuspended = true;
-          this.blur();
-          _this.__truncationSuspended = false;
-          onFinish();
-        }
-      });
-
-      _this2.updateDisplay();
-
-      _this2.domElement.appendChild(_this2.__input);
-
-      return _this2;
-    }
-
-    createClass(NumberControllerBox, [{
-      key: 'updateDisplay',
-      value: function updateDisplay() {
-        this.__input.value = this.__truncationSuspended ? this.getValue() : roundToDecimal(this.getValue(), this.__precision);
-        return get(NumberControllerBox.prototype.__proto__ || Object.getPrototypeOf(NumberControllerBox.prototype), 'updateDisplay', this).call(this);
-      }
-    }]);
-    return NumberControllerBox;
-  }(NumberController);
-
-  function map(v, i1, i2, o1, o2) {
-    return o1 + (o2 - o1) * ((v - i1) / (i2 - i1));
-  }
-
-  var NumberControllerSlider = function (_NumberController) {
-    inherits(NumberControllerSlider, _NumberController);
-
-    function NumberControllerSlider(object, property, min, max, step) {
-      classCallCheck(this, NumberControllerSlider);
-
-      var _this2 = possibleConstructorReturn(this, (NumberControllerSlider.__proto__ || Object.getPrototypeOf(NumberControllerSlider)).call(this, object, property, {
-        min: min,
-        max: max,
-        step: step
-      }));
-
-      var _this = _this2;
-      _this2.__background = document.createElement('div');
-      _this2.__foreground = document.createElement('div');
-      dom.bind(_this2.__background, 'mousedown', onMouseDown);
-      dom.bind(_this2.__background, 'touchstart', onTouchStart);
-      dom.addClass(_this2.__background, 'slider');
-      dom.addClass(_this2.__foreground, 'slider-fg');
-
-      function onMouseDown(e) {
-        document.activeElement.blur();
-        dom.bind(window, 'mousemove', onMouseDrag);
-        dom.bind(window, 'mouseup', onMouseUp);
-        onMouseDrag(e);
-      }
-
-      function onMouseDrag(e) {
-        e.preventDefault();
-
-        var bgRect = _this.__background.getBoundingClientRect();
-
-        _this.setValue(map(e.clientX, bgRect.left, bgRect.right, _this.__min, _this.__max));
-
-        return false;
-      }
-
-      function onMouseUp() {
-        dom.unbind(window, 'mousemove', onMouseDrag);
-        dom.unbind(window, 'mouseup', onMouseUp);
-
-        if (_this.__onFinishChange) {
-          _this.__onFinishChange.call(_this, _this.getValue());
-        }
-      }
-
-      function onTouchStart(e) {
-        if (e.touches.length !== 1) {
-          return;
-        }
-
-        dom.bind(window, 'touchmove', onTouchMove);
-        dom.bind(window, 'touchend', onTouchEnd);
-        onTouchMove(e);
-      }
-
-      function onTouchMove(e) {
-        var clientX = e.touches[0].clientX;
-
-        var bgRect = _this.__background.getBoundingClientRect();
-
-        _this.setValue(map(clientX, bgRect.left, bgRect.right, _this.__min, _this.__max));
-      }
-
-      function onTouchEnd() {
-        dom.unbind(window, 'touchmove', onTouchMove);
-        dom.unbind(window, 'touchend', onTouchEnd);
-
-        if (_this.__onFinishChange) {
-          _this.__onFinishChange.call(_this, _this.getValue());
-        }
-      }
-
-      _this2.updateDisplay();
-
-      _this2.__background.appendChild(_this2.__foreground);
-
-      _this2.domElement.appendChild(_this2.__background);
-
-      return _this2;
-    }
-
-    createClass(NumberControllerSlider, [{
-      key: 'updateDisplay',
-      value: function updateDisplay() {
-        var pct = (this.getValue() - this.__min) / (this.__max - this.__min);
-
-        this.__foreground.style.width = pct * 100 + '%';
-        return get(NumberControllerSlider.prototype.__proto__ || Object.getPrototypeOf(NumberControllerSlider.prototype), 'updateDisplay', this).call(this);
-      }
-    }]);
-    return NumberControllerSlider;
-  }(NumberController);
-
-  var FunctionController = function (_Controller) {
-    inherits(FunctionController, _Controller);
-
-    function FunctionController(object, property, text) {
-      classCallCheck(this, FunctionController);
-
-      var _this2 = possibleConstructorReturn(this, (FunctionController.__proto__ || Object.getPrototypeOf(FunctionController)).call(this, object, property));
-
-      var _this = _this2;
-      _this2.__button = document.createElement('div');
-      _this2.__button.innerHTML = text === undefined ? 'Fire' : text;
-      dom.bind(_this2.__button, 'click', function (e) {
-        e.preventDefault();
-
-        _this.fire();
-
-        return false;
-      });
-      dom.addClass(_this2.__button, 'button');
-
-      _this2.domElement.appendChild(_this2.__button);
-
-      return _this2;
-    }
-
-    createClass(FunctionController, [{
-      key: 'fire',
-      value: function fire() {
-        if (this.__onChange) {
-          this.__onChange.call(this);
-        }
-
-        this.getValue().call(this.object);
-
-        if (this.__onFinishChange) {
-          this.__onFinishChange.call(this, this.getValue());
-        }
-      }
-    }]);
-    return FunctionController;
-  }(Controller);
-
-  var ColorController = function (_Controller) {
-    inherits(ColorController, _Controller);
-
-    function ColorController(object, property) {
-      classCallCheck(this, ColorController);
-
-      var _this2 = possibleConstructorReturn(this, (ColorController.__proto__ || Object.getPrototypeOf(ColorController)).call(this, object, property));
-
-      _this2.__color = new Color(_this2.getValue());
-      _this2.__temp = new Color(0);
-      var _this = _this2;
-      _this2.domElement = document.createElement('div');
-      dom.makeSelectable(_this2.domElement, false);
-      _this2.__selector = document.createElement('div');
-      _this2.__selector.className = 'selector';
-      _this2.__saturation_field = document.createElement('div');
-      _this2.__saturation_field.className = 'saturation-field';
-      _this2.__field_knob = document.createElement('div');
-      _this2.__field_knob.className = 'field-knob';
-      _this2.__field_knob_border = '2px solid ';
-      _this2.__hue_knob = document.createElement('div');
-      _this2.__hue_knob.className = 'hue-knob';
-      _this2.__hue_field = document.createElement('div');
-      _this2.__hue_field.className = 'hue-field';
-      _this2.__input = document.createElement('input');
-      _this2.__input.type = 'text';
-      _this2.__input_textShadow = '0 1px 1px ';
-      dom.bind(_this2.__input, 'keydown', function (e) {
-        if (e.keyCode === 13) {
-          onBlur.call(this);
-        }
-      });
-      dom.bind(_this2.__input, 'blur', onBlur);
-      dom.bind(_this2.__selector, 'mousedown', function () {
-        dom.addClass(this, 'drag').bind(window, 'mouseup', function () {
-          dom.removeClass(_this.__selector, 'drag');
-        });
-      });
-      dom.bind(_this2.__selector, 'touchstart', function () {
-        dom.addClass(this, 'drag').bind(window, 'touchend', function () {
-          dom.removeClass(_this.__selector, 'drag');
-        });
-      });
-      var valueField = document.createElement('div');
-      Common.extend(_this2.__selector.style, {
-        width: '122px',
-        height: '102px',
-        padding: '3px',
-        backgroundColor: '#222',
-        boxShadow: '0px 1px 3px rgba(0,0,0,0.3)'
-      });
-      Common.extend(_this2.__field_knob.style, {
-        position: 'absolute',
-        width: '12px',
-        height: '12px',
-        border: _this2.__field_knob_border + (_this2.__color.v < 0.5 ? '#fff' : '#000'),
-        boxShadow: '0px 1px 3px rgba(0,0,0,0.5)',
-        borderRadius: '12px',
-        zIndex: 1
-      });
-      Common.extend(_this2.__hue_knob.style, {
-        position: 'absolute',
-        width: '15px',
-        height: '2px',
-        borderRight: '4px solid #fff',
-        zIndex: 1
-      });
-      Common.extend(_this2.__saturation_field.style, {
-        width: '100px',
-        height: '100px',
-        border: '1px solid #555',
-        marginRight: '3px',
-        display: 'inline-block',
-        cursor: 'pointer'
-      });
-      Common.extend(valueField.style, {
-        width: '100%',
-        height: '100%',
-        background: 'none'
-      });
-      linearGradient(valueField, 'top', 'rgba(0,0,0,0)', '#000');
-      Common.extend(_this2.__hue_field.style, {
-        width: '15px',
-        height: '100px',
-        border: '1px solid #555',
-        cursor: 'ns-resize',
-        position: 'absolute',
-        top: '3px',
-        right: '3px'
-      });
-      hueGradient(_this2.__hue_field);
-      Common.extend(_this2.__input.style, {
-        outline: 'none',
-        textAlign: 'center',
-        color: '#fff',
-        border: 0,
-        fontWeight: 'bold',
-        textShadow: _this2.__input_textShadow + 'rgba(0,0,0,0.7)'
-      });
-      dom.bind(_this2.__saturation_field, 'mousedown', fieldDown);
-      dom.bind(_this2.__saturation_field, 'touchstart', fieldDown);
-      dom.bind(_this2.__field_knob, 'mousedown', fieldDown);
-      dom.bind(_this2.__field_knob, 'touchstart', fieldDown);
-      dom.bind(_this2.__hue_field, 'mousedown', fieldDownH);
-      dom.bind(_this2.__hue_field, 'touchstart', fieldDownH);
-
-      function fieldDown(e) {
-        setSV(e);
-        dom.bind(window, 'mousemove', setSV);
-        dom.bind(window, 'touchmove', setSV);
-        dom.bind(window, 'mouseup', fieldUpSV);
-        dom.bind(window, 'touchend', fieldUpSV);
-      }
-
-      function fieldDownH(e) {
-        setH(e);
-        dom.bind(window, 'mousemove', setH);
-        dom.bind(window, 'touchmove', setH);
-        dom.bind(window, 'mouseup', fieldUpH);
-        dom.bind(window, 'touchend', fieldUpH);
-      }
-
-      function fieldUpSV() {
-        dom.unbind(window, 'mousemove', setSV);
-        dom.unbind(window, 'touchmove', setSV);
-        dom.unbind(window, 'mouseup', fieldUpSV);
-        dom.unbind(window, 'touchend', fieldUpSV);
-        onFinish();
-      }
-
-      function fieldUpH() {
-        dom.unbind(window, 'mousemove', setH);
-        dom.unbind(window, 'touchmove', setH);
-        dom.unbind(window, 'mouseup', fieldUpH);
-        dom.unbind(window, 'touchend', fieldUpH);
-        onFinish();
-      }
-
-      function onBlur() {
-        var i = interpret(this.value);
-
-        if (i !== false) {
-          _this.__color.__state = i;
-
-          _this.setValue(_this.__color.toOriginal());
-        } else {
-          this.value = _this.__color.toString();
-        }
-      }
-
-      function onFinish() {
-        if (_this.__onFinishChange) {
-          _this.__onFinishChange.call(_this, _this.__color.toOriginal());
-        }
-      }
-
-      _this2.__saturation_field.appendChild(valueField);
-
-      _this2.__selector.appendChild(_this2.__field_knob);
-
-      _this2.__selector.appendChild(_this2.__saturation_field);
-
-      _this2.__selector.appendChild(_this2.__hue_field);
-
-      _this2.__hue_field.appendChild(_this2.__hue_knob);
-
-      _this2.domElement.appendChild(_this2.__input);
-
-      _this2.domElement.appendChild(_this2.__selector);
-
-      _this2.updateDisplay();
-
-      function setSV(e) {
-        if (e.type.indexOf('touch') === -1) {
-          e.preventDefault();
-        }
-
-        var fieldRect = _this.__saturation_field.getBoundingClientRect();
-
-        var _ref = e.touches && e.touches[0] || e,
-            clientX = _ref.clientX,
-            clientY = _ref.clientY;
-
-        var s = (clientX - fieldRect.left) / (fieldRect.right - fieldRect.left);
-        var v = 1 - (clientY - fieldRect.top) / (fieldRect.bottom - fieldRect.top);
-
-        if (v > 1) {
-          v = 1;
-        } else if (v < 0) {
-          v = 0;
-        }
-
-        if (s > 1) {
-          s = 1;
-        } else if (s < 0) {
-          s = 0;
-        }
-
-        _this.__color.v = v;
-        _this.__color.s = s;
-
-        _this.setValue(_this.__color.toOriginal());
-
-        return false;
-      }
-
-      function setH(e) {
-        if (e.type.indexOf('touch') === -1) {
-          e.preventDefault();
-        }
-
-        var fieldRect = _this.__hue_field.getBoundingClientRect();
-
-        var _ref2 = e.touches && e.touches[0] || e,
-            clientY = _ref2.clientY;
-
-        var h = 1 - (clientY - fieldRect.top) / (fieldRect.bottom - fieldRect.top);
-
-        if (h > 1) {
-          h = 1;
-        } else if (h < 0) {
-          h = 0;
-        }
-
-        _this.__color.h = h * 360;
-
-        _this.setValue(_this.__color.toOriginal());
-
-        return false;
-      }
-
-      return _this2;
-    }
-
-    createClass(ColorController, [{
-      key: 'updateDisplay',
-      value: function updateDisplay() {
-        var i = interpret(this.getValue());
-
-        if (i !== false) {
-          var mismatch = false;
-          Common.each(Color.COMPONENTS, function (component) {
-            if (!Common.isUndefined(i[component]) && !Common.isUndefined(this.__color.__state[component]) && i[component] !== this.__color.__state[component]) {
-              mismatch = true;
-              return {};
-            }
-          }, this);
-
-          if (mismatch) {
-            Common.extend(this.__color.__state, i);
-          }
-        }
-
-        Common.extend(this.__temp.__state, this.__color.__state);
-        this.__temp.a = 1;
-        var flip = this.__color.v < 0.5 || this.__color.s > 0.5 ? 255 : 0;
-
-        var _flip = 255 - flip;
-
-        Common.extend(this.__field_knob.style, {
-          marginLeft: 100 * this.__color.s - 7 + 'px',
-          marginTop: 100 * (1 - this.__color.v) - 7 + 'px',
-          backgroundColor: this.__temp.toHexString(),
-          border: this.__field_knob_border + 'rgb(' + flip + ',' + flip + ',' + flip + ')'
-        });
-        this.__hue_knob.style.marginTop = (1 - this.__color.h / 360) * 100 + 'px';
-        this.__temp.s = 1;
-        this.__temp.v = 1;
-        linearGradient(this.__saturation_field, 'left', '#fff', this.__temp.toHexString());
-        this.__input.value = this.__color.toString();
-        Common.extend(this.__input.style, {
-          backgroundColor: this.__color.toHexString(),
-          color: 'rgb(' + flip + ',' + flip + ',' + flip + ')',
-          textShadow: this.__input_textShadow + 'rgba(' + _flip + ',' + _flip + ',' + _flip + ',.7)'
-        });
-      }
-    }]);
-    return ColorController;
-  }(Controller);
-
-  var vendors = ['-moz-', '-o-', '-webkit-', '-ms-', ''];
-
-  function linearGradient(elem, x, a, b) {
-    elem.style.background = '';
-    Common.each(vendors, function (vendor) {
-      elem.style.cssText += 'background: ' + vendor + 'linear-gradient(' + x + ', ' + a + ' 0%, ' + b + ' 100%); ';
-    });
-  }
-
-  function hueGradient(elem) {
-    elem.style.background = '';
-    elem.style.cssText += 'background: -moz-linear-gradient(top,  #ff0000 0%, #ff00ff 17%, #0000ff 34%, #00ffff 50%, #00ff00 67%, #ffff00 84%, #ff0000 100%);';
-    elem.style.cssText += 'background: -webkit-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
-    elem.style.cssText += 'background: -o-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
-    elem.style.cssText += 'background: -ms-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
-    elem.style.cssText += 'background: linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
-  }
-
-  var css = {
-    load: function load(url, indoc) {
-      var doc = indoc || document;
-      var link = doc.createElement('link');
-      link.type = 'text/css';
-      link.rel = 'stylesheet';
-      link.href = url;
-      doc.getElementsByTagName('head')[0].appendChild(link);
-    },
-    inject: function inject(cssContent, indoc) {
-      var doc = indoc || document;
-      var injected = document.createElement('style');
-      injected.type = 'text/css';
-      injected.innerHTML = cssContent;
-      var head = doc.getElementsByTagName('head')[0];
-
-      try {
-        head.appendChild(injected);
-      } catch (e) {}
-    }
-  };
-  var saveDialogContents = "<div id=\"dg-save\" class=\"dg dialogue\">\n\n  Here's the new load parameter for your <code>GUI</code>'s constructor:\n\n  <textarea id=\"dg-new-constructor\"></textarea>\n\n  <div id=\"dg-save-locally\">\n\n    <input id=\"dg-local-storage\" type=\"checkbox\"/> Automatically save\n    values to <code>localStorage</code> on exit.\n\n    <div id=\"dg-local-explain\">The values saved to <code>localStorage</code> will\n      override those passed to <code>dat.GUI</code>'s constructor. This makes it\n      easier to work incrementally, but <code>localStorage</code> is fragile,\n      and your friends may not see the same values you do.\n\n    </div>\n\n  </div>\n\n</div>";
-
-  var ControllerFactory = function ControllerFactory(object, property) {
-    var initialValue = object[property];
-
-    if (Common.isArray(arguments[2]) || Common.isObject(arguments[2])) {
-      return new OptionController(object, property, arguments[2]);
-    }
-
-    if (Common.isNumber(initialValue)) {
-      if (Common.isNumber(arguments[2]) && Common.isNumber(arguments[3])) {
-        if (Common.isNumber(arguments[4])) {
-          return new NumberControllerSlider(object, property, arguments[2], arguments[3], arguments[4]);
-        }
-
-        return new NumberControllerSlider(object, property, arguments[2], arguments[3]);
-      }
-
-      if (Common.isNumber(arguments[4])) {
-        return new NumberControllerBox(object, property, {
-          min: arguments[2],
-          max: arguments[3],
-          step: arguments[4]
-        });
-      }
-
-      return new NumberControllerBox(object, property, {
-        min: arguments[2],
-        max: arguments[3]
-      });
-    }
-
-    if (Common.isString(initialValue)) {
-      return new StringController(object, property);
-    }
-
-    if (Common.isFunction(initialValue)) {
-      return new FunctionController(object, property, '');
-    }
-
-    if (Common.isBoolean(initialValue)) {
-      return new BooleanController(object, property);
-    }
-
-    return null;
-  };
-
-  function requestAnimationFrame(callback) {
-    setTimeout(callback, 1000 / 60);
-  }
-
-  var requestAnimationFrame$1 = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || requestAnimationFrame;
-
-  var CenteredDiv = function () {
-    function CenteredDiv() {
-      classCallCheck(this, CenteredDiv);
-      this.backgroundElement = document.createElement('div');
-      Common.extend(this.backgroundElement.style, {
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        top: 0,
-        left: 0,
-        display: 'none',
-        zIndex: '1000',
-        opacity: 0,
-        WebkitTransition: 'opacity 0.2s linear',
-        transition: 'opacity 0.2s linear'
-      });
-      dom.makeFullscreen(this.backgroundElement);
-      this.backgroundElement.style.position = 'fixed';
-      this.domElement = document.createElement('div');
-      Common.extend(this.domElement.style, {
-        position: 'fixed',
-        display: 'none',
-        zIndex: '1001',
-        opacity: 0,
-        WebkitTransition: '-webkit-transform 0.2s ease-out, opacity 0.2s linear',
-        transition: 'transform 0.2s ease-out, opacity 0.2s linear'
-      });
-      document.body.appendChild(this.backgroundElement);
-      document.body.appendChild(this.domElement);
-
-      var _this = this;
-
-      dom.bind(this.backgroundElement, 'click', function () {
-        _this.hide();
-      });
-    }
-
-    createClass(CenteredDiv, [{
-      key: 'show',
-      value: function show() {
-        var _this = this;
-
-        this.backgroundElement.style.display = 'block';
-        this.domElement.style.display = 'block';
-        this.domElement.style.opacity = 0;
-        this.domElement.style.webkitTransform = 'scale(1.1)';
-        this.layout();
-        Common.defer(function () {
-          _this.backgroundElement.style.opacity = 1;
-          _this.domElement.style.opacity = 1;
-          _this.domElement.style.webkitTransform = 'scale(1)';
-        });
-      }
-    }, {
-      key: 'hide',
-      value: function hide() {
-        var _this = this;
-
-        var hide = function hide() {
-          _this.domElement.style.display = 'none';
-          _this.backgroundElement.style.display = 'none';
-          dom.unbind(_this.domElement, 'webkitTransitionEnd', hide);
-          dom.unbind(_this.domElement, 'transitionend', hide);
-          dom.unbind(_this.domElement, 'oTransitionEnd', hide);
-        };
-
-        dom.bind(this.domElement, 'webkitTransitionEnd', hide);
-        dom.bind(this.domElement, 'transitionend', hide);
-        dom.bind(this.domElement, 'oTransitionEnd', hide);
-        this.backgroundElement.style.opacity = 0;
-        this.domElement.style.opacity = 0;
-        this.domElement.style.webkitTransform = 'scale(1.1)';
-      }
-    }, {
-      key: 'layout',
-      value: function layout() {
-        this.domElement.style.left = window.innerWidth / 2 - dom.getWidth(this.domElement) / 2 + 'px';
-        this.domElement.style.top = window.innerHeight / 2 - dom.getHeight(this.domElement) / 2 + 'px';
-      }
-    }]);
-    return CenteredDiv;
-  }();
-
-  var styleSheet = ___$insertStyle(".dg ul{list-style:none;margin:0;padding:0;width:100%;clear:both}.dg.ac{position:fixed;top:0;left:0;right:0;height:0;z-index:0}.dg:not(.ac) .main{overflow:hidden}.dg.main{-webkit-transition:opacity .1s linear;-o-transition:opacity .1s linear;-moz-transition:opacity .1s linear;transition:opacity .1s linear}.dg.main.taller-than-window{overflow-y:auto}.dg.main.taller-than-window .close-button{opacity:1;margin-top:-1px;border-top:1px solid #2c2c2c}.dg.main ul.closed .close-button{opacity:1 !important}.dg.main:hover .close-button,.dg.main .close-button.drag{opacity:1}.dg.main .close-button{-webkit-transition:opacity .1s linear;-o-transition:opacity .1s linear;-moz-transition:opacity .1s linear;transition:opacity .1s linear;border:0;line-height:19px;height:20px;cursor:pointer;text-align:center;background-color:#000}.dg.main .close-button.close-top{position:relative}.dg.main .close-button.close-bottom{position:absolute}.dg.main .close-button:hover{background-color:#111}.dg.a{float:right;margin-right:15px;overflow-y:visible}.dg.a.has-save>ul.close-top{margin-top:0}.dg.a.has-save>ul.close-bottom{margin-top:27px}.dg.a.has-save>ul.closed{margin-top:0}.dg.a .save-row{top:0;z-index:1002}.dg.a .save-row.close-top{position:relative}.dg.a .save-row.close-bottom{position:fixed}.dg li{-webkit-transition:height .1s ease-out;-o-transition:height .1s ease-out;-moz-transition:height .1s ease-out;transition:height .1s ease-out;-webkit-transition:overflow .1s linear;-o-transition:overflow .1s linear;-moz-transition:overflow .1s linear;transition:overflow .1s linear}.dg li:not(.folder){cursor:auto;height:27px;line-height:27px;padding:0 4px 0 5px}.dg li.folder{padding:0;border-left:4px solid rgba(0,0,0,0)}.dg li.title{cursor:pointer;margin-left:-4px}.dg .closed li:not(.title),.dg .closed ul li,.dg .closed ul li>*{height:0;overflow:hidden;border:0}.dg .cr{clear:both;padding-left:3px;height:27px;overflow:hidden}.dg .property-name{cursor:default;float:left;clear:left;width:40%;overflow:hidden;text-overflow:ellipsis}.dg .c{float:left;width:60%;position:relative}.dg .c input[type=text]{border:0;margin-top:4px;padding:3px;width:100%;float:right}.dg .has-slider input[type=text]{width:30%;margin-left:0}.dg .slider{float:left;width:66%;margin-left:-5px;margin-right:0;height:19px;margin-top:4px}.dg .slider-fg{height:100%}.dg .c input[type=checkbox]{margin-top:7px}.dg .c select{margin-top:5px}.dg .cr.function,.dg .cr.function .property-name,.dg .cr.function *,.dg .cr.boolean,.dg .cr.boolean *{cursor:pointer}.dg .cr.color{overflow:visible}.dg .selector{display:none;position:absolute;margin-left:-9px;margin-top:23px;z-index:10}.dg .c:hover .selector,.dg .selector.drag{display:block}.dg li.save-row{padding:0}.dg li.save-row .button{display:inline-block;padding:0px 6px}.dg.dialogue{background-color:#222;width:460px;padding:15px;font-size:13px;line-height:15px}#dg-new-constructor{padding:10px;color:#222;font-family:Monaco, monospace;font-size:10px;border:0;resize:none;box-shadow:inset 1px 1px 1px #888;word-wrap:break-word;margin:12px 0;display:block;width:440px;overflow-y:scroll;height:100px;position:relative}#dg-local-explain{display:none;font-size:11px;line-height:17px;border-radius:3px;background-color:#333;padding:8px;margin-top:10px}#dg-local-explain code{font-size:10px}#dat-gui-save-locally{display:none}.dg{color:#eee;font:11px 'Lucida Grande', sans-serif;text-shadow:0 -1px 0 #111}.dg.main::-webkit-scrollbar{width:5px;background:#1a1a1a}.dg.main::-webkit-scrollbar-corner{height:0;display:none}.dg.main::-webkit-scrollbar-thumb{border-radius:5px;background:#676767}.dg li:not(.folder){background:#1a1a1a;border-bottom:1px solid #2c2c2c}.dg li.save-row{line-height:25px;background:#dad5cb;border:0}.dg li.save-row select{margin-left:5px;width:108px}.dg li.save-row .button{margin-left:5px;margin-top:1px;border-radius:2px;font-size:9px;line-height:7px;padding:4px 4px 5px 4px;background:#c5bdad;color:#fff;text-shadow:0 1px 0 #b0a58f;box-shadow:0 -1px 0 #b0a58f;cursor:pointer}.dg li.save-row .button.gears{background:#c5bdad url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQJJREFUeNpiYKAU/P//PwGIC/ApCABiBSAW+I8AClAcgKxQ4T9hoMAEUrxx2QSGN6+egDX+/vWT4e7N82AMYoPAx/evwWoYoSYbACX2s7KxCxzcsezDh3evFoDEBYTEEqycggWAzA9AuUSQQgeYPa9fPv6/YWm/Acx5IPb7ty/fw+QZblw67vDs8R0YHyQhgObx+yAJkBqmG5dPPDh1aPOGR/eugW0G4vlIoTIfyFcA+QekhhHJhPdQxbiAIguMBTQZrPD7108M6roWYDFQiIAAv6Aow/1bFwXgis+f2LUAynwoIaNcz8XNx3Dl7MEJUDGQpx9gtQ8YCueB+D26OECAAQDadt7e46D42QAAAABJRU5ErkJggg==) 2px 1px no-repeat;height:7px;width:8px}.dg li.save-row .button:hover{background-color:#bab19e;box-shadow:0 -1px 0 #b0a58f}.dg li.folder{border-bottom:0}.dg li.title{padding-left:16px;background:#000 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.2)}.dg .closed li.title{background-image:url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlGIWqMCbWAEAOw==)}.dg .cr.boolean{border-left:3px solid #806787}.dg .cr.color{border-left:3px solid}.dg .cr.function{border-left:3px solid #e61d5f}.dg .cr.number{border-left:3px solid #2FA1D6}.dg .cr.number input[type=text]{color:#2FA1D6}.dg .cr.string{border-left:3px solid #1ed36f}.dg .cr.string input[type=text]{color:#1ed36f}.dg .cr.function:hover,.dg .cr.boolean:hover{background:#111}.dg .c input[type=text]{background:#303030;outline:none}.dg .c input[type=text]:hover{background:#3c3c3c}.dg .c input[type=text]:focus{background:#494949;color:#fff}.dg .c .slider{background:#303030;cursor:ew-resize}.dg .c .slider-fg{background:#2FA1D6;max-width:100%}.dg .c .slider:hover{background:#3c3c3c}.dg .c .slider:hover .slider-fg{background:#44abda}\n");
-
-  css.inject(styleSheet);
-  var CSS_NAMESPACE = 'dg';
-  var HIDE_KEY_CODE = 72;
-  var CLOSE_BUTTON_HEIGHT = 20;
-  var DEFAULT_DEFAULT_PRESET_NAME = 'Default';
-
-  var SUPPORTS_LOCAL_STORAGE = function () {
-    try {
-      return !!window.localStorage;
-    } catch (e) {
-      return false;
-    }
-  }();
-
-  var SAVE_DIALOGUE = void 0;
-  var autoPlaceVirgin = true;
-  var autoPlaceContainer = void 0;
-  var hide = false;
-  var hideableGuis = [];
-
-  var GUI = function GUI(pars) {
-    var _this = this;
-
-    var params = pars || {};
-    this.domElement = document.createElement('div');
-    this.__ul = document.createElement('ul');
-    this.domElement.appendChild(this.__ul);
-    dom.addClass(this.domElement, CSS_NAMESPACE);
-    this.__folders = {};
-    this.__controllers = [];
-    this.__rememberedObjects = [];
-    this.__rememberedObjectIndecesToControllers = [];
-    this.__listening = [];
-    params = Common.defaults(params, {
-      closeOnTop: false,
-      autoPlace: true,
-      width: GUI.DEFAULT_WIDTH
-    });
-    params = Common.defaults(params, {
-      resizable: params.autoPlace,
-      hideable: params.autoPlace
-    });
-
-    if (!Common.isUndefined(params.load)) {
-      if (params.preset) {
-        params.load.preset = params.preset;
-      }
-    } else {
-      params.load = {
-        preset: DEFAULT_DEFAULT_PRESET_NAME
-      };
-    }
-
-    if (Common.isUndefined(params.parent) && params.hideable) {
-      hideableGuis.push(this);
-    }
-
-    params.resizable = Common.isUndefined(params.parent) && params.resizable;
-
-    if (params.autoPlace && Common.isUndefined(params.scrollable)) {
-      params.scrollable = true;
-    }
-
-    var useLocalStorage = SUPPORTS_LOCAL_STORAGE && localStorage.getItem(getLocalStorageHash(this, 'isLocal')) === 'true';
-    var saveToLocalStorage = void 0;
-    var titleRow = void 0;
-    Object.defineProperties(this, {
-      parent: {
-        get: function get$$1() {
-          return params.parent;
-        }
-      },
-      scrollable: {
-        get: function get$$1() {
-          return params.scrollable;
-        }
-      },
-      autoPlace: {
-        get: function get$$1() {
-          return params.autoPlace;
-        }
-      },
-      closeOnTop: {
-        get: function get$$1() {
-          return params.closeOnTop;
-        }
-      },
-      preset: {
-        get: function get$$1() {
-          if (_this.parent) {
-            return _this.getRoot().preset;
-          }
-
-          return params.load.preset;
-        },
-        set: function set$$1(v) {
-          if (_this.parent) {
-            _this.getRoot().preset = v;
-          } else {
-            params.load.preset = v;
-          }
-
-          setPresetSelectIndex(this);
-
-          _this.revert();
-        }
-      },
-      width: {
-        get: function get$$1() {
-          return params.width;
-        },
-        set: function set$$1(v) {
-          params.width = v;
-          setWidth(_this, v);
-        }
-      },
-      name: {
-        get: function get$$1() {
-          return params.name;
-        },
-        set: function set$$1(v) {
-          params.name = v;
-
-          if (titleRow) {
-            titleRow.innerHTML = params.name;
-          }
-        }
-      },
-      closed: {
-        get: function get$$1() {
-          return params.closed;
-        },
-        set: function set$$1(v) {
-          params.closed = v;
-
-          if (params.closed) {
-            dom.addClass(_this.__ul, GUI.CLASS_CLOSED);
-          } else {
-            dom.removeClass(_this.__ul, GUI.CLASS_CLOSED);
-          }
-
-          this.onResize();
-
-          if (_this.__closeButton) {
-            _this.__closeButton.innerHTML = v ? GUI.TEXT_OPEN : GUI.TEXT_CLOSED;
-          }
-        }
-      },
-      load: {
-        get: function get$$1() {
-          return params.load;
-        }
-      },
-      useLocalStorage: {
-        get: function get$$1() {
-          return useLocalStorage;
-        },
-        set: function set$$1(bool) {
-          if (SUPPORTS_LOCAL_STORAGE) {
-            useLocalStorage = bool;
-
-            if (bool) {
-              dom.bind(window, 'unload', saveToLocalStorage);
-            } else {
-              dom.unbind(window, 'unload', saveToLocalStorage);
-            }
-
-            localStorage.setItem(getLocalStorageHash(_this, 'isLocal'), bool);
-          }
-        }
-      }
-    });
-
-    if (Common.isUndefined(params.parent)) {
-      this.closed = params.closed || false;
-      dom.addClass(this.domElement, GUI.CLASS_MAIN);
-      dom.makeSelectable(this.domElement, false);
-
-      if (SUPPORTS_LOCAL_STORAGE) {
-        if (useLocalStorage) {
-          _this.useLocalStorage = true;
-          var savedGui = localStorage.getItem(getLocalStorageHash(this, 'gui'));
-
-          if (savedGui) {
-            params.load = JSON.parse(savedGui);
-          }
-        }
-      }
-
-      this.__closeButton = document.createElement('div');
-      this.__closeButton.innerHTML = GUI.TEXT_CLOSED;
-      dom.addClass(this.__closeButton, GUI.CLASS_CLOSE_BUTTON);
-
-      if (params.closeOnTop) {
-        dom.addClass(this.__closeButton, GUI.CLASS_CLOSE_TOP);
-        this.domElement.insertBefore(this.__closeButton, this.domElement.childNodes[0]);
-      } else {
-        dom.addClass(this.__closeButton, GUI.CLASS_CLOSE_BOTTOM);
-        this.domElement.appendChild(this.__closeButton);
-      }
-
-      dom.bind(this.__closeButton, 'click', function () {
-        _this.closed = !_this.closed;
-      });
-    } else {
-      if (params.closed === undefined) {
-        params.closed = true;
-      }
-
-      var titleRowName = document.createTextNode(params.name);
-      dom.addClass(titleRowName, 'controller-name');
-      titleRow = addRow(_this, titleRowName);
-
-      var onClickTitle = function onClickTitle(e) {
-        e.preventDefault();
-        _this.closed = !_this.closed;
-        return false;
-      };
-
-      dom.addClass(this.__ul, GUI.CLASS_CLOSED);
-      dom.addClass(titleRow, 'title');
-      dom.bind(titleRow, 'click', onClickTitle);
-
-      if (!params.closed) {
-        this.closed = false;
-      }
-    }
-
-    if (params.autoPlace) {
-      if (Common.isUndefined(params.parent)) {
-        if (autoPlaceVirgin) {
-          autoPlaceContainer = document.createElement('div');
-          dom.addClass(autoPlaceContainer, CSS_NAMESPACE);
-          dom.addClass(autoPlaceContainer, GUI.CLASS_AUTO_PLACE_CONTAINER);
-          document.body.appendChild(autoPlaceContainer);
-          autoPlaceVirgin = false;
-        }
-
-        autoPlaceContainer.appendChild(this.domElement);
-        dom.addClass(this.domElement, GUI.CLASS_AUTO_PLACE);
-      }
-
-      if (!this.parent) {
-        setWidth(_this, params.width);
-      }
-    }
-
-    this.__resizeHandler = function () {
-      _this.onResizeDebounced();
-    };
-
-    dom.bind(window, 'resize', this.__resizeHandler);
-    dom.bind(this.__ul, 'webkitTransitionEnd', this.__resizeHandler);
-    dom.bind(this.__ul, 'transitionend', this.__resizeHandler);
-    dom.bind(this.__ul, 'oTransitionEnd', this.__resizeHandler);
-    this.onResize();
-
-    if (params.resizable) {
-      addResizeHandle(this);
-    }
-
-    saveToLocalStorage = function saveToLocalStorage() {
-      if (SUPPORTS_LOCAL_STORAGE && localStorage.getItem(getLocalStorageHash(_this, 'isLocal')) === 'true') {
-        localStorage.setItem(getLocalStorageHash(_this, 'gui'), JSON.stringify(_this.getSaveObject()));
-      }
-    };
-
-    this.saveToLocalStorageIfPossible = saveToLocalStorage;
-
-    function resetWidth() {
-      var root = _this.getRoot();
-
-      root.width += 1;
-      Common.defer(function () {
-        root.width -= 1;
-      });
-    }
-
-    if (!params.parent) {
-      resetWidth();
-    }
-  };
-
-  GUI.toggleHide = function () {
-    hide = !hide;
-    Common.each(hideableGuis, function (gui) {
-      gui.domElement.style.display = hide ? 'none' : '';
-    });
-  };
-
-  GUI.CLASS_AUTO_PLACE = 'a';
-  GUI.CLASS_AUTO_PLACE_CONTAINER = 'ac';
-  GUI.CLASS_MAIN = 'main';
-  GUI.CLASS_CONTROLLER_ROW = 'cr';
-  GUI.CLASS_TOO_TALL = 'taller-than-window';
-  GUI.CLASS_CLOSED = 'closed';
-  GUI.CLASS_CLOSE_BUTTON = 'close-button';
-  GUI.CLASS_CLOSE_TOP = 'close-top';
-  GUI.CLASS_CLOSE_BOTTOM = 'close-bottom';
-  GUI.CLASS_DRAG = 'drag';
-  GUI.DEFAULT_WIDTH = 245;
-  GUI.TEXT_CLOSED = 'Close Controls';
-  GUI.TEXT_OPEN = 'Open Controls';
-
-  GUI._keydownHandler = function (e) {
-    if (document.activeElement.type !== 'text' && (e.which === HIDE_KEY_CODE || e.keyCode === HIDE_KEY_CODE)) {
-      GUI.toggleHide();
-    }
-  };
-
-  dom.bind(window, 'keydown', GUI._keydownHandler, false);
-  Common.extend(GUI.prototype, {
-    add: function add(object, property) {
-      return _add(this, object, property, {
-        factoryArgs: Array.prototype.slice.call(arguments, 2)
-      });
-    },
-    addColor: function addColor(object, property) {
-      return _add(this, object, property, {
-        color: true
-      });
-    },
-    remove: function remove(controller) {
-      this.__ul.removeChild(controller.__li);
-
-      this.__controllers.splice(this.__controllers.indexOf(controller), 1);
-
-      var _this = this;
-
-      Common.defer(function () {
-        _this.onResize();
-      });
-    },
-    destroy: function destroy() {
-      if (this.parent) {
-        throw new Error('Only the root GUI should be removed with .destroy(). ' + 'For subfolders, use gui.removeFolder(folder) instead.');
-      }
-
-      if (this.autoPlace) {
-        autoPlaceContainer.removeChild(this.domElement);
-      }
-
-      var _this = this;
-
-      Common.each(this.__folders, function (subfolder) {
-        _this.removeFolder(subfolder);
-      });
-      dom.unbind(window, 'keydown', GUI._keydownHandler, false);
-      removeListeners(this);
-    },
-    addFolder: function addFolder(name) {
-      if (this.__folders[name] !== undefined) {
-        throw new Error('You already have a folder in this GUI by the' + ' name "' + name + '"');
-      }
-
-      var newGuiParams = {
-        name: name,
-        parent: this
-      };
-      newGuiParams.autoPlace = this.autoPlace;
-
-      if (this.load && this.load.folders && this.load.folders[name]) {
-        newGuiParams.closed = this.load.folders[name].closed;
-        newGuiParams.load = this.load.folders[name];
-      }
-
-      var gui = new GUI(newGuiParams);
-      this.__folders[name] = gui;
-      var li = addRow(this, gui.domElement);
-      dom.addClass(li, 'folder');
-      return gui;
-    },
-    removeFolder: function removeFolder(folder) {
-      this.__ul.removeChild(folder.domElement.parentElement);
-
-      delete this.__folders[folder.name];
-
-      if (this.load && this.load.folders && this.load.folders[folder.name]) {
-        delete this.load.folders[folder.name];
-      }
-
-      removeListeners(folder);
-
-      var _this = this;
-
-      Common.each(folder.__folders, function (subfolder) {
-        folder.removeFolder(subfolder);
-      });
-      Common.defer(function () {
-        _this.onResize();
-      });
-    },
-    open: function open() {
-      this.closed = false;
-    },
-    close: function close() {
-      this.closed = true;
-    },
-    hide: function hide() {
-      this.domElement.style.display = 'none';
-    },
-    show: function show() {
-      this.domElement.style.display = '';
-    },
-    onResize: function onResize() {
-      var root = this.getRoot();
-
-      if (root.scrollable) {
-        var top = dom.getOffset(root.__ul).top;
-        var h = 0;
-        Common.each(root.__ul.childNodes, function (node) {
-          if (!(root.autoPlace && node === root.__save_row)) {
-            h += dom.getHeight(node);
-          }
-        });
-
-        if (window.innerHeight - top - CLOSE_BUTTON_HEIGHT < h) {
-          dom.addClass(root.domElement, GUI.CLASS_TOO_TALL);
-          root.__ul.style.height = window.innerHeight - top - CLOSE_BUTTON_HEIGHT + 'px';
-        } else {
-          dom.removeClass(root.domElement, GUI.CLASS_TOO_TALL);
-          root.__ul.style.height = 'auto';
-        }
-      }
-
-      if (root.__resize_handle) {
-        Common.defer(function () {
-          root.__resize_handle.style.height = root.__ul.offsetHeight + 'px';
-        });
-      }
-
-      if (root.__closeButton) {
-        root.__closeButton.style.width = root.width + 'px';
-      }
-    },
-    onResizeDebounced: Common.debounce(function () {
-      this.onResize();
-    }, 50),
-    remember: function remember() {
-      if (Common.isUndefined(SAVE_DIALOGUE)) {
-        SAVE_DIALOGUE = new CenteredDiv();
-        SAVE_DIALOGUE.domElement.innerHTML = saveDialogContents;
-      }
-
-      if (this.parent) {
-        throw new Error('You can only call remember on a top level GUI.');
-      }
-
-      var _this = this;
-
-      Common.each(Array.prototype.slice.call(arguments), function (object) {
-        if (_this.__rememberedObjects.length === 0) {
-          addSaveMenu(_this);
-        }
-
-        if (_this.__rememberedObjects.indexOf(object) === -1) {
-          _this.__rememberedObjects.push(object);
-        }
-      });
-
-      if (this.autoPlace) {
-        setWidth(this, this.width);
-      }
-    },
-    getRoot: function getRoot() {
-      var gui = this;
-
-      while (gui.parent) {
-        gui = gui.parent;
-      }
-
-      return gui;
-    },
-    getSaveObject: function getSaveObject() {
-      var toReturn = this.load;
-      toReturn.closed = this.closed;
-
-      if (this.__rememberedObjects.length > 0) {
-        toReturn.preset = this.preset;
-
-        if (!toReturn.remembered) {
-          toReturn.remembered = {};
-        }
-
-        toReturn.remembered[this.preset] = getCurrentPreset(this);
-      }
-
-      toReturn.folders = {};
-      Common.each(this.__folders, function (element, key) {
-        toReturn.folders[key] = element.getSaveObject();
-      });
-      return toReturn;
-    },
-    save: function save() {
-      if (!this.load.remembered) {
-        this.load.remembered = {};
-      }
-
-      this.load.remembered[this.preset] = getCurrentPreset(this);
-      markPresetModified(this, false);
-      this.saveToLocalStorageIfPossible();
-    },
-    saveAs: function saveAs(presetName) {
-      if (!this.load.remembered) {
-        this.load.remembered = {};
-        this.load.remembered[DEFAULT_DEFAULT_PRESET_NAME] = getCurrentPreset(this, true);
-      }
-
-      this.load.remembered[presetName] = getCurrentPreset(this);
-      this.preset = presetName;
-      addPresetOption(this, presetName, true);
-      this.saveToLocalStorageIfPossible();
-    },
-    revert: function revert(gui) {
-      Common.each(this.__controllers, function (controller) {
-        if (!this.getRoot().load.remembered) {
-          controller.setValue(controller.initialValue);
-        } else {
-          recallSavedValue(gui || this.getRoot(), controller);
-        }
-
-        if (controller.__onFinishChange) {
-          controller.__onFinishChange.call(controller, controller.getValue());
-        }
-      }, this);
-      Common.each(this.__folders, function (folder) {
-        folder.revert(folder);
-      });
-
-      if (!gui) {
-        markPresetModified(this.getRoot(), false);
-      }
-    },
-    listen: function listen(controller) {
-      var init = this.__listening.length === 0;
-
-      this.__listening.push(controller);
-
-      if (init) {
-        updateDisplays(this.__listening);
-      }
-    },
-    updateDisplay: function updateDisplay() {
-      Common.each(this.__controllers, function (controller) {
-        controller.updateDisplay();
-      });
-      Common.each(this.__folders, function (folder) {
-        folder.updateDisplay();
-      });
-    }
-  });
-
-  function addRow(gui, newDom, liBefore) {
-    var li = document.createElement('li');
-
-    if (newDom) {
-      li.appendChild(newDom);
-    }
-
-    if (liBefore) {
-      gui.__ul.insertBefore(li, liBefore);
-    } else {
-      gui.__ul.appendChild(li);
-    }
-
-    gui.onResize();
-    return li;
-  }
-
-  function removeListeners(gui) {
-    dom.unbind(window, 'resize', gui.__resizeHandler);
-
-    if (gui.saveToLocalStorageIfPossible) {
-      dom.unbind(window, 'unload', gui.saveToLocalStorageIfPossible);
-    }
-  }
-
-  function markPresetModified(gui, modified) {
-    var opt = gui.__preset_select[gui.__preset_select.selectedIndex];
-
-    if (modified) {
-      opt.innerHTML = opt.value + '*';
-    } else {
-      opt.innerHTML = opt.value;
-    }
-  }
-
-  function augmentController(gui, li, controller) {
-    controller.__li = li;
-    controller.__gui = gui;
-    Common.extend(controller, {
-      options: function options(_options) {
-        if (arguments.length > 1) {
-          var nextSibling = controller.__li.nextElementSibling;
-          controller.remove();
-          return _add(gui, controller.object, controller.property, {
-            before: nextSibling,
-            factoryArgs: [Common.toArray(arguments)]
-          });
-        }
-
-        if (Common.isArray(_options) || Common.isObject(_options)) {
-          var _nextSibling = controller.__li.nextElementSibling;
-          controller.remove();
-          return _add(gui, controller.object, controller.property, {
-            before: _nextSibling,
-            factoryArgs: [_options]
-          });
-        }
-      },
-      name: function name(_name) {
-        controller.__li.firstElementChild.firstElementChild.innerHTML = _name;
-        return controller;
-      },
-      listen: function listen() {
-        controller.__gui.listen(controller);
-
-        return controller;
-      },
-      remove: function remove() {
-        controller.__gui.remove(controller);
-
-        return controller;
-      }
-    });
-
-    if (controller instanceof NumberControllerSlider) {
-      var box = new NumberControllerBox(controller.object, controller.property, {
-        min: controller.__min,
-        max: controller.__max,
-        step: controller.__step
-      });
-      Common.each(['updateDisplay', 'onChange', 'onFinishChange', 'step', 'min', 'max'], function (method) {
-        var pc = controller[method];
-        var pb = box[method];
-
-        controller[method] = box[method] = function () {
-          var args = Array.prototype.slice.call(arguments);
-          pb.apply(box, args);
-          return pc.apply(controller, args);
-        };
-      });
-      dom.addClass(li, 'has-slider');
-      controller.domElement.insertBefore(box.domElement, controller.domElement.firstElementChild);
-    } else if (controller instanceof NumberControllerBox) {
-      var r = function r(returned) {
-        if (Common.isNumber(controller.__min) && Common.isNumber(controller.__max)) {
-          var oldName = controller.__li.firstElementChild.firstElementChild.innerHTML;
-          var wasListening = controller.__gui.__listening.indexOf(controller) > -1;
-          controller.remove();
-
-          var newController = _add(gui, controller.object, controller.property, {
-            before: controller.__li.nextElementSibling,
-            factoryArgs: [controller.__min, controller.__max, controller.__step]
-          });
-
-          newController.name(oldName);
-          if (wasListening) newController.listen();
-          return newController;
-        }
-
-        return returned;
-      };
-
-      controller.min = Common.compose(r, controller.min);
-      controller.max = Common.compose(r, controller.max);
-    } else if (controller instanceof BooleanController) {
-      dom.bind(li, 'click', function () {
-        dom.fakeEvent(controller.__checkbox, 'click');
-      });
-      dom.bind(controller.__checkbox, 'click', function (e) {
-        e.stopPropagation();
-      });
-    } else if (controller instanceof FunctionController) {
-      dom.bind(li, 'click', function () {
-        dom.fakeEvent(controller.__button, 'click');
-      });
-      dom.bind(li, 'mouseover', function () {
-        dom.addClass(controller.__button, 'hover');
-      });
-      dom.bind(li, 'mouseout', function () {
-        dom.removeClass(controller.__button, 'hover');
-      });
-    } else if (controller instanceof ColorController) {
-      dom.addClass(li, 'color');
-      controller.updateDisplay = Common.compose(function (val) {
-        li.style.borderLeftColor = controller.__color.toString();
-        return val;
-      }, controller.updateDisplay);
-      controller.updateDisplay();
-    }
-
-    controller.setValue = Common.compose(function (val) {
-      if (gui.getRoot().__preset_select && controller.isModified()) {
-        markPresetModified(gui.getRoot(), true);
-      }
-
-      return val;
-    }, controller.setValue);
-  }
-
-  function recallSavedValue(gui, controller) {
-    var root = gui.getRoot();
-
-    var matchedIndex = root.__rememberedObjects.indexOf(controller.object);
-
-    if (matchedIndex !== -1) {
-      var controllerMap = root.__rememberedObjectIndecesToControllers[matchedIndex];
-
-      if (controllerMap === undefined) {
-        controllerMap = {};
-        root.__rememberedObjectIndecesToControllers[matchedIndex] = controllerMap;
-      }
-
-      controllerMap[controller.property] = controller;
-
-      if (root.load && root.load.remembered) {
-        var presetMap = root.load.remembered;
-        var preset = void 0;
-
-        if (presetMap[gui.preset]) {
-          preset = presetMap[gui.preset];
-        } else if (presetMap[DEFAULT_DEFAULT_PRESET_NAME]) {
-          preset = presetMap[DEFAULT_DEFAULT_PRESET_NAME];
-        } else {
-          return;
-        }
-
-        if (preset[matchedIndex] && preset[matchedIndex][controller.property] !== undefined) {
-          var value = preset[matchedIndex][controller.property];
-          controller.initialValue = value;
-          controller.setValue(value);
-        }
-      }
-    }
-  }
-
-  function _add(gui, object, property, params) {
-    if (object[property] === undefined) {
-      throw new Error('Object "' + object + '" has no property "' + property + '"');
-    }
-
-    var controller = void 0;
-
-    if (params.color) {
-      controller = new ColorController(object, property);
-    } else {
-      var factoryArgs = [object, property].concat(params.factoryArgs);
-      controller = ControllerFactory.apply(gui, factoryArgs);
-    }
-
-    if (params.before instanceof Controller) {
-      params.before = params.before.__li;
-    }
-
-    recallSavedValue(gui, controller);
-    dom.addClass(controller.domElement, 'c');
-    var name = document.createElement('span');
-    dom.addClass(name, 'property-name');
-    name.innerHTML = controller.property;
-    var container = document.createElement('div');
-    container.appendChild(name);
-    container.appendChild(controller.domElement);
-    var li = addRow(gui, container, params.before);
-    dom.addClass(li, GUI.CLASS_CONTROLLER_ROW);
-
-    if (controller instanceof ColorController) {
-      dom.addClass(li, 'color');
-    } else {
-      dom.addClass(li, _typeof(controller.getValue()));
-    }
-
-    augmentController(gui, li, controller);
-
-    gui.__controllers.push(controller);
-
-    return controller;
-  }
-
-  function getLocalStorageHash(gui, key) {
-    return document.location.href + '.' + key;
-  }
-
-  function addPresetOption(gui, name, setSelected) {
-    var opt = document.createElement('option');
-    opt.innerHTML = name;
-    opt.value = name;
-
-    gui.__preset_select.appendChild(opt);
-
-    if (setSelected) {
-      gui.__preset_select.selectedIndex = gui.__preset_select.length - 1;
-    }
-  }
-
-  function showHideExplain(gui, explain) {
-    explain.style.display = gui.useLocalStorage ? 'block' : 'none';
-  }
-
-  function addSaveMenu(gui) {
-    var div = gui.__save_row = document.createElement('li');
-    dom.addClass(gui.domElement, 'has-save');
-
-    gui.__ul.insertBefore(div, gui.__ul.firstChild);
-
-    dom.addClass(div, 'save-row');
-    var gears = document.createElement('span');
-    gears.innerHTML = '&nbsp;';
-    dom.addClass(gears, 'button gears');
-    var button = document.createElement('span');
-    button.innerHTML = 'Save';
-    dom.addClass(button, 'button');
-    dom.addClass(button, 'save');
-    var button2 = document.createElement('span');
-    button2.innerHTML = 'New';
-    dom.addClass(button2, 'button');
-    dom.addClass(button2, 'save-as');
-    var button3 = document.createElement('span');
-    button3.innerHTML = 'Revert';
-    dom.addClass(button3, 'button');
-    dom.addClass(button3, 'revert');
-    var select = gui.__preset_select = document.createElement('select');
-
-    if (gui.load && gui.load.remembered) {
-      Common.each(gui.load.remembered, function (value, key) {
-        addPresetOption(gui, key, key === gui.preset);
-      });
-    } else {
-      addPresetOption(gui, DEFAULT_DEFAULT_PRESET_NAME, false);
-    }
-
-    dom.bind(select, 'change', function () {
-      for (var index = 0; index < gui.__preset_select.length; index++) {
-        gui.__preset_select[index].innerHTML = gui.__preset_select[index].value;
-      }
-
-      gui.preset = this.value;
-    });
-    div.appendChild(select);
-    div.appendChild(gears);
-    div.appendChild(button);
-    div.appendChild(button2);
-    div.appendChild(button3);
-
-    if (SUPPORTS_LOCAL_STORAGE) {
-      var explain = document.getElementById('dg-local-explain');
-      var localStorageCheckBox = document.getElementById('dg-local-storage');
-      var saveLocally = document.getElementById('dg-save-locally');
-      saveLocally.style.display = 'block';
-
-      if (localStorage.getItem(getLocalStorageHash(gui, 'isLocal')) === 'true') {
-        localStorageCheckBox.setAttribute('checked', 'checked');
-      }
-
-      showHideExplain(gui, explain);
-      dom.bind(localStorageCheckBox, 'change', function () {
-        gui.useLocalStorage = !gui.useLocalStorage;
-        showHideExplain(gui, explain);
-      });
-    }
-
-    var newConstructorTextArea = document.getElementById('dg-new-constructor');
-    dom.bind(newConstructorTextArea, 'keydown', function (e) {
-      if (e.metaKey && (e.which === 67 || e.keyCode === 67)) {
-        SAVE_DIALOGUE.hide();
-      }
-    });
-    dom.bind(gears, 'click', function () {
-      newConstructorTextArea.innerHTML = JSON.stringify(gui.getSaveObject(), undefined, 2);
-      SAVE_DIALOGUE.show();
-      newConstructorTextArea.focus();
-      newConstructorTextArea.select();
-    });
-    dom.bind(button, 'click', function () {
-      gui.save();
-    });
-    dom.bind(button2, 'click', function () {
-      var presetName = prompt('Enter a new preset name.');
-
-      if (presetName) {
-        gui.saveAs(presetName);
-      }
-    });
-    dom.bind(button3, 'click', function () {
-      gui.revert();
-    });
-  }
-
-  function addResizeHandle(gui) {
-    var pmouseX = void 0;
-    gui.__resize_handle = document.createElement('div');
-    Common.extend(gui.__resize_handle.style, {
-      width: '6px',
-      marginLeft: '-3px',
-      height: '200px',
-      cursor: 'ew-resize',
-      position: 'absolute'
-    });
-
-    function drag(e) {
-      e.preventDefault();
-      gui.width += pmouseX - e.clientX;
-      gui.onResize();
-      pmouseX = e.clientX;
-      return false;
-    }
-
-    function dragStop() {
-      dom.removeClass(gui.__closeButton, GUI.CLASS_DRAG);
-      dom.unbind(window, 'mousemove', drag);
-      dom.unbind(window, 'mouseup', dragStop);
-    }
-
-    function dragStart(e) {
-      e.preventDefault();
-      pmouseX = e.clientX;
-      dom.addClass(gui.__closeButton, GUI.CLASS_DRAG);
-      dom.bind(window, 'mousemove', drag);
-      dom.bind(window, 'mouseup', dragStop);
-      return false;
-    }
-
-    dom.bind(gui.__resize_handle, 'mousedown', dragStart);
-    dom.bind(gui.__closeButton, 'mousedown', dragStart);
-    gui.domElement.insertBefore(gui.__resize_handle, gui.domElement.firstElementChild);
-  }
-
-  function setWidth(gui, w) {
-    gui.domElement.style.width = w + 'px';
-
-    if (gui.__save_row && gui.autoPlace) {
-      gui.__save_row.style.width = w + 'px';
-    }
-
-    if (gui.__closeButton) {
-      gui.__closeButton.style.width = w + 'px';
-    }
-  }
-
-  function getCurrentPreset(gui, useInitialValues) {
-    var toReturn = {};
-    Common.each(gui.__rememberedObjects, function (val, index) {
-      var savedValues = {};
-      var controllerMap = gui.__rememberedObjectIndecesToControllers[index];
-      Common.each(controllerMap, function (controller, property) {
-        savedValues[property] = useInitialValues ? controller.initialValue : controller.getValue();
-      });
-      toReturn[index] = savedValues;
-    });
-    return toReturn;
-  }
-
-  function setPresetSelectIndex(gui) {
-    for (var index = 0; index < gui.__preset_select.length; index++) {
-      if (gui.__preset_select[index].value === gui.preset) {
-        gui.__preset_select.selectedIndex = index;
-      }
-    }
-  }
-
-  function updateDisplays(controllerArray) {
-    if (controllerArray.length !== 0) {
-      requestAnimationFrame$1.call(window, function () {
-        updateDisplays(controllerArray);
-      });
-    }
-
-    Common.each(controllerArray, function (c) {
-      c.updateDisplay();
-    });
-  }
-
-  var color = {
-    Color: Color,
-    math: ColorMath,
-    interpret: interpret
-  };
-  var controllers = {
-    Controller: Controller,
-    BooleanController: BooleanController,
-    OptionController: OptionController,
-    StringController: StringController,
-    NumberController: NumberController,
-    NumberControllerBox: NumberControllerBox,
-    NumberControllerSlider: NumberControllerSlider,
-    FunctionController: FunctionController,
-    ColorController: ColorController
-  };
-  var dom$1 = {
-    dom: dom
-  };
-  var gui = {
-    GUI: GUI
-  };
-  var GUI$1 = GUI;
-  var index = {
-    color: color,
-    controllers: controllers,
-    dom: dom$1,
-    gui: gui,
-    GUI: GUI$1
-  };
-  exports.color = color;
-  exports.controllers = controllers;
-  exports.dom = dom$1;
-  exports.gui = gui;
-  exports.GUI = GUI$1;
-  exports['default'] = index;
-  Object.defineProperty(exports, '__esModule', {
-    value: true
-  });
-});
-
-},{}],2:[function(require,module,exports){
-"use strict";
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -3129,7 +218,7 @@ var config_1 = require("./internal/config");
 
 exports.config = config_1.config;
 
-},{"./internal/AsyncSubject":3,"./internal/BehaviorSubject":4,"./internal/Notification":6,"./internal/Observable":7,"./internal/ReplaySubject":10,"./internal/Scheduler":11,"./internal/Subject":12,"./internal/Subscriber":14,"./internal/Subscription":15,"./internal/config":16,"./internal/observable/ConnectableObservable":17,"./internal/observable/bindCallback":19,"./internal/observable/bindNodeCallback":20,"./internal/observable/combineLatest":21,"./internal/observable/concat":22,"./internal/observable/defer":23,"./internal/observable/empty":24,"./internal/observable/forkJoin":25,"./internal/observable/from":26,"./internal/observable/fromEvent":28,"./internal/observable/fromEventPattern":29,"./internal/observable/generate":33,"./internal/observable/iif":34,"./internal/observable/interval":35,"./internal/observable/merge":36,"./internal/observable/never":37,"./internal/observable/of":38,"./internal/observable/onErrorResumeNext":39,"./internal/observable/pairs":40,"./internal/observable/race":41,"./internal/observable/range":42,"./internal/observable/throwError":44,"./internal/observable/timer":45,"./internal/observable/using":46,"./internal/observable/zip":47,"./internal/operators/groupBy":83,"./internal/scheduler/VirtualTimeScheduler":160,"./internal/scheduler/animationFrame":161,"./internal/scheduler/asap":162,"./internal/scheduler/async":163,"./internal/scheduler/queue":164,"./internal/symbol/observable":166,"./internal/util/ArgumentOutOfRangeError":168,"./internal/util/EmptyError":169,"./internal/util/ObjectUnsubscribedError":171,"./internal/util/TimeoutError":172,"./internal/util/UnsubscriptionError":173,"./internal/util/identity":176,"./internal/util/isObservable":185,"./internal/util/noop":188,"./internal/util/pipe":190}],3:[function(require,module,exports){
+},{"./internal/AsyncSubject":2,"./internal/BehaviorSubject":3,"./internal/Notification":5,"./internal/Observable":6,"./internal/ReplaySubject":9,"./internal/Scheduler":10,"./internal/Subject":11,"./internal/Subscriber":13,"./internal/Subscription":14,"./internal/config":15,"./internal/observable/ConnectableObservable":16,"./internal/observable/bindCallback":18,"./internal/observable/bindNodeCallback":19,"./internal/observable/combineLatest":20,"./internal/observable/concat":21,"./internal/observable/defer":22,"./internal/observable/empty":23,"./internal/observable/forkJoin":24,"./internal/observable/from":25,"./internal/observable/fromEvent":27,"./internal/observable/fromEventPattern":28,"./internal/observable/generate":32,"./internal/observable/iif":33,"./internal/observable/interval":34,"./internal/observable/merge":35,"./internal/observable/never":36,"./internal/observable/of":37,"./internal/observable/onErrorResumeNext":38,"./internal/observable/pairs":39,"./internal/observable/race":40,"./internal/observable/range":41,"./internal/observable/throwError":43,"./internal/observable/timer":44,"./internal/observable/using":45,"./internal/observable/zip":46,"./internal/operators/groupBy":82,"./internal/scheduler/VirtualTimeScheduler":159,"./internal/scheduler/animationFrame":160,"./internal/scheduler/asap":161,"./internal/scheduler/async":162,"./internal/scheduler/queue":163,"./internal/symbol/observable":165,"./internal/util/ArgumentOutOfRangeError":167,"./internal/util/EmptyError":168,"./internal/util/ObjectUnsubscribedError":170,"./internal/util/TimeoutError":171,"./internal/util/UnsubscriptionError":172,"./internal/util/identity":175,"./internal/util/isObservable":184,"./internal/util/noop":187,"./internal/util/pipe":189}],2:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -3217,7 +306,7 @@ var AsyncSubject = function (_super) {
 
 exports.AsyncSubject = AsyncSubject;
 
-},{"./Subject":12,"./Subscription":15}],4:[function(require,module,exports){
+},{"./Subject":11,"./Subscription":14}],3:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -3299,7 +388,7 @@ var BehaviorSubject = function (_super) {
 
 exports.BehaviorSubject = BehaviorSubject;
 
-},{"./Subject":12,"./util/ObjectUnsubscribedError":171}],5:[function(require,module,exports){
+},{"./Subject":11,"./util/ObjectUnsubscribedError":170}],4:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -3364,7 +453,7 @@ var InnerSubscriber = function (_super) {
 
 exports.InnerSubscriber = InnerSubscriber;
 
-},{"./Subscriber":14}],6:[function(require,module,exports){
+},{"./Subscriber":13}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3469,7 +558,7 @@ var Notification = function () {
 
 exports.Notification = Notification;
 
-},{"./observable/empty":24,"./observable/of":38,"./observable/throwError":44}],7:[function(require,module,exports){
+},{"./observable/empty":23,"./observable/of":37,"./observable/throwError":43}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3623,7 +712,7 @@ function getPromiseCtor(promiseCtor) {
   return promiseCtor;
 }
 
-},{"../internal/symbol/observable":166,"./config":16,"./util/canReportError":174,"./util/pipe":190,"./util/toSubscriber":197}],8:[function(require,module,exports){
+},{"../internal/symbol/observable":165,"./config":15,"./util/canReportError":173,"./util/pipe":189,"./util/toSubscriber":196}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3647,7 +736,7 @@ exports.empty = {
   complete: function () {}
 };
 
-},{"./config":16,"./util/hostReportError":175}],9:[function(require,module,exports){
+},{"./config":15,"./util/hostReportError":174}],8:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -3704,7 +793,7 @@ var OuterSubscriber = function (_super) {
 
 exports.OuterSubscriber = OuterSubscriber;
 
-},{"./Subscriber":14}],10:[function(require,module,exports){
+},{"./Subscriber":13}],9:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -3884,7 +973,7 @@ var ReplayEvent = function () {
   return ReplayEvent;
 }();
 
-},{"./Subject":12,"./SubjectSubscription":13,"./Subscription":15,"./operators/observeOn":98,"./scheduler/queue":164,"./util/ObjectUnsubscribedError":171}],11:[function(require,module,exports){
+},{"./Subject":11,"./SubjectSubscription":12,"./Subscription":14,"./operators/observeOn":97,"./scheduler/queue":163,"./util/ObjectUnsubscribedError":170}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3918,7 +1007,7 @@ var Scheduler = function () {
 
 exports.Scheduler = Scheduler;
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -4146,7 +1235,7 @@ var AnonymousSubject = function (_super) {
 
 exports.AnonymousSubject = AnonymousSubject;
 
-},{"../internal/symbol/rxSubscriber":167,"./Observable":7,"./SubjectSubscription":13,"./Subscriber":14,"./Subscription":15,"./util/ObjectUnsubscribedError":171}],13:[function(require,module,exports){
+},{"../internal/symbol/rxSubscriber":166,"./Observable":6,"./SubjectSubscription":12,"./Subscriber":13,"./Subscription":14,"./util/ObjectUnsubscribedError":170}],12:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -4217,7 +1306,7 @@ var SubjectSubscription = function (_super) {
 
 exports.SubjectSubscription = SubjectSubscription;
 
-},{"./Subscription":15}],14:[function(require,module,exports){
+},{"./Subscription":14}],13:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -4537,7 +1626,7 @@ var SafeSubscriber = function (_super) {
 
 exports.SafeSubscriber = SafeSubscriber;
 
-},{"../internal/symbol/rxSubscriber":167,"./Observer":8,"./Subscription":15,"./config":16,"./util/hostReportError":175,"./util/isFunction":180}],15:[function(require,module,exports){
+},{"../internal/symbol/rxSubscriber":166,"./Observer":7,"./Subscription":14,"./config":15,"./util/hostReportError":174,"./util/isFunction":179}],14:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4723,7 +1812,7 @@ function flattenUnsubscriptionErrors(errors) {
   }, []);
 }
 
-},{"./util/UnsubscriptionError":173,"./util/isArray":177,"./util/isFunction":180,"./util/isObject":184}],16:[function(require,module,exports){
+},{"./util/UnsubscriptionError":172,"./util/isArray":176,"./util/isFunction":179,"./util/isObject":183}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4750,7 +1839,7 @@ exports.config = {
 
 };
 
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -4989,7 +2078,7 @@ var RefCountSubscriber = function (_super) {
   return RefCountSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Observable":7,"../Subject":12,"../Subscriber":14,"../Subscription":15,"../operators/refCount":109}],18:[function(require,module,exports){
+},{"../Observable":6,"../Subject":11,"../Subscriber":13,"../Subscription":14,"../operators/refCount":108}],17:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -5088,7 +2177,7 @@ var SubscribeOnObservable = function (_super) {
 
 exports.SubscribeOnObservable = SubscribeOnObservable;
 
-},{"../Observable":7,"../scheduler/asap":162,"../util/isNumeric":183}],19:[function(require,module,exports){
+},{"../Observable":6,"../scheduler/asap":161,"../util/isNumeric":182}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5236,7 +2325,7 @@ function dispatchError(state) {
   subject.error(err);
 }
 
-},{"../AsyncSubject":3,"../Observable":7,"../operators/map":87,"../util/canReportError":174,"../util/isArray":177,"../util/isScheduler":187}],20:[function(require,module,exports){
+},{"../AsyncSubject":2,"../Observable":6,"../operators/map":86,"../util/canReportError":173,"../util/isArray":176,"../util/isScheduler":186}],19:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5403,7 +2492,7 @@ function dispatchError(arg) {
   subject.error(err);
 }
 
-},{"../AsyncSubject":3,"../Observable":7,"../operators/map":87,"../util/canReportError":174,"../util/isArray":177,"../util/isScheduler":187}],21:[function(require,module,exports){
+},{"../AsyncSubject":2,"../Observable":6,"../operators/map":86,"../util/canReportError":173,"../util/isArray":176,"../util/isScheduler":186}],20:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -5561,7 +2650,7 @@ var CombineLatestSubscriber = function (_super) {
 
 exports.CombineLatestSubscriber = CombineLatestSubscriber;
 
-},{"../OuterSubscriber":9,"../util/isArray":177,"../util/isScheduler":187,"../util/subscribeToResult":196,"./fromArray":27}],22:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../util/isArray":176,"../util/isScheduler":186,"../util/subscribeToResult":195,"./fromArray":26}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5584,7 +2673,7 @@ function concat() {
 
 exports.concat = concat;
 
-},{"../operators/concatAll":59,"./of":38}],23:[function(require,module,exports){
+},{"../operators/concatAll":58,"./of":37}],22:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5615,7 +2704,7 @@ function defer(observableFactory) {
 
 exports.defer = defer;
 
-},{"../Observable":7,"./empty":24,"./from":26}],24:[function(require,module,exports){
+},{"../Observable":6,"./empty":23,"./from":25}],23:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5644,7 +2733,7 @@ function emptyScheduled(scheduler) {
 
 exports.emptyScheduled = emptyScheduled;
 
-},{"../Observable":7}],25:[function(require,module,exports){
+},{"../Observable":6}],24:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -5783,7 +2872,7 @@ var ForkJoinSubscriber = function (_super) {
   return ForkJoinSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../Observable":7,"../OuterSubscriber":9,"../operators/map":87,"../util/isArray":177,"../util/subscribeToResult":196,"./empty":24}],26:[function(require,module,exports){
+},{"../Observable":6,"../OuterSubscriber":8,"../operators/map":86,"../util/isArray":176,"../util/subscribeToResult":195,"./empty":23}],25:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5836,7 +2925,7 @@ function from(input, scheduler) {
 
 exports.from = from;
 
-},{"../Observable":7,"../util/isArrayLike":178,"../util/isInteropObservable":181,"../util/isIterable":182,"../util/isPromise":186,"../util/subscribeTo":191,"./fromArray":27,"./fromIterable":30,"./fromObservable":31,"./fromPromise":32}],27:[function(require,module,exports){
+},{"../Observable":6,"../util/isArrayLike":177,"../util/isInteropObservable":180,"../util/isIterable":181,"../util/isPromise":185,"../util/subscribeTo":190,"./fromArray":26,"./fromIterable":29,"./fromObservable":30,"./fromPromise":31}],26:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5875,7 +2964,7 @@ function fromArray(input, scheduler) {
 
 exports.fromArray = fromArray;
 
-},{"../Observable":7,"../Subscription":15,"../util/subscribeToArray":192}],28:[function(require,module,exports){
+},{"../Observable":6,"../Subscription":14,"../util/subscribeToArray":191}],27:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5966,7 +3055,7 @@ function isEventTarget(sourceObj) {
   return sourceObj && typeof sourceObj.addEventListener === 'function' && typeof sourceObj.removeEventListener === 'function';
 }
 
-},{"../Observable":7,"../operators/map":87,"../util/isArray":177,"../util/isFunction":180}],29:[function(require,module,exports){
+},{"../Observable":6,"../operators/map":86,"../util/isArray":176,"../util/isFunction":179}],28:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6020,7 +3109,7 @@ function fromEventPattern(addHandler, removeHandler, resultSelector) {
 
 exports.fromEventPattern = fromEventPattern;
 
-},{"../Observable":7,"../operators/map":87,"../util/isArray":177,"../util/isFunction":180}],30:[function(require,module,exports){
+},{"../Observable":6,"../operators/map":86,"../util/isArray":176,"../util/isFunction":179}],29:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6085,7 +3174,7 @@ function fromIterable(input, scheduler) {
 
 exports.fromIterable = fromIterable;
 
-},{"../Observable":7,"../Subscription":15,"../symbol/iterator":165,"../util/subscribeToIterable":193}],31:[function(require,module,exports){
+},{"../Observable":6,"../Subscription":14,"../symbol/iterator":164,"../util/subscribeToIterable":192}],30:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6133,7 +3222,7 @@ function fromObservable(input, scheduler) {
 
 exports.fromObservable = fromObservable;
 
-},{"../Observable":7,"../Subscription":15,"../symbol/observable":166,"../util/subscribeToObservable":194}],32:[function(require,module,exports){
+},{"../Observable":6,"../Subscription":14,"../symbol/observable":165,"../util/subscribeToObservable":193}],31:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6173,7 +3262,7 @@ function fromPromise(input, scheduler) {
 
 exports.fromPromise = fromPromise;
 
-},{"../Observable":7,"../Subscription":15,"../util/subscribeToPromise":195}],33:[function(require,module,exports){
+},{"../Observable":6,"../Subscription":14,"../util/subscribeToPromise":194}],32:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6326,7 +3415,7 @@ function dispatch(state) {
   return this.schedule(state);
 }
 
-},{"../Observable":7,"../util/identity":176,"../util/isScheduler":187}],34:[function(require,module,exports){
+},{"../Observable":6,"../util/identity":175,"../util/isScheduler":186}],33:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6353,7 +3442,7 @@ function iif(condition, trueResult, falseResult) {
 
 exports.iif = iif;
 
-},{"./defer":23,"./empty":24}],35:[function(require,module,exports){
+},{"./defer":22,"./empty":23}],34:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6407,7 +3496,7 @@ function dispatch(state) {
   }, period);
 }
 
-},{"../Observable":7,"../scheduler/async":163,"../util/isNumeric":183}],36:[function(require,module,exports){
+},{"../Observable":6,"../scheduler/async":162,"../util/isNumeric":182}],35:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6452,7 +3541,7 @@ function merge() {
 
 exports.merge = merge;
 
-},{"../Observable":7,"../operators/mergeAll":92,"../util/isScheduler":187,"./fromArray":27}],37:[function(require,module,exports){
+},{"../Observable":6,"../operators/mergeAll":91,"../util/isScheduler":186,"./fromArray":26}],36:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6471,7 +3560,7 @@ function never() {
 
 exports.never = never;
 
-},{"../Observable":7,"../util/noop":188}],38:[function(require,module,exports){
+},{"../Observable":6,"../util/noop":187}],37:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6515,7 +3604,7 @@ function of() {
 
 exports.of = of;
 
-},{"../util/isScheduler":187,"./empty":24,"./fromArray":27,"./scalar":43}],39:[function(require,module,exports){
+},{"../util/isScheduler":186,"./empty":23,"./fromArray":26,"./scalar":42}],38:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6565,7 +3654,7 @@ function onErrorResumeNext() {
 
 exports.onErrorResumeNext = onErrorResumeNext;
 
-},{"../Observable":7,"../util/isArray":177,"./empty":24,"./from":26}],40:[function(require,module,exports){
+},{"../Observable":6,"../util/isArray":176,"./empty":23,"./from":25}],39:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6635,7 +3724,7 @@ function dispatch(state) {
 
 exports.dispatch = dispatch;
 
-},{"../Observable":7,"../Subscription":15}],41:[function(require,module,exports){
+},{"../Observable":6,"../Subscription":14}],40:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -6767,7 +3856,7 @@ var RaceSubscriber = function (_super) {
 
 exports.RaceSubscriber = RaceSubscriber;
 
-},{"../OuterSubscriber":9,"../util/isArray":177,"../util/subscribeToResult":196,"./fromArray":27}],42:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../util/isArray":176,"../util/subscribeToResult":195,"./fromArray":26}],41:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6842,7 +3931,7 @@ function dispatch(state) {
 
 exports.dispatch = dispatch;
 
-},{"../Observable":7}],43:[function(require,module,exports){
+},{"../Observable":6}],42:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6863,7 +3952,7 @@ function scalar(value) {
 
 exports.scalar = scalar;
 
-},{"../Observable":7}],44:[function(require,module,exports){
+},{"../Observable":6}],43:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6895,7 +3984,7 @@ function dispatch(_a) {
   subscriber.error(error);
 }
 
-},{"../Observable":7}],45:[function(require,module,exports){
+},{"../Observable":6}],44:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6955,7 +4044,7 @@ function dispatch(state) {
   this.schedule(state, period);
 }
 
-},{"../Observable":7,"../scheduler/async":163,"../util/isNumeric":183,"../util/isScheduler":187}],46:[function(require,module,exports){
+},{"../Observable":6,"../scheduler/async":162,"../util/isNumeric":182,"../util/isScheduler":186}],45:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7002,7 +4091,7 @@ function using(resourceFactory, observableFactory) {
 
 exports.using = using;
 
-},{"../Observable":7,"./empty":24,"./from":26}],47:[function(require,module,exports){
+},{"../Observable":6,"./empty":23,"./from":25}],46:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -7321,7 +4410,7 @@ var ZipBufferIterator = function (_super) {
   return ZipBufferIterator;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../../internal/symbol/iterator":165,"../OuterSubscriber":9,"../Subscriber":14,"../util/isArray":177,"../util/subscribeToResult":196,"./fromArray":27}],48:[function(require,module,exports){
+},{"../../internal/symbol/iterator":164,"../OuterSubscriber":8,"../Subscriber":13,"../util/isArray":176,"../util/subscribeToResult":195,"./fromArray":26}],47:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -7441,7 +4530,7 @@ var AuditSubscriber = function (_super) {
   return AuditSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../util/subscribeToResult":196}],49:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../util/subscribeToResult":195}],48:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7466,7 +4555,7 @@ function auditTime(duration, scheduler) {
 
 exports.auditTime = auditTime;
 
-},{"../observable/timer":45,"../scheduler/async":163,"./audit":48}],50:[function(require,module,exports){
+},{"../observable/timer":44,"../scheduler/async":162,"./audit":47}],49:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -7547,7 +4636,7 @@ var BufferSubscriber = function (_super) {
   return BufferSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../util/subscribeToResult":196}],51:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../util/subscribeToResult":195}],50:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -7701,7 +4790,7 @@ var BufferSkipCountSubscriber = function (_super) {
   return BufferSkipCountSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],52:[function(require,module,exports){
+},{"../Subscriber":13}],51:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -7950,7 +5039,7 @@ function dispatchBufferClose(arg) {
   subscriber.closeContext(context);
 }
 
-},{"../Subscriber":14,"../scheduler/async":163,"../util/isScheduler":187}],53:[function(require,module,exports){
+},{"../Subscriber":13,"../scheduler/async":162,"../util/isScheduler":186}],52:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -8120,7 +5209,7 @@ var BufferToggleSubscriber = function (_super) {
   return BufferToggleSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../Subscription":15,"../util/subscribeToResult":196}],54:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../Subscription":14,"../util/subscribeToResult":195}],53:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -8257,7 +5346,7 @@ var BufferWhenSubscriber = function (_super) {
   return BufferWhenSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../Subscription":15,"../util/subscribeToResult":196}],55:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../Subscription":14,"../util/subscribeToResult":195}],54:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -8350,7 +5439,7 @@ var CatchSubscriber = function (_super) {
   return CatchSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../InnerSubscriber":5,"../OuterSubscriber":9,"../util/subscribeToResult":196}],56:[function(require,module,exports){
+},{"../InnerSubscriber":4,"../OuterSubscriber":8,"../util/subscribeToResult":195}],55:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8367,7 +5456,7 @@ function combineAll(project) {
 
 exports.combineAll = combineAll;
 
-},{"../observable/combineLatest":21}],57:[function(require,module,exports){
+},{"../observable/combineLatest":20}],56:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8406,7 +5495,7 @@ function combineLatest() {
 
 exports.combineLatest = combineLatest;
 
-},{"../observable/combineLatest":21,"../observable/from":26,"../util/isArray":177}],58:[function(require,module,exports){
+},{"../observable/combineLatest":20,"../observable/from":25,"../util/isArray":176}],57:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8429,7 +5518,7 @@ function concat() {
 
 exports.concat = concat;
 
-},{"../observable/concat":22}],59:[function(require,module,exports){
+},{"../observable/concat":21}],58:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8444,7 +5533,7 @@ function concatAll() {
 
 exports.concatAll = concatAll;
 
-},{"./mergeAll":92}],60:[function(require,module,exports){
+},{"./mergeAll":91}],59:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8459,7 +5548,7 @@ function concatMap(project, resultSelector) {
 
 exports.concatMap = concatMap;
 
-},{"./mergeMap":93}],61:[function(require,module,exports){
+},{"./mergeMap":92}],60:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8476,7 +5565,7 @@ function concatMapTo(innerObservable, resultSelector) {
 
 exports.concatMapTo = concatMapTo;
 
-},{"./concatMap":60}],62:[function(require,module,exports){
+},{"./concatMap":59}],61:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -8574,7 +5663,7 @@ var CountSubscriber = function (_super) {
   return CountSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],63:[function(require,module,exports){
+},{"../Subscriber":13}],62:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -8704,7 +5793,7 @@ var DebounceSubscriber = function (_super) {
   return DebounceSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../util/subscribeToResult":196}],64:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../util/subscribeToResult":195}],63:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -8818,7 +5907,7 @@ function dispatchNext(subscriber) {
   subscriber.debouncedNext();
 }
 
-},{"../Subscriber":14,"../scheduler/async":163}],65:[function(require,module,exports){
+},{"../Subscriber":13,"../scheduler/async":162}],64:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -8902,7 +5991,7 @@ var DefaultIfEmptySubscriber = function (_super) {
   return DefaultIfEmptySubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],66:[function(require,module,exports){
+},{"../Subscriber":13}],65:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -9053,7 +6142,7 @@ var DelayMessage = function () {
   return DelayMessage;
 }();
 
-},{"../Notification":6,"../Subscriber":14,"../scheduler/async":163,"../util/isDate":179}],67:[function(require,module,exports){
+},{"../Notification":5,"../Subscriber":13,"../scheduler/async":162,"../util/isDate":178}],66:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -9256,7 +6345,7 @@ var SubscriptionDelaySubscriber = function (_super) {
   return SubscriptionDelaySubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Observable":7,"../OuterSubscriber":9,"../Subscriber":14,"../util/subscribeToResult":196}],68:[function(require,module,exports){
+},{"../Observable":6,"../OuterSubscriber":8,"../Subscriber":13,"../util/subscribeToResult":195}],67:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -9321,7 +6410,7 @@ var DeMaterializeSubscriber = function (_super) {
   return DeMaterializeSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],69:[function(require,module,exports){
+},{"../Subscriber":13}],68:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -9437,7 +6526,7 @@ var DistinctSubscriber = function (_super) {
 
 exports.DistinctSubscriber = DistinctSubscriber;
 
-},{"../OuterSubscriber":9,"../util/subscribeToResult":196}],70:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../util/subscribeToResult":195}],69:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -9543,7 +6632,7 @@ var DistinctUntilChangedSubscriber = function (_super) {
   return DistinctUntilChangedSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],71:[function(require,module,exports){
+},{"../Subscriber":13}],70:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9560,7 +6649,7 @@ function distinctUntilKeyChanged(key, compare) {
 
 exports.distinctUntilKeyChanged = distinctUntilKeyChanged;
 
-},{"./distinctUntilChanged":70}],72:[function(require,module,exports){
+},{"./distinctUntilChanged":69}],71:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9594,7 +6683,7 @@ function elementAt(index, defaultValue) {
 
 exports.elementAt = elementAt;
 
-},{"../util/ArgumentOutOfRangeError":168,"./defaultIfEmpty":65,"./filter":78,"./take":130,"./throwIfEmpty":137}],73:[function(require,module,exports){
+},{"../util/ArgumentOutOfRangeError":167,"./defaultIfEmpty":64,"./filter":77,"./take":129,"./throwIfEmpty":136}],72:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9641,7 +6730,7 @@ function endWith() {
 
 exports.endWith = endWith;
 
-},{"../observable/concat":22,"../observable/empty":24,"../observable/fromArray":27,"../observable/scalar":43,"../util/isScheduler":187}],74:[function(require,module,exports){
+},{"../observable/concat":21,"../observable/empty":23,"../observable/fromArray":26,"../observable/scalar":42,"../util/isScheduler":186}],73:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -9737,7 +6826,7 @@ var EverySubscriber = function (_super) {
   return EverySubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],75:[function(require,module,exports){
+},{"../Subscriber":13}],74:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -9828,7 +6917,7 @@ var SwitchFirstSubscriber = function (_super) {
   return SwitchFirstSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../util/subscribeToResult":196}],76:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../util/subscribeToResult":195}],75:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -9972,7 +7061,7 @@ var ExhaustMapSubscriber = function (_super) {
   return ExhaustMapSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../InnerSubscriber":5,"../OuterSubscriber":9,"../observable/from":26,"../util/subscribeToResult":196,"./map":87}],77:[function(require,module,exports){
+},{"../InnerSubscriber":4,"../OuterSubscriber":8,"../observable/from":25,"../util/subscribeToResult":195,"./map":86}],76:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -10146,7 +7235,7 @@ var ExpandSubscriber = function (_super) {
 
 exports.ExpandSubscriber = ExpandSubscriber;
 
-},{"../OuterSubscriber":9,"../util/subscribeToResult":196}],78:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../util/subscribeToResult":195}],77:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -10230,7 +7319,7 @@ var FilterSubscriber = function (_super) {
   return FilterSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],79:[function(require,module,exports){
+},{"../Subscriber":13}],78:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -10299,7 +7388,7 @@ var FinallySubscriber = function (_super) {
   return FinallySubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14,"../Subscription":15}],80:[function(require,module,exports){
+},{"../Subscriber":13,"../Subscription":14}],79:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -10409,7 +7498,7 @@ var FindValueSubscriber = function (_super) {
 
 exports.FindValueSubscriber = FindValueSubscriber;
 
-},{"../Subscriber":14}],81:[function(require,module,exports){
+},{"../Subscriber":13}],80:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10426,7 +7515,7 @@ function findIndex(predicate, thisArg) {
 
 exports.findIndex = findIndex;
 
-},{"../operators/find":80}],82:[function(require,module,exports){
+},{"../operators/find":79}],81:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10458,7 +7547,7 @@ function first(predicate, defaultValue) {
 
 exports.first = first;
 
-},{"../util/EmptyError":169,"../util/identity":176,"./defaultIfEmpty":65,"./filter":78,"./take":130,"./throwIfEmpty":137}],83:[function(require,module,exports){
+},{"../util/EmptyError":168,"../util/identity":175,"./defaultIfEmpty":64,"./filter":77,"./take":129,"./throwIfEmpty":136}],82:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -10728,7 +7817,7 @@ var InnerRefCountSubscription = function (_super) {
   return InnerRefCountSubscription;
 }(Subscription_1.Subscription);
 
-},{"../Observable":7,"../Subject":12,"../Subscriber":14,"../Subscription":15}],84:[function(require,module,exports){
+},{"../Observable":6,"../Subject":11,"../Subscriber":13,"../Subscription":14}],83:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -10791,7 +7880,7 @@ var IgnoreElementsSubscriber = function (_super) {
   return IgnoreElementsSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],85:[function(require,module,exports){
+},{"../Subscriber":13}],84:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -10866,7 +7955,7 @@ var IsEmptySubscriber = function (_super) {
   return IsEmptySubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],86:[function(require,module,exports){
+},{"../Subscriber":13}],85:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10898,7 +7987,7 @@ function last(predicate, defaultValue) {
 
 exports.last = last;
 
-},{"../util/EmptyError":169,"../util/identity":176,"./defaultIfEmpty":65,"./filter":78,"./takeLast":131,"./throwIfEmpty":137}],87:[function(require,module,exports){
+},{"../util/EmptyError":168,"../util/identity":175,"./defaultIfEmpty":64,"./filter":77,"./takeLast":130,"./throwIfEmpty":136}],86:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -10986,7 +8075,7 @@ var MapSubscriber = function (_super) {
   return MapSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],88:[function(require,module,exports){
+},{"../Subscriber":13}],87:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -11056,7 +8145,7 @@ var MapToSubscriber = function (_super) {
   return MapToSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],89:[function(require,module,exports){
+},{"../Subscriber":13}],88:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -11135,7 +8224,7 @@ var MaterializeSubscriber = function (_super) {
   return MaterializeSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Notification":6,"../Subscriber":14}],90:[function(require,module,exports){
+},{"../Notification":5,"../Subscriber":13}],89:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11155,7 +8244,7 @@ function max(comparer) {
 
 exports.max = max;
 
-},{"./reduce":108}],91:[function(require,module,exports){
+},{"./reduce":107}],90:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11178,7 +8267,7 @@ function merge() {
 
 exports.merge = merge;
 
-},{"../observable/merge":36}],92:[function(require,module,exports){
+},{"../observable/merge":35}],91:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11199,7 +8288,7 @@ function mergeAll(concurrent) {
 
 exports.mergeAll = mergeAll;
 
-},{"../util/identity":176,"./mergeMap":93}],93:[function(require,module,exports){
+},{"../util/identity":175,"./mergeMap":92}],92:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -11364,7 +8453,7 @@ var MergeMapSubscriber = function (_super) {
 
 exports.MergeMapSubscriber = MergeMapSubscriber;
 
-},{"../InnerSubscriber":5,"../OuterSubscriber":9,"../observable/from":26,"../util/subscribeToResult":196,"./map":87}],94:[function(require,module,exports){
+},{"../InnerSubscriber":4,"../OuterSubscriber":8,"../observable/from":25,"../util/subscribeToResult":195,"./map":86}],93:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11395,7 +8484,7 @@ function mergeMapTo(innerObservable, resultSelector, concurrent) {
 
 exports.mergeMapTo = mergeMapTo;
 
-},{"./mergeMap":93}],95:[function(require,module,exports){
+},{"./mergeMap":92}],94:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -11548,7 +8637,7 @@ var MergeScanSubscriber = function (_super) {
 
 exports.MergeScanSubscriber = MergeScanSubscriber;
 
-},{"../InnerSubscriber":5,"../OuterSubscriber":9,"../util/subscribeToResult":196}],96:[function(require,module,exports){
+},{"../InnerSubscriber":4,"../OuterSubscriber":8,"../util/subscribeToResult":195}],95:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11568,7 +8657,7 @@ function min(comparer) {
 
 exports.min = min;
 
-},{"./reduce":108}],97:[function(require,module,exports){
+},{"./reduce":107}],96:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11621,7 +8710,7 @@ var MulticastOperator = function () {
 
 exports.MulticastOperator = MulticastOperator;
 
-},{"../observable/ConnectableObservable":17}],98:[function(require,module,exports){
+},{"../observable/ConnectableObservable":16}],97:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -11744,7 +8833,7 @@ var ObserveOnMessage = function () {
 
 exports.ObserveOnMessage = ObserveOnMessage;
 
-},{"../Notification":6,"../Subscriber":14}],99:[function(require,module,exports){
+},{"../Notification":5,"../Subscriber":13}],98:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -11879,7 +8968,7 @@ var OnErrorResumeNextSubscriber = function (_super) {
   return OnErrorResumeNextSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../InnerSubscriber":5,"../OuterSubscriber":9,"../observable/from":26,"../util/isArray":177,"../util/subscribeToResult":196}],100:[function(require,module,exports){
+},{"../InnerSubscriber":4,"../OuterSubscriber":8,"../observable/from":25,"../util/isArray":176,"../util/subscribeToResult":195}],99:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -11953,7 +9042,7 @@ var PairwiseSubscriber = function (_super) {
   return PairwiseSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],101:[function(require,module,exports){
+},{"../Subscriber":13}],100:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11972,7 +9061,7 @@ function partition(predicate, thisArg) {
 
 exports.partition = partition;
 
-},{"../util/not":189,"./filter":78}],102:[function(require,module,exports){
+},{"../util/not":188,"./filter":77}],101:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12021,7 +9110,7 @@ function plucker(props, length) {
   return mapper;
 }
 
-},{"./map":87}],103:[function(require,module,exports){
+},{"./map":86}],102:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12040,7 +9129,7 @@ function publish(selector) {
 
 exports.publish = publish;
 
-},{"../Subject":12,"./multicast":97}],104:[function(require,module,exports){
+},{"../Subject":11,"./multicast":96}],103:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12059,7 +9148,7 @@ function publishBehavior(value) {
 
 exports.publishBehavior = publishBehavior;
 
-},{"../BehaviorSubject":4,"./multicast":97}],105:[function(require,module,exports){
+},{"../BehaviorSubject":3,"./multicast":96}],104:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12078,7 +9167,7 @@ function publishLast() {
 
 exports.publishLast = publishLast;
 
-},{"../AsyncSubject":3,"./multicast":97}],106:[function(require,module,exports){
+},{"../AsyncSubject":2,"./multicast":96}],105:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12105,7 +9194,7 @@ function publishReplay(bufferSize, windowTime, selectorOrScheduler, scheduler) {
 
 exports.publishReplay = publishReplay;
 
-},{"../ReplaySubject":10,"./multicast":97}],107:[function(require,module,exports){
+},{"../ReplaySubject":9,"./multicast":96}],106:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12134,7 +9223,7 @@ function race() {
 
 exports.race = race;
 
-},{"../observable/race":41,"../util/isArray":177}],108:[function(require,module,exports){
+},{"../observable/race":40,"../util/isArray":176}],107:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12165,7 +9254,7 @@ function reduce(accumulator, seed) {
 
 exports.reduce = reduce;
 
-},{"../util/pipe":190,"./defaultIfEmpty":65,"./scan":116,"./takeLast":131}],109:[function(require,module,exports){
+},{"../util/pipe":189,"./defaultIfEmpty":64,"./scan":115,"./takeLast":130}],108:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -12272,7 +9361,7 @@ var RefCountSubscriber = function (_super) {
   return RefCountSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],110:[function(require,module,exports){
+},{"../Subscriber":13}],109:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -12368,7 +9457,7 @@ var RepeatSubscriber = function (_super) {
   return RepeatSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14,"../observable/empty":24}],111:[function(require,module,exports){
+},{"../Subscriber":13,"../observable/empty":23}],110:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -12512,7 +9601,7 @@ var RepeatWhenSubscriber = function (_super) {
   return RepeatWhenSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../Subject":12,"../util/subscribeToResult":196}],112:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../Subject":11,"../util/subscribeToResult":195}],111:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -12600,7 +9689,7 @@ var RetrySubscriber = function (_super) {
   return RetrySubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],113:[function(require,module,exports){
+},{"../Subscriber":13}],112:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -12731,7 +9820,7 @@ var RetryWhenSubscriber = function (_super) {
   return RetryWhenSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../Subject":12,"../util/subscribeToResult":196}],114:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../Subject":11,"../util/subscribeToResult":195}],113:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -12822,7 +9911,7 @@ var SampleSubscriber = function (_super) {
   return SampleSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../util/subscribeToResult":196}],115:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../util/subscribeToResult":195}],114:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -12922,7 +10011,7 @@ function dispatchNotification(state) {
   this.schedule(state, period);
 }
 
-},{"../Subscriber":14,"../scheduler/async":163}],116:[function(require,module,exports){
+},{"../Subscriber":13,"../scheduler/async":162}],115:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -13038,7 +10127,7 @@ var ScanSubscriber = function (_super) {
   return ScanSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],117:[function(require,module,exports){
+},{"../Subscriber":13}],116:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -13212,7 +10301,7 @@ var SequenceEqualCompareToSubscriber = function (_super) {
   return SequenceEqualCompareToSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],118:[function(require,module,exports){
+},{"../Subscriber":13}],117:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13237,7 +10326,7 @@ function share() {
 
 exports.share = share;
 
-},{"../Subject":12,"./multicast":97,"./refCount":109}],119:[function(require,module,exports){
+},{"../Subject":11,"./multicast":96,"./refCount":108}],118:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13314,7 +10403,7 @@ function shareReplayOperator(_a) {
   };
 }
 
-},{"../ReplaySubject":10}],120:[function(require,module,exports){
+},{"../ReplaySubject":9}],119:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -13426,7 +10515,7 @@ var SingleSubscriber = function (_super) {
   return SingleSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14,"../util/EmptyError":169}],121:[function(require,module,exports){
+},{"../Subscriber":13,"../util/EmptyError":168}],120:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -13499,7 +10588,7 @@ var SkipSubscriber = function (_super) {
   return SkipSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],122:[function(require,module,exports){
+},{"../Subscriber":13}],121:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -13592,7 +10681,7 @@ var SkipLastSubscriber = function (_super) {
   return SkipLastSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14,"../util/ArgumentOutOfRangeError":168}],123:[function(require,module,exports){
+},{"../Subscriber":13,"../util/ArgumentOutOfRangeError":167}],122:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -13684,7 +10773,7 @@ var SkipUntilSubscriber = function (_super) {
   return SkipUntilSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../InnerSubscriber":5,"../OuterSubscriber":9,"../util/subscribeToResult":196}],124:[function(require,module,exports){
+},{"../InnerSubscriber":4,"../OuterSubscriber":8,"../util/subscribeToResult":195}],123:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -13773,7 +10862,7 @@ var SkipWhileSubscriber = function (_super) {
   return SkipWhileSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],125:[function(require,module,exports){
+},{"../Subscriber":13}],124:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13820,7 +10909,7 @@ function startWith() {
 
 exports.startWith = startWith;
 
-},{"../observable/concat":22,"../observable/empty":24,"../observable/fromArray":27,"../observable/scalar":43,"../util/isScheduler":187}],126:[function(require,module,exports){
+},{"../observable/concat":21,"../observable/empty":23,"../observable/fromArray":26,"../observable/scalar":42,"../util/isScheduler":186}],125:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13854,7 +10943,7 @@ var SubscribeOnOperator = function () {
   return SubscribeOnOperator;
 }();
 
-},{"../observable/SubscribeOnObservable":18}],127:[function(require,module,exports){
+},{"../observable/SubscribeOnObservable":17}],126:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13871,7 +10960,7 @@ function switchAll() {
 
 exports.switchAll = switchAll;
 
-},{"../util/identity":176,"./switchMap":128}],128:[function(require,module,exports){
+},{"../util/identity":175,"./switchMap":127}],127:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -14011,7 +11100,7 @@ var SwitchMapSubscriber = function (_super) {
   return SwitchMapSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../InnerSubscriber":5,"../OuterSubscriber":9,"../observable/from":26,"../util/subscribeToResult":196,"./map":87}],129:[function(require,module,exports){
+},{"../InnerSubscriber":4,"../OuterSubscriber":8,"../observable/from":25,"../util/subscribeToResult":195,"./map":86}],128:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14030,7 +11119,7 @@ function switchMapTo(innerObservable, resultSelector) {
 
 exports.switchMapTo = switchMapTo;
 
-},{"./switchMap":128}],130:[function(require,module,exports){
+},{"./switchMap":127}],129:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -14123,7 +11212,7 @@ var TakeSubscriber = function (_super) {
   return TakeSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14,"../observable/empty":24,"../util/ArgumentOutOfRangeError":168}],131:[function(require,module,exports){
+},{"../Subscriber":13,"../observable/empty":23,"../util/ArgumentOutOfRangeError":167}],130:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -14233,7 +11322,7 @@ var TakeLastSubscriber = function (_super) {
   return TakeLastSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14,"../observable/empty":24,"../util/ArgumentOutOfRangeError":168}],132:[function(require,module,exports){
+},{"../Subscriber":13,"../observable/empty":23,"../util/ArgumentOutOfRangeError":167}],131:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -14316,7 +11405,7 @@ var TakeUntilSubscriber = function (_super) {
   return TakeUntilSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../util/subscribeToResult":196}],133:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../util/subscribeToResult":195}],132:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -14417,7 +11506,7 @@ var TakeWhileSubscriber = function (_super) {
   return TakeWhileSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14}],134:[function(require,module,exports){
+},{"../Subscriber":13}],133:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -14537,7 +11626,7 @@ var TapSubscriber = function (_super) {
   return TapSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subscriber":14,"../util/isFunction":180,"../util/noop":188}],135:[function(require,module,exports){
+},{"../Subscriber":13,"../util/isFunction":179,"../util/noop":187}],134:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -14688,7 +11777,7 @@ var ThrottleSubscriber = function (_super) {
   return ThrottleSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../util/subscribeToResult":196}],136:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../util/subscribeToResult":195}],135:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -14821,7 +11910,7 @@ function dispatchNext(arg) {
   subscriber.clearThrottle();
 }
 
-},{"../Subscriber":14,"../scheduler/async":163,"./throttle":135}],137:[function(require,module,exports){
+},{"../Subscriber":13,"../scheduler/async":162,"./throttle":134}],136:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14854,7 +11943,7 @@ function defaultErrorFactory() {
   return new EmptyError_1.EmptyError();
 }
 
-},{"../util/EmptyError":169,"./tap":134}],138:[function(require,module,exports){
+},{"../util/EmptyError":168,"./tap":133}],137:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14910,7 +11999,7 @@ var TimeInterval = function () {
 
 exports.TimeInterval = TimeInterval;
 
-},{"../observable/defer":23,"../scheduler/async":163,"./map":87,"./scan":116}],139:[function(require,module,exports){
+},{"../observable/defer":22,"../scheduler/async":162,"./map":86,"./scan":115}],138:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14935,7 +12024,7 @@ function timeout(due, scheduler) {
 
 exports.timeout = timeout;
 
-},{"../observable/throwError":44,"../scheduler/async":163,"../util/TimeoutError":172,"./timeoutWith":140}],140:[function(require,module,exports){
+},{"../observable/throwError":43,"../scheduler/async":162,"../util/TimeoutError":171,"./timeoutWith":139}],139:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -15055,7 +12144,7 @@ var TimeoutWithSubscriber = function (_super) {
   return TimeoutWithSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../scheduler/async":163,"../util/isDate":179,"../util/subscribeToResult":196}],141:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../scheduler/async":162,"../util/isDate":178,"../util/subscribeToResult":195}],140:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15089,7 +12178,7 @@ var Timestamp = function () {
 
 exports.Timestamp = Timestamp;
 
-},{"../scheduler/async":163,"./map":87}],142:[function(require,module,exports){
+},{"../scheduler/async":162,"./map":86}],141:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15113,7 +12202,7 @@ function toArray() {
 
 exports.toArray = toArray;
 
-},{"./reduce":108}],143:[function(require,module,exports){
+},{"./reduce":107}],142:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -15233,7 +12322,7 @@ var WindowSubscriber = function (_super) {
   return WindowSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../Subject":12,"../util/subscribeToResult":196}],144:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../Subject":11,"../util/subscribeToResult":195}],143:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -15364,7 +12453,7 @@ var WindowCountSubscriber = function (_super) {
   return WindowCountSubscriber;
 }(Subscriber_1.Subscriber);
 
-},{"../Subject":12,"../Subscriber":14}],145:[function(require,module,exports){
+},{"../Subject":11,"../Subscriber":13}],144:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -15622,7 +12711,7 @@ function dispatchWindowClose(state) {
   subscriber.closeWindow(window);
 }
 
-},{"../Subject":12,"../Subscriber":14,"../scheduler/async":163,"../util/isNumeric":183,"../util/isScheduler":187}],146:[function(require,module,exports){
+},{"../Subject":11,"../Subscriber":13,"../scheduler/async":162,"../util/isNumeric":182,"../util/isScheduler":186}],145:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -15821,7 +12910,7 @@ var WindowToggleSubscriber = function (_super) {
   return WindowToggleSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../Subject":12,"../Subscription":15,"../util/subscribeToResult":196}],147:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../Subject":11,"../Subscription":14,"../util/subscribeToResult":195}],146:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -15961,7 +13050,7 @@ var WindowSubscriber = function (_super) {
   return WindowSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../Subject":12,"../util/subscribeToResult":196}],148:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../Subject":11,"../util/subscribeToResult":195}],147:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -16098,7 +13187,7 @@ var WithLatestFromSubscriber = function (_super) {
   return WithLatestFromSubscriber;
 }(OuterSubscriber_1.OuterSubscriber);
 
-},{"../OuterSubscriber":9,"../util/subscribeToResult":196}],149:[function(require,module,exports){
+},{"../OuterSubscriber":8,"../util/subscribeToResult":195}],148:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16121,7 +13210,7 @@ function zip() {
 
 exports.zip = zip;
 
-},{"../observable/zip":47}],150:[function(require,module,exports){
+},{"../observable/zip":46}],149:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16138,7 +13227,7 @@ function zipAll(project) {
 
 exports.zipAll = zipAll;
 
-},{"../observable/zip":47}],151:[function(require,module,exports){
+},{"../observable/zip":46}],150:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -16191,7 +13280,7 @@ var Action = function (_super) {
 
 exports.Action = Action;
 
-},{"../Subscription":15}],152:[function(require,module,exports){
+},{"../Subscription":14}],151:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -16272,7 +13361,7 @@ var AnimationFrameAction = function (_super) {
 
 exports.AnimationFrameAction = AnimationFrameAction;
 
-},{"./AsyncAction":156}],153:[function(require,module,exports){
+},{"./AsyncAction":155}],152:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -16343,7 +13432,7 @@ var AnimationFrameScheduler = function (_super) {
 
 exports.AnimationFrameScheduler = AnimationFrameScheduler;
 
-},{"./AsyncScheduler":157}],154:[function(require,module,exports){
+},{"./AsyncScheduler":156}],153:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -16424,7 +13513,7 @@ var AsapAction = function (_super) {
 
 exports.AsapAction = AsapAction;
 
-},{"../util/Immediate":170,"./AsyncAction":156}],155:[function(require,module,exports){
+},{"../util/Immediate":169,"./AsyncAction":155}],154:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -16495,7 +13584,7 @@ var AsapScheduler = function (_super) {
 
 exports.AsapScheduler = AsapScheduler;
 
-},{"./AsyncScheduler":157}],156:[function(require,module,exports){
+},{"./AsyncScheduler":156}],155:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -16643,7 +13732,7 @@ var AsyncAction = function (_super) {
 
 exports.AsyncAction = AsyncAction;
 
-},{"./Action":151}],157:[function(require,module,exports){
+},{"./Action":150}],156:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -16743,7 +13832,7 @@ var AsyncScheduler = function (_super) {
 
 exports.AsyncScheduler = AsyncScheduler;
 
-},{"../Scheduler":11}],158:[function(require,module,exports){
+},{"../Scheduler":10}],157:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -16823,7 +13912,7 @@ var QueueAction = function (_super) {
 
 exports.QueueAction = QueueAction;
 
-},{"./AsyncAction":156}],159:[function(require,module,exports){
+},{"./AsyncAction":155}],158:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -16868,7 +13957,7 @@ var QueueScheduler = function (_super) {
 
 exports.QueueScheduler = QueueScheduler;
 
-},{"./AsyncScheduler":157}],160:[function(require,module,exports){
+},{"./AsyncScheduler":156}],159:[function(require,module,exports){
 "use strict";
 
 var __extends = void 0 && (void 0).__extends || function () {
@@ -17036,7 +14125,7 @@ var VirtualAction = function (_super) {
 
 exports.VirtualAction = VirtualAction;
 
-},{"./AsyncAction":156,"./AsyncScheduler":157}],161:[function(require,module,exports){
+},{"./AsyncAction":155,"./AsyncScheduler":156}],160:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17049,7 +14138,7 @@ var AnimationFrameScheduler_1 = require("./AnimationFrameScheduler");
 
 exports.animationFrame = new AnimationFrameScheduler_1.AnimationFrameScheduler(AnimationFrameAction_1.AnimationFrameAction);
 
-},{"./AnimationFrameAction":152,"./AnimationFrameScheduler":153}],162:[function(require,module,exports){
+},{"./AnimationFrameAction":151,"./AnimationFrameScheduler":152}],161:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17062,7 +14151,7 @@ var AsapScheduler_1 = require("./AsapScheduler");
 
 exports.asap = new AsapScheduler_1.AsapScheduler(AsapAction_1.AsapAction);
 
-},{"./AsapAction":154,"./AsapScheduler":155}],163:[function(require,module,exports){
+},{"./AsapAction":153,"./AsapScheduler":154}],162:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17075,7 +14164,7 @@ var AsyncScheduler_1 = require("./AsyncScheduler");
 
 exports.async = new AsyncScheduler_1.AsyncScheduler(AsyncAction_1.AsyncAction);
 
-},{"./AsyncAction":156,"./AsyncScheduler":157}],164:[function(require,module,exports){
+},{"./AsyncAction":155,"./AsyncScheduler":156}],163:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17088,7 +14177,7 @@ var QueueScheduler_1 = require("./QueueScheduler");
 
 exports.queue = new QueueScheduler_1.QueueScheduler(QueueAction_1.QueueAction);
 
-},{"./QueueAction":158,"./QueueScheduler":159}],165:[function(require,module,exports){
+},{"./QueueAction":157,"./QueueScheduler":158}],164:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17107,7 +14196,7 @@ exports.getSymbolIterator = getSymbolIterator;
 exports.iterator = getSymbolIterator();
 exports.$$iterator = exports.iterator;
 
-},{}],166:[function(require,module,exports){
+},{}],165:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17115,7 +14204,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.observable = typeof Symbol === 'function' && Symbol.observable || '@@observable';
 
-},{}],167:[function(require,module,exports){
+},{}],166:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17124,7 +14213,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.rxSubscriber = typeof Symbol === 'function' ? Symbol('rxSubscriber') : '@@rxSubscriber_' + Math.random();
 exports.$$rxSubscriber = exports.rxSubscriber;
 
-},{}],168:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17141,7 +14230,7 @@ function ArgumentOutOfRangeErrorImpl() {
 ArgumentOutOfRangeErrorImpl.prototype = Object.create(Error.prototype);
 exports.ArgumentOutOfRangeError = ArgumentOutOfRangeErrorImpl;
 
-},{}],169:[function(require,module,exports){
+},{}],168:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17158,7 +14247,7 @@ function EmptyErrorImpl() {
 EmptyErrorImpl.prototype = Object.create(Error.prototype);
 exports.EmptyError = EmptyErrorImpl;
 
-},{}],170:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17189,7 +14278,7 @@ exports.Immediate = {
   }
 };
 
-},{}],171:[function(require,module,exports){
+},{}],170:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17206,7 +14295,7 @@ function ObjectUnsubscribedErrorImpl() {
 ObjectUnsubscribedErrorImpl.prototype = Object.create(Error.prototype);
 exports.ObjectUnsubscribedError = ObjectUnsubscribedErrorImpl;
 
-},{}],172:[function(require,module,exports){
+},{}],171:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17223,7 +14312,7 @@ function TimeoutErrorImpl() {
 TimeoutErrorImpl.prototype = Object.create(Error.prototype);
 exports.TimeoutError = TimeoutErrorImpl;
 
-},{}],173:[function(require,module,exports){
+},{}],172:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17243,7 +14332,7 @@ function UnsubscriptionErrorImpl(errors) {
 UnsubscriptionErrorImpl.prototype = Object.create(Error.prototype);
 exports.UnsubscriptionError = UnsubscriptionErrorImpl;
 
-},{}],174:[function(require,module,exports){
+},{}],173:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17273,7 +14362,7 @@ function canReportError(observer) {
 
 exports.canReportError = canReportError;
 
-},{"../Subscriber":14}],175:[function(require,module,exports){
+},{"../Subscriber":13}],174:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17288,7 +14377,7 @@ function hostReportError(err) {
 
 exports.hostReportError = hostReportError;
 
-},{}],176:[function(require,module,exports){
+},{}],175:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17301,7 +14390,7 @@ function identity(x) {
 
 exports.identity = identity;
 
-},{}],177:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17312,7 +14401,7 @@ exports.isArray = Array.isArray || function (x) {
   return x && typeof x.length === 'number';
 };
 
-},{}],178:[function(require,module,exports){
+},{}],177:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17323,7 +14412,7 @@ exports.isArrayLike = function (x) {
   return x && typeof x.length === 'number' && typeof x !== 'function';
 };
 
-},{}],179:[function(require,module,exports){
+},{}],178:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17336,7 +14425,7 @@ function isDate(value) {
 
 exports.isDate = isDate;
 
-},{}],180:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17349,7 +14438,7 @@ function isFunction(x) {
 
 exports.isFunction = isFunction;
 
-},{}],181:[function(require,module,exports){
+},{}],180:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17364,7 +14453,7 @@ function isInteropObservable(input) {
 
 exports.isInteropObservable = isInteropObservable;
 
-},{"../symbol/observable":166}],182:[function(require,module,exports){
+},{"../symbol/observable":165}],181:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17379,7 +14468,7 @@ function isIterable(input) {
 
 exports.isIterable = isIterable;
 
-},{"../symbol/iterator":165}],183:[function(require,module,exports){
+},{"../symbol/iterator":164}],182:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17394,7 +14483,7 @@ function isNumeric(val) {
 
 exports.isNumeric = isNumeric;
 
-},{"./isArray":177}],184:[function(require,module,exports){
+},{"./isArray":176}],183:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17407,7 +14496,7 @@ function isObject(x) {
 
 exports.isObject = isObject;
 
-},{}],185:[function(require,module,exports){
+},{}],184:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17422,7 +14511,7 @@ function isObservable(obj) {
 
 exports.isObservable = isObservable;
 
-},{"../Observable":7}],186:[function(require,module,exports){
+},{"../Observable":6}],185:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17435,7 +14524,7 @@ function isPromise(value) {
 
 exports.isPromise = isPromise;
 
-},{}],187:[function(require,module,exports){
+},{}],186:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17448,7 +14537,7 @@ function isScheduler(value) {
 
 exports.isScheduler = isScheduler;
 
-},{}],188:[function(require,module,exports){
+},{}],187:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17459,7 +14548,7 @@ function noop() {}
 
 exports.noop = noop;
 
-},{}],189:[function(require,module,exports){
+},{}],188:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17478,7 +14567,7 @@ function not(pred, thisArg) {
 
 exports.not = not;
 
-},{}],190:[function(require,module,exports){
+},{}],189:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17517,7 +14606,7 @@ function pipeFromArray(fns) {
 
 exports.pipeFromArray = pipeFromArray;
 
-},{"./noop":188}],191:[function(require,module,exports){
+},{"./noop":187}],190:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17570,7 +14659,7 @@ exports.subscribeTo = function (result) {
   }
 };
 
-},{"../Observable":7,"../symbol/iterator":165,"../symbol/observable":166,"./isArrayLike":178,"./isObject":184,"./isPromise":186,"./subscribeToArray":192,"./subscribeToIterable":193,"./subscribeToObservable":194,"./subscribeToPromise":195}],192:[function(require,module,exports){
+},{"../Observable":6,"../symbol/iterator":164,"../symbol/observable":165,"./isArrayLike":177,"./isObject":183,"./isPromise":185,"./subscribeToArray":191,"./subscribeToIterable":192,"./subscribeToObservable":193,"./subscribeToPromise":194}],191:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17589,7 +14678,7 @@ exports.subscribeToArray = function (array) {
   };
 };
 
-},{}],193:[function(require,module,exports){
+},{}],192:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17629,7 +14718,7 @@ exports.subscribeToIterable = function (iterable) {
   };
 };
 
-},{"../symbol/iterator":165}],194:[function(require,module,exports){
+},{"../symbol/iterator":164}],193:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17650,7 +14739,7 @@ exports.subscribeToObservable = function (obj) {
   };
 };
 
-},{"../symbol/observable":166}],195:[function(require,module,exports){
+},{"../symbol/observable":165}],194:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17673,7 +14762,7 @@ exports.subscribeToPromise = function (promise) {
   };
 };
 
-},{"./hostReportError":175}],196:[function(require,module,exports){
+},{"./hostReportError":174}],195:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17698,7 +14787,7 @@ function subscribeToResult(outerSubscriber, result, outerValue, outerIndex, dest
 
 exports.subscribeToResult = subscribeToResult;
 
-},{"../InnerSubscriber":5,"./subscribeTo":191}],197:[function(require,module,exports){
+},{"../InnerSubscriber":4,"./subscribeTo":190}],196:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17731,7 +14820,7 @@ function toSubscriber(nextOrObserver, error, complete) {
 
 exports.toSubscriber = toSubscriber;
 
-},{"../Observer":8,"../Subscriber":14,"../symbol/rxSubscriber":167}],198:[function(require,module,exports){
+},{"../Observer":7,"../Subscriber":13,"../symbol/rxSubscriber":166}],197:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18154,7 +15243,7 @@ var zipAll_1 = require("../internal/operators/zipAll");
 
 exports.zipAll = zipAll_1.zipAll;
 
-},{"../internal/operators/audit":48,"../internal/operators/auditTime":49,"../internal/operators/buffer":50,"../internal/operators/bufferCount":51,"../internal/operators/bufferTime":52,"../internal/operators/bufferToggle":53,"../internal/operators/bufferWhen":54,"../internal/operators/catchError":55,"../internal/operators/combineAll":56,"../internal/operators/combineLatest":57,"../internal/operators/concat":58,"../internal/operators/concatAll":59,"../internal/operators/concatMap":60,"../internal/operators/concatMapTo":61,"../internal/operators/count":62,"../internal/operators/debounce":63,"../internal/operators/debounceTime":64,"../internal/operators/defaultIfEmpty":65,"../internal/operators/delay":66,"../internal/operators/delayWhen":67,"../internal/operators/dematerialize":68,"../internal/operators/distinct":69,"../internal/operators/distinctUntilChanged":70,"../internal/operators/distinctUntilKeyChanged":71,"../internal/operators/elementAt":72,"../internal/operators/endWith":73,"../internal/operators/every":74,"../internal/operators/exhaust":75,"../internal/operators/exhaustMap":76,"../internal/operators/expand":77,"../internal/operators/filter":78,"../internal/operators/finalize":79,"../internal/operators/find":80,"../internal/operators/findIndex":81,"../internal/operators/first":82,"../internal/operators/groupBy":83,"../internal/operators/ignoreElements":84,"../internal/operators/isEmpty":85,"../internal/operators/last":86,"../internal/operators/map":87,"../internal/operators/mapTo":88,"../internal/operators/materialize":89,"../internal/operators/max":90,"../internal/operators/merge":91,"../internal/operators/mergeAll":92,"../internal/operators/mergeMap":93,"../internal/operators/mergeMapTo":94,"../internal/operators/mergeScan":95,"../internal/operators/min":96,"../internal/operators/multicast":97,"../internal/operators/observeOn":98,"../internal/operators/onErrorResumeNext":99,"../internal/operators/pairwise":100,"../internal/operators/partition":101,"../internal/operators/pluck":102,"../internal/operators/publish":103,"../internal/operators/publishBehavior":104,"../internal/operators/publishLast":105,"../internal/operators/publishReplay":106,"../internal/operators/race":107,"../internal/operators/reduce":108,"../internal/operators/refCount":109,"../internal/operators/repeat":110,"../internal/operators/repeatWhen":111,"../internal/operators/retry":112,"../internal/operators/retryWhen":113,"../internal/operators/sample":114,"../internal/operators/sampleTime":115,"../internal/operators/scan":116,"../internal/operators/sequenceEqual":117,"../internal/operators/share":118,"../internal/operators/shareReplay":119,"../internal/operators/single":120,"../internal/operators/skip":121,"../internal/operators/skipLast":122,"../internal/operators/skipUntil":123,"../internal/operators/skipWhile":124,"../internal/operators/startWith":125,"../internal/operators/subscribeOn":126,"../internal/operators/switchAll":127,"../internal/operators/switchMap":128,"../internal/operators/switchMapTo":129,"../internal/operators/take":130,"../internal/operators/takeLast":131,"../internal/operators/takeUntil":132,"../internal/operators/takeWhile":133,"../internal/operators/tap":134,"../internal/operators/throttle":135,"../internal/operators/throttleTime":136,"../internal/operators/throwIfEmpty":137,"../internal/operators/timeInterval":138,"../internal/operators/timeout":139,"../internal/operators/timeoutWith":140,"../internal/operators/timestamp":141,"../internal/operators/toArray":142,"../internal/operators/window":143,"../internal/operators/windowCount":144,"../internal/operators/windowTime":145,"../internal/operators/windowToggle":146,"../internal/operators/windowWhen":147,"../internal/operators/withLatestFrom":148,"../internal/operators/zip":149,"../internal/operators/zipAll":150}],199:[function(require,module,exports){
+},{"../internal/operators/audit":47,"../internal/operators/auditTime":48,"../internal/operators/buffer":49,"../internal/operators/bufferCount":50,"../internal/operators/bufferTime":51,"../internal/operators/bufferToggle":52,"../internal/operators/bufferWhen":53,"../internal/operators/catchError":54,"../internal/operators/combineAll":55,"../internal/operators/combineLatest":56,"../internal/operators/concat":57,"../internal/operators/concatAll":58,"../internal/operators/concatMap":59,"../internal/operators/concatMapTo":60,"../internal/operators/count":61,"../internal/operators/debounce":62,"../internal/operators/debounceTime":63,"../internal/operators/defaultIfEmpty":64,"../internal/operators/delay":65,"../internal/operators/delayWhen":66,"../internal/operators/dematerialize":67,"../internal/operators/distinct":68,"../internal/operators/distinctUntilChanged":69,"../internal/operators/distinctUntilKeyChanged":70,"../internal/operators/elementAt":71,"../internal/operators/endWith":72,"../internal/operators/every":73,"../internal/operators/exhaust":74,"../internal/operators/exhaustMap":75,"../internal/operators/expand":76,"../internal/operators/filter":77,"../internal/operators/finalize":78,"../internal/operators/find":79,"../internal/operators/findIndex":80,"../internal/operators/first":81,"../internal/operators/groupBy":82,"../internal/operators/ignoreElements":83,"../internal/operators/isEmpty":84,"../internal/operators/last":85,"../internal/operators/map":86,"../internal/operators/mapTo":87,"../internal/operators/materialize":88,"../internal/operators/max":89,"../internal/operators/merge":90,"../internal/operators/mergeAll":91,"../internal/operators/mergeMap":92,"../internal/operators/mergeMapTo":93,"../internal/operators/mergeScan":94,"../internal/operators/min":95,"../internal/operators/multicast":96,"../internal/operators/observeOn":97,"../internal/operators/onErrorResumeNext":98,"../internal/operators/pairwise":99,"../internal/operators/partition":100,"../internal/operators/pluck":101,"../internal/operators/publish":102,"../internal/operators/publishBehavior":103,"../internal/operators/publishLast":104,"../internal/operators/publishReplay":105,"../internal/operators/race":106,"../internal/operators/reduce":107,"../internal/operators/refCount":108,"../internal/operators/repeat":109,"../internal/operators/repeatWhen":110,"../internal/operators/retry":111,"../internal/operators/retryWhen":112,"../internal/operators/sample":113,"../internal/operators/sampleTime":114,"../internal/operators/scan":115,"../internal/operators/sequenceEqual":116,"../internal/operators/share":117,"../internal/operators/shareReplay":118,"../internal/operators/single":119,"../internal/operators/skip":120,"../internal/operators/skipLast":121,"../internal/operators/skipUntil":122,"../internal/operators/skipWhile":123,"../internal/operators/startWith":124,"../internal/operators/subscribeOn":125,"../internal/operators/switchAll":126,"../internal/operators/switchMap":127,"../internal/operators/switchMapTo":128,"../internal/operators/take":129,"../internal/operators/takeLast":130,"../internal/operators/takeUntil":131,"../internal/operators/takeWhile":132,"../internal/operators/tap":133,"../internal/operators/throttle":134,"../internal/operators/throttleTime":135,"../internal/operators/throwIfEmpty":136,"../internal/operators/timeInterval":137,"../internal/operators/timeout":138,"../internal/operators/timeoutWith":139,"../internal/operators/timestamp":140,"../internal/operators/toArray":141,"../internal/operators/window":142,"../internal/operators/windowCount":143,"../internal/operators/windowTime":144,"../internal/operators/windowToggle":145,"../internal/operators/windowWhen":146,"../internal/operators/withLatestFrom":147,"../internal/operators/zip":148,"../internal/operators/zipAll":149}],198:[function(require,module,exports){
 "use strict";
 
 var _appModule = _interopRequireDefault(require("./app.module.js"));
@@ -18165,7 +15254,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 console.log('bootstrap', document);
 angular.bootstrap(document, [_appModule.default]);
 
-},{"./app.module.js":200}],200:[function(require,module,exports){
+},{"./app.module.js":199}],199:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18222,7 +15311,7 @@ app.run(['$rootScope', $rootScope => {
 var _default = MODULE_NAME;
 exports.default = _default;
 
-},{"./directives/canvas.directive":201,"./directives/lazy-script.directive":202,"./directives/lazy.directive":203,"./directives/overscroll-responsive.directive":204,"./directives/overscroll.directive":205,"./filters/trusted.filter":206,"./product/product.controller":207,"./root.controller":208,"./services/api.service":209,"./services/dom.service":210,"./shared/location.service":211,"./shared/promise.service":212,"./shared/state.service":214,"./shared/storage.service":215,"./threejs/vr/vr":222}],201:[function(require,module,exports){
+},{"./directives/canvas.directive":200,"./directives/lazy-script.directive":201,"./directives/lazy.directive":202,"./directives/overscroll-responsive.directive":203,"./directives/overscroll.directive":204,"./filters/trusted.filter":205,"./product/product.controller":206,"./root.controller":207,"./services/api.service":208,"./services/dom.service":209,"./shared/location.service":210,"./shared/promise.service":211,"./shared/state.service":213,"./shared/storage.service":214,"./threejs/vr/vr":233}],200:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18358,7 +15447,7 @@ class CanvasDirective {
 exports.default = CanvasDirective;
 CanvasDirective.factory.$inject = ['$timeout', 'DomService'];
 
-},{"../shared/rect":213,"../threejs/canvas":216,"../threejs/vr/vr":222}],202:[function(require,module,exports){
+},{"../shared/rect":212,"../threejs/canvas":215,"../threejs/vr/vr":233}],201:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18409,7 +15498,7 @@ class LazyScriptDirective {
 exports.default = LazyScriptDirective;
 LazyScriptDirective.factory.$inject = [];
 
-},{}],203:[function(require,module,exports){
+},{}],202:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18564,7 +15653,7 @@ class LazyDirective {
 exports.default = LazyDirective;
 LazyDirective.factory.$inject = ['DomService'];
 
-},{"../shared/rect":213,"rxjs/operators":198}],204:[function(require,module,exports){
+},{"../shared/rect":212,"rxjs/operators":197}],203:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18685,30 +15774,35 @@ class OverscrollResponsiveDirective {
         if (element.style !== elementStyle) {
           element.style = elementStyle;
           node.setAttribute('style', elementStyle);
-        } // const containerRect = Rect.fromNode(container);
+        }
 
+        const containerRect = _rect.default.fromNode(container);
 
         if (y === d) {
           if (element.mode !== MODES.ABSOLUTE) {
-            element.mode = MODES.ABSOLUTE; // container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
-
+            element.mode = MODES.ABSOLUTE;
+            container.setAttribute('style', `position: absolute; left: ${containerRect.left}px; width: ${containerRect.width}px; bottom: 0`);
+            /*
             container.style.position = `relative`;
-            container.style.transform = `translateY(${y}px)`; // container.setAttribute('style', `position: relative; transform: translateY(${d}px);`);
+            container.style.transform = `translateY(${y}px)`;
+            */
+            // container.setAttribute('style', `position: relative; transform: translateY(${d}px);`);
           }
         } else if (y > 0) {
           if (element.mode !== MODES.FIXED) {
-            element.mode = MODES.FIXED; // container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
+            element.mode = MODES.FIXED;
+            container.setAttribute('style', `position: fixed; left: ${containerRect.left}px; width: ${containerRect.width}px; top: 0;`);
+            /*
+            container.style.position = `relative`;
+            */
+            // container.setAttribute('style', `position: relative; transform: translateY(${y}px);`);
+          } // container.style.transform = `translateY(${y}px)`;
 
-            container.style.position = `relative`; // container.setAttribute('style', `position: relative; transform: translateY(${y}px);`);
-          }
-
-          container.style.transform = `translateY(${y}px)`;
         } else {
           if (element.mode !== MODES.NONE) {
-            element.mode = MODES.NONE; // container.setAttribute('style', '');
-
-            container.style.position = `relative`;
-            container.style.transform = `none`;
+            element.mode = MODES.NONE;
+            container.setAttribute('style', ''); // container.style.position = `relative`;
+            // container.style.transform = `none`;
           }
         }
       }
@@ -18775,7 +15869,7 @@ class OverscrollResponsiveDirective {
 exports.default = OverscrollResponsiveDirective;
 OverscrollResponsiveDirective.factory.$inject = ['DomService'];
 
-},{"../shared/rect":213}],205:[function(require,module,exports){
+},{"../shared/rect":212}],204:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18904,7 +15998,7 @@ class OverscrollDirective {
 exports.default = OverscrollDirective;
 OverscrollDirective.factory.$inject = ['DomService'];
 
-},{"../shared/rect":213}],206:[function(require,module,exports){
+},{"../shared/rect":212}],205:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18919,7 +16013,7 @@ function TrustedFilter($sce) {
   };
 }
 
-},{}],207:[function(require,module,exports){
+},{}],206:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18978,7 +16072,7 @@ ProductCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService'];
 var _default = ProductCtrl;
 exports.default = _default;
 
-},{}],208:[function(require,module,exports){
+},{}],207:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19213,7 +16307,7 @@ RootCtrl.$inject = ['$scope', '$timeout', 'DomService', 'ApiService', 'WishlistS
 var _default = RootCtrl;
 exports.default = _default;
 
-},{"rxjs":2,"rxjs/operators":198}],209:[function(require,module,exports){
+},{"rxjs":1,"rxjs/operators":197}],208:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19271,7 +16365,7 @@ class ApiService {
 exports.default = ApiService;
 ApiService.factory.$inject = ['$http'];
 
-},{"rxjs":2}],210:[function(require,module,exports){
+},{"rxjs":1}],209:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19629,7 +16723,7 @@ DomService.scroll$ = function () {
 
 DomService.scrollAndRect$ = (0, _rxjs.combineLatest)(DomService.scroll$, DomService.windowRect$);
 
-},{"../shared/rect":213,"rxjs":2,"rxjs/internal/scheduler/animationFrame":161,"rxjs/operators":198}],211:[function(require,module,exports){
+},{"../shared/rect":212,"rxjs":1,"rxjs/internal/scheduler/animationFrame":160,"rxjs/operators":197}],210:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19713,7 +16807,7 @@ class LocationService {
 exports.default = LocationService;
 LocationService.factory.$inject = ['$location'];
 
-},{}],212:[function(require,module,exports){
+},{}],211:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19752,7 +16846,7 @@ class PromiseService {
 exports.default = PromiseService;
 PromiseService.factory.$inject = ['$q'];
 
-},{}],213:[function(require,module,exports){
+},{}],212:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19878,7 +16972,7 @@ class Rect {
 
 exports.default = Rect;
 
-},{}],214:[function(require,module,exports){
+},{}],213:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20035,7 +17129,7 @@ class StateService {
 exports.default = StateService;
 StateService.factory.$inject = ['$timeout', '$rootScope'];
 
-},{}],215:[function(require,module,exports){
+},{}],214:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20393,7 +17487,7 @@ class SessionStorageService {
 exports.SessionStorageService = SessionStorageService;
 SessionStorageService.factory.$inject = ['PromiseService'];
 
-},{}],216:[function(require,module,exports){
+},{}],215:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20401,23 +17495,35 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var dat = _interopRequireWildcard(require("dat.gui"));
-
 var _const = require("./const");
+
+var _roundBox = _interopRequireDefault(require("./geometries/round-box.geometry"));
 
 var _emittable = _interopRequireDefault(require("./interactive/emittable"));
 
+var _freezable = _interopRequireDefault(require("./interactive/freezable.group"));
+
+var _freezable2 = _interopRequireDefault(require("./interactive/freezable.mesh"));
+
+var _grabbable = _interopRequireDefault(require("./interactive/grabbable.group"));
+
+var _interactive = _interopRequireDefault(require("./interactive/interactive.mesh"));
+
 var _materials = _interopRequireDefault(require("./materials/materials"));
 
-var _orbit = _interopRequireDefault(require("./orbit/orbit"));
+var _physics = _interopRequireDefault(require("./physics/physics.worker"));
+
+var _controllers = _interopRequireDefault(require("./vr/controllers"));
+
+var _gamepads = require("./vr/gamepads");
 
 var _vr = require("./vr/vr");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
-
 /* jshint esversion: 6 */
+// import * as dat from 'dat.gui';
+// import Physics from './physics/physics';
 const CAMERA_DISTANCE = 2;
 const USE_CUBE_CAMERA = false;
 const ANTIALIAS_ENABLED = false;
@@ -20427,6 +17533,17 @@ const MIN_DEVICE_PIXEL_RATIO = 1;
 let baseZoom = 1;
 
 class Canvas extends _emittable.default {
+  get presenting() {
+    return this.presenting_;
+  }
+
+  set presenting(presenting) {
+    if (this.presenting_ !== presenting) {
+      this.presenting_ = presenting;
+      this.togglePrensenting(presenting);
+    }
+  }
+
   get anchor() {
     return this.anchor_;
   }
@@ -20480,8 +17597,13 @@ class Canvas extends _emittable.default {
   constructor(container, product) {
     super();
     this.container = container;
+    this.debugInfo = container.querySelector('.debug__info');
     this.product = product;
-    this.count = 0;
+    this.tick = 0;
+    this.clock = new THREE.Clock();
+    this.linearVelocity = new THREE.Vector3();
+    this.angularVelocity = new THREE.Vector3();
+    this.pingpong = 0;
     this.mouse = {
       x: 0,
       y: 0
@@ -20491,53 +17613,61 @@ class Canvas extends _emittable.default {
       height: 0,
       aspect: 0
     };
-    this.zoom_ = 0; // this.cameraDirection = new THREE.Vector3();
-    // const debugInfo = this.debugInfo = section.querySelector('.debug__info');
-    // const debugSave = this.debugSave = section.querySelector('.debug__save');
-    // Dom.detect(body);
-    // body.classList.add('ready');
-
+    this.zoom_ = 0;
     this.onTouchStart = this.onTouchStart.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
-    this.onMouseWheel = this.onMouseWheel.bind(this);
     this.onSave = this.onSave.bind(this);
     const scene = this.scene = this.addScene();
     const camera = this.camera = this.addCamera();
+    scene.add(camera);
     const renderer = this.renderer = this.addRenderer();
+    const materials = this.materials = new _materials.default(product);
+    const lights = this.lights = this.addLights(scene);
     let texture;
-    const vr = this.vr = this.addVR();
+    const vr = this.vr = this.addVR(); // vr.mode = VR_MODE.VR;
 
-    if (!_const.VR_ENABLED || vr.mode === VR_MODE.NONE) {
-      const composer = this.composer = this.addComposer();
-      const addons = this.addons = this.addSpheres(scene);
-      texture = this.getCubeCamera();
+    if (!_const.VR_ENABLED || vr.mode === _vr.VR_MODE.NONE) {
+      const composer = this.composer = this.addComposer(); // const addons = this.addons = this.addSpheres();
+      // scene.add(addons);
+      // texture = this.getCubeCamera();
+
+      const toothbrush = this.toothbrush = this.addToothbrush(scene);
+      /*
+      setTimeout(() => {
+      	vr.enabled = true;
+      	setTimeout(() => {
+      		vr.enabled = false;
+      	}, 4000);
+      }, 4000);
+      */
     } else {
-      this.addSceneBackground(renderer, scene);
-      texture = scene.background;
-      renderer.vr.enabled = true;
-    } // const hdr = this.hdr = this.getEnvMap((texture, textureData) => {
-    // this.addText('Scalare 33', scene);
-    // const materials = this.materials = this.addMaterials(texture);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFShadowMap; // THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
+      const raycaster = this.raycaster = new THREE.Raycaster();
+      const controllers = this.controllers = this.addControllers(renderer, vr, scene); // const physics = this.physics = new Physics();
 
-    const materials = this.materials = new _materials.default(product, !USE_CUBE_CAMERA || _const.VR_ENABLED && vr.mode !== VR_MODE.NONE, texture);
-    const toothbrush = this.toothbrush = this.addToothbrush(scene, texture);
-    const lights = this.lights = this.addLights(scene); // this.tweenTau();
-    // });
+      const physics = this.physics = new _physics.default();
+      this.addSceneBackground(renderer, (texture, source, options) => {
+        this.sceneBackground = texture;
+      });
+      setTimeout(() => {
+        const floor = this.floor = this.addFloor();
+        const stand = this.stand = this.addStand();
+        const toothbrush = this.toothbrush = this.addToothbrush(scene);
+        toothbrush.defaultY = this.stand.position.y + (0, _const.cm)(50);
+      }, 1000);
+    }
 
-    const controls = this.controls = this.addControls(); // const orbit = this.orbit = this.addOrbit(container);
-
-    window.addEventListener('resize', this.onWindowResize, false); // document.addEventListener('wheel', this.onMouseWheel, false);
-    // this.debugSave.addEventListener('click', this.onSave, false);
-    // this.section.classList.add('init');
-
-    this.onWindowResize(); // const gui = this.gui = this.addGUI__();
+    const controls = this.controls = this.addControls();
+    window.addEventListener('resize', this.onWindowResize, false);
+    this.onWindowResize();
   }
 
   addRenderer() {
     const renderer = new THREE.WebGLRenderer({
-      antialias: ANTIALIAS_ENABLED,
+      antialias: 'xr' in navigator || 'getVRDisplays' in navigator ? true : ANTIALIAS_ENABLED,
       // localClippingEnabled: true,
       // logarithmicDepthBuffer: true,
       // premultipliedAlpha: true,
@@ -20560,19 +17690,130 @@ class Canvas extends _emittable.default {
     if (_const.VR_ENABLED) {
       const vr = new _vr.VR(this.renderer, {
         referenceSpaceType: 'local'
+      }, this.camera, this.container.parentNode.querySelector('.group--nav--vr'));
+      vr.on('presenting', () => {
+        this.presenting = true;
       });
-      vr.on('presenting', () => {});
-      vr.on('exit', () => {});
+      vr.on('exit', () => {
+        this.presenting = false;
+      });
       vr.on('error', error => {
         this.debugInfo.innerHTML = error;
       });
-      this.emit('vrmode', vr.mode);
-      this.container.appendChild(vr.element);
+      this.emit('vrmode', vr.mode); // this.container.appendChild(vr.element);
+
       return vr;
     }
   }
 
+  addControllers(renderer, vr, scene) {
+    if (vr.mode !== _vr.VR_MODE.NONE || _const.TEST_ENABLED) {
+      const controllers = new _controllers.default(renderer, scene, {
+        debug: _const.DEBUG
+      });
+      controllers.on('press', button => {
+        // console.log('vrui.press', button.gamepad.hand, button.index);
+
+        /*
+        switch (button.gamepad.hand) {
+        	case GAMEPAD_HANDS.LEFT:
+        		// 0 joystick, 1 trigger, 2 grip, 3 Y, 4 X
+        		break;
+        	case GAMEPAD_HANDS.RIGHT:
+        		// 0 joystick, 1 trigger, 2 grip, 3 A, 4 B
+        		break;
+        }
+        */
+        if (button.index === 3) {
+          this.toothbrush.onRespawn();
+        }
+      });
+      return controllers;
+    }
+  }
+
+  togglePrensenting(presenting) {
+    console.log('togglePrensenting', presenting);
+    const renderer = this.renderer;
+    const scene = this.scene;
+    const physics = this.physics;
+    const lights = this.lights;
+    const floor = this.floor;
+    const stand = this.stand;
+    const toothbrush = this.toothbrush;
+
+    if (presenting) {
+      scene.background = this.sceneBackground;
+      scene.add(floor);
+      physics.addBox(floor, floor.userData.size);
+      scene.add(stand);
+      physics.addBox(stand, stand.userData.size);
+      toothbrush.userData.previousPosition = toothbrush.position.clone();
+      toothbrush.userData.previousQuaternion = toothbrush.quaternion.clone();
+      toothbrush.quaternion.setFromEuler(this.getEulerFromArray([0, 0, (0, _const.deg)(10)])); // toothbrush.rotation.set(0, 0, deg(10));
+
+      toothbrush.defaultY = stand.position.y + (0, _const.cm)(50);
+      toothbrush.position.set(0, toothbrush.defaultY, (0, _const.cm)(-60));
+      physics.addBox(toothbrush, toothbrush.userData.size, 1);
+      lights.remove(lights.light0);
+      lights.remove(lights.light1);
+      lights.add(lights.light2);
+    } else {
+      lights.add(lights.light0);
+      lights.add(lights.light1);
+      lights.remove(lights.light2);
+
+      if (physics) {
+        physics.remove(toothbrush);
+        physics.remove(stand);
+        physics.remove(floor);
+      }
+
+      scene.background = null; // this.sceneDefaultBackground;
+
+      renderer.setClearColor(0xffffff, 0);
+      scene.remove(floor);
+      scene.remove(stand);
+
+      if (toothbrush.userData.previousPosition && toothbrush.userData.previousQuaternion) {
+        toothbrush.position.copy(toothbrush.userData.previousPosition);
+        toothbrush.quaternion.copy(toothbrush.userData.previousQuaternion);
+      }
+    }
+  }
+
+  addFloor() {
+    const size = new THREE.Vector3(40, (0, _const.cm)(1), 40);
+    const geometry = new THREE.PlaneGeometry(40, 40);
+    geometry.rotateX((0, _const.deg)(-90));
+    const material = new THREE.ShadowMaterial();
+    material.opacity = 0.5;
+    const floor = new THREE.Mesh(geometry, material);
+    floor.position.y = 0.0;
+    floor.userData.size = size;
+    floor.receiveShadow = true;
+    return floor;
+  }
+
+  addStand() {
+    const size = new THREE.Vector3((0, _const.cm)(40), (0, _const.mm)(10), (0, _const.cm)(20));
+    const geometry = new _roundBox.default(size.x, size.y, size.z, (0, _const.mm)(5), 1, 1, 1, 5);
+    const stand = new THREE.Mesh(geometry, this.materials.white);
+    stand.position.set(0, (0, _const.cm)(116), (0, _const.cm)(-60));
+    stand.userData.size = size;
+    stand.receiveShadow = true;
+    return stand;
+  }
+
+  updateVelocity(controller) {
+    if (controller) {
+      this.linearVelocity.copy(controller.linearVelocity).multiplyScalar(40);
+      this.angularVelocity.copy(controller.angularVelocity).multiplyScalar(10);
+    }
+  }
+
   addScene() {
+    // this.sceneDefaultBackground = new THREE.Texture();
     const scene = new THREE.Scene(); // scene.background = new THREE.Color(0x00000000);
     // scene.background = new THREE.Color(0x404040);
     // scene.fog = new THREE.Fog(scene.background, 10, 700);
@@ -20580,9 +17821,8 @@ class Canvas extends _emittable.default {
     return scene;
   }
 
-  addSceneBackground(renderer, scene, callback) {
-    const loader = new THREE.TextureLoader().load('img/environment/equirectangular.jpg', (source, textureData) => {
-      // const loader = new THREE.TextureLoader().load('img/environment/360_world.jpg', (source, textureData) => {
+  addSceneBackground(renderer, callback) {
+    const loader = new THREE.TextureLoader().load('threejs/environment/equirectangular.jpg', (source, textureData) => {
       source.mapping = THREE.UVMapping;
       const options = {
         resolution: 1024,
@@ -20590,18 +17830,22 @@ class Canvas extends _emittable.default {
         minFilter: THREE.LinearMipMapLinearFilter,
         magFilter: THREE.LinearFilter
       };
-      scene.background = new THREE.CubemapGenerator(renderer).fromEquirectangular(source, options);
+      const texture = new THREE.CubemapGenerator(renderer).fromEquirectangular(source, options);
 
       if (typeof callback === 'function') {
-        const cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options);
-        const texture = cubemapGenerator.update(renderer);
-        texture.mapping = THREE.CubeReflectionMapping;
-        texture.mapping = THREE.CubeRefractionMapping;
+        callback(texture, source, options);
         source.dispose();
-        callback(texture);
       }
     });
     return loader;
+  }
+
+  equirectangularToCubeMap(texture, source, options) {
+    const cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options);
+    const cubemap = cubemapGenerator.update(renderer);
+    cubemap.mapping = THREE.CubeReflectionMapping;
+    cubemap.mapping = THREE.CubeRefractionMapping;
+    return cubemap;
   }
 
   addCamera() {
@@ -20613,12 +17857,15 @@ class Canvas extends _emittable.default {
     return camera;
   }
 
+  addVRCamera() {
+    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, (0, _const.cm)(1), 500);
+    camera.position.set(0, (0, _const.cm)(176), (0, _const.cm)(20));
+    camera.target = new THREE.Vector3(0, (0, _const.cm)(156), -(0, _const.cm)(60));
+    return camera;
+  }
+
   addControls() {
     const camera = this.camera;
-    const renderer = this.renderer; // camera.target.z = ROOM_RADIUS;
-    // camera.lookAt(camera.target);
-    // const target = renderer.domElement;
-
     const target = document.querySelector('.orbit-control');
     target.addEventListener('touchstart', this.onTouchStart, false);
     target.addEventListener('touchend', this.onTouchEnd, false);
@@ -20629,21 +17876,9 @@ class Canvas extends _emittable.default {
     controls.enableZoom = false; // controls.enableDamping = true;
 
     controls.maxDistance = CAMERA_DISTANCE * 3;
-    controls.minDistance = CAMERA_DISTANCE * 0.25; // controls.maxPolarAngle = Math.PI / 2;
-    // controls.minPolarAngle = Math.PI / 2;
-    // camera.position.set(60, 205, -73);
-    // camera.position.set(0, 50, 100);
-    // camera.position.set(6.3, 4.5, 111.5);
-    // camera.position.multiplyScalar(1.5);
-
+    controls.minDistance = CAMERA_DISTANCE * 0.25;
     controls.update();
     return controls;
-  }
-
-  addOrbit(container) {
-    const orbit = new _orbit.default();
-    const dragListener = orbit.setDragListener(container);
-    return orbit;
   }
 
   addComposer() {
@@ -20670,114 +17905,47 @@ class Canvas extends _emittable.default {
   }
 
   addLights(parent) {
-    const lights = new THREE.Group(); // const light0 = new THREE.HemisphereLight(0xf4fbfb, 0x91978a, 0.8);
-
+    const lights = new THREE.Group();
     const light0 = new THREE.HemisphereLight(0xffffff, 0x666666, 0.6);
     light0.position.set(0, 2, 0);
+    lights.light0 = light0;
     lights.add(light0);
-    /*
-    const helper0 = new THREE.HemisphereLightHelper(light0, 10, 0x888888);
-    lights.add(helper0);
-    */
-
     const light1 = new THREE.DirectionalLight(0xffffff, 0.8);
     light1.position.set(0, 0, 4);
-    /*
-    light1.castShadow = true;
-    light1.shadow.camera.near = 0.5; // default
-    light1.shadow.camera.far = 500; // default
-    light1.shadow.mapSize.width = 1024;
-    light1.shadow.mapSize.height = 1024;
-    */
-
+    lights.light1 = light1;
     lights.add(light1);
-    /*
-    const helper1 = new THREE.DirectionalLightHelper(light1, 10, 0x888888);
-    lights.add(helper1);
-    */
-
-    /*
-    const light2 = new THREE.DirectionalLight(0xffffff, 2);
-    light2.position.set(50, 50, 50);
-    lights.add(light2);
-    */
-
-    /*
-    const helper2 = new THREE.DirectionalLightHelper(light2, 10, 0x888888);
-    lights.add(helper2);
-    */
-
-    /*
-    const light3 = new THREE.PointLight(0xffffff, 1);
-    light3.position.set(-50, 50, 50);
-    lights.add(light3);
-    */
-
-    /*
-    const helper3 = new THREE.DirectionalLightHelper(light3, 10, 0x888888);
-    lights.add(helper3);
-    */
-
-    /*
-    const light4 = new THREE.PointLight(0xffffff, 1);
-    light4.position.set(50, 50, -50);
-    lights.add(light4);
-    */
-
-    /*
-    const helper4 = new THREE.DirectionalLightHelper(light4, 10, 0x888888);
-    lights.add(helper4);
-    */
-
-    /*
-    dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 2048;
-    dirLight.shadow.mapSize.height = 2048;
-    const d = 50;
-    dirLight.shadow.camera.left = -d;
-    dirLight.shadow.camera.right = d;
-    dirLight.shadow.camera.top = d;
-    dirLight.shadow.camera.bottom = -d;
-    dirLight.shadow.camera.far = 3500;
-    dirLight.shadow.bias = -0.0001;
-    */
-
-    /*
-    const dirLightHelper = new THREE.DirectionalLightHelper(dirLight, 10);
-    parent.add(dirLightHelper);
-    */
+    const light2 = new THREE.DirectionalLight(0xffffff, 1, 100);
+    light2.position.set(0, 3, 0);
+    light2.castShadow = true;
+    parent.add(light2);
+    light2.shadow.mapSize.width = 1024;
+    light2.shadow.mapSize.height = 1024;
+    light2.shadow.radius = 1.25;
+    light2.shadow.camera.near = 0.1;
+    light2.shadow.camera.far = 100;
+    lights.light2 = light2; // lights.add(light2);
 
     parent.add(lights);
     return lights;
   }
 
-  addToothbrush(parent, texture) {
-    const toothbrush = new THREE.Group();
-    const loader = new THREE.FBXLoader(); // new THREE.OBJLoader();
-
+  addToothbrush(parent) {
+    const toothbrush = new _grabbable.default();
+    const loader = new THREE.FBXLoader();
     loader.load(this.product.model, object => {
-      let i = 0;
       object.traverse(child => {
         if (child instanceof THREE.Mesh) {
-          // child.geometry.scale(10, 10, 10);
-          // THREE.BufferGeometryUtils.mergeVertices(child.geometry);
-          // THREE.BufferGeometryUtils.computeTangents(child.geometry);
-          // child.geometry.computeFaceNormals();
-          // child.geometry.computeVertexNormals(true);
-          // child.geometry.computeTangents();
           switch (child.name) {
             case 'body-primary':
             case 'bubble':
-              // child.geometry.computeFaceNormals();
-              // child.geometry.computeVertexNormals(true);
               child.material = this.materials.bodyPrimaryClear;
+              child.castShadow = true;
               toothbrush.body = child;
               break;
 
             case 'body-secondary':
-              // child.geometry.computeFaceNormals();
-              // child.geometry.computeVertexNormals(true);
               child.material = this.materials.bodySecondary;
+              child.castShadow = true;
               toothbrush.color = child;
               break;
 
@@ -20795,59 +17963,113 @@ class Canvas extends _emittable.default {
               child.renderOrder = 2;
               break;
           }
-          /*
-          if (i === 0) {
-          	child.geometry.computeFaceNormals();
-          	child.geometry.computeVertexNormals(true);
-          	child.material = this.materials.bodySecondary;
-          	toothbrush.color = child;
-          } else if (i === 1) {
-          	child.material = this.materials.bodyPrimaryClear;
-          	toothbrush.body = child;
-          } else if (i === 2) {
-          	child.material = this.materials.logoSilver;
-          	toothbrush.logo = child;
-          } else if (i === 3) {
-          	child.material = this.materials.bristlesSecondary;
-          } else if (i === 4) {
-          	child.material = this.materials.bristlesPrimary;
-          }
-          i++;
-          */
-
-          /*
-          child.geometry.scale(150, 150, 150);
-          child.geometry.rotateX(-Math.PI / 2);
-          // child.geometry.computeVertexNormals(true);
-          // child.geometry.computeTangents();
-          THREE.BufferGeometryUtils.computeTangents(child.geometry);
-          if (i === 0) {
-          	child.material = this.materials.bodySecondary;
-          } else if (i === 1) {
-          	child.material = this.materials.bristlesSecondary;
-          } else if (i === 2) {
-          	child.material = this.materials.bristlesPrimary;
-          } else if (i === 3) {
-          	child.material = this.materials.bodyPrimaryClear;
-          	toothbrush.body = child;
-          }
-          */
-
         }
-      }); // this.addLogo(object);
-      // object.material = material;
-      // object.rotateZ(Math.PI / 8);
-
+      });
       toothbrush.add(object);
+
+      if (this.physics) {
+        const box = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+        box.setFromObject(object);
+        const size = box.getSize(new THREE.Vector3());
+        toothbrush.userData.size = size;
+      }
+
       this.setBristle(this.bristle);
       this.setColor(this.color);
       this.emit('load');
     }, xhr => {// console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
     }, error => {
-      console.log('An error happened');
-    }); // toothbrush.rotation.set(Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4);
+      console.log('An error happened', error);
+    });
+    toothbrush.quaternion.setFromEuler(this.getEulerFromArray([0, (0, _const.deg)(-60), (0, _const.deg)(-60)])); // tre quarti sinistra
+    // toothbrush.rotation.set(0, deg(-60), deg(-60)); // 		tre quarti sinistra
 
-    toothbrush.rotation.set(0, (0, _const.deg)(-60), (0, _const.deg)(-60)); // 		tre quarti sinistra
+    toothbrush.on('grab', controller => {
+      console.log('toothbrush.on.grab');
+
+      if (this.physics) {
+        this.physics.remove(toothbrush);
+      }
+
+      toothbrush.userData.speed = 0;
+      toothbrush.freeze();
+      const target = controller.parent;
+      const position = toothbrush.position.clone();
+      toothbrush.parent.localToWorld(position);
+      target.worldToLocal(position);
+      toothbrush.parent.remove(toothbrush);
+
+      if (controller.gamepad.hand === _gamepads.GAMEPAD_HANDS.LEFT) {
+        // toothbrush.rotation.set(deg(180), deg(0), deg(115));
+        toothbrush.quaternion.setFromEuler(this.getEulerFromArray([(0, _const.deg)(180), (0, _const.deg)(0), (0, _const.deg)(115)]));
+        toothbrush.position.set((0, _const.cm)(1), (0, _const.cm)(2), (0, _const.cm)(0));
+      } else {
+        // toothbrush.rotation.set(0, deg(10), deg(-60));
+        toothbrush.quaternion.setFromEuler(this.getEulerFromArray([0, (0, _const.deg)(10), (0, _const.deg)(-60)]));
+        toothbrush.position.set((0, _const.cm)(-1), (0, _const.cm)(3), (0, _const.cm)(-1));
+      }
+
+      target.add(toothbrush);
+      TweenMax.to(controller.material, 0.4, {
+        opacity: 0.0,
+        ease: Power2.easeInOut
+      });
+    });
+    toothbrush.on('release', controller => {
+      console.log('toothbrush.on.release');
+      const target = this.scene;
+      const position = toothbrush.position.clone(); // new THREE.Vector3();
+
+      const quaternion = toothbrush.parent.quaternion.clone();
+      toothbrush.parent.localToWorld(position);
+      target.worldToLocal(position);
+      toothbrush.parent.remove(toothbrush);
+      toothbrush.position.set(0, 0, 0);
+      toothbrush.quaternion.premultiply(quaternion);
+      toothbrush.position.set(position.x, position.y, position.z);
+      target.add(toothbrush);
+      toothbrush.unfreeze();
+      TweenMax.to(controller.material, 0.4, {
+        opacity: 1.0,
+        ease: Power2.easeInOut
+      });
+
+      if (this.physics) {
+        if (_const.TEST_ENABLED) {
+          this.linearVelocity.z -= 1;
+        }
+
+        this.physics.addBox(toothbrush, toothbrush.userData.size, 1, this.linearVelocity, this.angularVelocity);
+      }
+    });
+
+    toothbrush.onRespawn = () => {
+      console.log('toothbrush.onRespawn');
+
+      if (this.physics) {
+        this.physics.remove(toothbrush);
+      }
+
+      toothbrush.parent.remove(toothbrush);
+      setTimeout(() => {
+        // toothbrush.rotation.set(0, 0, deg(10));
+        toothbrush.quaternion.setFromEuler(this.getEulerFromArray([0, 0, (0, _const.deg)(10)]));
+        toothbrush.position.set(0, toothbrush.defaultY, (0, _const.cm)(-60));
+        this.scene.add(toothbrush);
+
+        if (this.physics) {
+          this.physics.addBox(toothbrush, toothbrush.userData.size, 1);
+        }
+      }, 1000);
+    };
+
+    toothbrush.userData.respawn = data => {
+      if (toothbrush.position.y < (0, _const.cm)(30)) {
+        if (data && data.speed < 0.03) {
+          toothbrush.onRespawn();
+        }
+      }
+    };
 
     parent.add(toothbrush);
     return toothbrush;
@@ -20939,25 +18161,39 @@ class Canvas extends _emittable.default {
     }
 
     const toothbrush = this.toothbrush;
-    TweenMax.to(toothbrush.position, 0.8, {
-      x: position[0],
-      y: position[1],
-      z: position[2],
-      ease: Power2.easeInOut
-    });
-    TweenMax.to(toothbrush.rotation, 1.2, {
-      x: rotation[0],
-      y: rotation[1],
-      z: rotation[2],
-      ease: Power2.easeInOut
-    });
-    TweenMax.to(this.camera, 0.6, {
-      zoom: this.zoom,
-      ease: Power2.easeInOut,
-      onUpdate: () => {
-        this.camera.updateProjectionMatrix();
-      }
-    });
+    const quaternion = this.getQuaternionFromArray(rotation);
+
+    if (toothbrush) {
+      TweenMax.to(toothbrush.position, 0.8, {
+        x: position[0],
+        y: position[1],
+        z: position[2],
+        ease: Power2.easeInOut
+      });
+      /*
+      TweenMax.to(toothbrush.rotation, 1.2, {
+      	x: rotation[0],
+      	y: rotation[1],
+      	z: rotation[2],
+      	ease: Power2.easeInOut,
+      });
+      */
+
+      TweenMax.to(toothbrush.quaternion, 1.2, {
+        x: quaternion.x,
+        y: quaternion.y,
+        z: quaternion.z,
+        w: quaternion.w,
+        ease: Power2.easeInOut
+      });
+      TweenMax.to(this.camera, 0.6, {
+        zoom: this.zoom,
+        ease: Power2.easeInOut,
+        onUpdate: () => {
+          this.camera.updateProjectionMatrix();
+        }
+      });
+    }
 
     if (this.controls && this.camera.position.x !== 0) {
       TweenMax.to(this.camera.position, 0.6, {
@@ -20971,6 +18207,18 @@ class Canvas extends _emittable.default {
         }
       });
     }
+  }
+
+  getQuaternionFromEuler(euler) {
+    return new THREE.Quaternion().setFromEuler(euler);
+  }
+
+  getEulerFromArray(array, axis = 'XYZ') {
+    return new THREE.Euler(array[0], array[1], array[2], axis);
+  }
+
+  getQuaternionFromArray(array, axis = 'XYZ') {
+    return this.getQuaternionFromEuler(this.getEulerFromArray(array, axis));
   }
 
   tweenColor(material, colorValue) {
@@ -21062,42 +18310,7 @@ class Canvas extends _emittable.default {
     }
   }
 
-  getHDRMap(callback) {
-    const type = THREE.UnsignedByteType; // const type = THREE.FloatType;
-
-    const loader = new THREE.RGBELoader().setType(type).load('img/hdr/studio_small_02_1k.hdr', (source, sourceData) => {
-      switch (type) {
-        case THREE.UnsignedByteType:
-          source.encoding = THREE.RGBEEncoding;
-          source.minFilter = THREE.NearestFilter;
-          source.magFilter = THREE.NearestFilter;
-          break;
-
-        case THREE.FloatType:
-          source.encoding = THREE.LinearEncoding;
-          source.minFilter = THREE.LinearFilter;
-          source.magFilter = THREE.LinearFilter;
-          break;
-      }
-
-      source.generateMipmaps = false;
-      source.flipY = true;
-      const cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, {
-        resolution: 512
-      });
-      this.renderer.toneMappingExposure = 2.0;
-      const texture = cubemapGenerator.update(this.renderer);
-      source.dispose();
-
-      if (typeof callback === 'function') {
-        callback(texture);
-      }
-    }); //
-
-    return loader;
-  }
-
-  addSpheres(parent) {
+  addSpheres() {
     const group = new THREE.Group();
     group.visible = false;
     const icosahedron = new THREE.IcosahedronGeometry(200, 1);
@@ -21117,7 +18330,6 @@ class Canvas extends _emittable.default {
     const spheres_ = new THREE.Mesh(bufferGeometry, material);
     group.add(spheres_);
     group.rotation.set(0.3, 0, 0);
-    parent.add(group);
     return group;
   }
 
@@ -21126,7 +18338,7 @@ class Canvas extends _emittable.default {
       const renderer = this.renderer;
       const scene = this.scene; // pingpong
 
-      const count = this.count,
+      const pingpong = this.pingpong,
             cubeCamera0 = this.cubeCamera0,
             cubeCamera1 = this.cubeCamera1;
       renderer.setClearColor(0xfefefe, 1);
@@ -21135,7 +18347,7 @@ class Canvas extends _emittable.default {
       this.toothbrush.color.visible = false;
       this.addons.visible = true; // renderer.shadowMap.enabled = false;
 
-      if (count % 2 === 0) {
+      if (pingpong % 2 === 0) {
         this.materials.bodyPrimaryClear.envMap = cubeCamera0.renderTarget.texture; // this.materials.logoSilver.envMap = cubeCamera0.renderTarget.texture;
         // this.materials.bodySecondary.envMap = cubeCamera0.renderTarget.texture;
 
@@ -21147,7 +18359,7 @@ class Canvas extends _emittable.default {
         cubeCamera0.update(renderer, scene);
       }
 
-      this.count = count + 1;
+      this.pingpong = pingpong + 1;
       this.toothbrush.body.visible = true;
       this.toothbrush.logo.visible = true;
       this.toothbrush.color.visible = true;
@@ -21225,43 +18437,11 @@ class Canvas extends _emittable.default {
     }
   }
 
-  onMouseWheel(event) {
-    try {
-      const camera = this.camera;
-      const fov = camera.fov + event.deltaY * 0.01;
-      camera.fov = THREE.Math.clamp(fov, 30, 75);
-      camera.updateProjectionMatrix();
-    } catch (error) {
-      this.debugInfo.innerHTML = error;
-    }
-  }
-
-  onSave(event) {
-    this.save = true;
-  }
-
   updateControls() {
     const controls = this.controls;
 
-    if (controls) {
+    if (controls && !this.presenting) {
       controls.update();
-    }
-  }
-
-  updateOrbit() {
-    const orbit = this.orbit;
-
-    if (orbit) {
-      const camera = this.camera;
-      orbit.update();
-      camera.target.x = CAMERA_DISTANCE * Math.sin(orbit.phi) * Math.cos(orbit.theta);
-      camera.target.y = CAMERA_DISTANCE * Math.cos(orbit.phi);
-      camera.target.z = CAMERA_DISTANCE * Math.sin(orbit.phi) * Math.sin(orbit.theta);
-      camera.lookAt(camera.target);
-      /*
-      // distortion
-      camera.position.copy( camera.target ).negate();
-      */
     }
   }
 
@@ -21271,25 +18451,69 @@ class Canvas extends _emittable.default {
     if (composer) {
       composer.render();
     }
-  } // animation
+  }
 
+  updateRaycaster() {
+    try {
+      const controllers = this.controllers;
+      const raycaster = controllers.setRaycaster(this.raycaster);
+
+      if (raycaster) {
+        const hit = _interactive.default.hittest(raycaster, controllers.gamepads.button, controllers.controller);
+
+        if (hit) {
+          controllers.feedback();
+        }
+
+        _grabbable.default.grabtest(controllers);
+      }
+    } catch (error) {
+      this.debugInfo.innerHTML = error;
+    }
+  }
 
   render(delta) {
-    const renderer = this.renderer;
-    const camera = this.camera;
-    const scene = this.scene;
+    try {
+      const renderer = this.renderer;
+      const scene = this.scene;
+      const delta = this.clock.getDelta();
+      const time = this.clock.getElapsedTime();
+      const tick = Math.floor(time * 60);
+      const camera = this.camera; // if (!this.saving) {
 
-    if (!this.saving) {
-      this.updateControls();
-      this.updateOrbit(); // this.lights.rotation.set(0, this.lights.rotation.y + 0.003, 0);
-      // this.toothbrush.rotation.set(Math.cos(this.count / 100) * Math.PI / 180 * 2, Math.cos(this.count / 100) * Math.PI / 180 * 2, 0);
+      if (this.presenting) {
+        if (this.physics) {
+          this.physics.update(delta);
+        }
 
-      this.updateCubeCamera();
-      renderer.render(scene, camera);
-      this.updateComposer();
+        _freezable2.default.update(renderer, scene, camera, delta, time, tick);
+
+        _freezable.default.update(renderer, scene, camera, delta, time, tick);
+
+        if (this.controllers) {
+          this.controllers.update();
+          this.updateRaycaster(); // this.checkCameraPosition__();
+
+          if (this.physics) {
+            this.updateVelocity(this.controllers.controller);
+          }
+        }
+
+        renderer.render(scene, camera);
+      } else {
+        this.updateControls(); // this.updateCubeCamera();
+
+        renderer.render(scene, camera);
+        this.updateComposer();
+      }
+
+      this.delta = delta;
+      this.time = time;
+      this.tick = tick; // }
+      // this.checkForScreenshot(renderer);
+    } catch (error) {
+      this.debugInfo.innerHTML = error;
     }
-
-    this.checkForScreenshot(renderer);
   }
 
   animate() {
@@ -21297,8 +18521,7 @@ class Canvas extends _emittable.default {
     renderer.setAnimationLoop(() => {
       this.render();
     });
-  } // utils
-
+  }
 
   checkForScreenshot(renderer) {
     if (this.save) {
@@ -21384,6 +18607,10 @@ class Canvas extends _emittable.default {
     anchor.dispatchEvent(event);
   }
 
+  onSave(event) {
+    this.save = true;
+  }
+
   addGUI__() {
     const gui = new dat.GUI();
     const keys = ['bristlesSecondary', 'bristlesPrimary', 'bodySecondary', 'logoSilver', 'bodyPrimaryClear'];
@@ -21442,289 +18669,6 @@ class Canvas extends _emittable.default {
 
     return gui;
   }
-  /*
-  
-  tweenTau__(anchor) {
-  	// [0, 0, Math.PI / 2]; // 										vertical left
-  	// [0, 0, 0]; // 												horizontal right
-  	// [Math.PI / 4, Math.PI / 4, Math.PI / 4]; // 					tre quarti destra
-  	// [Math.PI / 2, 0, 0]; // 										top right
-  	// [0, Math.PI, Math.PI / 2]; // 								vertical right;
-  	const sm = window.innerWidth < 1024;
-  	let rotation, position;
-  	switch (anchor) {
-  		case 'hero':
-  			position = [0, 0, 0];
-  			rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
-  			this.zoom_ = 0;
-  			this.container.classList.remove('lefted');
-  			this.container.classList.remove('interactive');
-  			break;
-  		case 'manico':
-  			position = [0, 0, 0];
-  			rotation = [0, Math.PI, Math.PI / 2]; // 								vertical right;
-  			this.zoom_ = 0;
-  			if (sm) {
-  				this.container.classList.add('lefted');
-  			} else {
-  				this.container.classList.remove('lefted');
-  			}
-  			this.container.classList.remove('interactive');
-  			break;
-  		case 'testina':
-  			position = [0, 0, 0];
-  			rotation = [0, -Math.PI / 2, Math.PI / 32]; // 							testina vista dietro
-  			this.zoom_ = 0.2;
-  			if (sm) {
-  				this.container.classList.add('lefted');
-  			} else {
-  				this.container.classList.remove('lefted');
-  			}
-  			this.container.classList.remove('interactive');
-  			break;
-  		case 'setole':
-  			position = [0, -3, 0];
-  			rotation = [0, Math.PI - Math.PI / 4, Math.PI / 2]; // 					vertical right;
-  			this.zoom_ = 0.4;
-  			if (sm) {
-  				this.container.classList.add('lefted');
-  			} else {
-  				this.container.classList.remove('lefted');
-  			}
-  			this.container.classList.remove('interactive');
-  			break;
-  		case 'scalare':
-  			position = [0, -3, 0];
-  			rotation = [0, Math.PI, Math.PI / 2]; // 								vertical right;
-  			this.zoom_ = 0.4;
-  			if (sm) {
-  				this.container.classList.add('lefted');
-  			} else {
-  				this.container.classList.remove('lefted');
-  			}
-  			this.container.classList.remove('interactive');
-  			break;
-  		case 'italy':
-  			position = [0, 0, 0];
-  			rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
-  			this.zoom_ = 0;
-  			if (sm) {
-  				this.container.classList.add('lefted');
-  			} else {
-  				this.container.classList.remove('lefted');
-  			}
-  			this.container.classList.remove('interactive');
-  			break;
-  		case 'setole-tynex':
-  			position = [0, -2, 0];
-  			rotation = [0, 0, Math.PI / 2]; // 										vertical left;
-  			this.zoom_ = 0.2;
-  			if (sm) {
-  				this.container.classList.add('lefted');
-  			} else {
-  				this.container.classList.remove('lefted');
-  			}
-  			this.container.classList.remove('interactive');
-  			break;
-  		case 'colors':
-  			position = [0, 0, 0];
-  			rotation = [0, Math.PI, 0]; // 											horizontal left
-  			this.zoom_ = 0;
-  			this.container.classList.remove('lefted');
-  			this.container.classList.add('interactive');
-  			break;
-  		default:
-  			position = [0, 0, 0];
-  			rotation = [Math.PI / 4, Math.PI - Math.PI / 4, Math.PI / 4]; // 		tre quarti sinistra
-  			this.zoom_ = 0;
-  			this.container.classList.remove('lefted');
-  			this.container.classList.remove('interactive');
-  	}
-  	const toothbrush = this.toothbrush;
-  	TweenMax.to(toothbrush.position, 0.8, {
-  		x: position[0],
-  		y: position[1],
-  		z: position[2],
-  		ease: Power2.easeInOut,
-  	});
-  	TweenMax.to(toothbrush.rotation, 1.2, {
-  		x: rotation[0],
-  		y: rotation[1],
-  		z: rotation[2],
-  		ease: Power2.easeInOut,
-  	});
-  	TweenMax.to(this.camera, 0.6, {
-  		zoom: this.zoom,
-  		ease: Power2.easeInOut,
-  		onUpdate: () => {
-  			this.camera.updateProjectionMatrix();
-  		}
-  	});
-  	if (this.controls && this.camera.position.x !== 0) {
-  		TweenMax.to(this.camera.position, 0.6, {
-  			x: 0,
-  			y: 0,
-  			z: CAMERA_DISTANCE,
-  			ease: Power2.easeInOut,
-  			onUpdate: () => {
-  				this.controls.update();
-  				this.camera.updateProjectionMatrix();
-  			}
-  		});
-  	}
-  }
-  
-  
-  addLogo__(parent) {
-  	const geometry = new THREE.PlaneGeometry(24, 3, 3, 1);
-  	geometry.rotateX(-Math.PI / 2);
-  	geometry.translate(20, 2, 0);
-  	geometry.rotateY(Math.PI);
-  	// geometry.translate(0, 2.2, -24);
-  	const logo = new THREE.Mesh(geometry, this.materials.logoSilver);
-  	parent.add(logo);
-  	return logo;
-  }
-  */
-
-  /*
-  addComposer__() {
-  	const renderer = this.renderer;
-  	const scene = this.scene;
-  	const camera = this.camera;
-  	const composer = new THREE.EffectComposer(renderer);
-  	const renderPass = new THREE.RenderPass(scene, camera);
-  	composer.addPass(renderPass);
-  	const saoPass = new THREE.SAOPass(scene, camera, false, true);
-  	saoPass.output = THREE.SAOPass.OUTPUT.Default;
-  	saoPass.saoBias = 0.5;
-  	saoPass.saoIntensity = 0.18;
-  	saoPass.saoScale = 1;
-  	saoPass.saoKernelRadius = 100;
-  	saoPass.saoMinResolution = 0;
-  	saoPass.saoBlur = true;
-  	saoPass.saoBlurRadius = 8;
-  	saoPass.saoBlurStdDev = 4;
-  	saoPass.saoBlurDepthCutoff = 0.01;
-  	composer.addPass(saoPass);
-  	return composer;
-  }
-  */
-
-  /*
-  	addComposer___() {
-  		const renderer = this.renderer;
-  		const scene = this.scene;
-  		const camera = this.camera;
-  		const composer = new THREE.EffectComposer(renderer);
-  		const ssaoPass = new THREE.SSAOPass(scene, camera, window.innerWidth, window.innerHeight);
-  		ssaoPass.kernelRadius = 16;
-  		composer.addPass(ssaoPass);
-  		return composer;
-  	}
-  */
-
-  /*
-  	getEnvMap___(callback) {
-  		const textures = [
-  			'img/cubemaps/lights/',
-  			'img/cubemaps/park/',
-  			'img/cubemaps/pond/',
-  			'img/cubemaps/lake/',
-  			'img/cubemaps/square/'
-  		];
-  		const index = 0;
-  		const urls = ['posx.jpg', 'negx.jpg', 'posy.jpg', 'negy.jpg', 'posz.jpg', 'negz.jpg'];
-  		// const texture = THREE.ImageUtils.loadTextureCube(urls, new THREE.CubeRefractionMapping(), render);
-  		const loader = new THREE.CubeTextureLoader().setPath(textures[index]).load(urls, (texture, textureData) => {
-  			texture.mapping = THREE.CubeRefractionMapping;
-  			if (typeof callback === 'function') {
-  				callback(texture, textureData);
-  			}
-  		});
-  		return loader;
-  	}
-  */
-
-  /*
-  	getEnvMap__(callback) {
-  		const loader = new THREE.TextureLoader().load('img/hdr-04.jpg', (source, textureData) => {
-  			// source.encoding = THREE.sRGBEncoding;
-  			source.mapping = THREE.UVMapping;
-  			const options = {
-  				resolution: 1024,
-  				generateMipmaps: true,
-  				minFilter: THREE.LinearMipMapLinearFilter,
-  				magFilter: THREE.LinearFilter
-  			};
-  			// this.scene.background = new THREE.CubemapGenerator(this.renderer).fromEquirectangular(source, options);
-  			const cubemapGenerator = new THREE.EquirectangularToCubeGenerator(source, options);
-  			// pngBackground = cubemapGenerator.renderTarget;
-  			const texture = cubemapGenerator.update(this.renderer);
-  			source.dispose();
-  			texture.mapping = THREE.CubeReflectionMapping;
-  			texture.mapping = THREE.CubeRefractionMapping;
-  			// texture.generateMipmaps = false;
-  			// texture.flipY = true;
-  			// this.renderer.toneMappingExposure = 2.0;
-  			if (typeof callback === 'function') {
-  				callback(texture);
-  			}
-  		});
-  		//
-  		return loader;
-  	}
-  */
-
-  /*
-  	updateBackgroundColor__() {
-  		this.colorIndex = this.colorIndex || 0;
-  		this.colorIndex++;
-  		this.colorIndex = this.colorIndex % COLORS.length;
-  		const color = COLORS[this.colorIndex];
-  		TweenMax.to(this.renderer.domElement, 0.7, {
-  			backgroundColor: color, // `rgba(${r},${g},${b},1)`,
-  			delay: 3,
-  			ease: Power2.easeInOut,
-  			onUpdate: () => {
-  				this.addons.children.forEach(x => {
-  					x.material.color.setHex(color);
-  					x.material.needsUpdate = true;
-  				});
-  			},
-  			onComplete: () => {
-  				this.updateBackgroundColor();
-  			}
-  		});
-  	}
-  */
-
-  /*
-  	addBox__(parent) {
-  		const geometry = new THREE.BoxGeometry(600, 30, 30);
-  		const material = new THREE.MeshBasicMaterial({ color: 0xafb3bc });
-  		const cube = new THREE.Mesh(geometry, material);
-  		parent.add(cube);
-  		return cube;
-  	}
-  */
-
-  /*
-  	addBoxes__(parent) {
-  		const group = new THREE.Group();
-  		group.visible = true;
-  		const boxes = new Array(12).fill(null).map((x, i) => {
-  			const box = this.addBox__(group);
-  			const r = Math.PI * 2 / 12 * i;
-  			box.position.set(0, Math.sin(r) * 300, Math.cos(r) * 300);
-  			return box;
-  		});
-  		parent.add(group);
-  		return group;
-  	}
-  
-  */
-
 
 }
 
@@ -21807,7 +18751,7 @@ THREE.ShadowShader = {
 	`
 };
 
-},{"./const":217,"./interactive/emittable":218,"./materials/materials":219,"./orbit/orbit":221,"./vr/vr":222,"dat.gui":1}],217:[function(require,module,exports){
+},{"./const":216,"./geometries/round-box.geometry":217,"./interactive/emittable":219,"./interactive/freezable.group":221,"./interactive/freezable.mesh":222,"./interactive/grabbable.group":223,"./interactive/interactive.mesh":224,"./materials/materials":225,"./physics/physics.worker":226,"./vr/controllers":231,"./vr/gamepads":232,"./vr/vr":233}],216:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21825,7 +18769,7 @@ exports.MODEL_TYPE = exports.ORIGIN = exports.POINTER_RADIUS = exports.POINT_RAD
 /* global window, document */
 const TEST_ENABLED = false;
 exports.TEST_ENABLED = TEST_ENABLED;
-const VR_ENABLED = false;
+const VR_ENABLED = true;
 exports.VR_ENABLED = VR_ENABLED;
 const ROOM_RADIUS = 200;
 exports.ROOM_RADIUS = ROOM_RADIUS;
@@ -21927,7 +18871,186 @@ function cameraToPicture(cubeCamera, renderer, textureW) {
   return images;
 }
 
+},{}],217:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = RoundBoxGeometry;
+
+/* jshint esversion: 6 */
+function RoundBoxGeometry(width, height, depth, radius, widthSegments, heightSegments, depthSegments, radiusSegments) {
+  width = width || 1;
+  height = height || 1;
+  depth = depth || 1;
+  const minimum = Math.min(Math.min(width, height), depth);
+  radius = radius || minimum * 0.25;
+  radius = radius > minimum * 0.5 ? minimum * 0.5 : radius;
+  widthSegments = Math.floor(widthSegments) || 1;
+  heightSegments = Math.floor(heightSegments) || 1;
+  depthSegments = Math.floor(depthSegments) || 1;
+  radiusSegments = Math.floor(radiusSegments) || 1;
+  const fullGeometry = new THREE.BufferGeometry();
+  const fullPosition = [];
+  const fullUvs = [];
+  const fullIndex = [];
+  let fullIndexStart = 0;
+  let groupStart = 0;
+  RoundBoxGeometryBendPlane_(width, height, radius, widthSegments, heightSegments, radiusSegments, depth * 0.5, 'y', 0, 0);
+  RoundBoxGeometryBendPlane_(width, height, radius, widthSegments, heightSegments, radiusSegments, depth * 0.5, 'y', Math.PI, 1);
+  RoundBoxGeometryBendPlane_(depth, height, radius, depthSegments, heightSegments, radiusSegments, width * 0.5, 'y', Math.PI * 0.5, 2);
+  RoundBoxGeometryBendPlane_(depth, height, radius, depthSegments, heightSegments, radiusSegments, width * 0.5, 'y', Math.PI * -0.5, 3);
+  RoundBoxGeometryBendPlane_(width, depth, radius, widthSegments, depthSegments, radiusSegments, height * 0.5, 'x', Math.PI * -0.5, 4);
+  RoundBoxGeometryBendPlane_(width, depth, radius, widthSegments, depthSegments, radiusSegments, height * 0.5, 'x', Math.PI * 0.5, 5);
+  fullGeometry.addAttribute("position", new THREE.BufferAttribute(new Float32Array(fullPosition), 3));
+  fullGeometry.addAttribute("uv", new THREE.BufferAttribute(new Float32Array(fullUvs), 2));
+  fullGeometry.setIndex(fullIndex);
+  fullGeometry.computeVertexNormals();
+  return fullGeometry;
+
+  function RoundBoxGeometryBendPlane_(width, height, radius, widthSegments, heightSegments, smoothness, offset, axis, angle, materialIndex) {
+    const halfWidth = width * 0.5;
+    const halfHeight = height * 0.5;
+    const widthChunk = width / (widthSegments + smoothness * 2);
+    const heightChunk = height / (heightSegments + smoothness * 2);
+    const planeGeom = new THREE.PlaneBufferGeometry(width, height, widthSegments + smoothness * 2, heightSegments + smoothness * 2);
+    const v = new THREE.Vector3(); // current vertex
+
+    const cv = new THREE.Vector3(); // control vertex for bending
+
+    const cd = new THREE.Vector3(); // vector for distance
+
+    const position = planeGeom.attributes.position;
+    const uv = planeGeom.attributes.uv;
+    const widthShrinkLimit = widthChunk * smoothness;
+    const widthShrinkRatio = radius / widthShrinkLimit;
+    const heightShrinkLimit = heightChunk * smoothness;
+    const heightShrinkRatio = radius / heightShrinkLimit;
+    const widthInflateRatio = (halfWidth - radius) / (halfWidth - widthShrinkLimit);
+    const heightInflateRatio = (halfHeight - radius) / (halfHeight - heightShrinkLimit);
+
+    for (let i = 0; i < position.count; i++) {
+      v.fromBufferAttribute(position, i);
+
+      if (Math.abs(v.x) >= halfWidth - widthShrinkLimit) {
+        v.setX((halfWidth - (halfWidth - Math.abs(v.x)) * widthShrinkRatio) * Math.sign(v.x));
+      } else {
+        v.x *= widthInflateRatio;
+      } // lr
+
+
+      if (Math.abs(v.y) >= halfHeight - heightShrinkLimit) {
+        v.setY((halfHeight - (halfHeight - Math.abs(v.y)) * heightShrinkRatio) * Math.sign(v.y));
+      } else {
+        v.y *= heightInflateRatio;
+      } // tb
+      //re-calculation of uvs
+
+
+      uv.setXY(i, (v.x - -halfWidth) / width, 1 - (halfHeight - v.y) / height); // bending
+
+      const widthExceeds = Math.abs(v.x) >= halfWidth - radius;
+      const heightExceeds = Math.abs(v.y) >= halfHeight - radius;
+
+      if (widthExceeds || heightExceeds) {
+        cv.set(widthExceeds ? (halfWidth - radius) * Math.sign(v.x) : v.x, heightExceeds ? (halfHeight - radius) * Math.sign(v.y) : v.y, -radius);
+        cd.subVectors(v, cv).normalize();
+        v.copy(cv).addScaledVector(cd, radius);
+      }
+
+      position.setXYZ(i, v.x, v.y, v.z);
+    }
+
+    planeGeom.translate(0, 0, offset);
+
+    switch (axis) {
+      case 'y':
+        planeGeom.rotateY(angle);
+        break;
+
+      case 'x':
+        planeGeom.rotateX(angle);
+    } // merge positions
+
+
+    position.array.forEach(function (p) {
+      fullPosition.push(p);
+    }); // merge uvs
+
+    uv.array.forEach(function (u) {
+      fullUvs.push(u);
+    }); // merge indices
+
+    planeGeom.index.array.forEach(function (a) {
+      fullIndex.push(a + fullIndexStart);
+    });
+    fullIndexStart += position.count; // set the groups
+
+    fullGeometry.addGroup(groupStart, planeGeom.index.count, materialIndex);
+    groupStart += planeGeom.index.count;
+  }
+}
+
 },{}],218:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _freezable = _interopRequireDefault(require("./freezable.group"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* jshint esversion: 6 */
+class EmittableGroup extends _freezable.default {
+  constructor() {
+    super();
+    this.events = {};
+  }
+
+  on(type, callback) {
+    const event = this.events[type] = this.events[type] || [];
+    event.push(callback);
+    return () => {
+      this.events[type] = event.filter(x => x !== callback);
+    };
+  }
+
+  off(type, callback) {
+    const event = this.events[type];
+
+    if (event) {
+      this.events[type] = event.filter(x => x !== callback);
+    }
+  }
+
+  emit(type, data) {
+    const event = this.events[type];
+
+    if (event) {
+      event.forEach(callback => {
+        // callback.call(this, data);
+        callback(data);
+      });
+    }
+
+    const broadcast = this.events.broadcast;
+
+    if (broadcast) {
+      broadcast.forEach(callback => {
+        callback(type, data);
+      });
+    }
+  }
+
+}
+
+exports.default = EmittableGroup;
+
+},{"./freezable.group":221}],219:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21981,7 +19104,408 @@ class Emittable {
 
 exports.default = Emittable;
 
-},{}],219:[function(require,module,exports){
+},{}],220:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _freezable = _interopRequireDefault(require("./freezable.mesh"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* jshint esversion: 6 */
+class EmittableMesh extends _freezable.default {
+  constructor(geometry, material) {
+    geometry = geometry || new THREE.BoxGeometry(5, 5, 5);
+    material = material || new THREE.MeshBasicMaterial({
+      color: 0xff00ff // opacity: 1,
+      // transparent: true,
+
+    });
+    super(geometry, material); // this.renderOrder = 10;
+
+    this.events = {};
+  }
+
+  on(type, callback) {
+    const event = this.events[type] = this.events[type] || [];
+    event.push(callback);
+    return () => {
+      this.events[type] = event.filter(x => x !== callback);
+    };
+  }
+
+  off(type, callback) {
+    const event = this.events[type];
+
+    if (event) {
+      this.events[type] = event.filter(x => x !== callback);
+    }
+  }
+
+  emit(type, data) {
+    const event = this.events[type];
+
+    if (event) {
+      event.forEach(callback => {
+        // callback.call(this, data);
+        callback(data);
+      });
+    }
+
+    const broadcast = this.events.broadcast;
+
+    if (broadcast) {
+      broadcast.forEach(callback => {
+        callback(type, data);
+      });
+    }
+  }
+
+}
+
+exports.default = EmittableMesh;
+
+},{"./freezable.mesh":222}],221:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/* jshint esversion: 6 */
+class FreezableGroup extends THREE.Group {
+  static update(renderer, scene, camera, delta, time, tick) {
+    FreezableGroup.items.forEach(x => {
+      if (x.parent) {
+        x.onUpdate(renderer, scene, camera, x, delta, time, tick);
+      }
+    });
+  }
+
+  get freezed() {
+    return this.freezed_;
+  }
+
+  set freezed(freezed) {
+    // !!! cycle through freezable and not freezable
+    this.freezed_ = freezed;
+    this.children.filter(x => x.__lookupGetter__('freezed')).forEach(x => x.freezed = freezed);
+  }
+
+  constructor() {
+    super();
+    this.freezed = false;
+    FreezableGroup.items.push(this);
+  }
+
+  freeze() {
+    this.freezed = true;
+  }
+
+  unfreeze() {
+    this.freezed = false;
+  }
+
+  onUpdate(renderer, scene, camera, object, delta, tick) {// noop
+  }
+
+}
+
+exports.default = FreezableGroup;
+FreezableGroup.items = [];
+
+},{}],222:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/* jshint esversion: 6 */
+class FreezableMesh extends THREE.Mesh {
+  static update(renderer, scene, camera, delta, time, tick) {
+    FreezableMesh.items.forEach(x => {
+      if (x.parent) {
+        x.onUpdate(renderer, scene, camera, x, delta, time, tick);
+      }
+    });
+  }
+
+  get freezed() {
+    return this.freezed_;
+  }
+
+  set freezed(freezed) {
+    // !!! cycle through freezable and not freezable
+    this.freezed_ = freezed;
+    this.children.filter(x => x.__lookupGetter__('freezed')).forEach(x => x.freezed = freezed);
+  }
+
+  constructor(geometry, material) {
+    geometry = geometry || new THREE.BoxGeometry(5, 5, 5);
+    material = material || new THREE.MeshBasicMaterial({
+      color: 0xff00ff // opacity: 1,
+      // transparent: true,
+
+    });
+    super(geometry, material);
+    this.freezed = false;
+    FreezableMesh.items.push(this);
+  }
+
+  freeze() {
+    this.freezed = true;
+  }
+
+  unfreeze() {
+    this.freezed = false;
+  }
+
+  onUpdate(renderer, scene, camera, object, delta, tick) {// noop
+  }
+
+}
+
+exports.default = FreezableMesh;
+FreezableMesh.items = [];
+
+},{}],223:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _emittable = _interopRequireDefault(require("./emittable.group"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* jshint esversion: 6 */
+class GrabbableGroup extends _emittable.default {
+  static grabtest(controllers) {
+    const down = controllers.gamepads.button;
+    const controller = controllers.controller;
+    const items = GrabbableGroup.items.filter(x => !x.freezed);
+    let grabbedItem;
+
+    if (controller && down && down.index === 2) {
+      const controllerPosition = controller.parent.position;
+      items.reduce((p, x, i) => {
+        const distance = x.position.distanceTo(controllerPosition);
+
+        if (distance <= 0.1) {
+          if (distance < p) {
+            grabbedItem = x;
+            return distance;
+          } else {
+            return p;
+          }
+        }
+
+        return p;
+      }, Number.POSITIVE_INFINITY);
+    } else {
+      GrabbableGroup.items.filter(x => x.grab).forEach(x => x.grab = undefined);
+    }
+
+    items.forEach(x => {
+      x.grab = x === grabbedItem ? controller : undefined;
+    });
+    return grabbedItem;
+  }
+
+  constructor() {
+    super();
+    GrabbableGroup.items.push(this);
+  }
+
+  get grab() {
+    return this.grab_;
+  }
+
+  set grab(grab) {
+    if (this.grab_ !== grab) {
+      const grab_ = this.grab_;
+      this.grab_ = grab;
+
+      if (grab) {
+        this.emit('grab', grab);
+      } else {
+        this.emit('release', grab_);
+      }
+    }
+  }
+
+}
+
+exports.default = GrabbableGroup;
+GrabbableGroup.items = [];
+GrabbableGroup.center = new THREE.Vector3();
+
+},{"./emittable.group":218}],224:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _emittable = _interopRequireDefault(require("./emittable.mesh"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* jshint esversion: 6 */
+class InteractiveMesh extends _emittable.default {
+  static hittest(raycaster, down, controller) {
+    const items = InteractiveMesh.items.filter(x => !x.freezed);
+    let grabbedItem;
+
+    if (controller && down && down.index === 2) {
+      const controllerPosition = controller.parent.position;
+      const controllerBox = controller.updateBoundingBox(); // const controllerBoxCenter = controllerBox.getCenter(this.center);
+      // console.log(controllerBoxCenter.x, controllerBoxCenter.y, controllerBoxCenter.z);
+
+      items.reduce((p, x, i) => {
+        const distance = x.position.distanceTo(controllerPosition); // const intersect = controllerBox.intersectsBox(x.updateBoundingBox());
+
+        if (distance <= 0.1) {
+          // intersect) {
+          // const center = x.box.getCenter(this.center);
+          // const distance = controllerBox.distanceToPoint(center);
+          // console.log(distance);
+          // console.log(center, intersect, distance, p);
+          if (distance < p) {
+            grabbedItem = x;
+            return distance;
+          } else {
+            return p;
+          }
+        }
+
+        return p;
+      }, Number.POSITIVE_INFINITY); // const origin = raycaster.origin;
+      // console.log(controllerBox, down);
+    } else {
+      InteractiveMesh.items.filter(x => x.grab).forEach(x => x.grab = undefined);
+    }
+
+    if (grabbedItem) {
+      // console.log(grabbedItem);
+      items.forEach(x => {
+        x.grab = x === grabbedItem ? controller : undefined;
+      });
+      return grabbedItem;
+    } else {
+      const intersections = raycaster.intersectObjects(items);
+      let key, hit;
+      const hash = {};
+      intersections.forEach((intersection, i) => {
+        const object = intersection.object;
+        key = object.id;
+
+        if (i === 0 && InteractiveMesh.object != object) {
+          InteractiveMesh.object = object;
+          hit = object; // haptic feedback
+        }
+
+        hash[key] = intersection;
+      });
+      items.forEach(x => {
+        const intersection = hash[x.id]; // intersections.find(i => i.object === x);
+
+        x.intersection = intersection;
+        x.over = intersection !== undefined;
+        x.down = down;
+      });
+      return hit;
+    }
+  }
+
+  constructor(geometry, material) {
+    super(geometry, material);
+    geometry.computeBoundingBox();
+    this.box = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3()); // this.renderOrder = 10;
+
+    InteractiveMesh.items.push(this);
+  }
+
+  updateBoundingBox() {
+    // In the animation loop, to keep the bounding box updated after move/rotate/scale operations
+    this.updateMatrixWorld(true);
+    this.box.copy(this.geometry.boundingBox).applyMatrix4(this.matrixWorld); // console.log('updateBoundingBox', this.box);
+
+    return this.box;
+  }
+
+  get grab() {
+    return this.grab_;
+  }
+
+  set grab(grab) {
+    if (this.grab_ !== grab) {
+      const grab_ = this.grab_;
+      this.grab_ = grab;
+
+      if (grab) {
+        this.emit('grab', grab);
+      } else {
+        this.emit('release', grab_);
+      }
+    }
+  }
+
+  get over() {
+    return this.over_;
+  }
+
+  set over(over) {
+    if (over) {
+      this.emit('hit', this);
+    }
+
+    if (this.over_ !== over) {
+      this.over_ = over;
+
+      if (over) {
+        this.emit('over', this);
+      } else {
+        this.emit('out', this);
+      }
+    }
+  }
+
+  get down() {
+    return this.down_;
+  }
+
+  set down(down) {
+    down = down && this.over;
+
+    if (this.down_ !== down) {
+      this.down_ = down;
+
+      if (down) {
+        this.emit('down', this);
+      } else {
+        this.emit('up', this);
+      }
+    }
+  }
+
+}
+
+exports.default = InteractiveMesh;
+InteractiveMesh.items = [];
+InteractiveMesh.center = new THREE.Vector3();
+
+},{"./emittable.mesh":220}],225:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21993,25 +19517,13 @@ var _const = require("../const");
 
 /* jshint esversion: 6 */
 class Materials {
-  constructor(product, vrenabled, texture) {
+  constructor(product) {
     this.product = product;
-    this.vrenabled = vrenabled;
-    /*
-    const texture = new THREE.loader().load('threejs/matcap.jpg');
-    const material = new THREE.MeshMatcapMaterial({
-    	color: 0xffffff,
-    	matcap: texture,
-    	transparent: true,
-    	opacity: 1,
-    });
-    */
-    // const texture = this.getEnvMap();
-
     const textures = this.textures = this.addTextures();
     const white = this.white = this.getWhite();
-    const bodyPrimaryClear = this.bodyPrimaryClear = this.getBodyPrimaryClear(texture);
-    const logoSilver = this.logoSilver = this.getLogoSilver(texture);
-    const bodySecondary = this.bodySecondary = this.getBodySecondary(texture);
+    const bodyPrimaryClear = this.bodyPrimaryClear = this.getBodyPrimaryClear();
+    const logoSilver = this.logoSilver = this.getLogoSilver();
+    const bodySecondary = this.bodySecondary = this.getBodySecondary();
     const bristlesPrimary = this.bristlesPrimary = this.getBristlesPrimary();
     const bristlesSecondary = this.bristlesSecondary = this.getBristlesSecondary();
   }
@@ -22022,7 +19534,7 @@ class Materials {
       // equirectangular: loader.load('threejs/environment/equirectangular-sm.jpg'),
       matcap00: loader.load('threejs/matcap/matcap-00.jpg'),
       // matcap02: loader.load('threejs/matcap/matcap-02.jpg'),
-      matcap06: loader.load('threejs/matcap/matcap-06.jpg'),
+      // matcap06: loader.load('threejs/matcap/matcap-06.jpg'),
       // matcap11: loader.load('threejs/matcap/matcap-11.jpg'),
       // matcap13: loader.load('threejs/matcap/matcap-13.jpg'),
       matcap14: loader.load('threejs/matcap/matcap-14.jpg'),
@@ -22038,118 +19550,58 @@ class Materials {
 
   getWhite() {
     let material;
-
-    if (this.vrenabled) {
-      material = new THREE.MeshMatcapMaterial({
-        color: 0xffffff,
-        matcap: this.textures.matcap06
-      });
-    } else {
-      material = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        roughness: 0.2,
-        metalness: 0.2
-      });
-    }
-
-    return material;
-  }
-
-  getBodyPrimaryClear(texture) {
-    let material;
-
-    if (this.vrenabled) {
-      material = new THREE.MeshMatcapMaterial({
-        color: this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK ? 0x84807f : 0xf8f8f8,
-        matcap: this.textures.matcap15,
-        transparent: true,
-        opacity: this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK ? 0.8 : 0.4,
-        alphaTest: 0.2,
-        side: THREE.DoubleSide
-      });
-    } else {
-      /*
-      material = new THREE.MeshMatcapMaterial({
-      	color: 0xeeeeee,
-      	matcap: this.textures.equirectangular,
-      	transparent: true,
-      	opacity: 0.4,
-      	alphaTest: 0.2,
-      	side: THREE.DoubleSide,
-      });
-      */
-      material = new THREE.MeshPhongMaterial({
-        color: this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK ? 0x84807f : 0xf8f8f8,
-        envMap: texture,
-        transparent: true,
-        refractionRatio: 0.6,
-        reflectivity: 0.8,
-        opacity: this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK ? 0.375 : 0.25,
-        alphaTest: 0.2,
-        // refractionRatio: 0.99,
-        // reflectivity: 0.99,
-        // opacity: 0.5,
-        side: THREE.DoubleSide // blending: THREE.AdditiveBlending,
-
-      });
-    } // material.vertexTangents = true;
-
+    material = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      emissive: 0x333333,
+      roughness: 0.2,
+      metalness: 0.2
+    });
+    /*
+    material = new THREE.MeshMatcapMaterial({
+    	color: 0xffffff,
+    	matcap: this.textures.matcap06,
+    });
+    */
 
     return material;
   }
 
-  getBodySecondary(texture) {
+  getBodyPrimaryClear() {
     let material;
-
-    if (this.vrenabled) {
-      material = new THREE.MeshPhongMaterial({
-        color: this.product.colors[0].colors[0],
-        shininess: 100
-      });
-      /*
-      material = new THREE.MeshMatcapMaterial({
-      	color: this.product.colors[0].colors[0],
-      	matcap: this.textures.matcap13,
-      });
-      */
-    } else {
-      material = new THREE.MeshStandardMaterial({
-        color: this.product.colors[0].colors[0],
-        // emissive: 0x4f0300,
-        roughness: 0.2,
-        metalness: 0.2 // envMap: texture,
-        // envMapIntensity: 0.4,
-        // The refractionRatio must have value in the range 0 to 1.
-        // The default value, very close to 1, give almost invisible glass.
-        // refractionRatio: 0,
-        // side: THREE.DoubleSide,
-
-      });
-    }
+    material = new THREE.MeshMatcapMaterial({
+      color: this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK ? 0x84807f : 0xf8f8f8,
+      matcap: this.textures.matcap15,
+      transparent: true,
+      opacity: this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK ? 0.8 : 0.4,
+      alphaTest: 0.2,
+      side: THREE.DoubleSide
+    }); // material.vertexTangents = true;
 
     return material;
   }
 
-  getBristlesPrimary(texture) {
+  getBodySecondary() {
     let material;
+    material = new THREE.MeshPhongMaterial({
+      color: this.product.colors[0].colors[0],
+      shininess: 100
+    });
+    /*
+    material = new THREE.MeshMatcapMaterial({
+    	color: this.product.colors[0].colors[0],
+    	matcap: this.textures.matcap13,
+    });
+    */
 
-    if (this.vrenabled) {
-      material = new THREE.MeshMatcapMaterial({
-        color: this.product.bristles[0].colors[0],
-        matcap: this.textures.matcap14
-      });
-    } else {
-      material = new THREE.MeshStandardMaterial({
-        color: this.product.bristles[0].colors[0],
-        // 0x1f45c0,
-        // emissive: 0x333333,
-        // map: lightMap,
-        // normalMap: lightMap,
-        // metalnessMap: lightMap,
-        roughness: 0.9,
-        metalness: 0.0
-      });
-    }
+    return material;
+  }
+
+  getBristlesPrimary() {
+    let material;
+    material = new THREE.MeshMatcapMaterial({
+      color: this.product.bristles[0].colors[0],
+      matcap: this.textures.matcap14
+    });
 
     if (this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_WHITE) {
       material.map = this.textures.bristlesWhite;
@@ -22160,68 +19612,25 @@ class Materials {
     return material;
   }
 
-  getBristlesSecondary(texture) {
+  getBristlesSecondary() {
     let material;
-
-    if (this.vrenabled) {
-      material = new THREE.MeshMatcapMaterial({
-        color: this.product.bristles[0].colors[1],
-        map: this.textures.bristlesLight,
-        matcap: this.textures.matcap14
-      });
-    } else {
-      material = new THREE.MeshStandardMaterial({
-        color: this.product.bristles[0].colors[1],
-        // 0x1aac4e,
-        map: this.textures.bristlesLight,
-        // emissive: 0x333333,
-        // map: lightMap,
-        // normalMap: lightMap,
-        // metalnessMap: lightMap,
-        roughness: 0.9,
-        metalness: 0.0
-      });
-    }
-
+    material = new THREE.MeshMatcapMaterial({
+      color: this.product.bristles[0].colors[1],
+      map: this.textures.bristlesLight,
+      matcap: this.textures.matcap14
+    });
     return material;
   }
 
   getLogoSilver() {
     let material;
-
-    if (this.vrenabled) {
-      material = new THREE.MeshMatcapMaterial({
-        color: 0xffffff,
-        map: this.textures.toothbrushLogo,
-        matcap: this.textures.matcap00,
-        transparent: true,
-        alphaTest: 0.1
-      });
-    } else {
-      if (this.product.modelType === _const.MODEL_TYPE.PROFESSIONAL_BLACK) {
-        material = new THREE.MeshMatcapMaterial({
-          color: 0xffffff,
-          map: this.textures.toothbrushLogo,
-          matcap: this.textures.matcap00,
-          transparent: true,
-          alphaTest: 0.1
-        });
-      } else {
-        material = new THREE.MeshStandardMaterial({
-          color: 0xffffff,
-          map: this.textures.toothbrushLogo,
-          transparent: true,
-          roughness: 0.15,
-          metalness: 0.9 // envMap: texture,
-          // side: THREE.DoubleSide,
-          //
-          // opacity: 1,
-          // alphaTest: 0.1,
-
-        });
-      }
-    }
-
+    material = new THREE.MeshMatcapMaterial({
+      color: 0xffffff,
+      map: this.textures.toothbrushLogo,
+      matcap: this.textures.matcap00,
+      transparent: true,
+      alphaTest: 0.1
+    });
     return material;
   }
 
@@ -22229,7 +19638,7 @@ class Materials {
 
 exports.default = Materials;
 
-},{"../const":217}],220:[function(require,module,exports){
+},{"../const":216}],226:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22237,273 +19646,1444 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-/* jshint esversion: 6 */
-
-/* global window, document, TweenMax, ThreeJs */
-class DragListener {
-  constructor(target, downCallback, moveCallback, upCallback) {
-    this.target = target || document;
-
-    this.downCallback = downCallback || function (e) {
-      console.log('DragListener.downCallback not setted', e);
-    };
-
-    this.moveCallback = moveCallback || function (e) {
-      console.log('DragListener.moveCallback not setted', e);
-    };
-
-    this.upCallback = upCallback || function (e) {
-      console.log('DragListener.upCallback not setted', e);
-    };
-
-    this.dragging = false;
-    this.init();
-  }
-
-  init() {
-    this.onMouseDown = this.onMouseDown.bind(this);
-    this.onMouseMove = this.onMouseMove.bind(this);
-    this.onMouseUp = this.onMouseUp.bind(this);
-    this.onTouchStart = this.onTouchStart.bind(this);
-    this.onTouchMove = this.onTouchMove.bind(this);
-    this.onTouchEnd = this.onTouchEnd.bind(this);
-    this.target.addEventListener('mousedown', this.onMouseDown, false);
-    this.target.addEventListener('touchstart', this.onTouchStart, false);
-  }
-
-  onDown(down) {
-    this.down = down; // this.position ? { x: down.x - this.position.x, y: down.y - this.position.y } : down;
-
-    this.strength = {
-      x: 0,
-      y: 0
-    };
-    this.distance = this.distance || {
-      x: 0,
-      y: 0
-    };
-    this.speed = {
-      x: 0,
-      y: 0
-    };
-    this.downCallback(this);
-  }
-
-  onDrag(position) {
-    this.dragging = this.down !== undefined;
-    var target = this.target;
-    var distance = {
-      x: position.x - this.down.x,
-      y: position.y - this.down.y
-    };
-    var strength = {
-      x: distance.x / window.innerWidth * 2,
-      y: distance.y / window.innerHeight * 2
-    };
-    var speed = {
-      x: this.speed.x + (strength.x - this.strength.x) * 0.1,
-      y: this.speed.y + (strength.y - this.strength.y) * 0.1
-    };
-    this.position = position;
-    this.distance = distance;
-    this.strength = strength;
-    this.speed = speed;
-    this.moveCallback({
-      position: position,
-      distance: distance,
-      strength: strength,
-      speed: speed,
-      target: target
-    });
-  }
-
-  onUp() {
-    this.down = undefined;
-    this.dragging = false;
-    this.upCallback(this);
-  }
-
-  onMouseDown(e) {
-    this.target.removeEventListener('touchstart', this.onTouchStart);
-    this.onDown({
-      x: e.clientX,
-      y: e.clientY
-    });
-    this.addMouseListeners();
-  }
-
-  onMouseMove(e) {
-    this.onDrag({
-      x: e.clientX,
-      y: e.clientY
-    });
-  }
-
-  onMouseUp(e) {
-    this.removeMouseListeners();
-    /*
-    this.onDrag({
-    	x: e.clientX,
-    	y: e.clientY
-    });
-    */
-
-    this.onUp();
-  }
-
-  onTouchStart(e) {
-    this.target.removeEventListener('mousedown', this.onMouseDown);
-
-    if (e.touches.length > 1) {
-      e.preventDefault();
-      this.onDown({
-        x: e.touches[0].pageX,
-        y: e.touches[0].pageY
-      });
-      this.addTouchListeners();
-    }
-  }
-
-  onTouchMove(e) {
-    if (e.touches.length > 0) {
-      e.preventDefault();
-      this.onDrag({
-        x: e.touches[0].pageX,
-        y: e.touches[0].pageY
-      });
-    }
-  }
-
-  onTouchEnd(e) {
-    this.removeTouchListeners();
-    this.onDrag(this.position);
-    this.onUp();
-  }
-
-  addMouseListeners() {
-    document.addEventListener('mousemove', this.onMouseMove, false);
-    document.addEventListener('mouseup', this.onMouseUp, false);
-  }
-
-  addTouchListeners() {
-    document.addEventListener('touchend', this.onTouchEnd, false);
-    document.addEventListener('touchmove', this.onTouchMove, false);
-  }
-
-  removeMouseListeners() {
-    document.removeEventListener('mousemove', this.onMouseMove);
-    document.removeEventListener('mouseup', this.onMouseUp);
-  }
-
-  removeTouchListeners() {
-    document.removeEventListener('touchend', this.onTouchEnd);
-    document.removeEventListener('touchmove', this.onTouchMove);
-  }
-
-}
-
-exports.default = DragListener;
-
-},{}],221:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _drag = _interopRequireDefault(require("./drag.listener"));
+var _emittable = _interopRequireDefault(require("../interactive/emittable"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /* jshint esversion: 6 */
-
-/* global window, document */
-class Orbit {
+class PhysicsWorker extends _emittable.default {
   constructor() {
-    this.longitude = 0;
-    this.latitude = 0;
-    this.direction = 1; // this.speed = 1;
-
-    this.inertia = new THREE.Vector2();
-    this.set(0, 0);
-  }
-
-  setOrientation(orientation) {
-    if (orientation) {
-      this.set(orientation.longitude, orientation.latitude);
-    }
-  }
-
-  getOrientation() {
-    return {
-      latitude: this.latitude,
-      longitude: this.longitude
+    super();
+    this.meshes = {};
+    this.data = {
+      action: 'stepSimulation',
+      delta: 0
     };
+    const worker = this.worker = new Worker('./js/worker.wasm.js');
+    const debugInfo = document.querySelector('.debug__info');
+
+    worker.onmessage = event => {
+      const items = event.data;
+
+      if (items) {
+        // debugInfo.innerHTML = items.fps;
+        const meshes = this.meshes;
+
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          const mesh = meshes[item.id];
+
+          if (mesh && !mesh.freezed) {
+            mesh.position.set(item.position.x, item.position.y, item.position.z);
+            mesh.quaternion.set(item.quaternion.x, item.quaternion.y, item.quaternion.z, item.quaternion.w);
+
+            if (mesh.userData.respawn) {
+              mesh.userData.respawn(item);
+            }
+            /*
+            if (item.isActive) {
+            	console.log(item);
+            }
+            */
+
+          }
+        }
+      }
+
+      this.emit('items', items);
+    };
+
+    this.emit('init');
   }
 
-  setDragListener(container) {
-    let longitude, latitude;
-    const dragListener = new _drag.default(this.container, event => {
-      longitude = this.longitude;
-      latitude = this.latitude;
-    }, event => {
-      const direction = event.distance.x ? event.distance.x / Math.abs(event.distance.x) * -1 : 1;
-      this.direction = direction;
-      const lon = longitude - event.distance.x * 0.1;
-      const lat = latitude + event.distance.y * 0.1;
-      this.setInertia(lon, lat);
-      this.set(lon, lat); // console.log('longitude', this.longitude, 'latitude', this.latitude, 'direction', this.direction);
-    }, event => {// this.speed = Math.abs(event.strength.x) * 100;
-      // console.log('speed', this.speed);
-    });
+  update(delta) {// noop
 
-    dragListener.move = () => {};
-
-    this.dragListener = dragListener;
-    return dragListener;
-  }
-
-  set(longitude, latitude) {
-    latitude = Math.max(-80, Math.min(80, latitude));
-    const phi = THREE.Math.degToRad(90 - latitude);
-    const theta = THREE.Math.degToRad(longitude);
-    this.longitude = longitude;
-    this.latitude = latitude;
-    this.phi = phi;
-    this.theta = theta;
-  }
-
-  setInertia(longitude, latitude) {
-    const inertia = this.inertia;
-    inertia.x = (longitude - this.longitude) * 1;
-    inertia.y = (latitude - this.latitude) * 1;
-    this.inertia = inertia; // console.log(this.inertia);
-  }
-
-  updateInertia() {
-    const inertia = this.inertia;
-    inertia.multiplyScalar(0.95);
-    this.inertia = inertia;
     /*
-    let speed = this.speed;
-    speed = Math.max(1, speed * 0.95);
-    this.speed = speed;
+    this.data.delta = delta;
+    this.worker.postMessage(this.data);
     */
   }
 
-  update() {
-    if (this.dragListener && !this.dragListener.dragging) {
-      this.set(this.longitude + this.inertia.x, this.latitude + this.inertia.y);
-      this.updateInertia();
+  remove(mesh) {
+    if (this.meshes[mesh.id]) {
+      const data = {
+        action: 'remove',
+        id: mesh.id
+      };
+      delete this.meshes[mesh.id];
+      this.worker.postMessage(data);
+    }
+  }
+
+  addBox(mesh, size, mass, linearVelocity, angularVelocity) {
+    const data = {
+      action: 'addBox',
+      id: mesh.id,
+      position: {
+        x: mesh.position.x,
+        y: mesh.position.y,
+        z: mesh.position.z
+      },
+      quaternion: {
+        x: mesh.quaternion.x,
+        y: mesh.quaternion.y,
+        z: mesh.quaternion.z,
+        w: mesh.quaternion.w
+      },
+      size: size,
+      mass: mass,
+      linearVelocity: linearVelocity,
+      angularVelocity: angularVelocity
+    };
+    this.worker.postMessage(data);
+    this.meshes[mesh.id] = mesh;
+  }
+
+  addSphere(mesh, radius, mass, linearVelocity, angularVelocity) {
+    const data = {
+      action: 'addSphere',
+      id: mesh.id,
+      position: {
+        x: mesh.position.x,
+        y: mesh.position.y,
+        z: mesh.position.z
+      },
+      quaternion: {
+        x: mesh.quaternion.x,
+        y: mesh.quaternion.y,
+        z: mesh.quaternion.z,
+        w: mesh.quaternion.w
+      },
+      radius: radius,
+      mass: mass,
+      linearVelocity: linearVelocity,
+      angularVelocity: angularVelocity
+    };
+    this.worker.postMessage(data);
+    this.meshes[mesh.id] = mesh;
+  }
+
+}
+/*
+onmessage = function(event) {
+var data = event.data;
+if (data.objects.length != NUM) return;
+for (var i = 0; i < NUM; i++) {
+	var physicsObject = data.objects[i];
+	var renderObject = boxes[i];
+	renderObject.position[0] = physicsObject[0];
+	renderObject.position[1] = physicsObject[1];
+	renderObject.position[2] = physicsObject[2];
+	quaternion.x = physicsObject[3];
+	quaternion.y = physicsObject[4];
+	quaternion.z = physicsObject[5];
+	quaternion.w = physicsObject[6];
+	renderObject.rotation = quaternion.toEuler();
+}
+currFPS = data.currFPS;
+allFPS = data.allFPS;
+};
+
+physicsWorker.postMessage(NUM);
+
+}
+*/
+
+
+exports.default = PhysicsWorker;
+
+},{"../interactive/emittable":219}],227:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ControllerFragGlsl = void 0;
+const ControllerFragGlsl =
+/* glsl */
+`
+#define MATCAP
+uniform vec3 diffuse;
+uniform vec3 emissive;
+uniform float emissiveIntensity;
+uniform float opacity;
+uniform sampler2D matcap;
+varying vec3 vViewPosition;
+#ifndef FLAT_SHADED
+	varying vec3 vNormal;
+#endif
+#include <common>
+#include <uv_pars_fragment>
+#include <map_pars_fragment>
+#include <alphamap_pars_fragment>
+#include <fog_pars_fragment>
+#include <bumpmap_pars_fragment>
+#include <normalmap_pars_fragment>
+#include <logdepthbuf_pars_fragment>
+#include <clipping_planes_pars_fragment>
+void main() {
+	#include <clipping_planes_fragment>
+	vec4 diffuseColor = vec4( diffuse, opacity );
+	vec4 emissiveColor = vec4( emissive, opacity );
+	#include <logdepthbuf_fragment>
+	/* #include <map_fragment> */
+	#ifdef USE_MAP
+		vec4 texelColor = texture2D( map, vUv );
+		texelColor = mapTexelToLinear( texelColor );
+		diffuseColor *= texelColor;
+		diffuseColor = mix(diffuseColor, emissiveColor, emissiveIntensity);
+	#endif
+	#include <alphamap_fragment>
+	#include <alphatest_fragment>
+	#include <normal_fragment_begin>
+	#include <normal_fragment_maps>
+	vec3 viewDir = normalize( vViewPosition );
+	vec3 x = normalize( vec3( viewDir.z, 0.0, - viewDir.x ) );
+	vec3 y = cross( viewDir, x );
+	vec2 uv = vec2( dot( x, normal ), dot( y, normal ) ) * 0.495 + 0.5;
+	#ifdef USE_MATCAP
+		vec4 matcapColor = texture2D( matcap, uv );
+		matcapColor = matcapTexelToLinear( matcapColor );
+	#else
+		vec4 matcapColor = vec4( 1.0 );
+	#endif
+	vec3 outgoingLight = diffuseColor.rgb * (matcapColor.rgb + emissiveIntensity * 0.5); // max(matcapColor.rgb, emissiveColor.rgb);
+	gl_FragColor = vec4( outgoingLight, diffuseColor.a );
+	#include <premultiplied_alpha_fragment>
+	#include <tonemapping_fragment>
+	#include <encodings_fragment>
+	#include <fog_fragment>
+}
+`;
+exports.ControllerFragGlsl = ControllerFragGlsl;
+
+},{}],228:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _const = require("../../const");
+
+var _emittable = _interopRequireDefault(require("../../interactive/emittable.group"));
+
+var _gamepads = require("../gamepads");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* jshint esversion: 6 */
+class Controller extends _emittable.default {
+  get ready() {
+    return this.ready_;
+  }
+
+  set ready(ready) {
+    if (this.ready_ !== ready) {
+      this.ready_ = ready;
+
+      if (ready) {
+        this.emit('ready', this);
+      }
+    }
+  }
+
+  get active() {
+    return this.active_;
+  }
+
+  set active(active) {
+    if (this.active_ !== active) {
+      this.active_ = active;
+
+      if (active) {
+        this.add(this.ray);
+      } else {
+        this.remove(this.ray);
+      }
+    }
+  }
+
+  constructor(parent, gamepad, options = {}) {
+    super(); // this.ready = false;
+
+    this.buttons = new Array(10).fill(0).map(x => {
+      return {
+        value: 0
+      };
+    });
+    this.axis = new Array(2).fill(0).map(x => new THREE.Vector2());
+    this.linearVelocity = new THREE.Vector3();
+    this.angularVelocity = new THREE.Vector3();
+    this.boundingBox = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+    this.box = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+    this.parent = parent;
+    this.gamepad = gamepad;
+    this.options = options;
+    this.hand = gamepad.hand;
+    const model = this.model = this.addModel(this.hand);
+    const ray = this.ray = this.addRay(this.hand);
+    this.add(model);
+    parent.add(this);
+    this.addEvents();
+  }
+
+  updateBoundingBox() {
+    // In the animation loop, to keep the bounding box updated after move/rotate/scale operations
+    this.parent.updateMatrixWorld(true);
+    this.box.copy(this.boundingBox).applyMatrix4(this.parent.matrixWorld); // console.log('updateBoundingBox', this.box);
+
+    return this.box;
+  }
+
+  updateVelocity() {
+    let previousPosition = this.previousPosition_;
+
+    if (previousPosition) {
+      this.linearVelocity.subVectors(this.parent.position, previousPosition);
+    } else {
+      previousPosition = this.previousPosition_ = new THREE.Vector3();
+    }
+
+    previousPosition.copy(this.parent.position);
+    let previousRotation = this.previousRotation_;
+
+    if (previousRotation) {
+      this.angularVelocity.subVectors(this.parent.rotation, previousRotation);
+    } else {
+      previousRotation = this.previousRotation_ = new THREE.Vector3();
+    }
+
+    previousRotation.copy(this.parent.rotation);
+  }
+
+  addEvents() {
+    this.onActivate = this.onActivate.bind(this);
+    this.onDeactivate = this.onDeactivate.bind(this);
+    this.onPress = this.onPress.bind(this);
+    this.onRelease = this.onRelease.bind(this);
+    this.onAxis = this.onAxis.bind(this);
+    const gamepad = this.gamepad;
+    gamepad.on('activate', this.onActivate);
+    gamepad.on('deactivate', this.onDeactivate);
+    gamepad.on('press', this.onPress);
+    gamepad.on('release', this.onRelease);
+    gamepad.on('axis', this.onAxis);
+  }
+
+  removeEvents() {
+    const gamepad = this.gamepad;
+    gamepad.off('activate', this.onActivate);
+    gamepad.off('deactivate', this.onActivate);
+    gamepad.off('press', this.onPress);
+    gamepad.off('release', this.onRelease);
+    gamepad.off('axis', this.onAxis);
+  }
+
+  onActivate(gamepad) {
+    this.active = true;
+  }
+
+  onDeactivate(gamepad) {
+    this.active = false;
+  }
+
+  onPress(button) {
+    this.press(button.index);
+  }
+
+  onRelease(button) {
+    this.release(button.index);
+  }
+
+  onAxis(axis) {
+    this.axis[axis.index] = axis;
+  }
+
+  destroy() {
+    this.removeEvents();
+    this.gamepad = null;
+  }
+
+  addModel(hand) {
+    const geometry = new THREE.CylinderBufferGeometry((0, _const.cm)(2), (0, _const.cm)(2), (0, _const.cm)(12), 24);
+    geometry.rotateX(Math.PI / 2);
+    const texture = new THREE.TextureLoader().load('threejs/matcap/matcap-12.jpg');
+    const material = new THREE.MeshMatcapMaterial({
+      color: this.hand === _gamepads.GAMEPAD_HANDS.RIGHT ? 0x991111 : 0x111199,
+      matcap: texture // transparent: true,
+      // opacity: 1,
+
+    });
+    const mesh = new THREE.Mesh(geometry, material); // geometry.computeBoundingBox();
+
+    this.boundingBox.setFromObject(mesh);
+    this.ready = true;
+    return mesh;
+  }
+
+  addRay(hand) {
+    const geometry = new THREE.CylinderBufferGeometry((0, _const.mm)(1), (0, _const.mm)(0.5), (0, _const.cm)(30), 5); // 10, 12
+
+    geometry.rotateX(Math.PI / 2);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.5
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(0, 0, -(0, _const.cm)(18.5));
+    return mesh;
+  }
+
+  press(index) {
+    TweenMax.to(this.buttons[index], 0.3, {
+      value: 1,
+      ease: Power2.easeOut
+    });
+  }
+
+  release(index) {
+    TweenMax.to(this.buttons[index], 0.3, {
+      value: 0,
+      ease: Power2.easeOut
+    });
+  }
+
+  update(tick) {}
+
+  static getCos(tick, i = 0) {
+    return Math.cos(i + tick * 0.1);
+  }
+
+  static mixColor(color, a, b, value) {
+    return color.setRGB(a.r + (b.r - a.r) * value, a.g + (b.g - a.g) * value, a.b + (b.b - a.b) * value);
+  }
+
+  static mixUniformColor(uniform, a, b, value) {
+    uniform.value.r = a.r + (b.r - a.r) * value;
+    uniform.value.g = a.g + (b.g - a.g) * value;
+    uniform.value.b = a.b + (b.b - a.b) * value;
+  }
+
+} // Controller.clock = new THREE.Clock();
+// const clock = this.clock || (this.clock = new THREE.Clock());
+
+
+exports.default = Controller;
+
+},{"../../const":216,"../../interactive/emittable.group":218,"../gamepads":232}],229:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _const = require("../../const");
+
+var _gamepads = require("../gamepads");
+
+var _controller = _interopRequireDefault(require("./controller"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* jshint esversion: 6 */
+class HandController extends _controller.default {
+  constructor(parent, gamepad, options = {}) {
+    super(parent, gamepad, options);
+  }
+
+  addModel(hand) {
+    const format = '.fbx';
+    const path = `${HandController.FOLDER}/${hand}/${hand}-animated`;
+    const matcap = new THREE.TextureLoader().load('threejs/matcap/matcap-06.jpg');
+    const material = new THREE.MeshMatcapMaterial({
+      color: 0xffffff,
+      matcap: matcap,
+      alphaTest: 0.1,
+      transparent: true,
+      opacity: 1,
+      skinning: true,
+      side: THREE.BackSide
+    });
+    /*
+    const texture = new THREE.TextureLoader().load(`${path}.jpg`);
+    const material = new THREE.MeshStandardMaterial({
+    	color: 0xffffff,
+    	// map: texture,
+    	// matcap: matcap,
+    	alphaTest: 0.1,
+    	transparent: true,
+    	opacity: 1,
+    	skinning: true,
+    	side: THREE.DoubleSide,
+    });
+    */
+
+    const mesh = new THREE.Group();
+    const loader = format === '.fbx' ? new THREE.FBXLoader() : new THREE.OBJLoader();
+    let i = 0;
+    loader.load(`${path}${format}`, object => {
+      const mixer = this.mixer = new THREE.AnimationMixer(object);
+      mixer.timeScale = 2;
+      const grabClip = this.grabClip = mixer.clipAction(object.animations[0]);
+      grabClip.setLoop(THREE.LoopOnce);
+      grabClip.clampWhenFinished = true;
+      const releaseClip = this.releaseClip = mixer.clipAction(object.animations[1]);
+      releaseClip.setLoop(THREE.LoopOnce);
+      releaseClip.clampWhenFinished = true;
+      object.traverse(child => {
+        if (child instanceof THREE.Mesh) {
+          child.material = material; // child.material = material.clone();
+          // child.geometry.scale(0.1, 0.1, 0.1);
+          // child.geometry.computeBoundingBox();
+        }
+      }); // object.scale.set(0.1, 0.1, 0.1);
+      // const s = hand === GAMEPAD_HANDS.LEFT ? 0.045 : 0.045;
+
+      const s = 1;
+      object.scale.set(hand === _gamepads.GAMEPAD_HANDS.LEFT ? -s : s, s, s);
+      mesh.add(object);
+      this.material = material;
+      this.boundingBox.setFromObject(object);
+      this.skeleton = new THREE.SkeletonHelper(object);
+      this.ready = true;
+    }, xhr => {
+      this.progress = xhr.loaded / xhr.total;
+    }, error => {
+      console.log(error);
+      console.log(`HandController.addModel not found ${path}${format}`);
+    });
+    return mesh;
+  }
+
+  addRay(hand) {
+    if (_const.TEST_ENABLED) {
+      const geometry = new THREE.CylinderBufferGeometry((0, _const.mm)(4), (0, _const.mm)(4), 30, 3);
+      geometry.rotateX(Math.PI / 2);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.5
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(0, 0, -15);
+      return mesh;
+    } else {
+      const group = new THREE.Group();
+      return group;
+    }
+  }
+
+  press(index) {
+    if (index === 2) {
+      if (this.releaseClip) {
+        this.releaseClip.stop();
+      }
+
+      if (this.grabClip) {
+        if (this.grabClip.paused) {
+          this.grabClip.reset();
+        } else {
+          this.grabClip.play();
+        }
+      }
+    }
+  }
+
+  release(index) {
+    if (index === 2) {
+      if (this.grabClip) {
+        this.grabClip.stop();
+      }
+
+      if (this.releaseClip) {
+        if (this.releaseClip.paused) {
+          this.releaseClip.reset();
+        } else {
+          this.releaseClip.play();
+        }
+      }
+    }
+  }
+
+  update(tick) {
+    const clock = this.clock || (this.clock = new THREE.Clock());
+
+    if (this.mixer) {
+      const delta = clock.getDelta();
+      this.mixer.update(delta);
+    }
+    /*
+    if (this.options.test && this.ready) {
+    	const time = clock.getElapsedTime();
+    	if (time > 0 && Math.floor(time) % 5 === 0) {
+    		if (this.clip.paused) {
+    			this.clip.play();
+    			// this.clip.play().reset();
+    			// console.log(this.clip);
+    		}
+    	}
+    	// this.buttons[1].value = Math.abs(Controller.getCos(tick, 1));
+    }
+    */
+
+  }
+
+}
+
+exports.default = HandController;
+HandController.FOLDER = `threejs/models/hand`;
+
+},{"../../const":216,"../gamepads":232,"./controller":228}],230:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _const = require("../../const");
+
+var _gamepads = require("../gamepads");
+
+var _controller = _interopRequireDefault(require("./controller"));
+
+var _controllerFrag = require("./controller-frag.glsl");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* jshint esversion: 6 */
+const OFF = new THREE.Color(0x000000);
+const ON = new THREE.Color(0x2196f3);
+
+class OculusQuestController extends _controller.default {
+  constructor(parent, gamepad, options = {}) {
+    super(parent, gamepad, options);
+  }
+
+  addModel(hand) {
+    const format = '.fbx'; // '.obj';
+
+    const path = `${OculusQuestController.FOLDER}/${hand}/${hand}`;
+    const matcap = new THREE.TextureLoader().load('threejs/matcap/matcap-04.jpg');
+    const texture = new THREE.TextureLoader().load(`${path}.jpg`);
+    const material = new THREE.MeshMatcapMaterial({
+      color: 0xffffff,
+      map: texture,
+      matcap: matcap,
+      transparent: true,
+      opacity: 1
+    });
+    const mesh = new THREE.Group();
+    const loader = format === '.fbx' ? new THREE.FBXLoader() : new THREE.OBJLoader();
+    let i = 0;
+    loader.load(`${path}${format}`, object => {
+      object.traverse(child => {
+        if (child instanceof THREE.Mesh) {
+          child.material = material.clone();
+
+          child.material.onBeforeCompile = shader => {
+            // shader.uniforms.emissive = new THREE.Uniform(new THREE.Color(0x000000));
+            shader.uniforms.emissive = new THREE.Uniform(ON);
+            shader.uniforms.emissiveIntensity = {
+              value: 0
+            };
+            shader.fragmentShader = _controllerFrag.ControllerFragGlsl;
+            child.shader = shader;
+          };
+
+          child.geometry.rotateX(child.rotation.x);
+          child.geometry.rotateY(child.rotation.y);
+          child.geometry.rotateZ(child.rotation.z);
+          child.rotation.set(0, 0, 0);
+          const position = child.position.clone(); // left > 0 joystick, 1 trigger, 2 grip, 3 X, 4 Y
+          // right > 0 joystick, 1 trigger, 2 grip, 3 A, 4 B
+
+          switch (child.name) {
+            case 'joystick':
+              child.onBeforeRender = (renderer, scene, camera, geometry, material, group) => {
+                const axis = this.axis[0];
+                child.rotation.set(axis.y * (0, _const.deg)(15), 0, -axis.x * (0, _const.deg)(15));
+                const value = this.buttons[0].value;
+                child.position.set(position.x, position.y - value * (0, _const.mm)(2), position.z);
+
+                if (child.shader) {
+                  child.shader.uniforms.emissiveIntensity.value = value; // Controller.mixUniformColor(child.shader.uniforms.emissive, OFF, ON, value);
+                }
+              };
+
+              break;
+
+            case 'trigger':
+              child.onBeforeRender = (renderer, scene, camera, geometry, material, group) => {
+                const value = this.buttons[1].value;
+                child.rotation.set(-value * (0, _const.deg)(20), 0, 0);
+
+                if (child.shader) {
+                  child.shader.uniforms.emissiveIntensity.value = value; // Controller.mixUniformColor(child.shader.uniforms.emissive, OFF, ON, value);
+                }
+              };
+
+              break;
+
+            case 'grip':
+              const direction = hand === _gamepads.GAMEPAD_HANDS.RIGHT ? 1 : -1;
+
+              child.onBeforeRender = (renderer, scene, camera, geometry, material, group) => {
+                const value = this.buttons[2].value;
+                child.position.set(position.x + value * (0, _const.mm)(2) * direction, position.y, position.z);
+
+                if (child.shader) {
+                  child.shader.uniforms.emissiveIntensity.value = value; // Controller.mixUniformColor(child.shader.uniforms.emissive, OFF, ON, value);
+                }
+              };
+
+              break;
+
+            case 'buttonX':
+            case 'buttonA':
+              child.onBeforeRender = (renderer, scene, camera, geometry, material, group) => {
+                const value = this.buttons[3].value;
+                child.position.set(position.x, position.y - value * (0, _const.mm)(2), position.z);
+
+                if (child.shader) {
+                  child.shader.uniforms.emissiveIntensity.value = value; // Controller.mixUniformColor(child.shader.uniforms.emissive, OFF, ON, value);
+                }
+              };
+
+              break;
+
+            case 'buttonY':
+            case 'buttonB':
+              child.onBeforeRender = (renderer, scene, camera, geometry, material, group) => {
+                const value = this.buttons[4].value;
+                child.position.set(position.x, position.y - value * (0, _const.mm)(2), position.z);
+
+                if (child.shader) {
+                  child.shader.uniforms.emissiveIntensity.value = value; // Controller.mixUniformColor(child.shader.uniforms.emissive, OFF, ON, value);
+                }
+              };
+
+              break;
+
+            default:
+          }
+
+          i++;
+        }
+      }); // child.geometry.computeBoundingBox();
+
+      this.boundingBox.setFromObject(object);
+      mesh.add(object);
+      this.ready = true;
+    }, xhr => {
+      this.progress = xhr.loaded / xhr.total;
+    }, error => {
+      console.log(`OculusQuestController.addModel not found ${path}${format}`);
+    });
+    return mesh;
+  }
+
+  addRay(hand) {
+    const geometry = new THREE.CylinderBufferGeometry((0, _const.mm)(1), (0, _const.mm)(0.5), (0, _const.cm)(30), 5); // 10, 12
+
+    geometry.rotateX(Math.PI / 2);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.5
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(this.hand === _gamepads.GAMEPAD_HANDS.RIGHT ? (0, _const.cm)(1) : -(0, _const.cm)(1), 0, -(0, _const.cm)(18.5));
+    return mesh;
+  }
+
+  update(tick) {
+    if (this.options.test && this.ready) {
+      this.axis[0].x = _controller.default.getCos(tick, 0);
+      this.axis[0].y = _controller.default.getCos(tick, 1);
+      this.buttons[1].value = Math.abs(_controller.default.getCos(tick, 1));
+      this.buttons[2].value = Math.abs(_controller.default.getCos(tick, 2));
+      this.buttons[3].value = Math.abs(_controller.default.getCos(tick, 3));
+      this.buttons[4].value = Math.abs(_controller.default.getCos(tick, 4));
     }
   }
 
 }
 
-exports.default = Orbit;
+exports.default = OculusQuestController;
+OculusQuestController.FOLDER = `threejs/models/oculus-quest`;
 
-},{"./drag.listener":220}],222:[function(require,module,exports){
+},{"../../const":216,"../gamepads":232,"./controller":228,"./controller-frag.glsl":227}],231:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _const = require("../const");
+
+var _emittable = _interopRequireDefault(require("../interactive/emittable"));
+
+var _controller = _interopRequireDefault(require("./controller/controller"));
+
+var _handController = _interopRequireDefault(require("./controller/hand-controller"));
+
+var _oculusQuestController = _interopRequireDefault(require("./controller/oculus-quest-controller"));
+
+var _gamepads = _interopRequireWildcard(require("./gamepads"));
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* jshint esversion: 6 */
+const CONTROLLERS = {
+  DEFAULT: _controller.default,
+  OCULUS_QUEST: _oculusQuestController.default,
+  HAND: _handController.default
+};
+
+class Controllers extends _emittable.default {
+  constructor(renderer, scene, options = {}) {
+    super();
+    this.tick = 0;
+    this.controllers_ = {};
+    this.gamepads_ = {};
+    this.renderer = renderer;
+    this.scene = scene;
+    this.options = Object.assign({
+      debug: false,
+      test: _const.TEST_ENABLED
+    }, options);
+    this.direction = new THREE.Vector3();
+
+    if (this.options.debug) {
+      this.text = this.addText_(scene);
+    }
+
+    const gamepads = this.gamepads = this.addGamepads_();
+    this.addTestController_();
+    this.addEvents();
+  }
+  /*
+  get controller() {
+  	return this.controller_;
+  }
+  
+  set controller(controller) {
+  	if (this.controller_ !== controller) {
+  		if (this.controller_) {
+  			this.controller_.active = false;
+  		}
+  		this.controller_ = controller;
+  		controller.active = true;
+  	}
+  }
+  */
+
+
+  get gamepad() {
+    return this.gamepad_;
+  }
+
+  set gamepad(gamepad) {
+    if (this.gamepad_ !== gamepad) {
+      this.gamepad_ = gamepad;
+      this.controller = this.controllers_[gamepad.index];
+    }
+  }
+
+  feedback() {
+    const gamepad = this.gamepad;
+
+    if (gamepad) {
+      gamepad.feedback();
+    }
+  }
+
+  update() {
+    this.gamepads.update(this.tick);
+    Object.keys(this.controllers_).forEach(x => {
+      const controller = this.controllers_[x];
+      controller.update(this.tick);
+      controller.updateVelocity();
+    });
+    this.tick++;
+  }
+
+  setRaycaster(raycaster) {
+    const controller = this.controller;
+
+    if (controller) {
+      const pivot = controller.parent;
+      const position = pivot.position;
+      const rotation = pivot.getWorldDirection(this.direction).multiplyScalar(-1);
+      raycaster.set(position, rotation);
+      return raycaster;
+    }
+  }
+
+  addGamepads_() {
+    const gamepads = new _gamepads.default((message, object) => {
+      this.log(message, object);
+    });
+    return gamepads;
+  }
+
+  addEvents() {
+    this.onConnect = this.onConnect.bind(this);
+    this.onDisconnect = this.onDisconnect.bind(this);
+    this.onActivate = this.onActivate.bind(this);
+    this.onPress = this.onPress.bind(this);
+    this.onRelease = this.onRelease.bind(this);
+    this.onAxis = this.onAxis.bind(this);
+    this.onBroadcast = this.onBroadcast.bind(this);
+    const gamepads = this.gamepads;
+    gamepads.on('connect', this.onConnect);
+    gamepads.on('disconnect', this.onDisconnect);
+    gamepads.on('activate', this.onActivate);
+    /*
+    gamepads.on('press', this.onPress);
+    gamepads.on('release', this.onRelease);
+    gamepads.on('axis', this.onAxis);
+    */
+
+    gamepads.on('broadcast', this.onBroadcast);
+  }
+
+  removeEvents() {
+    const gamepads = this.gamepads;
+    gamepads.off('connect', this.onConnect);
+    gamepads.off('disconnect', this.onDisconnect);
+    gamepads.off('activate', this.onActivate);
+    /*
+    gamepads.off('press', this.onPress);
+    gamepads.off('release', this.onRelease);
+    gamepads.off('axis', this.onAxis);
+    */
+
+    gamepads.off('broadcast', this.onBroadcast);
+  }
+
+  onConnect(gamepad) {
+    this.log(`connect ${gamepad.hand} ${gamepad.index}`, gamepad);
+    const controller = this.addController_(this.renderer, this.scene, gamepad);
+  }
+
+  onDisconnect(gamepad) {
+    this.log(`disconnect ${gamepad.hand} ${gamepad.index}`, gamepad);
+    this.removeController_(gamepad);
+  }
+
+  onActivate(gamepad) {
+    this.gamepad = gamepad;
+  }
+
+  onPress(button) {
+    this.log(`press ${button.gamepad.hand} ${button.index}`, button);
+  }
+
+  onRelease(button) {// this.log(`release ${button.gamepad.hand} ${button.index}`, button);
+  }
+
+  onAxis(axis) {// this.log(`axis ${axis.gamepad.hand} ${axis.index} { x:${axis.x}, y:${axis.y} }`, axis);
+  }
+
+  onBroadcast(type, event) {
+    this.emit(type, event);
+  }
+
+  destroy() {
+    this.removeEvents();
+    this.gamepads = null;
+  }
+
+  addController_(renderer, scene, gamepad) {
+    const index = gamepad.index;
+    let controller = this.controllers_[index];
+
+    if (!controller) {
+      const pivot = renderer.vr.getController(index); // controller = new CONTROLLERS.DEFAULT(pivot, gamepad, this.options);
+      // controller = new CONTROLLERS.OCULUS_QUEST(pivot, gamepad, this.options);
+
+      controller = new CONTROLLERS.HAND(pivot, gamepad, this.options);
+      this.controllers_[index] = controller;
+      scene.add(pivot);
+    }
+
+    return controller;
+  }
+
+  removeController_(gamepad) {
+    const controller = this.controllers_[gamepad.index];
+
+    if (controller) {
+      const pivot = controller.parent;
+      this.scene.remove(pivot);
+      controller.parent.remove(controller);
+      delete this.controllers_[gamepad.index];
+    }
+  }
+
+  addTestController_() {
+    if (this.options.test) {
+      const gamepad = new _gamepads.Gamepad({
+        id: 'Test Left',
+        index: 0
+      });
+      const pivot = new THREE.Group();
+      pivot.name = 'Controller Pivot'; // const controller = new CONTROLLERS.DEFAULT(pivot, gamepad, this.options);
+      // const controller = new CONTROLLERS.OCULUS_QUEST(pivot, gamepad, this.options);
+
+      const controller = new CONTROLLERS.HAND(pivot, gamepad, this.options);
+      controller.on('ready', () => {
+        if (_const.BOUNDING_BOX) {
+          this.box = new THREE.BoxHelper(controller.skeleton || controller.model, 0xff0000);
+          this.scene.add(this.box);
+        }
+      });
+      pivot.position.set(0, (0, _const.cm)(117), -(0, _const.cm)(60));
+      this.scene.add(pivot);
+      this.controllers_[0] = controller;
+      this.controller = controller;
+      controller.active = true;
+      this.mouse = {
+        x: 0,
+        y: 0
+      };
+      this.onMouseUp = this.onMouseUp.bind(this);
+      this.onMouseDown = this.onMouseDown.bind(this);
+      this.onMouseMove = this.onMouseMove.bind(this);
+      window.addEventListener('mousedown', this.onMouseDown);
+      window.addEventListener('mouseup', this.onMouseUp);
+      window.addEventListener('mousemove', this.onMouseMove);
+    }
+  }
+
+  updateTest(mouse) {
+    const controller = this.controller;
+
+    if (controller) {
+      controller.parent.rotation.y = -mouse.x * Math.PI;
+      controller.parent.rotation.x = mouse.y * Math.PI / 2;
+      controller.parent.position.x = mouse.x * (0, _const.cm)(10);
+      controller.parent.position.y = (0, _const.cm)(147) + mouse.y * (0, _const.cm)(100);
+    }
+
+    const box = this.box;
+
+    if (box) {
+      box.update();
+    }
+  }
+
+  onMouseDown(event) {
+    const controller = this.controller;
+
+    if (controller) {
+      const button = controller.button || (controller.button = new _gamepads.GamepadButton(2, controller.gamepad));
+      controller.press(button.index);
+      this.gamepads.onEvent('press', button);
+    }
+  }
+
+  onMouseUp(event) {
+    const controller = this.controller;
+
+    if (controller) {
+      const button = controller.button;
+      controller.release(button.index);
+      this.gamepads.onEvent('release', button);
+    }
+  }
+
+  onMouseMove(event) {
+    const w2 = window.innerWidth / 2;
+    const h2 = window.innerHeight / 2;
+    this.mouse.x = (event.clientX - w2) / w2;
+    this.mouse.y = -(event.clientY - h2) / h2;
+    this.updateTest(this.mouse);
+  }
+
+  log(message, object) {
+    if (this.options.debug) {
+      console.log(message, object);
+      this.setText(message);
+    }
+  }
+
+  addText_(parent) {
+    const loader = new THREE.FontLoader();
+    loader.load('fonts/helvetiker_regular.typeface.json', font => {
+      this.font = font;
+      const material = new THREE.MeshBasicMaterial({
+        color: 0x111111,
+        // 0x33c5f6,
+        transparent: true,
+        opacity: 1,
+        side: THREE.DoubleSide
+      });
+      this.fontMaterial = material;
+    });
+  }
+
+  setText(message) {
+    if (this.options.debug) {
+      message = message || '1';
+
+      if (this.text) {
+        this.text.parent.remove(this.text);
+        this.text.geometry.dispose();
+      }
+
+      if (this.font) {
+        const shapes = this.font.generateShapes(message, 5);
+        const geometry = new THREE.ShapeBufferGeometry(shapes);
+        geometry.computeBoundingBox();
+        const x = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+        geometry.translate(x, 0, 0);
+        const text = new THREE.Mesh(geometry, this.fontMaterial);
+        text.position.set(0, 0, -_const.POINTER_RADIUS);
+        this.text = text;
+        this.scene.add(text);
+      }
+    }
+  }
+
+}
+
+exports.default = Controllers;
+
+},{"../const":216,"../interactive/emittable":219,"./controller/controller":228,"./controller/hand-controller":229,"./controller/oculus-quest-controller":230,"./gamepads":232}],232:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.GamepadAxis = exports.GamepadButton = exports.Gamepad = exports.GAMEPAD_MODELS = exports.GAMEPAD_HANDS = exports.default = exports.SUPPORTED_REGEXP = exports.SUPPORTED_GAMEPADS = void 0;
+
+var _emittable = _interopRequireDefault(require("../interactive/emittable"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* jshint esversion: 6 */
+const SUPPORTED_GAMEPADS = ['Gear VR Controller', 'Daydream Controller', 'Oculus Go Controller', 'OpenVR Gamepad', 'Oculus Touch', 'Spatial Controller'];
+exports.SUPPORTED_GAMEPADS = SUPPORTED_GAMEPADS;
+const SUPPORTED_REGEXP = new RegExp(`^(${SUPPORTED_GAMEPADS.join('|')})`, 'i');
+exports.SUPPORTED_REGEXP = SUPPORTED_REGEXP;
+
+class Gamepads extends _emittable.default {
+  static get() {
+    return [...(typeof navigator.getGamepads === 'function' ? navigator.getGamepads() : [])];
+  }
+
+  static isSupported(id) {
+    // console.log(`isSupported|${id}|`);
+    return id.match(SUPPORTED_REGEXP);
+  }
+
+  set gamepads(gamepads) {
+    this.gamepads_ = gamepads;
+  }
+
+  get gamepads() {
+    if (!this.gamepads_) {
+      this.gamepads_ = {}; // console.log('gamepads', this.gamepads_);
+
+      const gamepads = Gamepads.get();
+
+      for (let i = 0; i < gamepads.length; i++) {
+        this.connect(gamepads[i]);
+      }
+
+      this.addListeners();
+    }
+
+    return this.gamepads_;
+  }
+
+  constructor(log) {
+    super();
+    this.log = log;
+    this.hands = {};
+
+    this.onConnect = event => {
+      this.connect(event.gamepad);
+    };
+
+    this.onDisconnect = event => {
+      this.disconnect(event.gamepad);
+    };
+
+    this.onEvent = this.onEvent.bind(this);
+  }
+
+  connect($gamepad) {
+    // console.log('connect', $gamepad);
+    try {
+      // Note: $gamepad === navigator.getGamepads()[$gamepad.index]
+      if ($gamepad) {
+        const id = $gamepad.id;
+        this.log(`connect ${$gamepad.id} ${Gamepads.isSupported(id)}`, $gamepad);
+
+        if (Gamepads.isSupported(id)) {
+          const index = $gamepad.index;
+          const gamepad = this.gamepads[index] ? this.gamepads[index] : this.gamepads[index] = new Gamepad($gamepad); // console.log(gamepad);
+
+          this.hands[gamepad.hand] = gamepad;
+          this.emit('connect', gamepad);
+          gamepad.on('broadcast', this.onEvent);
+        }
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  disconnect($gamepad) {
+    // console.log('disconnect', $gamepad);
+    try {
+      // Note: $gamepad === navigator.getGamepads()[$gamepad.index]
+      const id = $gamepad.id;
+
+      if (Gamepads.isSupported(id)) {
+        const index = $gamepad.index;
+        const gamepad = this.gamepads[index] || $gamepad;
+
+        if (gamepad instanceof Gamepad) {
+          gamepad.off('broadcast', this.onEvent);
+          gamepad.destroy();
+        }
+
+        delete this.gamepads[gamepad.index];
+        delete this.hands[gamepad.hand];
+        this.emit('disconnect', gamepad);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  onEvent(type, event) {
+    switch (type) {
+      case 'press':
+        if (this.button !== event) {
+          if (this.button) {
+            event.gamepad.emit('deactivate', this.button.gamepad);
+          }
+
+          this.button = event;
+          event.gamepad.emit('activate', event.gamepad);
+        }
+
+        break;
+
+      case 'release':
+        if (this.button === event) {
+          this.button = null; // event.gamepad.emit('deactivate', event.gamepad);
+        }
+
+        break;
+    }
+
+    this.emit(type, event);
+  }
+
+  addListeners() {
+    window.addEventListener('gamepadconnected', this.onConnect, false);
+    window.addEventListener('gamepaddisconnected', this.onDisconnect, false);
+  }
+
+  removeListeners() {
+    window.removeEventListener('gamepadconnected', this.onConnect, false);
+    window.removeEventListener('gamepaddisconnected', this.onDisconnect, false);
+  }
+
+  update() {
+    for (let k in this.gamepads) {
+      const gamepad = this.gamepads[k];
+
+      if (gamepad) {
+        gamepad.update();
+      }
+    }
+  }
+
+  destroy() {
+    this.removeListeners();
+
+    for (let k in this.gamepads) {
+      const gamepad = this.gamepads[k];
+
+      if (gamepad) {
+        gamepad.destroy();
+      }
+    }
+
+    this.gamepads = null;
+  }
+
+}
+
+exports.default = Gamepads;
+const GAMEPAD_HANDS = {
+  NONE: 'none',
+  LEFT: 'left',
+  RIGHT: 'right'
+};
+exports.GAMEPAD_HANDS = GAMEPAD_HANDS;
+const GAMEPAD_MODELS = {
+  OCULUS_TOUCH: 0
+};
+exports.GAMEPAD_MODELS = GAMEPAD_MODELS;
+
+class Gamepad extends _emittable.default {
+  constructor(gamepad) {
+    super();
+    this.gamepad = gamepad;
+    this.id = gamepad.id;
+    this.index = gamepad.index;
+    this.hand = this.getHand();
+    this.type = this.getType();
+    this.buttons = {};
+    this.axes = {};
+  }
+
+  getHand() {
+    if (this.gamepad.hand === 'left' || this.id.match(/(\sleft)/i)) {
+      return GAMEPAD_HANDS.LEFT;
+    } else if (this.gamepad.hand === 'right' || this.id.match(/(\sright)/i)) {
+      return GAMEPAD_HANDS.RIGHT;
+    } else {
+      return GAMEPAD_HANDS.NONE;
+    }
+  }
+
+  getType() {
+    return this.id; // !!!
+  }
+
+  update() {
+    this.updateButtons();
+    this.updateAxes();
+  }
+
+  updateButtons() {
+    this.gamepad.buttons.forEach((x, i) => {
+      const pressed = x.pressed;
+      const button = this.buttons[i] || (this.buttons[i] = new GamepadButton(i, this));
+
+      if (button.pressed !== pressed) {
+        button.pressed = pressed;
+
+        if (pressed) {
+          this.emit('press', button);
+        } else if (status !== undefined) {
+          this.emit('release', button);
+        }
+      }
+    });
+  }
+
+  updateAxes() {
+    const axes = this.gamepad.axes;
+
+    for (let i = 0; i < axes.length; i += 2) {
+      const index = Math.floor(i / 2);
+      const axis = this.axes[index] || (this.axes[index] = new GamepadAxis(index, this));
+      const x = axes[i];
+      const y = axes[i + 1];
+
+      if (axis.x !== x || axis.y !== y) {
+        axis.x = x;
+        axis.y = y;
+
+        if (Math.abs(x) > Math.abs(y)) {
+          const left = x < -0.85;
+          const right = x > 0.85;
+
+          if (axis.left !== left) {
+            axis.left = left;
+            this.emit(left ? 'left' : 'none', axis);
+            console.log(`${axis.gamepad.hand} ${axis.gamepad.index} left ${left}`);
+          }
+
+          if (axis.right !== right) {
+            axis.right = right;
+            this.emit(right ? 'right' : 'none', axis);
+            console.log(`${axis.gamepad.hand} ${axis.gamepad.index} right ${right}`);
+          }
+        } else {
+          const up = y < -0.85;
+          const down = y > 0.85;
+
+          if (axis.up !== up) {
+            axis.up = up;
+            this.emit(up ? 'up' : 'none', axis);
+            console.log(`${axis.gamepad.hand} ${axis.gamepad.index} up ${up}`);
+          }
+
+          if (axis.down !== down) {
+            axis.down = down;
+            this.emit(down ? 'down' : 'none', axis);
+            console.log(`${axis.gamepad.hand} ${axis.gamepad.index} down ${down}`);
+          }
+        }
+
+        this.emit('axis', axis);
+      }
+    }
+  }
+
+  feedback(strength = 0.1, duration = 50) {
+    // !!! care for battery
+    return;
+    const actuators = this.gamepad.hapticActuators;
+
+    if (actuators && actuators.length) {
+      return actuators[0].pulse(strength, duration);
+    } else {
+      return Promise.reject();
+    }
+  }
+
+  destroy() {
+    this.gamepad = null;
+  }
+
+}
+
+exports.Gamepad = Gamepad;
+
+class GamepadButton {
+  constructor(index, gamepad) {
+    this.index = index;
+    this.gamepad = gamepad;
+    this.pressed = false;
+  }
+
+}
+
+exports.GamepadButton = GamepadButton;
+
+class GamepadAxis extends THREE.Vector2 {
+  constructor(index, gamepad) {
+    super();
+    this.index = index;
+    this.gamepad = gamepad;
+    this.left = this.right = this.up = this.down = false;
+  }
+
+}
+
+exports.GamepadAxis = GamepadAxis;
+
+},{"../interactive/emittable":219}],233:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22524,7 +21104,30 @@ const VR_MODE = {
 exports.VR_MODE = VR_MODE;
 
 class VR extends _emittable.default {
-  constructor(renderer, options) {
+  get enabled() {
+    return this.enabled_;
+  }
+
+  set enabled(enabled) {
+    if (this.enabled_ !== enabled) {
+      this.enabled_ = enabled;
+
+      if (enabled) {
+        this.position = this.camera.position.clone();
+        this.quaternion = this.camera.quaternion.clone();
+        this.renderer.vr.enabled = true;
+      } else {
+        this.renderer.vr.enabled = false;
+
+        if (this.position && this.quaternion) {
+          this.camera.position.copy(this.position);
+          this.camera.quaternion.copy(this.quaternion);
+        }
+      }
+    }
+  }
+
+  constructor(renderer, options, camera, element) {
     super();
 
     if (options && options.frameOfReferenceType) {
@@ -22533,6 +21136,7 @@ class VR extends _emittable.default {
 
     this.renderer = renderer;
     this.options = options;
+    this.camera = camera;
     this.onVRDisplayConnect = this.onVRDisplayConnect.bind(this);
     this.onVRDisplayDisconnect = this.onVRDisplayDisconnect.bind(this);
     this.onVRDisplayPresentChange = this.onVRDisplayPresentChange.bind(this);
@@ -22543,8 +21147,9 @@ class VR extends _emittable.default {
     this.onXRClick = this.onXRClick.bind(this);
     this.onXRSessionStarted = this.onXRSessionStarted.bind(this);
     this.onXRSessionEnded = this.onXRSessionEnded.bind(this);
-    this.mode = this.detectMode();
-    this.initElement();
+    this.mode = this.detectMode(); // this.mode = VR_MODE.VR;
+
+    this.initElement(element); // this.setEnterVR(null);
   }
 
   detectMode() {
@@ -22559,14 +21164,19 @@ class VR extends _emittable.default {
     return mode;
   }
 
-  initElement() {
+  initElement(element) {
     try {
-      let element;
+      const customElement = this.customElement = element;
 
       switch (this.mode) {
         case VR_MODE.VR:
-          element = this.element = this.addElement('button');
-          element.style.display = 'none';
+          if (element) {
+            this.element = element;
+          } else {
+            element = this.element = this.addElement('button');
+            element.style.display = 'none';
+          }
+
           window.addEventListener('vrdisplayconnect', this.onVRDisplayConnect, false);
           window.addEventListener('vrdisplaydisconnect', this.onVRDisplayDisconnect, false);
           window.addEventListener('vrdisplaypresentchange', this.onVRDisplayPresentChange, false);
@@ -22575,19 +21185,30 @@ class VR extends _emittable.default {
           break;
 
         case VR_MODE.XR:
-          element = this.element = this.addElement('button');
+          if (element) {
+            this.element = element;
+          } else {
+            element = this.element = this.addElement('button');
+          }
+
           this.getXR();
           break;
 
         default:
-          element = this.element = this.addElement('a');
-          element.style.display = 'block';
-          element.style.left = 'calc(50% - 90px)';
-          element.style.width = '180px';
-          element.style.textDecoration = 'none';
-          element.href = 'https://webvr.info';
-          element.target = '_blank';
-          element.innerHTML = 'WEBVR NOT SUPPORTED';
+          if (element) {
+            this.element = element;
+            element.classList.add('vr--not-supported');
+          } else {
+            element = this.element = this.addElement('a');
+            element.style.display = 'block';
+            element.style.left = 'calc(50% - 90px)';
+            element.style.width = '180px';
+            element.style.textDecoration = 'none';
+            element.href = 'https://webvr.info';
+            element.target = '_blank';
+            element.innerHTML = 'WEBVR NOT SUPPORTED';
+          }
+
       }
 
       this.element = element;
@@ -22603,13 +21224,17 @@ class VR extends _emittable.default {
     element.style.position = 'absolute';
     element.style.bottom = '20px';
     element.style.padding = '12px 6px';
-    element.style.border = '1px solid #fff';
-    element.style.borderRadius = '4px';
     element.style.background = 'rgba(0,0,0,0.1)';
+    element.style.border = '1px solid #fff';
+    element.style.opacity = '0.5';
+    element.style.borderRadius = '4px';
+    element.style.background = '#E91E63';
+    element.style.border = 'none';
+    element.style.opacity = '1';
+    element.style.borderRadius = '20px';
     element.style.color = '#fff';
     element.style.font = 'normal 13px sans-serif';
     element.style.textAlign = 'center';
-    element.style.opacity = '0.5';
     element.style.outline = 'none';
     element.style.zIndex = '999';
     return element;
@@ -22650,11 +21275,17 @@ class VR extends _emittable.default {
     this.renderer.vr.setDevice(device);
     this.session = null;
     const element = this.element;
-    element.style.display = '';
-    element.style.cursor = 'pointer';
-    element.style.left = 'calc(50% - 50px)';
-    element.style.width = '100px';
-    element.textContent = 'ENTER VR';
+
+    if (this.customElement) {
+      element.classList.add('vr--enter', 'vr--vr');
+    } else {
+      element.style.display = '';
+      element.style.cursor = 'pointer';
+      element.style.left = 'calc(50% - 50px)';
+      element.style.width = '100px';
+      element.textContent = 'ENTER VR';
+    }
+
     element.addEventListener('mouseenter', this.onVRMouseEnter);
     element.addEventListener('mouseleave', this.onVRMouseLeave);
     element.addEventListener('click', this.onVRClick);
@@ -22664,11 +21295,16 @@ class VR extends _emittable.default {
     this.device = device;
     this.session = null;
     const element = this.element;
-    element.style.display = '';
-    element.style.cursor = 'pointer';
-    element.style.left = 'calc(50% - 50px)';
-    element.style.width = '100px';
-    element.textContent = 'ENTER XR'; // !!!
+
+    if (this.customElement) {
+      element.classList.add('vr--enter', 'vr--xr');
+    } else {
+      element.style.display = '';
+      element.style.cursor = 'pointer';
+      element.style.left = 'calc(50% - 50px)';
+      element.style.width = '100px';
+      element.textContent = 'ENTER XR'; // !!!
+    }
 
     element.addEventListener('mouseenter', this.onVRMouseEnter);
     element.addEventListener('mouseleave', this.onVRMouseLeave);
@@ -22677,13 +21313,19 @@ class VR extends _emittable.default {
   }
 
   setVRNotFound() {
-    renderer.vr.setDevice(null);
+    this.renderer.vr.setDevice(null);
     const element = this.element;
-    element.style.display = '';
-    element.style.cursor = 'auto';
-    element.style.left = 'calc(50% - 75px)';
-    element.style.width = '150px';
-    element.textContent = 'VR NOT FOUND';
+
+    if (this.customElement) {
+      element.classList.add('vr--not-found');
+    } else {
+      element.style.display = '';
+      element.style.cursor = 'auto';
+      element.style.left = 'calc(50% - 75px)';
+      element.style.width = '150px';
+      element.textContent = 'VR NOT FOUND';
+    }
+
     element.removeEventListener('mouseenter', this.onVRMouseEnter);
     element.removeEventListener('mouseleave', this.onVRMouseLeave);
     element.removeEventListener('click', this.onVRClick);
@@ -22696,7 +21338,7 @@ class VR extends _emittable.default {
   }
 
   onVRDisplayDisconnect(event) {
-    this.setVRNotFound();
+    this.setVRNotFound(); // ???
   }
 
   onVRDisplayPresentChange(event) {
@@ -22705,10 +21347,20 @@ class VR extends _emittable.default {
       this.session = isPresenting;
 
       if (isPresenting) {
-        this.element.textContent = 'EXIT VR';
+        if (this.customElement) {
+          this.element.classList.add('vr--exit');
+        } else {
+          this.element.textContent = 'EXIT VR';
+        }
+
         this.emit('presenting');
       } else {
-        this.element.textContent = 'ENTER VR';
+        if (this.customElement) {
+          this.element.classList.remove('vr--exit');
+        } else {
+          this.element.textContent = 'ENTER VR';
+        }
+
         this.emit('exit');
       }
     } catch (error) {
@@ -22718,12 +21370,13 @@ class VR extends _emittable.default {
 
   onVRDisplayActivate(event) {
     try {
+      this.emit('beforepresenting');
       event.display.requestPresent([{
         source: this.renderer.domElement
       }]).then(() => {
         this.emit('presenting');
       }, error => {
-        console.log(error);
+        console.log('onVRDisplayActivate', error);
         this.emit('error', error);
       });
     } catch (error) {
@@ -22744,14 +21397,18 @@ class VR extends _emittable.default {
       const device = this.device;
 
       if (device.isPresenting) {
+        this.emit('beforeexiting');
         device.exitPresent();
+        this.enabled = false;
       } else {
+        this.emit('beforepresenting');
+        this.enabled = true;
         device.requestPresent([{
           source: this.renderer.domElement
         }]).then(() => {
           this.emit('presenting');
         }, error => {
-          console.log(error);
+          console.log('onVRClick', error);
           this.emit('error', error);
         });
       }
@@ -22765,6 +21422,8 @@ class VR extends _emittable.default {
       const device = this.device;
 
       if (this.session === null) {
+        this.emit('beforepresenting');
+        this.enabled = true;
         device.requestSession({
           immersive: true,
           exclusive: true
@@ -22777,7 +21436,9 @@ class VR extends _emittable.default {
         }
         */
       } else {
+        this.emit('beforeexiting');
         this.session.end();
+        this.enabled = false;
       }
     } catch (error) {
       this.emit('error', error);
@@ -22789,7 +21450,13 @@ class VR extends _emittable.default {
       session.addEventListener('end', this.onXRSessionEnded);
       this.renderer.vr.setSession(session);
       this.session = session;
-      this.element.textContent = 'EXIT VR';
+
+      if (this.customElement) {
+        this.element.classList.add('vr--exit');
+      } else {
+        this.element.textContent = 'EXIT VR';
+      }
+
       this.emit('presenting');
     } catch (error) {
       this.emit('error', error);
@@ -22801,7 +21468,13 @@ class VR extends _emittable.default {
       this.session.removeEventListener('end', this.onXRSessionEnded);
       this.renderer.vr.setSession(null);
       this.session = null;
-      this.element.textContent = 'ENTER VR';
+
+      if (this.customElement) {
+        this.element.classList.remove('vr--exit');
+      } else {
+        this.element.textContent = 'ENTER VR';
+      }
+
       this.emit('exit');
     } catch (error) {
       this.emit('error', error);
@@ -22835,5 +21508,5 @@ VRDisplays[0]: VRDisplay {
 
 exports.VR = VR;
 
-},{"../interactive/emittable":218}]},{},[199]);
+},{"../interactive/emittable":219}]},{},[198]);
 //# sourceMappingURL=tau.js.map
