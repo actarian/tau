@@ -124,3 +124,26 @@ ng-transclude {
 	/* Firefox 18- */
 	font-family: $font-primary;
 }
+
+
+//Montaggi list
+.montaggi-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	text-align: center;
+	margin-top: 100px;
+
+	li {
+		padding: 10px 0;
+
+		a {
+			color: $foreground-secondary;
+			font-weight: 400;
+
+			&:hover, &:focus {
+				color: $foreground-primary;
+			}
+		}
+	}
+}

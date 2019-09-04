@@ -110,6 +110,20 @@ ng-transclude {
   /* Firefox 18- */
   font-family: "Sofia Pro", sans-serif; }
 
+.montaggi-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  margin-top: 100px; }
+  .montaggi-list li {
+    padding: 10px 0; }
+    .montaggi-list li a {
+      color: #121212;
+      font-weight: 400; }
+      .montaggi-list li a:hover, .montaggi-list li a:focus {
+        color: #e10000; }
+
 body {
   font-family: "Sofia Pro", sans-serif;
   font-weight: 300;
