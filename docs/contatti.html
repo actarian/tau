@@ -93,7 +93,93 @@
 	<ng-include src="'templates/shared/header.html'"></ng-include>
 	<main class="page">
 		<div class="view" ng-cloak>
-			<ng-include src="'templates/pages/contatti.html'"></ng-include>
+			<section class="section--contatti-intro">
+				<div class="container">
+					<div class="row">
+						<div class="col-12">
+							<div class="title">Accusantium dolor</div>
+							<div class="abstract">Sit accusantium doloremque laudantium</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			
+			<section class="section--contatti-form">
+				<div class="container">
+					<div class="row">
+						<div class="col-12 col-sm-6 form-contatti">
+							<h3>Lorem ipsum dolor sit amet.</h3>
+							<form>
+								<select name="motivazione" id="motivazione">
+									<option selected disabled>Motivazione</option>
+									<option value="1">Richiesta informazioni</option>
+									<option value="2">Asssitenza prodotto</option>
+									<option value="3">Informazioni commerciali</option>
+								</select>
+								<input type="text" placeholder="Il tuo nome" required>
+								<input type="email" placeholder="Email" required>
+								<textarea name="messaggio" id="messaggio" cols="30" rows="10" placeholder="Messaggio"></textarea>
+								<div class="privacy">
+									<input type="checkbox" name="vehicle1" value="Bike"> <p>Confermo di aver letto e approvato <a href="#">l'informativa sulla Privacy Policy</a> 
+										e autorizzo la raccolta dei miei dati personali per rispondere alla mia richiesta.</p>
+								</div>
+								<input type="submit" value="Invia Ora" class="btn btn--secondary">
+							</form>
+						</div>
+						<div class="col-12 col-sm-5 offset-sm-1 list-contatti">
+							<div>
+								<h4>Sales</h4>
+								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.<br>Invia una mail a <a href="mailto:sales@tau-marin.it">sales@tau-marin.it</a></p>
+							</div>
+							<div>
+								<h4>Supporto clienti</h4>
+								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.<br>Invia una mail a <a href="mailto:supporto@tau-marin.it">supporto@tau-marin.it</a></p>
+							</div>
+							<div>
+								<h4>Media & press</h4>
+								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.<br>Invia una mail a <a href="mailto:press@tau-marin.it">press@tau-marin.it</a></p>
+							</div>
+							<div>
+								<h4>Per tutto il resto</h4>
+								<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.<br>Invia una mail a <a href="mailto:hello@tau-marin.it">hello@tau-marin.it</a></p>
+							</div>
+							<div>
+								<h4>Seguici su</h4>
+								<ul>
+									<li>
+										<a href="#" target="_blank">
+											<svg class="icon icon--instagram">
+												<use xlink:href="#icon--instagram"></use>
+											</svg>
+										</a>
+									</li>
+									<li>
+										<a href="#" target="_blank">
+											<svg class="icon icon--facebook">
+												<use xlink:href="#icon--facebook"></use>
+											</svg>
+										</a>
+									</li>
+									<li>
+										<a href="#" target="_blank">
+											<svg class="icon icon--linkedin">
+												<use xlink:href="#icon--linkedin"></use>
+											</svg>
+										</a>
+									</li>
+									<li>
+										<a href="#" target="_blank">
+											<svg class="icon icon--youtube">
+												<use xlink:href="#icon--youtube"></use>
+											</svg>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
 		</div>
 	</main>
 	<ng-include src="'templates/shared/footer.html'"></ng-include>
