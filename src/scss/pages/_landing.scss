@@ -24,6 +24,11 @@
 		.left {
 			width: 50%;
 			order: 0;
+			
+			@include media-breakpoint-up(lg) {
+				position: relative;
+				left: 100px;
+			}
 
 			@include media-breakpoint-down(sm) {
 				width: 100%;
@@ -174,6 +179,22 @@
 .section--landing-listing {
 	padding: 100px 0;
 
+	.intro {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		text-align: center;
+		margin-bottom: 100px;
+		margin-top: 100px;
+
+		.title {
+			font-weight: 600;
+			font-size: 36px;
+			line-height: 54px;
+			color: #e10000;
+		}
+	}
+
 	.row {
 		align-items: center;
 
@@ -253,7 +274,7 @@
 
 				span {
 					color: #fff;
-					text-shadow: 0px 0px 3px #000;
+					text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 				}
 			}
 		}

@@ -88,8 +88,8 @@ ng-transclude {
     .slick-dots li.slick-active button:after {
       content: '';
       display: block;
-      height: 12px;
-      width: 12px;
+      height: 10px;
+      width: 10px;
       border: 2px solid #e10000;
       background: #fff;
       border-radius: 12px; }
@@ -123,6 +123,92 @@ ng-transclude {
       font-weight: 400; }
       .montaggi-list li a:hover, .montaggi-list li a:focus {
         color: #e10000; }
+
+.section--default-content {
+  padding: 100px 0; }
+  .section--default-content .intro {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    text-align: center;
+    margin-bottom: 100px;
+    margin-top: 100px; }
+    .section--default-content .intro .title {
+      font-weight: 600;
+      font-size: 36px;
+      line-height: 54px;
+      color: #e10000; }
+      @media (max-width: 859.98px) {
+        .section--default-content .intro .title {
+          font-size: 28px;
+          line-height: 36px;
+          margin-bottom: 20px; } }
+  .section--default-content p {
+    width: 40%;
+    position: relative;
+    margin: 20px auto; }
+    @media (max-width: 1439.98px) {
+      .section--default-content p {
+        width: 80%; } }
+    @media (max-width: 1023.98px) {
+      .section--default-content p {
+        width: 80%; } }
+    @media (max-width: 859.98px) {
+      .section--default-content p {
+        width: 100%; } }
+    .section--default-content p.quote {
+      font-size: 36px;
+      line-height: 54px;
+      color: #e10000;
+      font-weight: 400;
+      text-align: center;
+      width: 50%;
+      margin: 100px auto;
+      font-style: italic; }
+      @media (max-width: 1439.98px) {
+        .section--default-content p.quote {
+          width: 80%;
+          font-size: 24px;
+          line-height: 42px; } }
+    .section--default-content p strong {
+      font-weight: 400;
+      color: #121212; }
+  .section--default-content h2, .section--default-content h3, .section--default-content h4, .section--default-content h5 {
+    color: #e10000;
+    text-align: left;
+    width: 40%;
+    position: relative;
+    margin: 40px auto 20px; }
+    @media (max-width: 1439.98px) {
+      .section--default-content h2, .section--default-content h3, .section--default-content h4, .section--default-content h5 {
+        width: 80%; } }
+    @media (max-width: 1023.98px) {
+      .section--default-content h2, .section--default-content h3, .section--default-content h4, .section--default-content h5 {
+        width: 80%; } }
+    @media (max-width: 859.98px) {
+      .section--default-content h2, .section--default-content h3, .section--default-content h4, .section--default-content h5 {
+        width: 100%; } }
+  .section--default-content ul {
+    width: 40%;
+    position: relative;
+    margin: 20px auto;
+    padding: 0 20px; }
+    @media (max-width: 1439.98px) {
+      .section--default-content ul {
+        width: 80%; } }
+    @media (max-width: 1023.98px) {
+      .section--default-content ul {
+        width: 80%; } }
+    @media (max-width: 859.98px) {
+      .section--default-content ul {
+        width: 100%; } }
 
 body {
   font-family: "Sofia Pro", sans-serif;
@@ -2790,6 +2876,10 @@ button,
       -webkit-box-ordinal-group: 1;
           -ms-flex-order: 0;
               order: 0; }
+      @media (min-width: 1440px) {
+        .section--landing-hero .wrap .left {
+          position: relative;
+          left: 100px; } }
       @media (max-width: 1023.98px) {
         .section--landing-hero .wrap .left {
           width: 100%;
@@ -2912,6 +3002,25 @@ button,
 
 .section--landing-listing {
   padding: 100px 0; }
+  .section--landing-listing .intro {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    text-align: center;
+    margin-bottom: 100px;
+    margin-top: 100px; }
+    .section--landing-listing .intro .title {
+      font-weight: 600;
+      font-size: 36px;
+      line-height: 54px;
+      color: #e10000; }
   .section--landing-listing .row {
     -webkit-box-align: center;
         -ms-flex-align: center;
@@ -2984,7 +3093,7 @@ button,
         color: #121212; }
         .section--landing-listing .item .title--professional span {
           color: #fff;
-          text-shadow: 0px 0px 3px #000; }
+          text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black; }
     .section--landing-listing .item .description {
       color: #121212;
       font-size: 40px;
@@ -3133,7 +3242,7 @@ header .section--header-topbar {
   font-weight: 600;
   line-height: 20px;
   padding: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 50px;
   margin-top: -31px; }
 
 header .row {
@@ -3311,9 +3420,7 @@ footer {
   footer .back-to-top .icon--back-to-top {
     width: 50px;
     height: 50px;
-    fill: #fff;
-    -webkit-transform: rotate(-90deg);
-            transform: rotate(-90deg); }
+    fill: #fff; }
   footer .footer-menu {
     display: -webkit-box;
     display: -ms-flexbox;
@@ -3439,7 +3546,7 @@ footer {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
-  min-height: 80vh; }
+  min-height: 100vh; }
 
 .section--home-hero .title {
   text-align: center;
@@ -3517,7 +3624,8 @@ footer {
             align-items: center; }
 
 .section--home-slide-prodotti {
-  padding: 100px 0; }
+  padding: 100px 0;
+  background-color: #efefef; }
   @media (max-width: 859.98px) {
     .section--home-slide-prodotti {
       padding: 50px 0; } }
@@ -3663,6 +3771,9 @@ footer {
     .section--home-inclinazioni {
       padding: 50px 0;
       text-align: center; } }
+  .section--home-inclinazioni .txt-inclinazioni {
+    position: relative;
+    top: 100px; }
   .section--home-inclinazioni .doppia-immagine {
     position: relative; }
     .section--home-inclinazioni .doppia-immagine .img-2 {
@@ -3796,7 +3907,7 @@ footer {
           padding: 0 20px; } }
 
 .section--home-dove-acquistare {
-  padding: 100px 0;
+  padding: 100px 0 150px;
   text-align: center; }
   .section--home-dove-acquistare .title {
     color: #e10000;
@@ -3870,7 +3981,7 @@ footer {
 
 .section--product-hero .title {
   text-align: center;
-  font-size: 120px;
+  font-size: 72px;
   font-weight: 600;
   line-height: 1.2;
   color: #e10000;
@@ -5152,6 +5263,46 @@ footer {
           font-size: 28px;
           line-height: 36px;
           margin-bottom: 20px; } }
+  .section--magazine-listing .item--promozione {
+    border: 2px solid #e10000;
+    height: auto;
+    min-height: initial;
+    padding: 40px;
+    text-align: center;
+    margin: 20px 0; }
+    .section--magazine-listing .item--promozione .abstract {
+      color: #e10000;
+      text-transform: uppercase;
+      font-size: 16px;
+      line-height: 20px;
+      letter-spacing: 0.5px;
+      font-weight: 600; }
+    .section--magazine-listing .item--promozione .img {
+      position: relative; }
+      .section--magazine-listing .item--promozione .img img {
+        max-width: 100%; }
+    .section--magazine-listing .item--promozione .title {
+      font-size: 40px;
+      line-height: 44px;
+      letter-spacing: 0.2px;
+      color: #e10000;
+      font-weight: 600; }
+    .section--magazine-listing .item--promozione .description {
+      font-size: 18px;
+      line-height: 36px;
+      letter-spacing: 0.2px;
+      margin: 20px 0 40px;
+      color: #121212;
+      font-weight: 400; }
+      .section--magazine-listing .item--promozione .description span {
+        color: #e10000; }
+    .section--magazine-listing .item--promozione .cta a {
+      color: #e10000;
+      text-transform: uppercase;
+      font-size: 16px;
+      line-height: 20px;
+      letter-spacing: 0.5px;
+      font-weight: 600; }
   .section--magazine-listing .box {
     background-size: cover !important;
     min-height: 700px;
@@ -5171,7 +5322,7 @@ footer {
     .section--magazine-listing .box .black-layer {
       content: '';
       display: block;
-      height: 200px;
+      height: 400px;
       width: 100%;
       position: relative;
       z-index: 1;
@@ -5186,6 +5337,12 @@ footer {
       position: absolute;
       z-index: 2;
       padding: 30px; }
+      .section--magazine-listing .box .caption .category {
+        font-size: 16px;
+        text-transform: uppercase;
+        color: #fff;
+        letter-spacing: 0.5px;
+        font-weight: 600; }
       .section--magazine-listing .box .caption .title {
         color: #fff;
         font-size: 40px;
@@ -5228,9 +5385,10 @@ footer {
           .section--magazine-listing .pagination ul li a:hover, .section--magazine-listing .pagination ul li a:focus {
             color: #e10000; }
           .section--magazine-listing .pagination ul li a.active {
-            border: 2px solid #ccc;
+            border: 2px solid #e10000;
             border-radius: 100%;
             color: #e10000;
+            font-weight: 600;
             line-height: 40px;
             width: 45px;
             height: 45px; }
@@ -5281,7 +5439,7 @@ footer {
     .section--magazine-hero .caption .title {
       font-size: 36px;
       line-height: 54px;
-      font-weight: 600;
+      font-weight: 500;
       margin: 20px 0; }
     .section--magazine-hero .caption .description {
       font-size: 18px;
@@ -5310,12 +5468,16 @@ footer {
       font-weight: 400;
       text-align: center;
       width: 50%;
-      margin: 100px auto; }
+      margin: 100px auto;
+      font-style: italic; }
       @media (max-width: 1439.98px) {
         .section--magazine-content p.quote {
           width: 80%;
           font-size: 24px;
           line-height: 42px; } }
+    .section--magazine-content p strong {
+      font-weight: 400;
+      color: #121212; }
   .section--magazine-content .img-news {
     position: relative;
     margin: 100px 0;
@@ -5433,7 +5595,7 @@ footer {
   .section--contatti-intro .title {
     color: #e10000;
     font-size: 60px;
-    font-weight: 600; }
+    font-weight: 500; }
     @media (max-width: 1023.98px) {
       .section--contatti-intro .title {
         font-size: 42px;
@@ -5458,7 +5620,8 @@ footer {
         line-height: 24px; } }
 
 .section--contatti-form {
-  padding: 0 0 100px; }
+  padding: 100px 0;
+  background-color: #efefef; }
   .section--contatti-form .form-contatti {
     -webkit-box-ordinal-group: 1;
         -ms-flex-order: 0;

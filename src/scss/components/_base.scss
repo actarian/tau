@@ -93,8 +93,8 @@ ng-transclude {
 				&:after {
 					content: '';
 					display: block;
-					height: 12px;
-					width: 12px;
+					height: 10px;
+					width: 10px;
 					border: 2px solid $foreground-primary;
 					background: #fff;
 					border-radius: 12px;
@@ -144,6 +144,112 @@ ng-transclude {
 			&:hover, &:focus {
 				color: $foreground-primary;
 			}
+		}
+	}
+}
+
+//Pagina Interna
+.section--default-content {
+	padding: 100px 0;
+
+	.intro {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		text-align: center;
+		margin-bottom: 100px;
+		margin-top: 100px;
+
+		.title {
+			font-weight: $font-semibold;
+			font-size: 36px;
+			line-height: 54px;
+			color: $foreground-primary;
+
+			@include media-breakpoint-down(xs) {
+				font-size: 28px;
+				line-height: 36px;
+				margin-bottom: 20px;
+			}
+		}
+	}
+
+	p {
+		width: 40%;
+		position: relative;
+		margin: 20px auto;
+
+		@include media-breakpoint-down(md) {
+			width: 80%;
+		}
+
+		@include media-breakpoint-down(sm) {
+			width: 80%;
+		}
+
+		@include media-breakpoint-down(xs) {
+			width: 100%;
+		}
+
+		&.quote {
+			font-size: 36px;
+			line-height: 54px;
+			color: $foreground-primary;
+			font-weight: $font-regular;
+			text-align: center;
+			width: 50%;
+			margin: 100px auto;
+			font-style: italic;
+
+			@include media-breakpoint-down(md) {
+				width: 80%;
+				font-size: 24px;
+				line-height: 42px;
+			}
+		}
+
+		strong {
+			font-weight: 400;
+			color: $foreground-secondary;
+		}
+	}
+
+	h2, h3, h4, h5 {
+		color: $foreground-primary;
+		text-align: left;
+		width: 40%;
+		position: relative;
+		margin: 40px auto 20px;
+
+		@include media-breakpoint-down(md) {
+			width: 80%;
+		}
+
+		@include media-breakpoint-down(sm) {
+			width: 80%;
+		}
+
+		@include media-breakpoint-down(xs) {
+			width: 100%;
+		}
+	}
+
+	ul {
+		width: 40%;
+		position: relative;
+		margin: 20px auto;
+		padding: 0 20px;
+
+		@include media-breakpoint-down(md) {
+			width: 80%;
+		}
+
+		@include media-breakpoint-down(sm) {
+			width: 80%;
+		}
+
+		@include media-breakpoint-down(xs) {
+			width: 100%;
 		}
 	}
 }

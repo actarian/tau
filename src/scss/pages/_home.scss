@@ -5,7 +5,7 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		min-height: 80vh;
+		min-height: 100vh;
 	}
 
 	.title {
@@ -96,6 +96,7 @@
 //Home Slide Prodotti
 .section--home-slide-prodotti {
 	padding: 100px 0;
+	background-color: #efefef;
 
 	@include media-breakpoint-down(xs) {
 		padding: 50px 0;
@@ -284,6 +285,11 @@
 	@include media-breakpoint-down(xs) {
 		padding: 50px 0;
 		text-align: center;
+	}
+
+	.txt-inclinazioni {
+		position: relative;
+		top: 100px;
 	}
 
 	.doppia-immagine {
@@ -484,7 +490,7 @@
 
 //Home Dove Acquistare
 .section--home-dove-acquistare {
-	padding: 100px 0;
+	padding: 100px 0 150px;
 	text-align: center;
 
 	.title {
