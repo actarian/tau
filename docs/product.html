@@ -96,7 +96,388 @@
 	<ng-include src="'templates/shared/header.html'"></ng-include>
 	<main class="page">
 		<div class="view" ng-cloak>
-			<ng-include src="'templates/pages/product.html'"></ng-include>
+				<script type="text/javascript" lazy-script>
+					var professional27 = {
+						modelType: 1,
+						model: 'threejs/models/toothbrush/professional-27.fbx',
+						bristles: [{
+							name: 'Dure',
+							key: 'hard',
+							colors: ['#024c99', '#e13334']
+						}, {
+							name: 'Medie',
+							key: 'medium',
+							colors: ['#024c99', '#42a644']
+						}, {
+							name: 'Morbide',
+							key: 'soft',
+							colors: ['#024c99', '#60b9f3']
+						}, {
+							name: 'Molto Morbide',
+							key: 'softer',
+							colors: ['#024c99', '#15b29a']
+						}],
+						colors: [{
+							name: 'Rosso',
+							key: 'red',
+							colors: ['#e13334']
+						}, {
+							name: 'Bianco',
+							key: 'white',
+							colors: ['#ebe8e1']
+						}, {
+							name: 'Blu',
+							key: 'blue',
+							colors: ['#0e38b1']
+						}, {
+							name: 'Verde',
+							key: 'green',
+							colors: ['#3d6d4f']
+						}]
+					}
+				
+					var professionalBlack = {
+						modelType: 2,
+						model: 'threejs/models/toothbrush/professional-27.fbx',
+						bristles: [{
+							name: 'Dure',
+							key: 'hard',
+							colors: ['#454342', '#454342']
+						}],
+						colors: [{
+							name: 'Nero',
+							key: 'black',
+							colors: ['#232221']
+						}]
+					}
+				
+					var professionalWhite = {
+						modelType: 3,
+						model: 'threejs/models/toothbrush/professional-27.fbx',
+						bristles: [{
+							name: 'Dure',
+							key: 'hard',
+							colors: ['#dae0ee', '#f6eeec']
+						}],
+						colors: [{
+							name: 'Bianco',
+							key: 'white',
+							colors: ['#cccccc']
+						}]
+					}
+				
+					var scalare33 = {
+						modelType: 4,
+						model: 'threejs/models/toothbrush/scalare-33.fbx',
+						bristles: [{
+							name: 'Dure',
+							key: 'hard',
+							colors: ['#024c99', '#e13334']
+						}, {
+							name: 'Medie',
+							key: 'medium',
+							colors: ['#024c99', '#42a644']
+						}, {
+							name: 'Morbide',
+							key: 'soft',
+							colors: ['#024c99', '#60b9f3']
+						}, {
+							name: 'Molto Morbide',
+							key: 'softer',
+							colors: ['#024c99', '#15b29a']
+						}],
+						colors: [{
+							name: 'Rosso',
+							key: 'red',
+							colors: ['#e13334']
+						}, {
+							name: 'Bianco',
+							key: 'white',
+							colors: ['#ebe8e1']
+						}, {
+							name: 'Blu',
+							key: 'blue',
+							colors: ['#0e38b1']
+						}, {
+							name: 'Verde',
+							key: 'green',
+							colors: ['#3d6d4f']
+						}]
+					}
+				
+					window.product = professional27;
+				
+				</script>
+				
+				<div ng-controller="ProductCtrl as productCtrl">
+				
+					<section class="section--product-hero" data-anchor="hero">
+						<div class="container">
+							<div class="row">
+								<div class="col-lg-8 offset-lg-2">
+									<div class="title">professional 27</div>
+									<div class="abstract">testina piccola, efficacia massima.</div>
+									<div class="description">Lo spazzolino ideale per raggiungere comodamente le zone più difficili del cavo orale, garantendo una spazzolata efficace e al tempo stesso delicata.</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				
+					<section class="section--product-info" overscroll-responsive="500">
+						<div class="container">
+							<div class="title">stile e funzionalità.</div>
+							<div class="group--vertical-center">
+								<div class="listing--info row">
+									<div class="listing__item col-md-4 offset-md-0" data-overscroll-anchor="manico">
+										<div class="bullet"></div>
+										<div class="group--info">
+											<div class="title"><span>manico diritto</span></div>
+											<div class="abstract">per una corretta impugnatura</div>
+										</div>
+									</div>
+									<div class="listing__item col-md-4 offset-md-4" data-overscroll-anchor="testina">
+										<div class="bullet"></div>
+										<div class="group--info">
+											<div class="title"><span>testina corta</span></div>
+											<div class="abstract">solo 27 millimetri, massima efficacia di spazzolamento</div>
+										</div>
+									</div>
+									<div class="listing__item col-md-4 offset-md-0" data-overscroll-anchor="setole">
+										<div class="bullet"></div>
+										<div class="group--info">
+											<div class="title"><span>setole di due durezze</span></div>
+											<div class="abstract">una rimuove la placca l’altra massaggia le gengive</div>
+										</div>
+									</div>
+									<div class="listing__item col-md-4 offset-md-4" data-overscroll-anchor="scalare">
+										<div class="bullet"></div>
+										<div class="group--info">
+											<div class="title"><span>inclinazione scalare</span></div>
+											<div class="abstract">per raggiungere anche i punti più nascosti</div>
+										</div>
+									</div>
+									<div class="listing__item col-md-4 offset-md-0" data-overscroll-anchor="italy">
+										<div class="bullet"></div>
+										<div class="group--info">
+											<div class="title"><span>made in italy</span></div>
+											<div class="abstract">100% prodotto e realizzato in Italia con i migliori materiali</div>
+										</div>
+									</div>
+									<div class="listing__item col-md-4 offset-md-4" data-overscroll-anchor="setole-tynex">
+										<div class="bullet"></div>
+										<div class="group--info">
+											<div class="title"><span>setole arrotondate in tynex</span></div>
+											<div class="abstract">per raggiungere anche i punti più nascosti</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				
+					<section class="section--product-colors fixed" canvas="productCtrl.product" data-anchor="colors">
+						<div class="container">
+							<div class="group--vertical-center">
+								<div class="title">lo spazzolino perfetto per te.</div>
+								<div class="row">
+									<div class="col-lg-8 offset-lg-2">
+										<div class="group--inline">
+											<div class="group--nav group--nav--bristles">
+												<div class="label">Setole:</div>
+												<ul class="nav--types">
+													<li ng-class="{ active: productCtrl.bristle == item}" ng-click="productCtrl.bristle = item" ng-repeat="item in productCtrl.product.bristles track by $index"><span class="name" ng-bind="item.name"></span></li>
+												</ul>
+											</div>
+											<div class="group--nav group--nav--color">
+												<div class="label">Colore:</div>
+												<ul class="nav--colors">
+													<li class="color color--{{item.key}}" ng-class="{ active: productCtrl.color == item}" ng-click="productCtrl.color = item" ng-repeat="item in productCtrl.product.colors track by $index"><span class="bullet"></span><span class="name" ng-bind="item.name"></span></li>
+												</ul>
+											</div>
+											<div class="group--nav group--nav--vr">
+												<div class="label">
+													<span class="label__disabled">VR non connesso:</span>
+													<span class="label__enter">Provalo in VR:</span>
+													<span class="label__exit">Termina VR:</span>
+												</div>
+												<button class="btn btn--vr">
+													<svg class="icon icon--vr">
+														<use xlink:href="#icon--vr"></use>
+													</svg>
+												</button>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="orbit-control">---</div>
+							</div>
+						</div>
+						<div class="inner">
+							<div class="debug__info"></div>
+							<svg class="icon--rotate" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 173 173">
+								<path id="path" class="icon--rotate__ellipse" d="M164.7,165.7
+					c-15.5,15.5-63.6-7.3-107.4-51.1S-9.3,22.8,6.3,7.3s63.6,7.3,107.4,51.1S180.3,150.2,164.7,165.7z" />
+								<path style="fill:#E10000;" d="M-2.1-5.1L2.1-1l1.2,1.2L2.1,1.5l-3.6,3.6l-1.2-1.2l3.6-3.6l-4.2-4.2L-2.1-5.1z">
+									<animateMotion dur="8s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" rotate="auto">
+										<mpath xlink:href="#path"></mpath>
+									</animateMotion>
+								</path>
+							</svg>
+						</div>
+					</section>
+				
+					<section class="section--product-consigli">
+						<div class="container">
+							<div class="intro">
+								<div class="title">I nostri consigli d'uso</div>
+							</div>
+							<div class="row">
+								<div class="col-12 col-sm-4">
+									<div class="box">
+										<div class="caption">
+											<div class="numero">Consiglio N° 1</div>
+											<div class="title">Movimento verticale</div>
+											<div class="description">Spazzola i denti con movimento verticale a partire dalla gengiva verso il dente, effettuando un piccolo movimento rotatorio.</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-12 col-sm-4">
+									<div class="box">
+										<div class="caption">
+											<div class="numero">Consiglio N° 2</div>
+											<div class="title">E' ora di cambiarlo?</div>
+											<div class="description">Ricordati di verificare sempre lo stato del tuo spazzolino: una buona abitudine è quella di cambiarlo ogni tre mesi circa.</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-12 col-sm-4">
+									<div class="box">
+										<div class="caption">
+											<div class="numero">Consiglio N° 3</div>
+											<div class="title">Non fare a meno del filo</div>
+											<div class="description">Il filo interdentale è l’alleato più prezioso per rimuovere placca residui di cibo dagli interstizi fra i denti.</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				
+					<section class="section--product-related">
+						<div class="container">
+							<div class="intro">
+								<div class="title">Dalla stessa collezioni</div>
+							</div>
+						</div>
+						<div class="slide">
+							<div class="item">
+								<div class="img"><img src="img/product/protezione-totale.png" alt="Protezione Totale"></div>
+								<div class="title">protezione totale</div>
+								<div class="description">7 azioni in un solo<br>prodotto</div>
+								<div class="cta">
+									<a href="#">Scoprilo</a>
+								</div>
+							</div>
+							<div class="item">
+								<div class="img img--top"><img src="img/product/scalare-33.png" alt="Scalare 33"></div>
+								<div class="title">scalare 33</div>
+								<div class="description">Design, tecnologia<br>e qualità si incontrano</div>
+								<div class="cta">
+									<a href="#">Scoprilo</a>
+								</div>
+							</div>
+							<div class="item">
+								<div class="img img--top"><img src="img/product/professional-27.png" alt="Professional 27"></div>
+								<div class="title">professional 27</div>
+								<div class="description">Testina piccola,<br>efficacia massima</div>
+								<div class="cta">
+									<a href="#">Scoprilo</a>
+								</div>
+							</div>
+							<div class="item">
+								<div class="img"><img src="img/product/protezione-totale.png" alt="Protezione Totale"></div>
+								<div class="title">protezione totale</div>
+								<div class="description">7 azioni in un solo<br>prodotto</div>
+								<div class="cta">
+									<a href="#">Scoprilo</a>
+								</div>
+							</div>
+						</div>
+					</section>
+				
+					<section class="section--product-abbinamento">
+						<div class="container">
+							<div class="intro">
+								<div class="title">Si abbina perfettamente con</div>
+							</div>
+						</div>
+						<div class="slide">
+							<div class="item">
+								<div class="img"><img src="img/product/protezione-totale.png" alt="Protezione Totale"></div>
+								<div class="title">protezione totale</div>
+								<div class="description">7 azioni in un solo<br>prodotto</div>
+								<div class="cta">
+									<a href="#">Scoprilo</a>
+								</div>
+							</div>
+							<div class="item">
+								<div class="img img--top"><img src="img/product/scalare-33.png" alt="Scalare 33"></div>
+								<div class="title">scalare 33</div>
+								<div class="description">Design, tecnologia<br>e qualità si incontrano</div>
+								<div class="cta">
+									<a href="#">Scoprilo</a>
+								</div>
+							</div>
+							<div class="item">
+								<div class="img img--top"><img src="img/product/professional-27.png" alt="Professional 27"></div>
+								<div class="title">professional 27</div>
+								<div class="description">Testina piccola,<br>efficacia massima</div>
+								<div class="cta">
+									<a href="#">Scoprilo</a>
+								</div>
+							</div>
+							<div class="item">
+								<div class="img"><img src="img/product/protezione-totale.png" alt="Protezione Totale"></div>
+								<div class="title">protezione totale</div>
+								<div class="description">7 azioni in un solo<br>prodotto</div>
+								<div class="cta">
+									<a href="#">Scoprilo</a>
+								</div>
+							</div>
+						</div>
+					</section>
+				
+					<section class="section--product-inclinazioni">
+						<div class="container">
+							<div class="intro">
+								<div class="title">Scopri le nostre storie di <i>inclinazioni</i></div>
+							</div>
+							<div class="row">
+								<div class="col-12 col-sm-6">
+									<div class="box" style="background: url('img/product/img-inclinazioni-1.jpg')">
+										<div class="black-layer"></div>
+										<div class="caption">
+											<div class="title">Sed do eiusmod</div>
+											<div class="description">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et... <a href="#">Continua a leggere</a></div>
+										</div>
+									</div>
+								</div>
+								<div class="col-12 col-sm-6">
+									<div class="box" style="background: url('img/product/img-inclinazioni-2.jpg')">
+										<div class="black-layer"></div>
+										<div class="caption">
+											<div class="title">Sed do eiusmod</div>
+											<div class="description">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et... <a href="#">Continua a leggere</a></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				
+				
+				</div>
+				
 		</div>
 	</main>
 	<ng-include src="'templates/shared/footer.html'"></ng-include>
