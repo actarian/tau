@@ -3291,7 +3291,9 @@ header .main-menu {
 header .main-search {
   display: inline-block;
   margin-right: 20px;
-  color: #000; }
+  color: #000;
+  position: relative;
+  top: 5px; }
   @media (max-width: 1439.98px) {
     header .main-search {
       margin-right: 10px;
@@ -3302,6 +3304,9 @@ header .main-search {
       font-size: 20px;
       position: relative;
       top: -5px; } }
+  header .main-search .icon--search {
+    width: 19px;
+    height: 18px; }
 
 header .dove-acquistare {
   display: inline-block; }
@@ -3608,8 +3613,9 @@ footer {
   .section--home-hero .cta .icon--arrow-circle-right {
     width: 50px;
     height: 50px;
-    fill: #e10000;
-    margin-right: 20px; }
+    margin-right: 20px;
+    -webkit-transition: all ease-in-out;
+    transition: all ease-in-out; }
   .section--home-hero .cta a {
     color: #e10000;
     text-transform: uppercase;

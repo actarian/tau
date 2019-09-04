@@ -77,8 +77,8 @@
 		.icon--arrow-circle-right { 
 			width: 50px; 
 			height: 50px;
-			fill: $foreground-primary;
 			margin-right: 20px;
+			transition: all ease-in-out;
 		}
 
 		a {

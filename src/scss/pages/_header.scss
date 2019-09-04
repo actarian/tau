@@ -75,6 +75,8 @@ header {
 		display: inline-block;
 		margin-right: 20px;
 		color: #000;
+		position: relative;
+		top: 5px;
 
 		@include media-breakpoint-down(md) {
 			margin-right: 10px;
@@ -86,6 +88,11 @@ header {
 			font-size: 20px;
 			position: relative;
 			top: -5px;
+		}
+
+		.icon--search {
+			width: 19px;
+			height: 18px;
 		}
 	}
 
