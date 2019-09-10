@@ -96,7 +96,7 @@ ng-transclude {
 					height: 10px;
 					width: 10px;
 					border: 2px solid $foreground-primary;
-					background: #fff;
+					background: transparent;
 					border-radius: 12px;
 				}
 			}
@@ -251,5 +251,27 @@ ng-transclude {
 		@include media-breakpoint-down(xs) {
 			width: 100%;
 		}
+	}
+}
+
+//Accept Cookie
+#acceptcookie {
+	position: fixed;
+	width: 100%;
+	left: 0;
+	bottom: 0;
+	background: #fff;
+	text-align: center;
+	padding: 10px;
+	color: $foreground-secondary;
+	font-weight: 500;
+
+	a {
+		background: $foreground-primary;
+		color: #fff;
+		border-radius: 100%;
+		padding: 8px 11px;
+		font-size: 14px;
+		font-weight: 600;
 	}
 }

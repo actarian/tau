@@ -200,6 +200,10 @@
 
 		.col-12 {
 			padding: 100px 0;
+
+			@include media-breakpoint-down(md) {
+				padding: 50px 0;
+			}
 			
 			@include media-breakpoint-down(xs) {
 				padding: 50px 0;
@@ -226,6 +230,28 @@
 			justify-content: space-around;
 		}
 
+		&.item-top {
+
+			&:hover {
+
+				.img {
+					@include media-breakpoint-up(sm) {
+						-webkit-animation: mymove .5s;
+						animation: mymove .5s;
+						animation-fill-mode: forwards;
+					}
+				}
+
+				.caption {
+
+					@include media-breakpoint-up(sm) {
+						text-align: left;
+						padding-left: 100px;
+					}
+				}
+			}
+		}
+
 		.img {
 			position: absolute;
 			z-index: 3;
@@ -237,8 +263,8 @@
 			img {
 				max-width: 100%;
 
-				@include media-breakpoint-down(xs) {
-					max-width: 40px;
+				@include media-breakpoint-down(md) {
+					max-width: 80%;
 				}
 			}
 
@@ -247,14 +273,29 @@
 			}
 		}
 
+		.caption {
+			
+			@include media-breakpoint-down(sm) {
+				width: 50%;
+			}
+
+			@media (max-width: 375px) {
+				width: 100%;
+			}
+		}
+
 		.title {
 			color: $foreground-primary;
-			font-weight: 600;
+			font-weight: 500;
 			font-size: 60px;
 			letter-spacing: 0.2px;
 			line-height: 64px;
 			z-index: 2;
 			position: relative;
+
+			@include media-breakpoint-down(md) {
+				font-size: 34px;
+			}
 
 			@include media-breakpoint-down(sm) {
 				width: 100%;
@@ -288,6 +329,11 @@
 			z-index: 2;
 			position: relative;
 			margin: 20px 0 40px;
+
+			@include media-breakpoint-down(md) {
+				font-size: 18px;
+				line-height: 31px;
+			}
 
 			@include media-breakpoint-down(sm) {
 				width: 100%;
@@ -387,7 +433,7 @@
 				.black-layer {
 					content: '';
 					display: block;
-					height: 200px;
+					height: 300px;
 					width: 100%;
 					position: relative;
 					z-index: 1;
@@ -407,6 +453,16 @@
 					position: absolute;
 					z-index: 2;
 					padding: 30px;
+					width: 100%;
+					bottom: 90px;
+
+					.category {
+						font-size: 16px;
+						text-transform: uppercase;
+						color: #fff;
+						letter-spacing: 0.5px;
+						font-weight: 600;
+					}
 		
 					.title {
 						color: #fff;
@@ -444,4 +500,24 @@
 	.more {
 		text-align: center;
 	}
+}
+
+@-webkit-keyframes mymove {
+	from {left: 270px;}
+	to {left: 0px;}
+}
+
+@keyframes mymove {
+	from {left: 270px;}
+	to {left: 0px;}
+}
+
+@-webkit-keyframes myscale {
+	from {transform: scale(1);}
+	to {transform: scale(1.1);}
+}
+
+@keyframes myscale {
+	from {transform: scale(1);}
+	to {transform: scale(1.1);}
 }

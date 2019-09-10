@@ -78,7 +78,6 @@
 			width: 50px; 
 			height: 50px;
 			margin-right: 20px;
-			transition: all ease-in-out;
 		}
 
 		a {
@@ -164,6 +163,47 @@
 				outline: none;
 			}
 
+			&.item-bottom {
+
+				&:hover {
+
+					img {
+
+						@include media-breakpoint-up(sm) {
+							-webkit-animation: myscale .5s;
+							animation: myscale .5s;
+							animation-fill-mode: forwards;
+						}
+					}
+				}			
+			}
+
+			&.item-top {
+
+				&:hover {
+	
+					.img {
+						@include media-breakpoint-up(sm) {
+							-webkit-animation: mymove .5s;
+							animation: mymove .5s;
+							animation-fill-mode: forwards;
+						}
+
+						img {
+							animation: none
+						}
+					}
+	
+					.caption {
+	
+						@include media-breakpoint-up(sm) {
+							text-align: left;
+							padding-left: 100px;
+						}
+					}
+				}
+			}
+
 			.img {
 				position: absolute;
 				z-index: 3;
@@ -185,10 +225,6 @@
 				&--top {
 					position: absolute;
 
-					@include media-breakpoint-down(xs) {
-						left: 60px;
-					}
-
 					img {
 
 						@include media-breakpoint-down(md) {
@@ -201,8 +237,6 @@
 			.caption {
 
 				@include media-breakpoint-down(xs) {
-					text-align: left;
-					margin-left: 60px;
 					position: relative;
 					top: -40px;
 				}
@@ -215,13 +249,9 @@
 				}
 			}
 
-			.caption-normal {
-
-			}
-
 			.title {
 				color: $foreground-primary;
-				font-weight: $font-semibold;
+				font-weight: 500;
 				font-size: 60px;
 				letter-spacing: 0.2px;
 				line-height: 64px;
@@ -299,6 +329,7 @@
 			position: absolute;
 			left: 150px;
 			top: 250px;
+			box-shadow: 0px 20px 20px 0px rgba(0, 0, 0, 0.3);
 
 			@include media-breakpoint-down(xs) {
 				position: relative;

@@ -31,7 +31,7 @@
 	.title {
 		text-align: center;
 		font-size: 72px;
-		font-weight: $font-semibold;
+		font-weight: 500;
 		line-height: 1.2;
 		color: $foreground-primary;
 		margin-bottom: 30px;
@@ -98,7 +98,7 @@
 	.title {
 		text-align: center;
 		font-size: 72px;
-		font-weight: $font-semibold;
+		font-weight: 500;
 		line-height: 1.2;
 		color: $foreground-primary;
 		margin-bottom: 30px;
@@ -948,6 +948,46 @@
 	img {
 		width: 100%;
 	}
+
+	.item {
+
+		&.item-bottom {
+
+			&:hover {
+
+				img {
+
+					@include media-breakpoint-up(sm) {
+						-webkit-animation: myscale .5s;
+						animation: myscale .5s;
+						animation-fill-mode: forwards;
+					}
+				}
+			}			
+		}
+
+		&.item-top {
+
+			&:hover {
+
+				.img {
+					@include media-breakpoint-up(sm) {
+						-webkit-animation: mymove .5s;
+						animation: mymove .5s;
+						animation-fill-mode: forwards;
+					}
+				}
+
+				.caption {
+
+					@include media-breakpoint-up(sm) {
+						text-align: left;
+						padding-left: 100px;
+					}
+				}
+			}
+		}
+	}
 }
 
 @keyframes pulse {
@@ -1193,7 +1233,7 @@
 
 			.title {
 				color: $foreground-primary;
-				font-weight: $font-semibold;
+				font-weight: 500;
 				font-size: 60px;
 				letter-spacing: 0.2px;
 				line-height: 64px;
@@ -1310,6 +1350,43 @@
 				outline: none;
 			}
 
+			&.item-bottom {
+
+				&:hover {
+	
+					img {
+	
+						@include media-breakpoint-up(sm) {
+							-webkit-animation: myscale .5s;
+							animation: myscale .5s;
+							animation-fill-mode: forwards;
+						}
+					}
+				}			
+			}
+	
+			&.item-top {
+	
+				&:hover {
+	
+					.img {
+						@include media-breakpoint-up(sm) {
+							-webkit-animation: mymove .5s;
+							animation: mymove .5s;
+							animation-fill-mode: forwards;
+						}
+					}
+	
+					.caption {
+	
+						@include media-breakpoint-up(sm) {
+							text-align: left;
+							padding-left: 100px;
+						}
+					}
+				}
+			}
+
 			.img {
 				position: absolute;
 				z-index: 3;
@@ -1342,7 +1419,7 @@
 
 			.title {
 				color: $foreground-primary;
-				font-weight: $font-semibold;
+				font-weight: 500;
 				font-size: 60px;
 				letter-spacing: 0.2px;
 				line-height: 64px;
@@ -1435,11 +1512,12 @@
 		align-items: flex-end;
 
 		@include media-breakpoint-down(md) {
-			min-height: 450px;
+			min-height: 600px;
 		}
 
 		@include media-breakpoint-down(sm) {
 			margin-bottom: 30px;
+			min-height: 450px;
 		}
 
 		.black-layer {
@@ -1465,6 +1543,19 @@
 			position: absolute;
 			z-index: 2;
 			padding: 30px;
+			bottom: 0;
+
+			@include media-breakpoint-down(sm) {
+				bottom: 20px;
+			}
+
+			.category {
+				font-size: 16px;
+				text-transform: uppercase;
+				color: #fff;
+				letter-spacing: 0.5px;
+				font-weight: 600;
+			}
 
 			.title {
 				color: #fff;

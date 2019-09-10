@@ -24,10 +24,16 @@ header {
 	}
 
 	.col-logo {
+		width: 20%;
 
 		@include media-breakpoint-down(xs) {
 			width: 50%;
 		}
+	}
+
+	.col-cta {
+		width: 20%;
+		text-align: right;
 	}
 
 	//Main Menu
