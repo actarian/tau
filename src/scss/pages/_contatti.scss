@@ -11,6 +11,10 @@
 		min-height: 40vh;
 	}
 
+	@include media-breakpoint-down(xs) {
+		padding: 50px 0;
+	}
+
 	.title {
 		color: $foreground-primary;
 		font-size: 60px;
@@ -49,8 +53,11 @@
 .section--contatti-form {
 	padding: 100px 0;
 	background-color: #f9fafb;
-	
 
+	@include media-breakpoint-down(xs) {
+		padding: 50px 0;
+	}
+	
 	.form-contatti {
 		order: 0;
 		background-color: #fff;

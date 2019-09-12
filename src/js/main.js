@@ -34,11 +34,13 @@ function fullSearch() {
     //Search Full
     $('.main-search').on('click', function(e){
         $('.section--search').toggleClass('show');
+        $('body').toggleClass('no-scroll');
         e.preventDefault();
     });
     //Close Search
     $('.close-search').on('click', function(e){
         $('.section--search').removeClass('show');
+        $('body').toggleClass('no-scroll');
         e.preventDefault();
     });
 }

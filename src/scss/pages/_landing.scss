@@ -179,6 +179,10 @@
 .section--landing-listing {
 	padding: 100px 0;
 
+	@include media-breakpoint-down(xs) {
+		padding: 50px 0;
+	}
+
 	.intro {
 		display: flex;
 		flex-direction: column;
@@ -186,6 +190,11 @@
 		text-align: center;
 		margin-bottom: 100px;
 		margin-top: 100px;
+
+		@include media-breakpoint-down(xs) {
+			margin-top: 150px;
+			margin-bottom: 50px;
+		}
 
 		.title {
 			font-weight: 600;
@@ -258,6 +267,18 @@
 
 			@include media-breakpoint-down(sm) {
 				position: relative;
+				width: 30%;
+				text-align: center;
+			}
+
+			&#bambini {
+
+				img {
+
+					@include media-breakpoint-down(sm) {
+						max-width: 45%;
+					}
+				}
 			}
 
 			img {
@@ -280,7 +301,7 @@
 			}
 
 			@media (max-width: 375px) {
-				width: 100%;
+				width: 70%;
 			}
 		}
 
@@ -371,6 +392,7 @@
 			height: auto;
 			min-height: initial;
 			padding: 40px;
+			text-align: center;
 
 			.abstract {
 				color: $foreground-primary;
@@ -383,6 +405,8 @@
 
 			.img {
 				position: relative;
+				width: 100%;
+				max-width: 100%;
 
 				img {
 					max-width: 100%;

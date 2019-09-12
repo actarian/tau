@@ -122,10 +122,6 @@
 
 	@include media-breakpoint-down(sm) {
 
-		.container {
-			justify-content: flex-end;
-		}
-
 		.title {
 			font-size: 36px;
 			margin-bottom: 15px;
@@ -1100,11 +1096,12 @@
 		padding: 50px;
 
 		@include media-breakpoint-down(md) {
-			padding: 20px;
+			padding: 30px;
 		}
 
 		@include media-breakpoint-down(sm) {
 			margin-bottom: 30px;
+			padding: 40px;
 		}
 
 		.caption {
@@ -1123,7 +1120,7 @@
 			.title {
 				color: $foreground-secondary;
 				font-size: 24px;
-				line-height: 20px;
+				line-height: 30px;
 				font-weight: $font-semibold;
 				padding: 40px 0 20px;
 			}
@@ -1133,6 +1130,11 @@
 				font-size: 18px;
 				line-height: 30px;
 				letter-spacing: 0.2px;
+
+				@include media-breakpoint-down(xs) {
+					font-size: 14px;
+					line-height: 24px;
+				}
 			}
 		}
 	}
@@ -1195,6 +1197,10 @@
 				min-height: 460px;
 			}
 
+			@include media-breakpoint-down(sm) {
+				min-height: 350px;
+			}
+
 			&:hover,
 			&:focus {
 				outline: none;
@@ -1224,7 +1230,12 @@
 					img {
 
 						@include media-breakpoint-down(md) {
-							max-height: 370px;
+							max-height: 420px;
+							width: auto;
+						}
+
+						@include media-breakpoint-down(sm) {
+							max-height: 320px;
 							width: auto;
 						}
 					}
@@ -1345,6 +1356,10 @@
 				min-height: 460px;
 			}
 
+			@include media-breakpoint-down(sm) {
+				min-height: 350px;
+			}
+
 			&:hover,
 			&:focus {
 				outline: none;
@@ -1411,7 +1426,13 @@
 					img {
 
 						@include media-breakpoint-down(md) {
-							max-height: 370px;
+							max-height: 420px;
+							width: auto;
+						}
+
+						@include media-breakpoint-down(sm) {
+							max-height: 320px;
+							width: auto;
 						}
 					}
 				}
@@ -1433,6 +1454,7 @@
 
 				@include media-breakpoint-down(sm) {
 					font-size: 24px;
+					margin-top: 0;
 				}
 			}
 

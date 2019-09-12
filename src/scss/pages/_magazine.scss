@@ -24,6 +24,11 @@
 		margin-bottom: 100px;
 		margin-top: 100px;
 
+		@include media-breakpoint-down(xs) {
+			margin-top: 150px;
+			margin-bottom: 50px;
+		}
+
 		.title {
 			font-weight: $font-semibold;
 			font-size: 36px;
@@ -314,6 +319,10 @@
 				font-size: 24px;
 				line-height: 42px;
 			}
+
+			@include media-breakpoint-down(xs) {
+				width: 100%;
+			}
 		}
 
 		strong {
@@ -374,6 +383,10 @@
 		text-align: center;
 		margin-bottom: 100px;
 
+		@include media-breakpoint-down(xs) {
+			margin-bottom: 50px;
+		}
+
 		.title {
 			font-weight: $font-semibold;
 			font-size: 36px;
@@ -383,7 +396,7 @@
 			@include media-breakpoint-down(xs) {
 				font-size: 28px;
 				line-height: 36px;
-				margin-bottom: 20px;
+				margin-bottom: 0;
 			}
 		}
 	}
@@ -429,6 +442,11 @@
 				color: #fff;
 				font-size: 40px;
 				font-weight: $font-medium;
+				
+				@include media-breakpoint-down(sm) {
+					font-size: 32px;
+					line-height: 37px;
+				}
 			}
 
 			.description {
@@ -436,6 +454,11 @@
 				font-size: 18px;
 				line-height: 36px;
 				letter-spacing: 0.2px;
+
+				@include media-breakpoint-down(sm) {
+					font-size: 14px;
+					line-height: 28px;
+				}
 
 				a {
 					color: $foreground-primary;

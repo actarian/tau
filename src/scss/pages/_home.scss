@@ -5,7 +5,7 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		min-height: 100vh;
+		min-height: 80vh;
 	}
 
 	.title {
@@ -24,6 +24,19 @@
 		@media (max-width:736px) {
 			font-size: 28px;
 			margin-bottom: 30px;
+		}
+
+		br  {
+
+			@include media-breakpoint-down(sm) {
+				content: ' '
+			}
+		}
+
+		br:after {
+			@include media-breakpoint-down(sm) {
+				content: ' '
+			}
 		}
 
 		span {
@@ -159,6 +172,10 @@
 				min-height: 460px;
 			}
 
+			@include media-breakpoint-down(sm) {
+				min-height: 350px;
+			}
+
 			&:hover, &:focus {
 				outline: none;
 			}
@@ -228,7 +245,11 @@
 					img {
 
 						@include media-breakpoint-down(md) {
-							max-height: 370px;
+							max-height: 420px;
+						}
+
+						@include media-breakpoint-down(sm) {
+							max-height: 320px;
 						}
 					}
 				}
@@ -512,8 +533,8 @@
 			font-weight: $font-semibold;
 			text-transform: uppercase;
 
-			@include media-breakpoint-down(xs) {
-				padding: 0 20px;
+			@include media-breakpoint-down(sm) {
+				padding: 20px;
 			}
 		}
 	}
