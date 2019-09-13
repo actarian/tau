@@ -198,6 +198,7 @@ function mobileMenu() {
         $('.mobile-menu').toggleClass('show');
         $(this).toggleClass('active');
         e.preventDefault();
+        $('.navbar-toggler').toggleClass('collapsed');
     });
 }
 
