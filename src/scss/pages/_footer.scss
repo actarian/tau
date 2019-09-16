@@ -1,9 +1,80 @@
 footer {
 	background: $foreground-primary;
-	padding: 100px 0 0;
+	padding: 50px 0 0;
 
 	@include media-breakpoint-down(xs) {
 		padding: 50px 0 0;
+	}
+
+	//pre-footer
+	.pre-footer {
+		padding: 0 0 50px;
+		border-bottom: 1px solid #fff;
+		text-align: center;
+		margin-bottom: 50px;
+
+		form {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+
+			@include media-breakpoint-down(xs) {
+				flex-direction: column;
+			}
+
+			h3 {
+				display: inline-block;
+				color: #fff;
+				margin-right: 20px;
+				font-weight: 500;
+				margin-top: 0;
+				margin-bottom: 0;
+			}
+
+			input[type="email"] {
+				padding: 20px;
+				border-radius: 0;
+				border: 0;
+				background: rgba(255,255,255,1);
+				margin-top: 10px;
+				width: 300px;
+				line-height: 20px;
+				font-size: 14px;
+				margin-right: 20px;
+
+				&:focus {
+					background: rgba(255,255,255,1);
+				}
+
+				@include media-breakpoint-down(xs) {
+					width: 100%;
+					max-width: 250px;
+					margin-right: 0;
+				}
+			}
+
+			input[type="submit"] {
+				background: transparent;
+				color: #fff;
+				border: 2px solid #fff;
+				border-radius: 500px;
+				text-align: center;
+				padding: 10px 20px;
+				font-family: "Sofia Pro", sans-serif;
+				text-transform: uppercase;
+				font-weight: 600;
+				cursor: pointer;
+				transition: all ease-in-out .2s;
+				margin-top: 10px;
+				line-height: 20px;
+
+				&:hover, &:focus {
+					background: #fff;
+					color: $foreground-primary;
+					transition: all ease-in-out .2s;
+				}
+			}
+		}
 	}
 	
 	//Back to top

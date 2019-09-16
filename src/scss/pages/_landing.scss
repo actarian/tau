@@ -9,6 +9,41 @@
 	}
 }
 
+.section--landing-intro {
+	padding: 100px 0;
+    text-align: center;
+    min-height: 60vh;
+    display: flex;
+    justify-content: center;
+	align-items: center;
+	background-color: #fff;
+	
+	@include media-breakpoint-down(sm) {
+		min-height: 40vh;
+	}
+
+	@include media-breakpoint-down(xs) {
+		padding: 50px 0;
+	}
+
+	.title {
+		color: $foreground-primary;
+		font-size: 60px;
+		font-weight: 500;
+		margin-top: 50px;
+
+		@include media-breakpoint-down(sm) {
+			font-size: 42px;
+			line-height: 52px;
+		}
+
+		@include media-breakpoint-down(xs) {
+			font-size: 32px;
+			line-height: 42px;
+		}
+	}
+}
+
 .section--landing-hero {
 	padding: 100px 0;
 	position: relative;
@@ -162,6 +197,10 @@
 	border-bottom: 1px solid #dbdbdb;
 	text-align: center;
 	overflow-x: auto;
+
+	&.categorie-non-solo {
+		border-top: 1px solid #dbdbdb;	
+	}
 
 	@include media-breakpoint-down(md) {
 		padding: 10px 0;
