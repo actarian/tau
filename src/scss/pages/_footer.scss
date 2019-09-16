@@ -5,18 +5,34 @@ footer {
 	@include media-breakpoint-down(xs) {
 		padding: 50px 0 0;
 	}
-
+	
 	//Back to top
 	.back-to-top {
+		width: 60px;
+		height: 60px;
+		border: 2px solid #fff;
+		padding: 20px;
+		border-radius: 100%;
+		transition: all ease-in-out .3s;
 
-		@include media-breakpoint-down(xs) {
-			display: none;
+		.icon--arrow {
+			transform: rotate(-90deg);
+			width: 15px;
+			height: 15px;
+			position: relative;
+			top: -7px;
+			left: 1px;
+			fill: #fff;
 		}
 
-		.icon--back-to-top {
-			width: 50px;
-			height: 50px;
-			fill: #fff;
+		&:hover, &:focus {
+					
+			.icon--arrow {
+				-webkit-animation: icon-bounce-top 1s infinite; /* Safari 4+ */
+				-moz-animation:    icon-bounce-top 1s infinite; /* Fx 5+ */
+				-o-animation:      icon-bounce-top 1s infinite; /* Opera 12+ */
+				animation:         icon-bounce-top 1s infinite; /* IE 10+, Fx 29+ */
+			}
 		}
 	}
 
@@ -250,4 +266,21 @@ footer {
 	@include media-breakpoint-up(sm) {}
 
 	@include media-breakpoint-down(xs) {}
+}
+
+@-webkit-keyframes icon-bounce-top {
+	0%   { transform: translateY(0) rotate(-90deg); }
+	100% { transform: translateY(-5px) rotate(-90deg); }
+}
+@-moz-keyframes icon-bounce-top {
+	0%   { transform: translateY(0) rotate(-90deg); }
+	100% { transform: translateY(-5px) rotate(-90deg); }
+}
+@-o-keyframes icon-bounce-top {
+	0%   { transform: translateY(0) rotate(-90deg); }
+	100% { transform: translateY(-5px) rotate(-90deg); }
+}
+@keyframes icon-bounce-top {
+	0%   { transform: translateY(0) rotate(-90deg); }
+	100% { transform: translateY(-5px) rotate(-90deg); }
 }

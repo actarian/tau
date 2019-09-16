@@ -128,6 +128,30 @@
 				display: flex;
 				align-items: center;
 
+				&.link-arrow {
+					width: 60px;
+					height: 60px;
+					border: 2px solid;
+					padding: 20px;
+					border-radius: 100%;
+					margin-right: 20px;
+					transition: all ease-in-out .3s;
+	
+					.icon--arrow {
+						fill: $foreground-primary;
+						transform: rotate(90deg);
+					}
+					
+					&:hover, &:focus {
+						
+						.icon--arrow {
+							-webkit-animation: icon-bounce-down 1s infinite; /* Safari 4+ */
+							-moz-animation:    icon-bounce-down 1s infinite; /* Fx 5+ */
+							-o-animation:      icon-bounce-down 1s infinite; /* Opera 12+ */
+							animation:         icon-bounce-down 1s infinite; /* IE 10+, Fx 29+ */
+						}
+					}
+				}
 			}
 		}
 	}
@@ -544,4 +568,22 @@
 @keyframes myscale {
 	from {transform: scale(1);}
 	to {transform: scale(1.1);}
+}
+
+
+@-webkit-keyframes icon-bounce-down {
+	0%   { transform: translateY(0) rotate(90deg); }
+	100% { transform: translateY(5px) rotate(90deg); }
+}
+@-moz-keyframes icon-bounce-down {
+	0%   { transform: translateY(0) rotate(90deg); }
+	100% { transform: translateY(5px) rotate(90deg); }
+}
+@-o-keyframes icon-bounce-down {
+	0%   { transform: translateY(0) rotate(90deg); }
+	100% { transform: translateY(5px) rotate(90deg); }
+}
+@keyframes icon-bounce-down {
+	0%   { transform: translateY(0) rotate(90deg); }
+	100% { transform: translateY(5px) rotate(90deg); }
 }

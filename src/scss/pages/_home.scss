@@ -101,6 +101,31 @@
 			letter-spacing: 0.5px;
 			display: flex;
 			align-items: center;
+			transition: all ease-in-out .3s;
+
+			&.link-arrow {
+				width: 60px;
+				height: 60px;
+				border: 2px solid;
+				padding: 20px;
+				border-radius: 100%;
+				margin-right: 20px;
+				transition: all ease-in-out .3s;
+
+				.icon--arrow {
+					fill: $foreground-primary;
+				}
+				
+				&:hover, &:focus {
+					
+					.icon--arrow {
+						-webkit-animation: icon-bounce 1s infinite; /* Safari 4+ */
+						-moz-animation:    icon-bounce 1s infinite; /* Fx 5+ */
+						-o-animation:      icon-bounce 1s infinite; /* Opera 12+ */
+						animation:         icon-bounce 1s infinite; /* IE 10+, Fx 29+ */
+					}
+				}
+			}
 		}
 	}
 }
@@ -704,4 +729,22 @@
 }
   .navbar-toggler.collapsed .main-nav__hamburger span:nth-child(5), .navbar-toggler.collapsed .main-nav__hamburger span:nth-child(6) {
 	top: 14.25px;
+}
+
+
+@-webkit-keyframes icon-bounce {
+	0%   { transform: translateX(0); }
+	100% { transform: translateX(5px); }
+}
+@-moz-keyframes icon-bounce {
+	0%   { transform: translateX(0); }
+	100% { transform: translateX(5px); }
+}
+@-o-keyframes icon-bounce {
+	0%   { transform: translateX(0); }
+	100% { transform: translateX(5px); }
+}
+@keyframes icon-bounce {
+	0%   { transform: translateX(0); }
+	100% { transform: translateX(5px); }
 }
