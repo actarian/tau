@@ -3632,8 +3632,8 @@ footer {
         margin-bottom: 0; }
       footer .pre-footer form input[type="email"] {
         padding: 20px;
-        border-radius: 0;
-        border: 0;
+        border-radius: 500px;
+        border: 1px solid #ddd;
         background: white;
         margin-top: 10px;
         width: 300px;
@@ -3642,10 +3642,10 @@ footer {
         margin-right: 20px; }
         footer .pre-footer form input[type="email"]:focus {
           background: white; }
-        @media (max-width: 859.98px) {
+        @media (max-width: 1023.98px) {
           footer .pre-footer form input[type="email"] {
             width: 100%;
-            max-width: 250px;
+            max-width: 100%;
             margin-right: 0; } }
       footer .pre-footer form input[type="submit"] {
         background: transparent;
@@ -3667,6 +3667,9 @@ footer {
           color: #e10000;
           -webkit-transition: all ease-in-out .2s;
           transition: all ease-in-out .2s; }
+        @media (max-width: 1023.98px) {
+          footer .pre-footer form input[type="submit"] {
+            width: 100%; } }
   footer .back-to-top {
     width: 60px;
     height: 60px;

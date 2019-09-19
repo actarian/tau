@@ -33,8 +33,8 @@ footer {
 
 			input[type="email"] {
 				padding: 20px;
-				border-radius: 0;
-				border: 0;
+				border-radius: 500px;
+				border: 1px solid #ddd;
 				background: rgba(255,255,255,1);
 				margin-top: 10px;
 				width: 300px;
@@ -46,9 +46,9 @@ footer {
 					background: rgba(255,255,255,1);
 				}
 
-				@include media-breakpoint-down(xs) {
+				@include media-breakpoint-down(sm) {
 					width: 100%;
-					max-width: 250px;
+					max-width: 100%;
 					margin-right: 0;
 				}
 			}
@@ -72,6 +72,10 @@ footer {
 					background: #fff;
 					color: $foreground-primary;
 					transition: all ease-in-out .2s;
+				}
+
+				@include media-breakpoint-down(sm) {
+					width: 100%;
 				}
 			}
 		}
