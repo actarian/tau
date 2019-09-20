@@ -29,13 +29,17 @@ header {
 		width: 30%;
 
 		@include media-breakpoint-down(xs) {
-			width: 50%;
+			width: 60%;
 		}
 	}
 
 	.col-cta {
 		width: 30%;
 		text-align: right;
+
+		@include media-breakpoint-down(xs) {
+			width: 40%;
+		}
 	}
 
 	//Main Menu
