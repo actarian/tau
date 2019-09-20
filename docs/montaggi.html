@@ -88,21 +88,9 @@
 </head>
 
 <body>
-	<section class="section--search">
-		<div class="container">
-			<div class="close-search">
-				<svg class="icon icon--times">
-					<use xlink:href="#icon--times"></use>
-				</svg>
-				</div>
-			<div class="search-group">
-				<input type="text" placeholder="Cerca nel sito">
-				<a class="btn btn--primary"><span>Cerca</span></a>
-			</div>
-		</div>
-	</section>
-	<ng-include src="'templates/shared/svg.html'"></ng-include>
-	<ng-include src="'templates/shared/header.html'"></ng-include>
+	<ng-include src="'docs/templates/shared/full-search.html'"></ng-include>
+	<ng-include src="'docs/templates/shared/svg.html'"></ng-include>
+	<ng-include src="'docs/templates/shared/header.html'"></ng-include>
 	<main class="page">
 		<div class="view" ng-cloak>
 			
@@ -150,7 +138,7 @@
 
 		</div>
 	</main>
-	<ng-include src="'templates/shared/footer.html'"></ng-include>
+	<ng-include src="'docs/templates/shared/footer.html'"></ng-include>
 	<!--[if IE ]>
 	<script src="js/polyfills.js"></script>
 	<![endif]-->
