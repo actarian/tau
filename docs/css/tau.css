@@ -3058,6 +3058,9 @@ button,
     @media (max-width: 859.98px) {
       .section--landing-categories.categorie-non-solo {
         text-align: left; } }
+    @media (max-width: 859.98px) {
+      .section--landing-categories.categorie-non-solo ul {
+        width: 500px; } }
   @media (max-width: 1439.98px) {
     .section--landing-categories {
       padding: 10px 0; } }

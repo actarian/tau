@@ -204,6 +204,13 @@
 		@include media-breakpoint-down(xs) {
 			text-align: left;
 		}
+
+		ul {
+
+			@include media-breakpoint-down(xs) {
+				width: 500px;
+			}
+		}
 	}
 
 	@include media-breakpoint-down(md) {
@@ -218,6 +225,7 @@
 		@include media-breakpoint-down(sm) {
 			width: 1000px;
 		}
+
 
 		li {
 			display: inline-block;
