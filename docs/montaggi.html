@@ -88,7 +88,19 @@
 </head>
 
 <body>
-	<ng-include src="'templates/shared/full-search.html'"></ng-include>
+	<section class="section--search">
+		<div class="container">
+			<div class="close-search">
+				<svg class="icon icon--times">
+					<use xlink:href="#icon--times"></use>
+				</svg>
+				</div>
+			<div class="search-group">
+				<input type="text" placeholder="Cerca nel sito">
+				<a class="btn btn--primary"><span>Cerca</span></a>
+			</div>
+		</div>
+	</section>
 	<ng-include src="'templates/shared/svg.html'"></ng-include>
 	<ng-include src="'templates/shared/header.html'"></ng-include>
 	<main class="page">
