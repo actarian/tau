@@ -88,9 +88,77 @@
 </head>
 
 <body class="landing">
-	<ng-include src="'templates/shared/full-search.html'"></ng-include>
-	<ng-include src="'templates/shared/svg.html'"></ng-include>
-	<ng-include src="'templates/shared/header.html'"></ng-include>
+		<ng-include src="'templates/shared/svg.html'"></ng-include>
+		<section class="section--search">
+			<div class="container">
+				<div class="close-search">
+					<svg class="icon icon--times">
+						<use xlink:href="#icon--times"></use>
+					</svg>
+					</div>
+				<div class="search-group">
+					<input type="text" placeholder="Cerca nel sito">
+					<a class="btn btn--primary"><span>Cerca</span></a>
+				</div>
+			</div>
+		</section>
+		<header>
+			<section class="section--header-topbar">
+				Disegnato e realizzato in Italia
+			</section>
+			<div class="container">
+				<!--<img class="template" src="img/header/header.jpg" />-->
+				<div class="row">
+					<div class="col-logo">
+						<a href="/"><img class="logo" src="img/header/logo.jpg" alt="Tau Marin" /></a>
+					</div>
+					<div class="col-menu">
+						<div class="main-menu">
+							<ul>
+								<li><a href="#">Lo spazzolino</a></li>
+								<li><a href="#">E non solo</a></li>
+								<li><a href="#"><i>Inclinazioni</i></a></li>
+							</ul>
+						</div>
+					</div>
+					<div class="col-cta">
+						<a href="#" class="main-search">
+							<svg class="icon icon--search">
+								<use xlink:href="#icon--search"></use>
+							</svg>
+						</a>
+						<div class="dove-acquistare">
+							<a href="#" class="btn btn--secondary"><span>Dove Acquistare</span></a>
+						</div>
+						<div class="hamburger">
+							<!--<svg class="icon icon--hamburger">
+								<use xlink:href="#icon--hamburger"></use>
+							</svg>-->
+							<button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+								<span class="navbar-toggler-icon">
+									<span class="main-nav__hamburger">
+										<span></span>
+										<span></span>
+										<span></span>
+										<span></span>
+										<span></span>
+										<span></span>
+									</span>
+								</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="mobile-menu">
+				<ul>
+					<li class="active"><a href="#">Lo spazzolino</a></li>
+					<li><a href="#">E non solo</a></li>
+					<li><a href="#"><i>Inclinazioni</i></a></li>
+					<li class="cta"><a href="#">Dove acquistare</a></li>
+				</ul>
+			</div>
+		</header>
 	<main class="page">
 		<div class="view" ng-cloak>
 			<section class="section--landing-hero" style="background: url('img/landing/bg-landing-1.jpg');">
@@ -289,7 +357,102 @@
 			</section>
 		</div>
 	</main>
-	<ng-include src="'templates/shared/footer.html'"></ng-include>
+	<footer>
+			<div class="pre-footer">
+				<div class="container">
+					<div class="row">
+						<div class="col-12">
+							<form action="" id="nl-form">
+								<h3>Iscriviti alla newsletter</h3>
+								<input type="email" name="email" placeholder="Indirizzo email" required>
+								<input type="submit" value="Iscriviti">
+							</form> 
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="container">
+				<div class="row">
+					<div class="col-12 col-md-1 col-back-to-top">
+						
+						<a href="#" class="back-to-top">
+							<svg class="icon icon--arrow">
+								<use xlink:href="#icon--arrow"></use>
+							</svg> 
+						</a>
+						<div class="logo-alfasigma-mobile">
+							<img src="img/footer/logo-alfasigma.png" alt="Alfasigma" />
+						</div>
+					</div>
+					<div class="col-12 col-md-5 offset-md-2 col-footer-menu">
+						<div class="footer-menu">
+							<div class="left">
+								<a href="#">spazzolini</a>
+								<a href="#">dentifrici</a>
+								<a href="#">kit da viaggio</a>
+								<a href="#">fili interdentali</a>
+								<a href="#">scovolini</a>
+							</div>
+							<div class="right">
+								<a href="#">le inclinazioni</a>
+								<a href="#">azienda</a>
+								<a href="#">dove acquistare</a>
+							</div>
+						</div>
+					</div>
+					<div class="col-12 col-md-3 offset-md-1 col-social">
+						<div class="logo-alfasigma">
+							<img src="img/footer/logo-alfasigma.png" alt="Alfasigma" />
+						</div>
+						<div class="social-footer">
+							<ul>
+								<li>
+									<a href="#" target="_blank">
+										<svg class="icon icon--instagram">
+											<use xlink:href="#icon--instagram"></use>
+										</svg>
+									</a>
+								</li>
+								<li>
+									<a href="#" target="_blank">
+										<svg class="icon icon--facebook">
+											<use xlink:href="#icon--facebook"></use>
+										</svg>
+									</a>
+								</li>
+								<li>
+									<a href="#" target="_blank">
+										<svg class="icon icon--youtube">
+											<use xlink:href="#icon--youtube"></use>
+										</svg>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="copy-footer">
+				<div class="container">
+					<div class="wrap">
+						<div class="left">
+							<div class="copy-menu">
+								<ul>
+									<li><a href="#">Cookie Policy</a></li>
+									<li><a href="#">Term of Use</a></li>
+									<li><a href="#">Privacy Policy</a></li>
+									<li><a href="#">Credits</a></li>
+								</ul>
+							</div>
+						</div>
+						<div class="right">
+							<p>© 2019 Alfasigma Spa. p.iva 03432221202</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</footer>
+		
 	<!--[if IE ]>
 	<script src="js/polyfills.js"></script>
 	<![endif]-->

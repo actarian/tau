@@ -91,6 +91,7 @@
 </head>
 
 <body>
+	<ng-include src="'templates/shared/svg.html'"></ng-include>
 	<section class="section--search">
 		<div class="container">
 			<div class="close-search">
@@ -104,7 +105,6 @@
 			</div>
 		</div>
 	</section>
-	<ng-include src="'templates/shared/svg.html'"></ng-include>
 	<header>
 		<section class="section--header-topbar">
 			Disegnato e realizzato in Italia
@@ -386,7 +386,102 @@
 			</div>
 		</div>
 	</main>
-	<ng-include src="'templates/shared/footer.html'"></ng-include>
+	<footer>
+		<div class="pre-footer">
+			<div class="container">
+				<div class="row">
+					<div class="col-12">
+						<form action="" id="nl-form">
+							<h3>Iscriviti alla newsletter</h3>
+							<input type="email" name="email" placeholder="Indirizzo email" required>
+							<input type="submit" value="Iscriviti">
+						</form> 
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container">
+			<div class="row">
+				<div class="col-12 col-md-1 col-back-to-top">
+					
+					<a href="#" class="back-to-top">
+						<svg class="icon icon--arrow">
+							<use xlink:href="#icon--arrow"></use>
+						</svg> 
+					</a>
+					<div class="logo-alfasigma-mobile">
+						<img src="img/footer/logo-alfasigma.png" alt="Alfasigma" />
+					</div>
+				</div>
+				<div class="col-12 col-md-5 offset-md-2 col-footer-menu">
+					<div class="footer-menu">
+						<div class="left">
+							<a href="#">spazzolini</a>
+							<a href="#">dentifrici</a>
+							<a href="#">kit da viaggio</a>
+							<a href="#">fili interdentali</a>
+							<a href="#">scovolini</a>
+						</div>
+						<div class="right">
+							<a href="#">le inclinazioni</a>
+							<a href="#">azienda</a>
+							<a href="#">dove acquistare</a>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-3 offset-md-1 col-social">
+					<div class="logo-alfasigma">
+						<img src="img/footer/logo-alfasigma.png" alt="Alfasigma" />
+					</div>
+					<div class="social-footer">
+						<ul>
+							<li>
+								<a href="#" target="_blank">
+									<svg class="icon icon--instagram">
+										<use xlink:href="#icon--instagram"></use>
+									</svg>
+								</a>
+							</li>
+							<li>
+								<a href="#" target="_blank">
+									<svg class="icon icon--facebook">
+										<use xlink:href="#icon--facebook"></use>
+									</svg>
+								</a>
+							</li>
+							<li>
+								<a href="#" target="_blank">
+									<svg class="icon icon--youtube">
+										<use xlink:href="#icon--youtube"></use>
+									</svg>
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="copy-footer">
+			<div class="container">
+				<div class="wrap">
+					<div class="left">
+						<div class="copy-menu">
+							<ul>
+								<li><a href="#">Cookie Policy</a></li>
+								<li><a href="#">Term of Use</a></li>
+								<li><a href="#">Privacy Policy</a></li>
+								<li><a href="#">Credits</a></li>
+							</ul>
+						</div>
+					</div>
+					<div class="right">
+						<p>© 2019 Alfasigma Spa. p.iva 03432221202</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</footer>
+	
 	<!--[if IE ]>
 	<script src="js/polyfills.js"></script>
 	<![endif]-->
