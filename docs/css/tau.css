@@ -3437,13 +3437,13 @@ header {
     width: 30%; }
     @media (max-width: 859.98px) {
       header .col-logo {
-        width: 60%; } }
+        width: 40%; } }
   header .col-cta {
     width: 30%;
     text-align: right; }
     @media (max-width: 859.98px) {
       header .col-cta {
-        width: 40%; } }
+        width: 50%; } }
   header .main-menu {
     text-align: center; }
     @media (max-width: 859.98px) {

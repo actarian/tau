@@ -29,7 +29,7 @@ header {
 		width: 30%;
 
 		@include media-breakpoint-down(xs) {
-			width: 60%;
+			width: 40%;
 		}
 	}
 
@@ -38,7 +38,7 @@ header {
 		text-align: right;
 
 		@include media-breakpoint-down(xs) {
-			width: 40%;
+			width: 50%;
 		}
 	}
 
