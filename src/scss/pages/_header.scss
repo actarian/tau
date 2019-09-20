@@ -29,7 +29,7 @@ header {
 		width: 30%;
 
 		@include media-breakpoint-down(xs) {
-			width: 40%;
+			width: 50%;
 		}
 	}
 
@@ -39,6 +39,9 @@ header {
 
 		@include media-breakpoint-down(xs) {
 			width: 50%;
+			display: flex;
+			justify-content: flex-end;
+			align-items: center;
 		}
 	}
 
@@ -96,14 +99,13 @@ header {
 
 		@include media-breakpoint-down(md) {
 			margin-right: 10px;
-			font-size: 14px;
 		}
 
 		@include media-breakpoint-down(xs) {
 			margin-right: 10px;
-			font-size: 20px;
 			position: relative;
-			top: -5px;
+			top: -1px;
+			display: block;
 		}
 
 		.icon--search {
@@ -139,6 +141,14 @@ header {
 			}
 		}
 
+		.navbar-toggler {
+
+			@include media-breakpoint-down(xs) {
+				position: relative;
+				top: -1px;
+			}
+		}
+
 		.icon--hamburger { 
 			width: 30px;
 			height: 26px;
@@ -148,6 +158,8 @@ header {
 		@include media-breakpoint-down(xs) {
 			display: inline-block;
 			cursor: pointer;
+			position: relative;
+			top: -4px;
 		}
 	}
 

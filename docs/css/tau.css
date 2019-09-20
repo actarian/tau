@@ -3437,13 +3437,22 @@ header {
     width: 30%; }
     @media (max-width: 859.98px) {
       header .col-logo {
-        width: 40%; } }
+        width: 50%; } }
   header .col-cta {
     width: 30%;
     text-align: right; }
     @media (max-width: 859.98px) {
       header .col-cta {
-        width: 50%; } }
+        width: 50%;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-pack: end;
+            -ms-flex-pack: end;
+                justify-content: flex-end;
+        -webkit-box-align: center;
+            -ms-flex-align: center;
+                align-items: center; } }
   header .main-menu {
     text-align: center; }
     @media (max-width: 859.98px) {
@@ -3481,14 +3490,13 @@ header {
     top: 5px; }
     @media (max-width: 1439.98px) {
       header .main-search {
-        margin-right: 10px;
-        font-size: 14px; } }
+        margin-right: 10px; } }
     @media (max-width: 859.98px) {
       header .main-search {
         margin-right: 10px;
-        font-size: 20px;
         position: relative;
-        top: -5px; } }
+        top: -1px;
+        display: block; } }
     header .main-search .icon--search {
       width: 19px;
       height: 18px; }
@@ -3504,6 +3512,10 @@ header {
     display: none; }
     header .hamburger.active .icon--hamburger {
       fill: #121212; }
+    @media (max-width: 859.98px) {
+      header .hamburger .navbar-toggler {
+        position: relative;
+        top: -1px; } }
     header .hamburger .icon--hamburger {
       width: 30px;
       height: 26px;
@@ -3511,7 +3523,9 @@ header {
     @media (max-width: 859.98px) {
       header .hamburger {
         display: inline-block;
-        cursor: pointer; } }
+        cursor: pointer;
+        position: relative;
+        top: -4px; } }
   header .mobile-menu {
     display: none;
     background: #f9fafb;
