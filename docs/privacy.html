@@ -80,6 +80,7 @@
 	</style>
 	<!-- <link rel="stylesheet" href="css/vendors.css" /> -->
 	<link rel="stylesheet" href="css/tau.css" />
+	<link rel="stylesheet" href="css/jquery.fancybox.css" />
 	<!-- <link rel="stylesheet" href="https://use.typekit.net/ymy5peo.css"> -->
 	<link href="https://fonts.googleapis.com/css?family=Poppins:300,500,600,700&display=swap" rel="stylesheet">
 	<link href="fonts/sofia/stylesheet.css" rel="stylesheet">
@@ -182,13 +183,29 @@
 					<p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit.</p>
 					<h5>Titolo paragrafo h5</h5>
 					<p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit.</p>
+					<p><a data-fancybox="" data-src="#disclaimer-modal" data-modal="true" href="javascript:;" class="btn btn--secondary"><span>Disclaimer Fancy Box</span></a></p>
+					<div id="disclaimer-modal" style="display: none; max-width: 600px;">
+						<button type="button" data-fancybox-close="" class="fancybox-button fancybox-close-small" title="Close"><svg xmlns="http://www.w3.org/2000/svg" version="1" viewBox="0 0 24 24"><path d="M13 12l5-5-1-1-5 5-5-5-1 1 5 5-5 5 1 1 5-5 5 5 1-1z"></path></svg></button>
+						<h2>
+							I'm a modal!
+						</h2>
+						<p>
+							You can close me only by pressing custom button below.
+						</p>
+						<p>
+							It would also be possible to prevent closing using <code>beforeClose</code> callback.
+						</p>
+						<p>
+							<a data-fancybox-close="" class="btn btn--secondary"><span>Ho capito!</span></a>
+						</p>
+					</div>
 				</div>
 			</section>
 			
 		</div>
 	</main>
 	<footer>
-			<div class="pre-footer">
+			<!--<div class="pre-footer">
 				<div class="container">
 					<div class="row">
 						<div class="col-12">
@@ -200,7 +217,7 @@
 						</div>
 					</div>
 				</div>
-			</div>
+			</div>-->
 			<div class="container">
 				<div class="row">
 					<div class="col-12 col-md-1 col-back-to-top">
@@ -293,6 +310,7 @@
 	<script type="text/javascript" src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 	<script type="text/javascript" src="slick/slick.min.js"></script>
 	<script type="text/javascript" src="js/main.js"></script>
+	<script src="js/jquery.fancybox.js"></script>
 </body>
 
 
