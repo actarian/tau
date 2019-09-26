@@ -302,7 +302,12 @@ ng-transclude {
 		display: flex;
 		justify-content: space-between;
 
+		@include media-breakpoint-down(xs) {
+			display: block;
+		}
+
 		ul {
+			padding: 0 20px;
 
 			li {
 				color: $foreground-secondary;

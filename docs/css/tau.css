@@ -248,8 +248,13 @@ ng-transclude {
   -webkit-box-pack: justify;
       -ms-flex-pack: justify;
           justify-content: space-between; }
-  #caratteristiche-modal .wrap ul li {
-    color: #121212; }
+  @media (max-width: 859.98px) {
+    #caratteristiche-modal .wrap {
+      display: block; } }
+  #caratteristiche-modal .wrap ul {
+    padding: 0 20px; }
+    #caratteristiche-modal .wrap ul li {
+      color: #121212; }
 
 body {
   font-family: "Sofia Pro", sans-serif;
