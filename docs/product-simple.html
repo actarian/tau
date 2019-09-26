@@ -82,6 +82,7 @@
 	</style>
 	<!-- <link rel="stylesheet" href="css/vendors.css" /> -->
 	<link rel="stylesheet" href="css/tau.css" />
+	<link rel="stylesheet" href="css/jquery.fancybox.css" />
 	<!-- <link rel="stylesheet" href="https://use.typekit.net/ymy5peo.css"> -->
 	<link href="https://fonts.googleapis.com/css?family=Poppins:300,500,600,700&display=swap" rel="stylesheet">
 	<link href="fonts/sofia/stylesheet.css" rel="stylesheet">
@@ -173,6 +174,47 @@
 								<div class="title">protezione totale</div>
 								<div class="abstract">7 azioni in un solo prodotto</div>
 								<div class="description">Il dentifricio innovativo che offre 7 azioni in un unico gesto. Il Dentifricio Protezione Totale tau-marin è indicato per un utilizzo quotidiano.</div>
+								<div class="caratteristiche">
+									<a data-fancybox="" data-src="#caratteristiche-modal" data-modal="true" href="javascript:;"><span>Caratteristiche</span></a>
+									<div id="caratteristiche-modal" style="display: none; width: 800px;">
+										<button type="button" data-fancybox-close="" class="fancybox-button fancybox-close-small" title="Close"><svg xmlns="http://www.w3.org/2000/svg" version="1" viewBox="0 0 24 24"><path d="M13 12l5-5-1-1-5 5-5-5-1 1 5 5-5 5 1 1 5-5 5 5 1-1z"></path></svg></button>
+										<h2>
+											Caratteristiche INCI
+										</h2>
+										<div class="wrap">
+											<div class="item">
+												<ul>
+													<li>Acqua</li>
+													<li>Hydrogenated starch hydrolysate</li>
+													<li>Hydrated silica</li>
+													<li>Glycerin</li>
+													<li>Peg-150 distearate</li>
+													<li>Tetrapotassium pyrophosphate</li>
+													<li>Sodium lauryl sulfate</li>
+													<li>Aroma</li>
+													<li>Cellulose gum</li>
+													<li>Titanium dioxide</li>
+													<li>Sodium methylparaben</li>
+												</ul>
+											</div>
+											<div class="item">
+												<ul>
+													<li>Cinnamal</li>
+													<li>Sodium saccharin</li>
+													<li>Menthol</li>
+													<li>Disodium pyrophosphate</li>
+													<li>Sodium fluoride</li>
+													<li>Ammonium glycyrrhizate</li>
+													<li>Limonene</li>
+													<li>Cinnamomum zeylanicum bark oil</li>
+													<li>Eugenol</li>
+													<li>Linalool</li>
+													<li>Ci 42090</li>
+												</ul>
+											</div>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -411,6 +453,9 @@
 					</a>
 					<div class="logo-alfasigma-mobile">
 						<img src="img/footer/logo-alfasigma.png" alt="Alfasigma" />
+						<svg class="payoff">
+							<use xlink:href="#payoff"></use>
+						</svg>
 					</div>
 				</div>
 				<div class="col-12 col-md-5 offset-md-2 col-footer-menu">
@@ -432,6 +477,9 @@
 				<div class="col-12 col-md-3 offset-md-1 col-social">
 					<div class="logo-alfasigma">
 						<img src="img/footer/logo-alfasigma.png" alt="Alfasigma" />
+						<svg class="payoff">
+							<use xlink:href="#payoff"></use>
+						</svg>
 					</div>
 					<div class="social-footer">
 						<ul>
@@ -492,6 +540,7 @@
 	<script type="text/javascript" src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 	<script type="text/javascript" src="slick/slick.min.js"></script>
 	<script type="text/javascript" src="js/main.js"></script>
+	<script src="js/jquery.fancybox.js"></script>
 </body>
 
 

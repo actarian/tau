@@ -53,6 +53,16 @@
 		margin: 0 auto;
 	}
 
+	.caratteristiche {
+		text-align: center;
+		padding-top: 40px;
+		color: $foreground-primary;
+		
+		a {
+			font-weight: 600;
+		}
+	}
+
 	@include media-breakpoint-down(sm) {
 
 		.container {
@@ -118,6 +128,16 @@
 		font-size: 24px;
 		max-width: 660px;
 		margin: 0 auto;
+	}
+
+	.caratteristiche {
+		text-align: center;
+		padding-top: 40px;
+		color: $foreground-primary;
+		
+		a {
+			font-weight: 600;
+		}
 	}
 
 	@include media-breakpoint-down(sm) {

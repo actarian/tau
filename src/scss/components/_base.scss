@@ -288,3 +288,25 @@ ng-transclude {
 		font-weight: 600;
 	}
 }
+
+
+//Caretteristiche Modal
+#caratteristiche-modal {
+
+	h2 {
+		color: $foreground-secondary;
+		margin: 0;
+	}
+
+	.wrap {
+		display: flex;
+		justify-content: space-between;
+
+		ul {
+
+			li {
+				color: $foreground-secondary;
+			}
+		}
+	}
+}

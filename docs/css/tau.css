@@ -237,6 +237,20 @@ ng-transclude {
     font-size: 14px;
     font-weight: 600; }
 
+#caratteristiche-modal h2 {
+  color: #121212;
+  margin: 0; }
+
+#caratteristiche-modal .wrap {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between; }
+  #caratteristiche-modal .wrap ul li {
+    color: #121212; }
+
 body {
   font-family: "Sofia Pro", sans-serif;
   font-weight: 300;
@@ -3737,6 +3751,11 @@ footer {
           font-size: 14px;
           padding: 5px 0;
           letter-spacing: 0.5px; } }
+  footer .payoff {
+    height: 19px;
+    width: 219px;
+    fill: #fff;
+    display: block; }
   @media (max-width: 859.98px) {
     footer .logo-alfasigma {
       display: none; } }
@@ -4511,6 +4530,13 @@ footer {
   max-width: 660px;
   margin: 0 auto; }
 
+.section--product-hero .caratteristiche {
+  text-align: center;
+  padding-top: 40px;
+  color: #e10000; }
+  .section--product-hero .caratteristiche a {
+    font-weight: 600; }
+
 @media (max-width: 1023.98px) {
   .section--product-hero .container {
     -webkit-box-pack: end;
@@ -4565,6 +4591,13 @@ footer {
   font-size: 24px;
   max-width: 660px;
   margin: 0 auto; }
+
+.section--product-simple-hero .caratteristiche {
+  text-align: center;
+  padding-top: 40px;
+  color: #e10000; }
+  .section--product-simple-hero .caratteristiche a {
+    font-weight: 600; }
 
 @media (max-width: 1023.98px) {
   .section--product-simple-hero .title {
