@@ -3772,7 +3772,7 @@ footer {
       footer .logo-alfasigma-mobile {
         display: block; } }
   footer .social-footer {
-    margin-top: 40px;
+    margin-top: 20px;
     margin-bottom: 40px; }
     footer .social-footer ul {
       list-style: none;
@@ -4910,32 +4910,95 @@ footer {
         visibility: visible;
         opacity: 1; } }
 
-.section--product--simple-colors .container {
-  padding-top: 5vh;
-  /*
-		padding-top: 300px;
-		padding-bottom: 300px;
-		*/ }
-
-.section--product--simple-colors .title {
-  text-align: center;
-  font-size: 36px;
-  font-weight: 600;
-  line-height: 1.2;
-  color: #121212;
-  margin-bottom: 100px; }
-
-.section--product--simple-colors .image {
-  text-align: center; }
-  .section--product--simple-colors .image img {
-    max-width: 100%; }
-
-@media (max-width: 1023.98px) {
-  .section--product--simple-colors {
-    margin-bottom: 20vh; }
+.section--product--simple-colors {
+  padding: 100px 0; }
+  .section--product--simple-colors .title {
+    text-align: center;
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #121212;
+    margin-bottom: 100px; }
+  .section--product--simple-colors .image {
+    text-align: center; }
+    .section--product--simple-colors .image img {
+      max-width: 100%;
+      width: 600px; }
+  @media (max-width: 1023.98px) {
     .section--product--simple-colors .title {
-      font-size: 20px;
-      margin-bottom: 50vh; } }
+      font-size: 28px; } }
+  @media (max-width: 859.98px) {
+    .section--product--simple-colors .title {
+      font-size: 24px; } }
+  .section--product--simple-colors .group--inline {
+    position: relative;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    width: 100%;
+    padding-top: 100px; }
+  .section--product--simple-colors .group--nav {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center; }
+    .section--product--simple-colors .group--nav .label {
+      font-size: 16px;
+      font-weight: 700;
+      color: #121212;
+      text-transform: uppercase;
+      margin-right: 20px;
+      line-height: 1;
+      padding-top: 3px; }
+  .section--product--simple-colors .nav--colors {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0; }
+    .section--product--simple-colors .nav--colors .name {
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      color: #797a82;
+      text-transform: uppercase;
+      display: none; }
+    .section--product--simple-colors .nav--colors .bullet {
+      display: block;
+      position: relative;
+      width: 18px;
+      height: 18px;
+      border-radius: 9px; }
+      .section--product--simple-colors .nav--colors .bullet:before {
+        border-color: transparent; }
+    .section--product--simple-colors .nav--colors .color--red .bullet {
+      background: #e13334; }
+    .section--product--simple-colors .nav--colors .color--white .bullet {
+      background: #ebe8e1; }
+    .section--product--simple-colors .nav--colors .color--blue .bullet {
+      background: #0e38b1; }
+    .section--product--simple-colors .nav--colors .color--green .bullet {
+      background: #3d6d4f; }
+    .section--product--simple-colors .nav--colors li {
+      line-height: 0;
+      margin-right: 20px;
+      cursor: pointer; }
+      .section--product--simple-colors .nav--colors li:hover .bullet:before, .section--product--simple-colors .nav--colors li.active .bullet:before {
+        border-color: #e10000; }
+      .section--product--simple-colors .nav--colors li:last-child {
+        margin: 0; }
 
 .section--product-colors .container {
   padding-top: 5vh;
