@@ -4910,6 +4910,33 @@ footer {
         visibility: visible;
         opacity: 1; } }
 
+.section--product--simple-colors .container {
+  padding-top: 5vh;
+  /*
+		padding-top: 300px;
+		padding-bottom: 300px;
+		*/ }
+
+.section--product--simple-colors .title {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #121212;
+  margin-bottom: 100px; }
+
+.section--product--simple-colors .image {
+  text-align: center; }
+  .section--product--simple-colors .image img {
+    max-width: 100%; }
+
+@media (max-width: 1023.98px) {
+  .section--product--simple-colors {
+    margin-bottom: 20vh; }
+    .section--product--simple-colors .title {
+      font-size: 20px;
+      margin-bottom: 50vh; } }
+
 .section--product-colors .container {
   padding-top: 5vh;
   /*

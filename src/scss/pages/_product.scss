@@ -557,6 +557,44 @@
 	}
 }
 
+.section--product--simple-colors {
+
+	.container {
+		padding-top: 5vh;
+		/*
+		padding-top: 300px;
+		padding-bottom: 300px;
+		*/
+	}
+
+	.title {
+		text-align: center;
+		font-size: 36px;
+		font-weight: $font-semibold;
+		line-height: 1.2;
+		color: $foreground-secondary;
+		margin-bottom: 100px;
+	}
+
+	.image {
+		text-align: center;
+
+		img {
+			max-width: 100%;
+		}
+	}
+
+	@include media-breakpoint-down(sm) {
+		margin-bottom: 20vh;
+
+		.title {
+			font-size: 20px;
+			margin-bottom: 50vh;
+		}
+	}
+
+}
+
 .section--product-colors {
 
 	.container {
