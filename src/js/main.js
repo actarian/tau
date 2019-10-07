@@ -209,6 +209,48 @@ function jumpTo() {
     });
 }
 
+/* --------------------------------------------------
+  Color 44 gatti
+-------------------------------------------------- */
+function color44Gatti() {
+    //Blu
+    $('.color--blue2 .bullet').on('click', function(e){
+        $('.nav--colors').find('.color').removeClass('active');
+        $(this).parent().toggleClass('active');
+        $('.44-blu').fadeIn();
+        $('.44-giallo').hide();
+        $('.44-rosa').hide();
+        $('.44-fucsia').hide();
+    });
+    //Fucsia
+    $('.color--fucsia .bullet').on('click', function(e){
+        $('.nav--colors').find('.color').removeClass('active');
+        $(this).parent().toggleClass('active');
+        $('.44-blu').hide();
+        $('.44-giallo').hide();
+        $('.44-rosa').hide();
+        $('.44-fucsia').fadeIn();
+    });
+    //Giallo
+    $('.color--yellow .bullet').on('click', function(e){
+        $('.nav--colors').find('.color').removeClass('active');
+        $(this).parent().toggleClass('active');
+        $('.44-blu').hide();
+        $('.44-fucsia').hide();
+        $('.44-rosa').hide();
+        $('.44-giallo').fadeIn();
+    });
+    //Rosa
+    $('.color--pink .bullet').on('click', function(e){
+        $('.nav--colors').find('.color').removeClass('active');
+        $(this).parent().toggleClass('active');
+        $('.44-blu').hide();
+        $('.44-fucsia').hide();
+        $('.44-giallo').hide();
+        $('.44-rosa').fadeIn();
+    });
+}
+
 
 /* --------------------------------------------------
   DOC READY
@@ -221,5 +263,6 @@ $(function () {
     slideProdCorrelati();
     slideProdAbbinamento();
     slideInfoListingProd();
-    mobileMenu();    
+    mobileMenu();
+    color44Gatti();    
 });
