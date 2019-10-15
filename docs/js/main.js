@@ -251,6 +251,94 @@ function color44Gatti() {
     });
 }
 
+/* --------------------------------------------------
+  Slide 44 Gatti
+-------------------------------------------------- */
+function slide44Gatti() {
+    $('.slide-44-gatti').slick({
+        arrows: false,
+        dots: false,
+        fade: true,
+        autoplay: true,
+        autoplaySpeed: 2000,
+        slidesToShow: 1,
+        slidesToScroll: 1
+    });
+}
+
+/* --------------------------------------------------
+  Personaggi Mobile
+-------------------------------------------------- */
+function personaggiMobile() {
+    $('.personaggi-mobile').slick({
+        arrows: false,
+        dots: true,
+        slidesToShow: 2,
+        slidesToScroll: 1,
+        responsive: [
+            {
+                breakpoint: 1399,
+                settings: {
+                    slidesToShow: 3,
+                    slidesToScroll: 1
+                }
+            },
+            {
+                breakpoint: 1024,
+                settings: {
+                    slidesToShow: 2,
+                    slidesToScroll: 1
+                }
+            },
+            {
+                breakpoint: 767,
+                settings: {
+                    slidesToShow: 1,
+                    slidesToScroll: 1
+                }
+            }
+        ]
+    });
+}
+
+/* --------------------------------------------------
+  gattiProdHover
+-------------------------------------------------- */
+function gattiProdHover() {
+    $('.milady').mouseover(function() {
+        $('.viola .spazzolino').addClass('bounce');
+        $('.viola .ombra').addClass('scale');
+    });
+    $('.milady').mouseleave(function() {
+        $('.viola .spazzolino').removeClass('bounce');
+        $('.viola .ombra').removeClass('scale');
+    });
+    $('.pilon').mouseover(function() {
+        $('.rosa .spazzolino').addClass('bounce');
+        $('.rosa .ombra').addClass('scale');
+    });
+    $('.pilon').mouseleave(function() {
+        $('.rosa .spazzolino').removeClass('bounce');
+        $('.rosa .ombra').removeClass('scale');
+    });
+    $('.lampo').mouseover(function() {
+        $('.blu .spazzolino').addClass('bounce');
+        $('.blu .ombra').addClass('scale');
+    });
+    $('.lampo').mouseleave(function() {
+        $('.blu .spazzolino').removeClass('bounce');
+        $('.blu .ombra').removeClass('scale');
+    });
+    $('.meatball').mouseover(function() {
+        $('.giallo .spazzolino').addClass('bounce');
+        $('.giallo .ombra').addClass('scale');
+    });
+    $('.meatball').mouseleave(function() {
+        $('.giallo .spazzolino').removeClass('bounce');
+        $('.giallo .ombra').removeClass('scale');
+    });
+}
+
 
 /* --------------------------------------------------
   DOC READY
@@ -264,5 +352,8 @@ $(function () {
     slideProdAbbinamento();
     slideInfoListingProd();
     mobileMenu();
-    color44Gatti();    
+    color44Gatti();
+    gattiProdHover();
+    slide44Gatti();
+    personaggiMobile();
 });

@@ -2927,6 +2927,506 @@ button,
         font-size: 32px;
         line-height: 42px; } }
 
+.section--landing--44gatti-hero {
+  padding: 250px 0;
+  position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  background-repeat: no-repeat !important;
+  background-position: 60% 40% !important; }
+  @media (max-width: 1439.98px) {
+    .section--landing--44gatti-hero {
+      background-position: 20% 50% !important; } }
+  @media (max-width: 1023.98px) {
+    .section--landing--44gatti-hero {
+      background-position: 20% 50% !important; } }
+  @media (max-width: 859.98px) {
+    .section--landing--44gatti-hero {
+      padding: 50px 0;
+      background: none !important; } }
+  .section--landing--44gatti-hero .wrap {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center; }
+    .section--landing--44gatti-hero .wrap .left {
+      width: 50%;
+      -webkit-box-ordinal-group: 1;
+          -ms-flex-order: 0;
+              order: 0; }
+      @media (min-width: 1440px) {
+        .section--landing--44gatti-hero .wrap .left {
+          position: relative;
+          left: 100px; } }
+      @media (max-width: 1023.98px) {
+        .section--landing--44gatti-hero .wrap .left {
+          width: 100%;
+          -webkit-box-ordinal-group: 2;
+              -ms-flex-order: 1;
+                  order: 1; } }
+      .section--landing--44gatti-hero .wrap .left .arcobaleno-gatti {
+        position: relative;
+        display: none; }
+        @media (max-width: 1023.98px) {
+          .section--landing--44gatti-hero .wrap .left .arcobaleno-gatti {
+            display: block;
+            width: 100%;
+            margin: 0 auto;
+            top: -40px;
+            display: block;
+            left: -100px; } }
+        @media (max-width: 425px) {
+          .section--landing--44gatti-hero .wrap .left .arcobaleno-gatti {
+            left: -60px; } }
+      .section--landing--44gatti-hero .wrap .left .logo-gatti {
+        max-width: 100%; }
+        @media (max-width: 1023.98px) {
+          .section--landing--44gatti-hero .wrap .left .logo-gatti {
+            width: 250px; } }
+      @media (max-width: 1023.98px) {
+        .section--landing--44gatti-hero .wrap .left .cta {
+          display: none; } }
+    .section--landing--44gatti-hero .wrap .right {
+      width: 50%;
+      -webkit-box-ordinal-group: 2;
+          -ms-flex-order: 1;
+              order: 1; }
+      .section--landing--44gatti-hero .wrap .right img {
+        max-width: 100%; }
+        @media (max-width: 1023.98px) {
+          .section--landing--44gatti-hero .wrap .right img {
+            max-width: initial;
+            height: auto;
+            width: 100%; } }
+      @media (max-width: 1023.98px) {
+        .section--landing--44gatti-hero .wrap .right {
+          width: 100%;
+          -webkit-box-ordinal-group: 1;
+              -ms-flex-order: 0;
+                  order: 0;
+          text-align: center; } }
+  .section--landing--44gatti-hero .caption {
+    color: #121212;
+    max-width: 500px;
+    text-align: center; }
+    @media (max-width: 1023.98px) {
+      .section--landing--44gatti-hero .caption {
+        max-width: 100%; } }
+    @media (max-width: 859.98px) {
+      .section--landing--44gatti-hero .caption {
+        text-align: center; } }
+    .section--landing--44gatti-hero .caption .title {
+      font-size: 36px;
+      line-height: 46px;
+      font-weight: 500;
+      margin: 20px 0; }
+      .section--landing--44gatti-hero .caption .title i {
+        color: #e10000; }
+      @media (max-width: 1023.98px) {
+        .section--landing--44gatti-hero .caption .title {
+          font-size: 32px;
+          line-height: 52px; } }
+      @media (max-width: 859.98px) {
+        .section--landing--44gatti-hero .caption .title {
+          font-size: 24px;
+          line-height: 42px; } }
+    .section--landing--44gatti-hero .caption .description {
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 30px; }
+      @media (max-width: 859.98px) {
+        .section--landing--44gatti-hero .caption .description {
+          font-size: 16px;
+          line-height: 26px; } }
+    .section--landing--44gatti-hero .caption .cta {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: center;
+          -ms-flex-pack: center;
+              justify-content: center;
+      margin-top: 50px; }
+      @media (max-width: 859.98px) {
+        .section--landing--44gatti-hero .caption .cta {
+          -webkit-box-pack: center;
+              -ms-flex-pack: center;
+                  justify-content: center; } }
+      .section--landing--44gatti-hero .caption .cta .icon--arrow-circle-right {
+        width: 50px;
+        height: 50px;
+        fill: #e10000;
+        margin-right: 20px;
+        -webkit-transform: rotate(90deg);
+                transform: rotate(90deg); }
+      .section--landing--44gatti-hero .caption .cta a {
+        color: #e10000;
+        text-transform: uppercase;
+        font-weight: 600;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-align: center;
+            -ms-flex-align: center;
+                align-items: center; }
+        .section--landing--44gatti-hero .caption .cta a.link-arrow {
+          width: 60px;
+          height: 60px;
+          border: 2px solid;
+          padding: 20px;
+          border-radius: 100%;
+          margin-right: 20px;
+          -webkit-transition: all ease-in-out .3s;
+          transition: all ease-in-out .3s; }
+          .section--landing--44gatti-hero .caption .cta a.link-arrow .icon--arrow {
+            fill: #e10000;
+            -webkit-transform: rotate(90deg);
+                    transform: rotate(90deg); }
+          .section--landing--44gatti-hero .caption .cta a.link-arrow:hover .icon--arrow, .section--landing--44gatti-hero .caption .cta a.link-arrow:focus .icon--arrow {
+            -webkit-animation: icon-bounce-down 1s infinite;
+            /* Safari 4+ */
+            /* Fx 5+ */
+            /* Opera 12+ */
+            animation: icon-bounce-down 1s infinite;
+            /* IE 10+, Fx 29+ */ }
+
+.section--personaggi-intro {
+  text-align: center;
+  padding: 100px 0; }
+  .section--personaggi-intro .title {
+    font-size: 36px;
+    color: #121212;
+    font-weight: 600; }
+  .section--personaggi-intro .description {
+    font-size: 24px;
+    color: #797a82;
+    font-weight: 400;
+    margin: 20px 0; }
+  .section--personaggi-intro .cta a {
+    color: #e10000;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 16px; }
+
+.section--personaggi {
+  padding: 100px 0;
+  text-align: center;
+  position: relative; }
+  .section--personaggi .personaggi-mobile {
+    display: none; }
+    @media (max-width: 1399px) {
+      .section--personaggi .personaggi-mobile {
+        display: block; } }
+    .section--personaggi .personaggi-mobile img {
+      margin: 0 auto; }
+    .section--personaggi .personaggi-mobile .slick-slide {
+      outline: none; }
+    .section--personaggi .personaggi-mobile .slick-dots {
+      margin-top: 50px; }
+  .section--personaggi .personaggi-desktop {
+    display: block; }
+    @media (max-width: 1399px) {
+      .section--personaggi .personaggi-desktop {
+        display: none; } }
+  .section--personaggi .milady {
+    position: absolute;
+    left: 0;
+    top: 50px; }
+  .section--personaggi .lampo {
+    position: absolute;
+    right: 0;
+    top: 50px; }
+  .section--personaggi .pilon {
+    position: absolute;
+    left: 0;
+    bottom: 50px; }
+  .section--personaggi .meatball {
+    position: absolute;
+    right: 0;
+    bottom: 50px; }
+  .section--personaggi img {
+    max-width: 100%; }
+  .section--personaggi .wrap {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center; }
+    .section--personaggi .wrap .item {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+          -ms-flex-direction: column;
+              flex-direction: column;
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center; }
+      .section--personaggi .wrap .item img.spazzolino {
+        width: 66px;
+        height: auto;
+        max-width: 100%;
+        margin: 0 40px; }
+        .section--personaggi .wrap .item img.spazzolino.bounce {
+          -webkit-animation-name: bounce;
+                  animation-name: bounce;
+          -webkit-animation-duration: 1.5s;
+                  animation-duration: 1.5s;
+          -webkit-animation-fill-mode: both;
+                  animation-fill-mode: both;
+          -webkit-animation-timing-function: linear;
+                  animation-timing-function: linear;
+          -webkit-animation-iteration-count: infinite;
+                  animation-iteration-count: infinite; }
+
+@-webkit-keyframes bounce {
+  0%, 20%, 40%, 60%, 80%, 100% {
+    -webkit-transform: translateY(0); }
+  50% {
+    -webkit-transform: translateY(-20px); } }
+
+@keyframes bounce {
+  0%, 20%, 40%, 60%, 80%, 100% {
+    -webkit-transform: translateY(0);
+            transform: translateY(0); }
+  50% {
+    -webkit-transform: translateY(-20px);
+            transform: translateY(-20px); } }
+      .section--personaggi .wrap .item img.ombra {
+        scale: 1; }
+        .section--personaggi .wrap .item img.ombra.scale {
+          -webkit-animation-name: scale;
+                  animation-name: scale;
+          -webkit-animation-duration: 1.5s;
+                  animation-duration: 1.5s;
+          -webkit-animation-fill-mode: both;
+                  animation-fill-mode: both;
+          -webkit-animation-timing-function: linear;
+                  animation-timing-function: linear;
+          -webkit-animation-iteration-count: infinite;
+                  animation-iteration-count: infinite; }
+
+@-webkit-keyframes scale {
+  0%, 20%, 40%, 60%, 80%, 100% {
+    -webkit-transform: scale(1); }
+  50% {
+    -webkit-transform: scale(0.3); } }
+
+@keyframes scale {
+  0%, 20%, 40%, 60%, 80%, 100% {
+    -webkit-transform: scale(1);
+            transform: scale(1); }
+  50% {
+    -webkit-transform: scale(0.3);
+            transform: scale(0.3); } }
+
+.section--prod44gatti-intro {
+  text-align: center;
+  padding: 100px 0; }
+  .section--prod44gatti-intro .title {
+    font-size: 36px;
+    color: #121212;
+    font-weight: 600; }
+  .section--prod44gatti-intro .description {
+    font-size: 24px;
+    color: #797a82;
+    font-weight: 400;
+    margin: 20px 0; }
+
+.section--prod44gatti {
+  padding: 100px 0; }
+  .section--prod44gatti .wrap {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center; }
+    @media (max-width: 1439.98px) {
+      .section--prod44gatti .wrap {
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+        -webkit-box-align: start;
+            -ms-flex-align: start;
+                align-items: flex-start; } }
+    .section--prod44gatti .wrap .col1, .section--prod44gatti .wrap .col3 {
+      width: 25%; }
+      @media (max-width: 1439.98px) {
+        .section--prod44gatti .wrap .col1, .section--prod44gatti .wrap .col3 {
+          -webkit-box-ordinal-group: 3;
+              -ms-flex-order: 2;
+                  order: 2;
+          width: 100%; } }
+      .section--prod44gatti .wrap .col1 .item, .section--prod44gatti .wrap .col3 .item {
+        padding-bottom: 100px; }
+        @media (max-width: 1439.98px) {
+          .section--prod44gatti .wrap .col1 .item, .section--prod44gatti .wrap .col3 .item {
+            margin: 0 20px; } }
+        @media (max-width: 1023.98px) {
+          .section--prod44gatti .wrap .col1 .item, .section--prod44gatti .wrap .col3 .item {
+            padding-bottom: 50px; } }
+        .section--prod44gatti .wrap .col1 .item:last-child, .section--prod44gatti .wrap .col3 .item:last-child {
+          padding-bottom: 0; }
+          @media (max-width: 1023.98px) {
+            .section--prod44gatti .wrap .col1 .item:last-child, .section--prod44gatti .wrap .col3 .item:last-child {
+              padding-bottom: 50px; } }
+        @media (max-width: 1439.98px) {
+          .section--prod44gatti .wrap .col1 .item .caption, .section--prod44gatti .wrap .col3 .item .caption {
+            text-align: center; } }
+        .section--prod44gatti .wrap .col1 .item .caption .title, .section--prod44gatti .wrap .col3 .item .caption .title {
+          color: #e95e0f;
+          font-family: 'Baloo Bhai', cursive;
+          font-size: 24px;
+          line-height: 36px;
+          text-transform: uppercase; }
+          @media (max-width: 1023.98px) {
+            .section--prod44gatti .wrap .col1 .item .caption .title, .section--prod44gatti .wrap .col3 .item .caption .title {
+              text-transform: initial; } }
+        @media (max-width: 1439.98px) {
+          .section--prod44gatti .wrap .col1 .item .icon, .section--prod44gatti .wrap .col3 .item .icon {
+            display: none; } }
+    .section--prod44gatti .wrap .col2 {
+      width: 30%; }
+      @media (max-width: 1439.98px) {
+        .section--prod44gatti .wrap .col2 {
+          -webkit-box-ordinal-group: 2;
+              -ms-flex-order: 1;
+                  order: 1;
+          width: 100%; } }
+      .section--prod44gatti .wrap .col2 .note {
+        position: absolute;
+        top: -50px; }
+        @media (max-width: 1023.98px) {
+          .section--prod44gatti .wrap .col2 .note {
+            display: none; } }
+      .section--prod44gatti .wrap .col2 .slide-44-gatti {
+        left: 70px;
+        top: 0; }
+        @media (max-width: 1023.98px) {
+          .section--prod44gatti .wrap .col2 .slide-44-gatti {
+            left: 0;
+            margin-bottom: 50px; } }
+        @media (max-width: 1023.98px) {
+          .section--prod44gatti .wrap .col2 .slide-44-gatti .slick-slide img {
+            max-width: 100%;
+            height: 500px;
+            margin: 0 auto; } }
+    .section--prod44gatti .wrap .col1 .item {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between; }
+      .section--prod44gatti .wrap .col1 .item .caption {
+        text-align: right; }
+        @media (max-width: 1023.98px) {
+          .section--prod44gatti .wrap .col1 .item .caption {
+            text-align: center; } }
+      .section--prod44gatti .wrap .col1 .item .icon {
+        position: relative;
+        top: -15px;
+        left: 10px; }
+    .section--prod44gatti .wrap .col3 .item {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: justify;
+          -ms-flex-pack: justify;
+              justify-content: space-between; }
+      .section--prod44gatti .wrap .col3 .item .caption {
+        text-align: left; }
+        @media (max-width: 1023.98px) {
+          .section--prod44gatti .wrap .col3 .item .caption {
+            text-align: center; } }
+      .section--prod44gatti .wrap .col3 .item .icon {
+        position: relative;
+        top: -15px;
+        right: 10px; }
+
+.section--44gatti-consigli {
+  padding: 100px 0; }
+  .section--44gatti-consigli .intro {
+    text-align: center; }
+    .section--44gatti-consigli .intro .title {
+      font-size: 36px;
+      font-weight: 600;
+      color: #121212;
+      padding-bottom: 50px; }
+  .section--44gatti-consigli .wrap {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center; }
+    @media (max-width: 1023.98px) {
+      .section--44gatti-consigli .wrap {
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap; } }
+    .section--44gatti-consigli .wrap .col1 {
+      text-align: center; }
+      @media (max-width: 1023.98px) {
+        .section--44gatti-consigli .wrap .col1 {
+          width: 100%;
+          text-align: center; } }
+      .section--44gatti-consigli .wrap .col1 img {
+        max-width: 100%; }
+    .section--44gatti-consigli .wrap .col2 {
+      width: 30%; }
+      @media (max-width: 1023.98px) {
+        .section--44gatti-consigli .wrap .col2 {
+          width: 100%; } }
+      .section--44gatti-consigli .wrap .col2 .item {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+                flex-direction: column;
+        -webkit-box-pack: justify;
+            -ms-flex-pack: justify;
+                justify-content: space-between;
+        text-align: center;
+        padding-bottom: 50px;
+        padding-left: 30px;
+        padding-right: 30px; }
+        .section--44gatti-consigli .wrap .col2 .item:last-child {
+          padding-bottom: 0; }
+        .section--44gatti-consigli .wrap .col2 .item .icon {
+          padding-bottom: 20px; }
+        .section--44gatti-consigli .wrap .col2 .item .title {
+          color: #69c64c;
+          font-family: 'Baloo Bhai', cursive;
+          font-size: 24px;
+          line-height: 20px;
+          padding-bottom: 20px; }
+        .section--44gatti-consigli .wrap .col2 .item .description {
+          color: #797a82;
+          font-size: 18px;
+          line-height: 30px; }
+
 .section--landing-hero {
   padding: 100px 0;
   position: relative;
