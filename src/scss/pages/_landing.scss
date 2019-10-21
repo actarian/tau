@@ -316,6 +316,15 @@
 
 		img {
 			cursor: pointer;
+			transition: all ease-in-out .3s;
+
+			&.milady, &.pilon, &.lampo, &.meatball {
+
+				&:hover {
+					transform: scale(1.1);
+					transition: all ease-in-out .3s;
+				}
+			}
 		}
 	}
 

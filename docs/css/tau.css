@@ -3155,7 +3155,14 @@ button,
       .section--personaggi .personaggi-desktop {
         display: none; } }
     .section--personaggi .personaggi-desktop img {
-      cursor: pointer; }
+      cursor: pointer;
+      -webkit-transition: all ease-in-out .3s;
+      transition: all ease-in-out .3s; }
+      .section--personaggi .personaggi-desktop img.milady:hover, .section--personaggi .personaggi-desktop img.pilon:hover, .section--personaggi .personaggi-desktop img.lampo:hover, .section--personaggi .personaggi-desktop img.meatball:hover {
+        -webkit-transform: scale(1.1);
+                transform: scale(1.1);
+        -webkit-transition: all ease-in-out .3s;
+        transition: all ease-in-out .3s; }
   .section--personaggi .milady {
     position: absolute;
     left: 0;
