@@ -3154,6 +3154,8 @@ button,
     @media (max-width: 1399px) {
       .section--personaggi .personaggi-desktop {
         display: none; } }
+    .section--personaggi .personaggi-desktop img {
+      cursor: pointer; }
   .section--personaggi .milady {
     position: absolute;
     left: 0;
