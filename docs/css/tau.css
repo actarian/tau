@@ -3004,10 +3004,11 @@ button,
           .section--landing--44gatti-hero .wrap .left .arcobaleno-gatti {
             left: -60px; } }
       .section--landing--44gatti-hero .wrap .left .logo-gatti {
-        max-width: 100%; }
+        width: 200px;
+        height: auto; }
         @media (max-width: 1023.98px) {
           .section--landing--44gatti-hero .wrap .left .logo-gatti {
-            width: 250px; } }
+            width: 150px; } }
       @media (max-width: 1023.98px) {
         .section--landing--44gatti-hero .wrap .left .cta {
           display: none; } }
@@ -3119,32 +3120,48 @@ button,
 .section--personaggi-intro {
   text-align: center;
   padding: 100px 0; }
+  @media (max-width: 767px) {
+    .section--personaggi-intro {
+      padding: 50px 0; } }
   .section--personaggi-intro .title {
     font-size: 36px;
     color: #121212;
     font-weight: 600; }
+    @media (max-width: 767px) {
+      .section--personaggi-intro .title {
+        font-size: 24px; } }
   .section--personaggi-intro .description {
     font-size: 24px;
     color: #797a82;
     font-weight: 400;
     margin: 20px 0; }
+    @media (max-width: 767px) {
+      .section--personaggi-intro .description {
+        font-size: 18px; } }
   .section--personaggi-intro .cta a {
     color: #e10000;
     font-weight: 600;
     text-transform: uppercase;
     font-size: 16px; }
+    @media (max-width: 767px) {
+      .section--personaggi-intro .cta a {
+        font-size: 14px; } }
 
 .section--personaggi {
   padding: 100px 0;
   text-align: center;
   position: relative; }
+  @media (max-width: 767px) {
+    .section--personaggi {
+      padding: 50px 0; } }
   .section--personaggi .personaggi-mobile {
     display: none; }
     @media (max-width: 1399px) {
       .section--personaggi .personaggi-mobile {
         display: block; } }
     .section--personaggi .personaggi-mobile img {
-      margin: 0 auto; }
+      margin: 0 auto;
+      height: 500px; }
     .section--personaggi .personaggi-mobile .slick-slide {
       outline: none; }
     .section--personaggi .personaggi-mobile .slick-dots {
@@ -3260,23 +3277,38 @@ button,
 .section--prod44gatti-intro {
   text-align: center;
   padding: 100px 0; }
+  @media (max-width: 767px) {
+    .section--prod44gatti-intro {
+      padding: 50px 0; } }
   .section--prod44gatti-intro .title {
     font-size: 36px;
     color: #121212;
     font-weight: 600; }
+    @media (max-width: 767px) {
+      .section--prod44gatti-intro .title {
+        font-size: 24px; } }
   .section--prod44gatti-intro .description {
     font-size: 24px;
     color: #797a82;
     font-weight: 400;
     margin: 20px 0; }
+    @media (max-width: 767px) {
+      .section--prod44gatti-intro .description {
+        font-size: 18px; } }
   .section--prod44gatti-intro .cta a {
     color: #e10000;
     font-weight: 600;
     text-transform: uppercase;
     font-size: 16px; }
+    @media (max-width: 767px) {
+      .section--prod44gatti-intro .cta a {
+        font-size: 14px; } }
 
 .section--prod44gatti {
   padding: 100px 0; }
+  @media (max-width: 767px) {
+    .section--prod44gatti {
+      padding: 50px 0; } }
   .section--prod44gatti .wrap {
     display: -webkit-box;
     display: -ms-flexbox;
@@ -3328,6 +3360,9 @@ button,
           @media (max-width: 1439.98px) {
             .section--prod44gatti .wrap .col1 .item .caption .title, .section--prod44gatti .wrap .col3 .item .caption .title {
               text-transform: initial; } }
+          @media (max-width: 767px) {
+            .section--prod44gatti .wrap .col1 .item .caption .title, .section--prod44gatti .wrap .col3 .item .caption .title {
+              font-size: 18px; } }
         @media (max-width: 1439.98px) {
           .section--prod44gatti .wrap .col1 .item .icon, .section--prod44gatti .wrap .col3 .item .icon {
             display: none; } }
@@ -3393,6 +3428,9 @@ button,
 
 .section--44gatti-consigli {
   padding: 100px 0; }
+  @media (max-width: 767px) {
+    .section--44gatti-consigli {
+      padding: 50px 0; } }
   .section--44gatti-consigli .intro {
     text-align: center; }
     .section--44gatti-consigli .intro .title {
@@ -3400,6 +3438,9 @@ button,
       font-weight: 600;
       color: #121212;
       padding-bottom: 50px; }
+      @media (max-width: 767px) {
+        .section--44gatti-consigli .intro .title {
+          font-size: 24px; } }
   .section--44gatti-consigli .wrap {
     display: -webkit-box;
     display: -ms-flexbox;
@@ -3452,10 +3493,27 @@ button,
           font-size: 24px;
           line-height: 20px;
           padding-bottom: 20px; }
+          @media (max-width: 767px) {
+            .section--44gatti-consigli .wrap .col2 .item .title {
+              font-size: 18px; } }
         .section--44gatti-consigli .wrap .col2 .item .description {
           color: #797a82;
           font-size: 18px;
           line-height: 30px; }
+          @media (max-width: 767px) {
+            .section--44gatti-consigli .wrap .col2 .item .description {
+              font-size: 14px; } }
+  .section--44gatti-consigli .cta {
+    text-align: center;
+    padding-top: 50px; }
+    .section--44gatti-consigli .cta a {
+      color: #e10000;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 16px; }
+      @media (max-width: 767px) {
+        .section--44gatti-consigli .cta a {
+          font-size: 14px; } }
 
 .section--landing-hero {
   padding: 100px 0;
@@ -3469,6 +3527,9 @@ button,
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center; }
+  @media (max-width: 767px) {
+    .section--landing-hero {
+      padding: 50px 0; } }
   .section--landing-hero .wrap {
     display: -webkit-box;
     display: -ms-flexbox;

@@ -117,10 +117,11 @@
 			}
 
 			.logo-gatti {
-				max-width: 100%;
+				width: 200px;
+				height: auto;
 
 				@include media-breakpoint-down(sm) {
-					width: 250px;
+					width: 150px;
 				}
 			}
 
@@ -258,10 +259,19 @@
 	text-align: center;
 	padding: 100px 0;
 
+	@media (max-width: 767px) {
+		padding: 50px 0;
+	}
+		
+
 	.title {
 		font-size: 36px;
 		color: $foreground-secondary;
 		font-weight: $font-semibold;
+
+		@media (max-width: 767px) {
+			font-size: 24px;
+		}
 	}
 
 	.description {
@@ -269,6 +279,10 @@
 		color: #797a82;
 		font-weight: $font-regular;
 		margin: 20px 0;
+
+		@media (max-width: 767px) {
+			font-size: 18px;
+		}
 	}
 
 	.cta {
@@ -278,6 +292,10 @@
 			font-weight: $font-semibold;
 			text-transform: uppercase;
 			font-size: 16px;
+
+			@media (max-width: 767px) {
+				font-size: 14px;
+			}
 		}
 	}
 }
@@ -286,6 +304,10 @@
 	padding: 100px 0;
 	text-align: center;
 	position: relative;
+
+	@media (max-width: 767px) {
+		padding: 50px 0;
+	}
 
 	.personaggi-mobile {
 		display: none;
@@ -296,6 +318,7 @@
 
 		img {
 			margin: 0 auto;
+			height: 500px;
 		}
 
 		.slick-slide {
@@ -419,10 +442,18 @@
 	text-align: center;
 	padding: 100px 0;
 
+	@media (max-width: 767px) {
+		padding: 50px 0;
+	}
+
 	.title {
 		font-size: 36px;
 		color: $foreground-secondary;
 		font-weight: $font-semibold;
+
+		@media (max-width: 767px) {
+			font-size: 24px;
+		}
 	}
 
 	.description {
@@ -430,6 +461,10 @@
 		color: #797a82;
 		font-weight: $font-regular;
 		margin: 20px 0;
+
+		@media (max-width: 767px) {
+			font-size: 18px;
+		}
 	}
 
 	.cta {
@@ -439,6 +474,10 @@
 			font-weight: $font-semibold;
 			text-transform: uppercase;
 			font-size: 16px;
+
+			@media (max-width: 767px) {
+				font-size: 14px;
+			}
 		}
 	}
 }
@@ -446,6 +485,10 @@
 
 .section--prod44gatti {
 	padding: 100px 0;
+
+	@media (max-width: 767px) {
+		padding: 50px 0;
+	}
 
 	.wrap {
 		display: flex;
@@ -501,6 +544,11 @@
 						@include media-breakpoint-down(md) {
 							text-transform: initial;
 						}
+
+						@media (max-width: 767px) {
+							font-size: 18px;
+						}
+							
 					}
 				}
 
@@ -604,6 +652,10 @@
 .section--44gatti-consigli {
 	padding: 100px 0;
 
+	@media (max-width: 767px) {
+		padding: 50px 0;
+	}
+
 	.intro {
 		text-align: center;
 
@@ -612,6 +664,11 @@
 			font-weight: 600;
 			color: $foreground-secondary;
 			padding-bottom: 50px;
+
+			@media (max-width: 767px) {
+				font-size: 24px;
+			}
+				
 		}
 	}
 
@@ -667,13 +724,37 @@
 					font-size: 24px;
 					line-height: 20px;
 					padding-bottom: 20px;
+
+					@media (max-width: 767px) {
+						font-size: 18px;
+					}
 				}
 
 				.description {
 					color: #797a82;
 					font-size: 18px;
 					line-height: 30px;
+
+					@media (max-width: 767px) {
+						font-size: 14px;
+					}
 				}
+			}
+		}
+	}
+
+	.cta {
+		text-align: center;
+		padding-top: 50px;
+
+		a {
+			color: $foreground-primary;
+			font-weight: $font-semibold;
+			text-transform: uppercase;
+			font-size: 16px;
+
+			@media (max-width: 767px) {
+				font-size: 14px;
 			}
 		}
 	}
@@ -685,6 +766,10 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
+
+	@media (max-width: 767px) {
+		padding: 50px 0;
+	}
 
 	.wrap {
 		display: flex;
@@ -891,6 +976,7 @@
 
 	@include media-breakpoint-down(xs) {
 		padding: 50px 0;
+		
 	}
 
 	.intro {
