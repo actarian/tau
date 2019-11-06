@@ -3002,7 +3002,15 @@ button,
             left: -100px; } }
         @media (max-width: 425px) {
           .section--landing--44gatti-hero .wrap .left .arcobaleno-gatti {
-            left: -60px; } }
+            left: -170px;
+            width: 530px; } }
+        @media (max-width: 375px) {
+          .section--landing--44gatti-hero .wrap .left .arcobaleno-gatti {
+            left: -200px; } }
+        @media (max-width: 320px) {
+          .section--landing--44gatti-hero .wrap .left .arcobaleno-gatti {
+            left: -175px;
+            width: 450px; } }
       .section--landing--44gatti-hero .wrap .left .logo-gatti {
         width: 200px;
         height: auto; }
@@ -3116,6 +3124,18 @@ button,
             /* Opera 12+ */
             animation: icon-bounce-down 1s infinite;
             /* IE 10+, Fx 29+ */ }
+  .section--landing--44gatti-hero .legal-line {
+    position: absolute;
+    bottom: -30px;
+    color: #000;
+    font-weight: 600;
+    font-size: 14px;
+    display: block;
+    width: 100%;
+    text-align: center; }
+    @media (max-width: 425px) {
+      .section--landing--44gatti-hero .legal-line {
+        display: none; } }
 
 .section--personaggi-intro {
   text-align: center;

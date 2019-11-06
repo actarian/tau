@@ -112,7 +112,17 @@
 				}
 
 				@media (max-width: 425px) {
-					left: -60px;
+					left: -170px;
+    				width: 530px;
+				}
+
+				@media (max-width: 375px) {
+					left: -200px;
+				}
+
+				@media (max-width: 320px) {
+					left: -175px;
+					width: 450px;
 				}
 			}
 
@@ -251,6 +261,20 @@
 					}
 				}
 			}
+		}
+	}
+	.legal-line {
+		position: absolute;
+		bottom: -30px;
+		color: #000;
+		font-weight: 600;
+		font-size: 14px;
+		display: block;
+		width: 100%;
+		text-align: center;
+
+		@media (max-width: 425px) {
+			display: none;
 		}
 	}
 }
@@ -976,7 +1000,6 @@
 
 	@include media-breakpoint-down(xs) {
 		padding: 50px 0;
-		
 	}
 
 	.intro {
