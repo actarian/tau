@@ -5762,6 +5762,16 @@ footer {
     background: #0e38b1; }
   .section--product-colors .nav--colors .color--green .bullet {
     background: #3d6d4f; }
+  .section--product-colors .nav--colors .color--black .bullet {
+    background: #232221; }
+  .section--product-colors .nav--colors .color--azur .bullet {
+    background: #aae5ee; }
+  .section--product-colors .nav--colors .color--watergreen .bullet {
+    background: #83ffc6; }
+  .section--product-colors .nav--colors .color--lilat .bullet {
+    background: #b189db; }
+  .section--product-colors .nav--colors .color--grey .bullet {
+    background: #d9d9d9; }
   .section--product-colors .nav--colors li {
     line-height: 0;
     margin-right: 20px;

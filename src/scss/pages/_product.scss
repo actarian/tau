@@ -57,7 +57,7 @@
 		text-align: center;
 		padding-top: 40px;
 		color: $foreground-primary;
-		
+
 		a {
 			font-weight: 600;
 		}
@@ -134,7 +134,7 @@
 		text-align: center;
 		padding-top: 40px;
 		color: $foreground-primary;
-		
+
 		a {
 			font-weight: 600;
 		}
@@ -229,7 +229,7 @@
 		@include media-breakpoint-down(sm) {
 			display: block;
 		}
-		
+
 		.listing__item {
 
 			.title {
@@ -574,7 +574,7 @@
 
 		img {
 			max-width: 100%;
-			width:600px;
+			width: 600px;
 		}
 	}
 
@@ -872,6 +872,26 @@
 			background: #3d6d4f;
 		}
 
+		.color--black .bullet {
+			background: #232221;
+		}
+
+		.color--azur .bullet {
+			background: #aae5ee;
+		}
+
+		.color--watergreen .bullet {
+			background: #83ffc6;
+		}
+
+		.color--lilat .bullet {
+			background: #b189db;
+		}
+
+		.color--grey .bullet {
+			background: #d9d9d9;
+		}
+
 		li {
 			line-height: 0;
 			margin-right: 20px;
@@ -1123,7 +1143,7 @@
 						animation-fill-mode: forwards;
 					}
 				}
-			}			
+			}
 		}
 
 		&.item-top {
@@ -1532,22 +1552,22 @@
 			&.item-bottom {
 
 				&:hover {
-	
+
 					img {
-	
+
 						@include media-breakpoint-up(sm) {
 							-webkit-animation: myscale .5s;
 							animation: myscale .5s;
 							animation-fill-mode: forwards;
 						}
 					}
-				}			
+				}
 			}
-	
+
 			&.item-top {
-	
+
 				&:hover {
-	
+
 					.img {
 						@include media-breakpoint-up(sm) {
 							-webkit-animation: mymove .5s;
@@ -1555,9 +1575,9 @@
 							animation-fill-mode: forwards;
 						}
 					}
-	
+
 					.caption {
-	
+
 						@include media-breakpoint-up(sm) {
 							text-align: left;
 							padding-left: 100px;

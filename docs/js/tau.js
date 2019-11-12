@@ -20474,8 +20474,7 @@ class Controllers extends _emittable.default {
   get controller() {
   	return this.controller_;
   }
-  
-  set controller(controller) {
+  	set controller(controller) {
   	if (this.controller_ !== controller) {
   		if (this.controller_) {
   			this.controller_.active = false;
