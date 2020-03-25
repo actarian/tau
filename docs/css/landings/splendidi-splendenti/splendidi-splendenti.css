@@ -543,6 +543,20 @@ html.has-scroll-dragging {
     color: #fff; }
     .splendidi-splendenti .section--ottimista:before {
       background: #ffc500; }
+    .splendidi-splendenti .section--ottimista .group--picture {
+      position: relative; }
+    .splendidi-splendenti .section--ottimista .corianders {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0;
+      height: 0; }
+    .splendidi-splendenti .section--ottimista .coriander {
+      position: absolute;
+      background-color: #91e600;
+      width: 50px;
+      height: 50px;
+      border-radius: 6px; }
   .splendidi-splendenti .section--eclettico {
     color: #fff; }
     .splendidi-splendenti .section--eclettico:before {
@@ -671,6 +685,12 @@ html.has-scroll-dragging {
       display: none; }
     .splendidi-splendenti header .mobile-menu {
       display: none; } }
+  @media (min-height: 790px) {
+    .splendidi-splendenti .banner {
+      font-size: 32px; }
+      .splendidi-splendenti .banner span {
+        padding: 0 6px;
+        font-size: 32px; } }
   @media (max-width: 939px) {
     .splendidi-splendenti header {
       width: calc(100% - 30px);

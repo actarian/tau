@@ -1,6 +1,7 @@
 import LocomotiveScroll from 'locomotive-scroll';
 import Swiper from 'swiper';
 import PainterComponent from './painter/painter.component';
+import ParticleComponent from './particle/particle.component';
 
 const TWEEN = true;
 
@@ -10,6 +11,7 @@ class SplendidiSplendenti {
 		this.initSpazzolino();
 		this.initNonSolo();
 		this.initBanners();
+		this.initCoriander();
 		this.initMouths();
 		this.initPainter();
 		this.initEmergency();
@@ -149,6 +151,13 @@ class SplendidiSplendenti {
 				TweenMax.fromTo(inner, width / 50, { x: 0 }, { x: -width, ease: Linear.easeNone, repeat: -1 });
 			}
 			element.classList.add('init');
+		});
+	}
+
+	initCoriander() {
+		const container = document.querySelector('.corianders');
+		const corianders = new Array(50).fill(0).map(() => new ParticleComponent(document.createElement("div"))).map(particle => {
+			container.appendChild(particle.node);
 		});
 	}
 

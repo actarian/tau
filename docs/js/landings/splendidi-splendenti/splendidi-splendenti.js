@@ -13769,11 +13769,81 @@ exports.default = PainterComponent;
 },{"tinycolor2":3}],5:[function(require,module,exports){
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+class ParticleComponent {
+  constructor(node) {
+    this.node = node;
+    node.setAttribute('class', 'coriander');
+    this.init();
+    this.animate();
+  }
+
+  init() {
+    const node = this.node;
+    TweenMax.set(node, {
+      scale: 0.4 + Math.random() * 0.6,
+      opacity: 0,
+      x: 0,
+      y: 0
+    });
+  }
+
+  animate() {
+    const node = this.node;
+    const props = {
+      pow: 0
+    };
+    let vx = -10 + Math.random() * 20;
+    let vy = -3 - Math.random() * 4;
+    let vr = -3 + Math.random() * 6;
+    const tween = TweenMax.fromTo(props, 2.5, {
+      pow: 0
+    }, {
+      pow: 1,
+      overwrite: 'all',
+      onUpdate: () => {
+        // console.log(props.pow);
+        TweenMax.set(node, {
+          opacity: props.pow,
+          rotation: `+=${vr}deg`,
+          x: `+=${vx}`,
+          y: `+=${vy}`
+        });
+        vx *= 0.98;
+        vy += 0.1;
+      },
+      onRepeat: () => {
+        // console.log(props.pow);
+        vx = -10 + Math.random() * 20;
+        vy = -3 - Math.random() * 4;
+        TweenMax.set(node, {
+          x: 0,
+          y: 0
+        });
+      },
+      delay: Math.random() * 2.5,
+      repeat: -1
+    });
+  }
+
+}
+
+exports.default = ParticleComponent;
+
+},{}],6:[function(require,module,exports){
+"use strict";
+
 var _locomotiveScroll = _interopRequireDefault(require("locomotive-scroll"));
 
 var _swiper = _interopRequireDefault(require("swiper"));
 
 var _painter = _interopRequireDefault(require("./painter/painter.component"));
+
+var _particle = _interopRequireDefault(require("./particle/particle.component"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -13784,6 +13854,7 @@ class SplendidiSplendenti {
     this.initSpazzolino();
     this.initNonSolo();
     this.initBanners();
+    this.initCoriander();
     this.initMouths();
     this.initPainter();
     this.initEmergency();
@@ -13939,6 +14010,13 @@ class SplendidiSplendenti {
     });
   }
 
+  initCoriander() {
+    const container = document.querySelector('.corianders');
+    const corianders = new Array(50).fill(0).map(() => new _particle.default(document.createElement("div"))).map(particle => {
+      container.appendChild(particle.node);
+    });
+  }
+
   initMouths() {
     const mouths = [].slice.call(document.querySelectorAll('[mouth]')).forEach(element => {
       let i = 0;
@@ -14053,5 +14131,5 @@ class SplendidiSplendenti {
 
 const splendidiSplendenti = new SplendidiSplendenti();
 
-},{"./painter/painter.component":4,"locomotive-scroll":1,"swiper":2}]},{},[5]);
+},{"./painter/painter.component":4,"./particle/particle.component":5,"locomotive-scroll":1,"swiper":2}]},{},[6]);
 //# sourceMappingURL=splendidi-splendenti.js.map

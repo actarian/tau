@@ -527,6 +527,26 @@
 		&:before {
 			background: #ffc500;
 		}
+
+		.group--picture {
+			position: relative;
+		}
+
+		.corianders {
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			width: 0;
+			height: 0;
+		}
+
+		.coriander {
+			position: absolute;
+			background-color: #91e600;
+			width: 50px;
+			height: 50px;
+			border-radius: 6px;
+		}
 	}
 
 	.section--eclettico {
@@ -747,6 +767,19 @@
 				display: none;
 			}
 		}
+	}
+
+	@media (min-height: 790px) {
+
+		.banner {
+			font-size: 32px;
+
+			span {
+				padding: 0 6px;
+				font-size: 32px;
+			}
+		}
+
 	}
 
 	@media (max-width: 939px) {
