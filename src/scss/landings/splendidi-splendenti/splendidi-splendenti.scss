@@ -1,6 +1,7 @@
 @import '../../mixins';
 @import '../../components/reset';
 @import 'components/locomotive';
+@import 'components/footer';
 
 .splendidi-splendenti {
 
@@ -125,6 +126,12 @@
 
 	}
 
+	footer {
+		.col-back-to-top {
+			display: none;
+		}
+	}
+
 	ul.menu {
 		li {
 			a {
@@ -165,6 +172,15 @@
 	.abstract {
 		font-size: 36px;
 		line-height: 2;
+	}
+
+	.emoji {
+		width: 1.3em;
+		height: 1.3em;
+		display: inline-block;
+		vertical-align: baseline;
+		margin: 0 0.1em;
+		cursor: pointer;
 	}
 
 	.group--cta {
@@ -629,14 +645,6 @@
 			margin-bottom: 1em;
 		}
 		*/
-
-		.emoji {
-			width: 1.3em;
-			height: 1.3em;
-			display: inline-block;
-			vertical-align: baseline;
-			margin: 0 0.1em;
-		}
 	}
 
 	.section--consigli {
@@ -663,14 +671,6 @@
 
 		.title {
 			margin-bottom: 1em;
-		}
-
-		.emoji {
-			width: 1.3em;
-			height: 1.3em;
-			display: inline-block;
-			vertical-align: baseline;
-			margin: 0 0.1em;
 		}
 
 		.btn--cta {

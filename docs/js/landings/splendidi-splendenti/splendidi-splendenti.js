@@ -14003,13 +14003,28 @@ class SplendidiSplendenti {
     const emoji = [].slice.call(document.querySelectorAll('.emoji')).forEach(element => {
       if (TWEEN) {
         const r = -10 + Math.floor(Math.random() * 20);
-        TweenMax.fromTo(element, 2, {
-          rotation: `${r}deg`
-        }, {
-          rotation: `${r * -1}deg`,
-          ease: Elastic.easeOut.config(1, 0.3),
-          delay: Math.random(),
-          repeat: -1
+
+        const randomRotate = () => {
+          TweenMax.fromTo(element, 2, {
+            rotation: `${r}deg`
+          }, {
+            rotation: `${r * -1}deg`,
+            ease: Elastic.easeOut.config(1, 0.3),
+            delay: Math.random(),
+            repeat: -1
+          });
+        };
+
+        randomRotate();
+        element.addEventListener('click', () => {
+          TweenMax.to(element, 1, {
+            rotation: '+=90deg',
+            ease: Elastic.easeOut.config(1, 0.3),
+            overwrite: 'all',
+            onComplete: () => {
+              randomRotate();
+            }
+          });
         });
       }
     });

@@ -1,0 +1,169 @@
+.splendidi-splendenti {
+
+	footer {
+		background: #e11e26;
+		color: white;
+		padding: 0;
+		border-bottom: 5px solid #030409;
+
+		.container {
+			padding: 70px 20px;
+		}
+
+		.back-to-top {
+			width: 60px;
+			height: 60px;
+			border: 2px solid #fff;
+			padding: 20px;
+			border-radius: 100%;
+			transition: all ease-in-out .3s;
+
+			.icon--arrow {
+				transform: rotate(-90deg);
+				width: 15px;
+				height: 15px;
+				position: relative;
+				top: -7px;
+				left: 1px;
+				fill: #fff;
+			}
+		}
+
+		.col-social {
+			.pay-off-text {
+				i {
+					font-style: normal;
+				}
+			}
+		}
+
+		.footer-menu {
+			display: none !important;
+		}
+
+		.payoff {
+			height: 19px;
+			width: 219px;
+			fill: #fff;
+			display: block;
+		}
+
+		.logo-alfasigma {
+			img {
+				max-width: 100%;
+			}
+		}
+
+		.logo-alfasigma-mobile {
+			display: none;
+		}
+
+		.social-footer {
+			display: none;
+		}
+
+		.nl-footer {
+
+			h3 {
+				color: #fff;
+				font-size: 18px;
+				font-weight: 500;
+				margin: 0;
+			}
+
+			form {
+				color: #fff;
+				font-size: 14px;
+				font-weight: 400;
+
+				label {
+					display: block;
+					padding-top: 10px;
+					padding-bottom: 5px;
+				}
+
+				input[type="email"] {
+					padding: 10px;
+					border-radius: 500px;
+					border: 1px solid #ccc;
+					margin-top: 10px;
+					max-width: 200px;
+					line-height: 20px;
+				}
+
+				input[type="submit"] {
+					background: transparent;
+					color: #fff;
+					border: 2px solid #fff;
+					border-radius: 500px;
+					text-align: center;
+					padding: 10px 20px;
+					font-family: "Sofia Pro", sans-serif;
+					text-transform: uppercase;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all ease-in-out .2s;
+					margin-top: 10px;
+					line-height: 20px;
+
+					&:hover,
+					&:focus {
+						background: #fff;
+						color: #e11e26;
+						transition: all ease-in-out .2s;
+					}
+				}
+			}
+		}
+
+		.copy-footer {
+			padding: 0;
+			margin: 0;
+			border-top: 2px solid #fff;
+
+			.wrap {
+				display: block;
+
+				.left {
+					width: 100%;
+
+					.copy-menu {
+						ul {
+							list-style: none;
+							padding: 0;
+							margin: 0;
+
+							li {
+								display: inline-block;
+								padding: 0 20px;
+
+								&:first-child {
+									padding-left: 0;
+								}
+
+								a {
+									color: #fff;
+									font-size: 12px;
+									font-weight: 600;
+									letter-spacing: 1px;
+								}
+							}
+						}
+					}
+				}
+
+				.right {
+					width: 100%;
+
+					p {
+						text-align: center;
+						color: #fff;
+						font-size: 12px;
+						font-weight: 600;
+						letter-spacing: 1px;
+					}
+				}
+			}
+		}
+	}
+}
