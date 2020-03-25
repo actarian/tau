@@ -19,7 +19,10 @@ export default class PainterComponent {
 		canvas.height = canvas.offsetHeight;
 		const context = this.context = canvas.getContext('2d');
 		let currentBrush = this.currentBrush = this.makeBrush(strokeWidth);
-		this.addEventListeners();
+		setTimeout(() => {
+			this.addEventListeners();
+			this.onResize();
+		}, 1000);
 	}
 
 	rotatePoint(distance, angle, origin) {

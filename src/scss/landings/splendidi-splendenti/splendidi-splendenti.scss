@@ -303,37 +303,6 @@
 		}
 	}
 
-	.swiper-pagination-bullets {
-		position: fixed;
-		width: 100vw;
-		height: 40px;
-		top: calc(100vh - 100px);
-		bottom: auto;
-		left: 0;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-
-		.swiper-pagination-bullet {
-			width: 6px;
-			height: 6px;
-			background: white;
-			border: solid 3px transparent;
-			margin: 0 10px;
-			opacity: 1;
-			transition: ease-in-out 350ms;
-			transition-property: background-color, border-color;
-
-			&-active {
-				width: 16px;
-				height: 16px;
-				margin: 0 5px;
-				background: transparent;
-				border-color: #0b0c11;
-			}
-		}
-	}
-
 	.section--diagonal {
 		&:before {
 			content: '';
@@ -349,11 +318,52 @@
 	}
 
 	.section--spazzolino {
-		background: #0090d4;
 		color: #fff;
+		transition: background-color ease-in-out 600ms;
 
 		&:before {
+			transition: background-color ease-in-out 600ms;
+		}
+
+		&,
+		&.slide-0 {
 			background: #0090d4;
+
+			&:before {
+				background: #0090d4;
+			}
+		}
+
+		&.slide-1 {
+			background: #ffc403;
+
+			&:before {
+				background: #ffc403;
+			}
+		}
+
+		&.slide-2 {
+			background: #9357a9;
+
+			&:before {
+				background: #9357a9;
+			}
+		}
+
+		&.slide-3 {
+			background: #cf2f89;
+
+			&:before {
+				background: #cf2f89;
+			}
+		}
+
+		&.slide-4 {
+			background: #3d6d4f;
+
+			&:before {
+				background: #3d6d4f;
+			}
 		}
 
 		.container {
@@ -371,6 +381,37 @@
 
 				img {
 					max-height: 130vh;
+				}
+			}
+		}
+
+		.swiper-pagination-bullets {
+			position: fixed;
+			width: 100vw;
+			height: 40px;
+			top: calc(100vh - 100px);
+			bottom: auto;
+			left: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+
+			.swiper-pagination-bullet {
+				width: 6px;
+				height: 6px;
+				background: white;
+				border: solid 3px transparent;
+				margin: 0 10px;
+				opacity: 1;
+				transition: ease-in-out 350ms;
+				transition-property: background-color, border-color;
+
+				&-active {
+					width: 16px;
+					height: 16px;
+					margin: 0 5px;
+					background: transparent;
+					border-color: #0b0c11;
 				}
 			}
 		}
@@ -497,6 +538,21 @@
 		.picture {
 			display: flex;
 			justify-content: center;
+		}
+
+		.swiper-container,
+		.swiper-slide,
+		.picture,
+		.picture img {
+			width: 90px;
+		}
+
+		.swiper-slide {
+			opacity: 0 !important;
+
+			&-active {
+				opacity: 1 !important;
+			}
 		}
 
 		.title {

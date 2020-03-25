@@ -284,39 +284,6 @@ html.has-scroll-dragging {
       top: 6%;
       color: white;
       line-height: 1; }
-  .splendidi-splendenti .swiper-pagination-bullets {
-    position: fixed;
-    width: 100vw;
-    height: 40px;
-    top: calc(100vh - 100px);
-    bottom: auto;
-    left: 0;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-pack: center;
-        -ms-flex-pack: center;
-            justify-content: center;
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center; }
-    .splendidi-splendenti .swiper-pagination-bullets .swiper-pagination-bullet {
-      width: 6px;
-      height: 6px;
-      background: white;
-      border: solid 3px transparent;
-      margin: 0 10px;
-      opacity: 1;
-      -webkit-transition: ease-in-out 350ms;
-      transition: ease-in-out 350ms;
-      -webkit-transition-property: background-color, border-color;
-      transition-property: background-color, border-color; }
-      .splendidi-splendenti .swiper-pagination-bullets .swiper-pagination-bullet-active {
-        width: 16px;
-        height: 16px;
-        margin: 0 5px;
-        background: transparent;
-        border-color: #0b0c11; }
   .splendidi-splendenti .section--diagonal:before {
     content: '';
     position: absolute;
@@ -328,10 +295,32 @@ html.has-scroll-dragging {
             transform: skewY(-15deg);
     border-bottom: 6px solid #030409; }
   .splendidi-splendenti .section--spazzolino {
-    background: #0090d4;
-    color: #fff; }
+    color: #fff;
+    -webkit-transition: background-color ease-in-out 600ms;
+    transition: background-color ease-in-out 600ms; }
     .splendidi-splendenti .section--spazzolino:before {
+      -webkit-transition: background-color ease-in-out 600ms;
+      transition: background-color ease-in-out 600ms; }
+    .splendidi-splendenti .section--spazzolino, .splendidi-splendenti .section--spazzolino.slide-0 {
       background: #0090d4; }
+      .splendidi-splendenti .section--spazzolino:before, .splendidi-splendenti .section--spazzolino.slide-0:before {
+        background: #0090d4; }
+    .splendidi-splendenti .section--spazzolino.slide-1 {
+      background: #ffc403; }
+      .splendidi-splendenti .section--spazzolino.slide-1:before {
+        background: #ffc403; }
+    .splendidi-splendenti .section--spazzolino.slide-2 {
+      background: #9357a9; }
+      .splendidi-splendenti .section--spazzolino.slide-2:before {
+        background: #9357a9; }
+    .splendidi-splendenti .section--spazzolino.slide-3 {
+      background: #cf2f89; }
+      .splendidi-splendenti .section--spazzolino.slide-3:before {
+        background: #cf2f89; }
+    .splendidi-splendenti .section--spazzolino.slide-4 {
+      background: #3d6d4f; }
+      .splendidi-splendenti .section--spazzolino.slide-4:before {
+        background: #3d6d4f; }
     .splendidi-splendenti .section--spazzolino .container {
       width: 100vw;
       padding: 27vh 0 80px 0; }
@@ -347,6 +336,39 @@ html.has-scroll-dragging {
                 justify-content: center; }
         .splendidi-splendenti .section--spazzolino .swiper-slide .picture img {
           max-height: 130vh; }
+    .splendidi-splendenti .section--spazzolino .swiper-pagination-bullets {
+      position: fixed;
+      width: 100vw;
+      height: 40px;
+      top: calc(100vh - 100px);
+      bottom: auto;
+      left: 0;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: center;
+          -ms-flex-pack: center;
+              justify-content: center;
+      -webkit-box-align: center;
+          -ms-flex-align: center;
+              align-items: center; }
+      .splendidi-splendenti .section--spazzolino .swiper-pagination-bullets .swiper-pagination-bullet {
+        width: 6px;
+        height: 6px;
+        background: white;
+        border: solid 3px transparent;
+        margin: 0 10px;
+        opacity: 1;
+        -webkit-transition: ease-in-out 350ms;
+        transition: ease-in-out 350ms;
+        -webkit-transition-property: background-color, border-color;
+        transition-property: background-color, border-color; }
+        .splendidi-splendenti .section--spazzolino .swiper-pagination-bullets .swiper-pagination-bullet-active {
+          width: 16px;
+          height: 16px;
+          margin: 0 5px;
+          background: transparent;
+          border-color: #0b0c11; }
     .splendidi-splendenti .section--spazzolino .ico-professional-27 {
       position: fixed;
       width: 128.1px;
@@ -436,6 +458,15 @@ html.has-scroll-dragging {
     -webkit-box-pack: center;
         -ms-flex-pack: center;
             justify-content: center; }
+  .splendidi-splendenti .section--nonsolo .swiper-container,
+  .splendidi-splendenti .section--nonsolo .swiper-slide,
+  .splendidi-splendenti .section--nonsolo .picture,
+  .splendidi-splendenti .section--nonsolo .picture img {
+    width: 90px; }
+  .splendidi-splendenti .section--nonsolo .swiper-slide {
+    opacity: 0 !important; }
+    .splendidi-splendenti .section--nonsolo .swiper-slide-active {
+      opacity: 1 !important; }
   .splendidi-splendenti .section--nonsolo .title {
     font-size: 72px;
     line-height: 1;

@@ -7,7 +7,8 @@ const TWEEN = true;
 class SplendidiSplendenti {
 
 	constructor() {
-		this.initSwiper();
+		this.initSpazzolino();
+		this.initNonSolo();
 		this.initBanners();
 		this.initMouths();
 		this.initPainter();
@@ -18,6 +19,63 @@ class SplendidiSplendenti {
 			const scroll = this.getLocomotiveScroll();
 		}, 500);
 
+	}
+
+	initSpazzolino() {
+		const section = document.querySelector('.section--spazzolino');
+		const swiper = new Swiper(section.querySelector('.swiper-container'), {
+			slidesPerView: 1,
+			spaceBetween: 0,
+			loop: true,
+			effect: 'fade',
+			speed: 1000,
+			autoplay: {
+				delay: 2500,
+				disableOnInteraction: false,
+			},
+			keyboardControl: true,
+			mousewheelControl: false,
+			pagination: {
+				el: '.swiper-pagination',
+				clickable: true,
+			},
+			keyboard: {
+				enabled: true,
+				onlyInViewport: true,
+			},
+		});
+		swiper.on('slideChange', () => {
+			for (let i = 0; i < 5; i++) {
+				section.classList.remove(`slide-${i}`);
+			}
+			section.classList.add(`slide-${swiper.realIndex}`);
+			// console.log(swiper, swiper.realIndex);
+		});
+	}
+
+	initNonSolo() {
+		const section = document.querySelector('.section--nonsolo');
+		const swiper = new Swiper(section.querySelector('.swiper-container'), {
+			slidesPerView: 1,
+			spaceBetween: 0,
+			loop: true,
+			effect: 'fade',
+			speed: 1000,
+			autoplay: {
+				delay: 2500,
+				disableOnInteraction: false,
+			},
+			keyboardControl: true,
+			mousewheelControl: false,
+			pagination: {
+				el: '.swiper-pagination',
+				clickable: true,
+			},
+			keyboard: {
+				enabled: true,
+				onlyInViewport: true,
+			},
+		});
 	}
 
 	initBanners() {
@@ -106,30 +164,6 @@ class SplendidiSplendenti {
 					repeat: -1
 				});
 			}
-		});
-	}
-
-	initSwiper() {
-		const swiper = new Swiper('.swiper-container', {
-			slidesPerView: 1,
-			spaceBetween: 0,
-			loop: true,
-			effect: 'fade',
-			speed: 1000,
-			autoplay: {
-				delay: 2500,
-				disableOnInteraction: false,
-			},
-			keyboardControl: true,
-			mousewheelControl: false,
-			pagination: {
-				el: '.swiper-pagination',
-				clickable: true,
-			},
-			keyboard: {
-				enabled: true,
-				onlyInViewport: true,
-			},
 		});
 	}
 
