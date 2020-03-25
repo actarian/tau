@@ -13850,6 +13850,68 @@ class SplendidiSplendenti {
     });
   }
 
+  initEmergency() {
+    const emergencies = [].slice.call(document.querySelectorAll('[emergency]')).forEach(element => {
+      let i = 0;
+
+      const setClass = () => {
+        for (let j = 0; j < 5; j++) {
+          element.classList.remove(`step-${j}`);
+        }
+
+        element.classList.add(`step-${i}`);
+      };
+
+      element.addEventListener('click', event => {
+        if (i < 5) {
+          i++;
+          setClass();
+
+          if (i === 5) {
+            const box = element.querySelector('.box');
+            TweenMax.to(box, 0.5, {
+              opacity: 0,
+              ease: Quad.easeOut
+            });
+            const doc = element.querySelector('.document');
+            TweenMax.to(doc, 0.5, {
+              scale: 1.2,
+              rotation: '-10deg',
+              ease: Elastic.easeOut.config(1, 0.3)
+            });
+          }
+
+          TweenMax.to(element, 1, {
+            scale: '-=0.01',
+            rotation: `+=${-2 + Math.random() * 4}deg`,
+            ease: Elastic.easeOut.config(1, 0.3),
+            overwrite: 'all',
+            onComplete: () => {
+              if (i < 5) {
+                i = 0;
+                setClass();
+              }
+
+              TweenMax.to(element, 1.5, {
+                scale: 1,
+                rotation: 0,
+                ease: Elastic.easeOut.config(1, 0.3)
+              });
+            }
+          });
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        } else if (i < 6) {
+          i++;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        } else {
+          console.log('open link!');
+        }
+      });
+    });
+  }
+
   initBanners() {
     const banners = [].slice.call(document.querySelectorAll('.banner')).forEach(element => {
       const inner = element.querySelector('.inner');
@@ -13864,7 +13926,7 @@ class SplendidiSplendenti {
       }
 
       if (TWEEN) {
-        TweenMax.fromTo(inner, 2, {
+        TweenMax.fromTo(inner, width / 50, {
           x: 0
         }, {
           x: -width,
@@ -13899,32 +13961,37 @@ class SplendidiSplendenti {
           });
         }
       });
-      const img = element.querySelector('img');
-    });
-  }
+      const flash = element.querySelector('.flash');
 
-  initEmergency() {
-    const emergencies = [].slice.call(document.querySelectorAll('[emergency]')).forEach(element => {
-      let i = 0;
-      element.addEventListener('click', () => {
-        if (i < 5) {
-          i++;
-          TweenMax.to(element, 1, {
-            scale: '-=0.01',
-            rotation: `+=${-2 + Math.random() * 4}deg`,
-            ease: Elastic.easeOut.config(1, 0.3),
-            overwrite: 'all',
+      if (flash) {
+        const tweenFlash = () => {
+          TweenMax.fromTo(flash, 1, {
+            scale: 0.05,
+            rotation: '0deg',
+            opacity: 0
+          }, {
+            scale: 1,
+            rotation: '360deg',
+            opacity: 1,
+            ease: Quad.easeOut,
             onComplete: () => {
-              i = 0;
-              TweenMax.to(element, 1.5, {
+              TweenMax.to(flash, 2, {
                 scale: 1,
-                rotation: 0,
-                ease: Elastic.easeOut.config(1, 0.3)
+                rotation: '390deg',
+                opacity: 1,
+                ease: Linear.easeNone,
+                onComplete: () => {
+                  tweenFlash();
+                }
               });
             }
           });
-        }
-      });
+        };
+
+        tweenFlash();
+      }
+
+      const img = element.querySelector('img');
     });
   }
 

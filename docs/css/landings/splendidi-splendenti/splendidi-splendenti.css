@@ -85,6 +85,7 @@ html.has-scroll-dragging {
     -webkit-box-align: center;
         -ms-flex-align: center;
             align-items: center;
+    text-align: center;
     padding: 15vw 0; }
   .splendidi-splendenti header {
     position: absolute;
@@ -181,6 +182,9 @@ html.has-scroll-dragging {
     line-height: 1.6;
     letter-spacing: 0.05em;
     text-transform: uppercase; }
+  .splendidi-splendenti .abstract {
+    font-size: 36px;
+    line-height: 2; }
   .splendidi-splendenti .group--cta {
     padding: 40px 0; }
   .splendidi-splendenti .btn--cta {
@@ -254,10 +258,19 @@ html.has-scroll-dragging {
     -o-user-drag: none;
     user-drag: none; }
   .splendidi-splendenti [mouth] {
+    position: relative;
     margin: 100px 0 30px 0;
     cursor: pointer; }
     .splendidi-splendenti [mouth] img {
       max-width: 380px; }
+    .splendidi-splendenti [mouth] .flash {
+      position: absolute;
+      width: 76%;
+      top: 0;
+      right: 0;
+      margin-right: -29%;
+      margin-top: -16%;
+      opacity: 0; }
   .splendidi-splendenti [painter] {
     position: absolute;
     top: -15vw;
@@ -282,8 +295,23 @@ html.has-scroll-dragging {
     .splendidi-splendenti [emergency] .title--small {
       position: absolute;
       top: 6%;
+      width: 84%;
+      left: 8%;
       color: white;
+      text-align: center;
       line-height: 1; }
+    .splendidi-splendenti [emergency] .glass, .splendidi-splendenti [emergency].step-0 .glass {
+      opacity: 0.9; }
+    .splendidi-splendenti [emergency].step-1 .glass {
+      opacity: 0.7; }
+    .splendidi-splendenti [emergency].step-2 .glass {
+      opacity: 0.5; }
+    .splendidi-splendenti [emergency].step-3 .glass {
+      opacity: 0.3; }
+    .splendidi-splendenti [emergency].step-4 .glass {
+      opacity: 0.1; }
+    .splendidi-splendenti [emergency].step-5 .glass {
+      opacity: 0.0; }
   .splendidi-splendenti .section--diagonal:before {
     content: '';
     position: absolute;
@@ -373,10 +401,11 @@ html.has-scroll-dragging {
       position: fixed;
       width: 128.1px;
       height: 128.1px;
-      margin-left: -64.05px;
+      margin-right: -64.05px;
       margin-top: -64.05px;
       right: 25vw;
-      top: 75vh; }
+      top: 75vh;
+      text-align: left; }
       .splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27 {
         position: absolute;
         width: 53.9px;
@@ -427,59 +456,65 @@ html.has-scroll-dragging {
                 box-shadow: 0 7px 0 -5px black; }
     .splendidi-splendenti .section--designer .btn--cta {
       pointer-events: all; }
-  .splendidi-splendenti .section--nonsolo .row {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex; }
-    .splendidi-splendenti .section--nonsolo .row .col {
+  .splendidi-splendenti .section--nonsolo {
+    /*
+		.title {
+			font-size: 72px;
+			line-height: 1;
+			margin-bottom: 1em;
+		}
+		*/ }
+    .splendidi-splendenti .section--nonsolo .row {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex; }
+      .splendidi-splendenti .section--nonsolo .row .col {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+                flex-direction: column;
+        -webkit-box-pack: center;
+            -ms-flex-pack: center;
+                justify-content: center; }
+        .splendidi-splendenti .section--nonsolo .row .col:first-child {
+          -webkit-box-flex: 1;
+              -ms-flex: 1 1 30%;
+                  flex: 1 1 30%; }
+        .splendidi-splendenti .section--nonsolo .row .col:last-child {
+          -webkit-box-flex: 1;
+              -ms-flex: 1 1 70%;
+                  flex: 1 1 70%;
+          padding-right: 10vw; }
+    .splendidi-splendenti .section--nonsolo .content {
+      text-align: left; }
+    .splendidi-splendenti .section--nonsolo .title {
+      font-size: 72px;
+      margin-bottom: 1em; }
+    .splendidi-splendenti .section--nonsolo .picture {
       display: -webkit-box;
       display: -ms-flexbox;
       display: flex;
-      -webkit-box-orient: vertical;
-      -webkit-box-direction: normal;
-          -ms-flex-direction: column;
-              flex-direction: column;
       -webkit-box-pack: center;
           -ms-flex-pack: center;
               justify-content: center; }
-      .splendidi-splendenti .section--nonsolo .row .col:first-child {
-        -webkit-box-flex: 1;
-            -ms-flex: 1 1 30%;
-                flex: 1 1 30%; }
-      .splendidi-splendenti .section--nonsolo .row .col:last-child {
-        -webkit-box-flex: 1;
-            -ms-flex: 1 1 70%;
-                flex: 1 1 70%;
-        padding-right: 10vw; }
-  .splendidi-splendenti .section--nonsolo .picture {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-pack: center;
-        -ms-flex-pack: center;
-            justify-content: center; }
-  .splendidi-splendenti .section--nonsolo .swiper-container,
-  .splendidi-splendenti .section--nonsolo .swiper-slide,
-  .splendidi-splendenti .section--nonsolo .picture,
-  .splendidi-splendenti .section--nonsolo .picture img {
-    width: 90px; }
-  .splendidi-splendenti .section--nonsolo .swiper-slide {
-    opacity: 0 !important; }
-    .splendidi-splendenti .section--nonsolo .swiper-slide-active {
-      opacity: 1 !important; }
-  .splendidi-splendenti .section--nonsolo .title {
-    font-size: 72px;
-    line-height: 1;
-    margin-bottom: 1em; }
-  .splendidi-splendenti .section--nonsolo .abstract {
-    font-size: 36px;
-    line-height: 2; }
-  .splendidi-splendenti .section--nonsolo .emoji {
-    width: 1.3em;
-    height: 1.3em;
-    display: inline-block;
-    vertical-align: baseline;
-    margin: 0 0.1em; }
+    .splendidi-splendenti .section--nonsolo .swiper-container,
+    .splendidi-splendenti .section--nonsolo .swiper-slide,
+    .splendidi-splendenti .section--nonsolo .picture,
+    .splendidi-splendenti .section--nonsolo .picture img {
+      width: 90px; }
+    .splendidi-splendenti .section--nonsolo .swiper-slide {
+      opacity: 0 !important; }
+      .splendidi-splendenti .section--nonsolo .swiper-slide-active {
+        opacity: 1 !important; }
+    .splendidi-splendenti .section--nonsolo .emoji {
+      width: 1.3em;
+      height: 1.3em;
+      display: inline-block;
+      vertical-align: baseline;
+      margin: 0 0.1em; }
   .splendidi-splendenti .section--consigli .container {
     max-width: 680px;
     margin: 0 auto;
@@ -492,9 +527,6 @@ html.has-scroll-dragging {
     text-align: center; }
   .splendidi-splendenti .section--dove .title {
     margin-bottom: 1em; }
-  .splendidi-splendenti .section--dove .abstract {
-    font-size: 36px;
-    line-height: 2; }
   .splendidi-splendenti .section--dove .emoji {
     width: 1.3em;
     height: 1.3em;
@@ -506,9 +538,6 @@ html.has-scroll-dragging {
     color: white; }
   .splendidi-splendenti .section--follow .title {
     margin-bottom: 1em; }
-  .splendidi-splendenti .section--follow .abstract {
-    font-size: 36px;
-    line-height: 2; }
   .splendidi-splendenti .section--follow .group--cta > .btn--cta + .btn--cta {
     margin-top: 1em; }
   .splendidi-splendenti .section--follow .btn--cta {
@@ -530,12 +559,12 @@ html.has-scroll-dragging {
       background: #4360b5; }
   .splendidi-splendenti .section--footer {
     background: #e21821; }
-  @media (min-width: 1024px) {
+  @media (min-width: 940px) {
     .splendidi-splendenti header .hamburger {
       display: none; }
     .splendidi-splendenti header .mobile-menu {
       display: none; } }
-  @media (max-width: 1023px) {
+  @media (max-width: 939px) {
     .splendidi-splendenti header {
       width: calc(100% - 30px);
       margin: 15px; }
@@ -549,13 +578,50 @@ html.has-scroll-dragging {
         display: block; }
       .splendidi-splendenti header .mobile-menu {
         display: none; }
+    .splendidi-splendenti .container {
+      padding: 150px 20px; }
+    .splendidi-splendenti [mouth] img {
+      max-width: 100%; }
+    .splendidi-splendenti [emergency] .title--small {
+      font-size: 19px; }
+    .splendidi-splendenti .title {
+      font-size: 30px; }
+    .splendidi-splendenti .title--small {
+      font-size: 13px; }
+    .splendidi-splendenti .abstract {
+      font-size: 18px; }
+    .splendidi-splendenti .btn--cta {
+      padding: 15px 20px;
+      font-size: 12px; }
+      .splendidi-splendenti .btn--cta.instagram, .splendidi-splendenti .btn--cta.facebook {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        width: calc(100vw - 40px);
+        -webkit-box-pack: start;
+            -ms-flex-pack: start;
+                justify-content: flex-start;
+        -webkit-box-align: center;
+            -ms-flex-align: center;
+                align-items: center; }
     .splendidi-splendenti .banner {
       font-size: 25px; }
       .splendidi-splendenti .banner span {
         padding: 0 5px;
         font-size: 25px; }
       .splendidi-splendenti .banner.banner--limited-edition {
-        top: 100px; } }
+        top: 100px; }
+    .splendidi-splendenti .section--designer .picture {
+      max-width: calc(100vw - 40px); }
+    .splendidi-splendenti .section--nonsolo .row .col:last-child {
+      padding-right: 0; }
+    .splendidi-splendenti .section--nonsolo .title {
+      font-size: 36px; }
+    .splendidi-splendenti .section--nonsolo .swiper-container,
+    .splendidi-splendenti .section--nonsolo .swiper-slide,
+    .splendidi-splendenti .section--nonsolo .picture,
+    .splendidi-splendenti .section--nonsolo .picture img {
+      width: 50px; } }
 
 @-webkit-keyframes ring {
   from {
