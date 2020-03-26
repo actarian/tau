@@ -1,3 +1,5 @@
+@import './vars';
+
 html {
 	&:not(.has-scroll-init) {
 		cursor: wait;
@@ -54,6 +56,6 @@ body {
 	right: 0;
 
 	&:hover {
-		cursor: pointer;
+		cursor: $cursor;
 	}
 }

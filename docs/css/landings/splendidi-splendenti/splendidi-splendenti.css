@@ -54,13 +54,19 @@ html.has-scroll-dragging {
   left: 0;
   right: 0; }
   .c-scrollbar_thumb:hover {
-    cursor: pointer; }
+    cursor: none; }
 
 .splendidi-splendenti {
   margin: 0;
   font-family: Poppins, sans-serif;
   background: #fff;
   color: #030409; }
+  .splendidi-splendenti a,
+  .splendidi-splendenti span,
+  .splendidi-splendenti button,
+  .splendidi-splendenti div {
+    outline: none;
+    cursor: none !important; }
   .splendidi-splendenti svg.hidden {
     display: block;
     width: 0;
@@ -106,7 +112,7 @@ html.has-scroll-dragging {
     display: inline-block;
     vertical-align: baseline;
     margin: 0 0.1em;
-    cursor: pointer; }
+    cursor: none; }
   .splendidi-splendenti .group--cta {
     padding: 40px 0; }
   .splendidi-splendenti .btn--cta {
@@ -182,7 +188,7 @@ html.has-scroll-dragging {
   .splendidi-splendenti [mouth] {
     position: relative;
     margin: 100px 0 30px 0;
-    cursor: pointer; }
+    cursor: none; }
     .splendidi-splendenti [mouth] img {
       max-width: 380px; }
     .splendidi-splendenti [mouth] .flash {
@@ -199,11 +205,11 @@ html.has-scroll-dragging {
     left: 0;
     width: 100%;
     height: calc(100% + 30vw);
-    cursor: pointer; }
+    cursor: none; }
   .splendidi-splendenti [emergency] {
     position: relative;
     max-width: 400px;
-    cursor: pointer; }
+    cursor: none; }
     .splendidi-splendenti [emergency] img {
       width: 100%; }
     .splendidi-splendenti [emergency] .document,
@@ -482,7 +488,7 @@ html.has-scroll-dragging {
       font-family: "Sofia Pro", sans-serif;
       text-transform: uppercase;
       font-weight: 600;
-      cursor: pointer;
+      cursor: none;
       -webkit-transition: all ease-in-out .2s;
       transition: all ease-in-out .2s;
       margin-top: 10px;
@@ -591,7 +597,8 @@ html.has-scroll-dragging {
             justify-content: center;
     -webkit-box-align: center;
         -ms-flex-align: center;
-            align-items: center; }
+            align-items: center;
+    cursor: none; }
     .splendidi-splendenti .section--spazzolino .swiper-pagination-bullets .swiper-pagination-bullet {
       width: 6px;
       height: 6px;
@@ -805,6 +812,45 @@ html.has-scroll-dragging {
   .splendidi-splendenti .section--nonsolo .picture,
   .splendidi-splendenti .section--nonsolo .picture img {
     width: 50px; } }
+
+.splendidi-splendenti a,
+.splendidi-splendenti span,
+.splendidi-splendenti button,
+.splendidi-splendenti div {
+  outline: none;
+  cursor: none !important; }
+
+.splendidi-splendenti .pointer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100000;
+  pointer-events: none;
+  -webkit-transform-origin: 0 0;
+          transform-origin: 0 0;
+  visibility: hidden; }
+  .splendidi-splendenti .pointer.init {
+    visibility: visible; }
+  .splendidi-splendenti .pointer:after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: red;
+    display: none; }
+  .splendidi-splendenti .pointer img {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    display: none; }
+  .splendidi-splendenti .pointer .point,
+  .splendidi-splendenti .pointer .click {
+    -webkit-transform: translateX(-20%) translateY(-8%);
+            transform: translateX(-20%) translateY(-8%); }
+  .splendidi-splendenti .pointer:not(.down) .point {
+    display: block; }
+  .splendidi-splendenti .pointer.down .click {
+    display: block; }
 
 @-webkit-keyframes ring {
   from {

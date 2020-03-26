@@ -1,8 +1,18 @@
+@import './vars';
+
 .splendidi-splendenti {
 	margin: 0;
 	font-family: Poppins, sans-serif;
 	background: #fff;
 	color: #030409;
+
+	a,
+	span,
+	button,
+	div {
+		outline: none;
+		cursor: none !important;
+	}
 
 	svg.hidden {
 		display: block;
@@ -54,7 +64,7 @@
 		display: inline-block;
 		vertical-align: baseline;
 		margin: 0 0.1em;
-		cursor: pointer;
+		cursor: $cursor;
 	}
 
 	.group--cta {
@@ -155,7 +165,7 @@
 	[mouth] {
 		position: relative;
 		margin: 100px 0 30px 0;
-		cursor: pointer;
+		cursor: $cursor;
 
 		img {
 			max-width: 380px;
@@ -178,13 +188,13 @@
 		left: 0;
 		width: 100%;
 		height: calc(100% + 30vw);
-		cursor: pointer;
+		cursor: $cursor;
 	}
 
 	[emergency] {
 		position: relative;
 		max-width: 400px;
-		cursor: pointer;
+		cursor: $cursor;
 
 		img {
 			width: 100%;

@@ -1,5 +1,6 @@
 @import '../../mixins';
 @import '../../components/reset';
+@import 'components/vars';
 @import 'components/locomotive';
 @import 'components/base';
 @import 'components/header';
@@ -99,6 +100,7 @@
 			display: flex;
 			justify-content: center;
 			align-items: center;
+			cursor: $cursor;
 
 			.swiper-pagination-bullet {
 				width: 6px;
@@ -418,6 +420,62 @@
 			}
 		}
 
+	}
+
+	a,
+	span,
+	button,
+	div {
+		outline: none;
+		cursor: none !important;
+	}
+
+	.pointer {
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: 100000;
+		// mix-blend-mode: hard-light;
+		pointer-events: none;
+		transform-origin: 0 0;
+		visibility: hidden;
+
+		&.init {
+			visibility: visible;
+		}
+
+		&:after {
+			content: '';
+			position: absolute;
+			width: 2px;
+			height: 2px;
+			background: red;
+			display: none; // !!!
+		}
+
+		img {
+			position: absolute;
+			width: 80px;
+			height: 80px;
+			display: none;
+		}
+
+		.point,
+		.click {
+			transform: translateX(-20%) translateY(-8%);
+		}
+
+		&:not(.down) {
+			.point {
+				display: block;
+			}
+		}
+
+		&.down {
+			.click {
+				display: block;
+			}
+		}
 	}
 
 }

@@ -3,6 +3,7 @@ import Swiper from 'swiper';
 import IntersectionService from './intersection/intersection.service';
 import PainterComponent from './painter/painter.component';
 import ParticleComponent from './particle/particle.component';
+import PointerComponent from './pointer/pointer';
 
 const TWEEN = true;
 
@@ -18,6 +19,7 @@ class SplendidiSplendenti {
 		this.addScrollCallback(this.initPainter());
 		this.addScrollCallback(this.initEmergency());
 		this.addScrollCallback(this.initEmoji());
+		this.initPointer();
 		setTimeout(() => {
 			const scroll = this.getLocomotiveScroll();
 			if (scroll) {
@@ -287,6 +289,10 @@ class SplendidiSplendenti {
 				});
 			});
 		});
+	}
+
+	initPointer() {
+		const pointer = new PointerComponent(document.querySelector('.pointer'));
 	}
 
 	getLocomotiveScroll() {
