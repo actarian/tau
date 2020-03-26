@@ -13542,6 +13542,70 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+class IntersectionService {
+  static callbacks() {
+    if (!this.callbacks_) {
+      this.callbacks_ = [];
+    }
+
+    return this.callbacks_;
+  }
+
+  static observer() {
+    if (!this.observer_) {
+      this.observer_ = new IntersectionObserver(entries => {
+        const callbacks = this.callbacks();
+        entries.forEach(entry => {
+          const state = entry !== undefined && entry.isIntersecting;
+          const c = callbacks.find(x => x.node === entry.target);
+
+          if (c.state !== state) {
+            c.state = state;
+            c.callback(state);
+          }
+        });
+      });
+    }
+
+    return this.observer_;
+  }
+
+  static observe(node, callback) {
+    if ('IntersectionObserver' in window) {
+      if (typeof callback === 'function') {
+        const callbacks = this.callbacks();
+        callbacks.push({
+          node,
+          callback
+        });
+      }
+
+      const observer = this.observer();
+      observer.observe(node);
+    } else if (typeof callback === 'function') {
+      callback(true);
+    }
+  }
+
+  static unobserve(node) {
+    if ('IntersectionObserver' in window) {
+      const observer = this.observer();
+      observer.unobserve(node);
+    }
+  }
+
+}
+
+exports.default = IntersectionService;
+
+},{}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
 var _tinycolor = _interopRequireDefault(require("tinycolor2"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -13549,7 +13613,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const BUTTON = 0b01;
 
 class PainterComponent {
-  constructor(canvas, colour = '#ffcc00', strokeWidth = 30, varyBrightness = 5) {
+  constructor(canvas, colour = '#0b0c11', strokeWidth = 10, varyBrightness = 5) {
     // Brush colour and size
     this.colour = colour;
     this.strokeWidth = strokeWidth;
@@ -13766,7 +13830,7 @@ class PainterComponent {
 
 exports.default = PainterComponent;
 
-},{"tinycolor2":3}],5:[function(require,module,exports){
+},{"tinycolor2":3}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13774,19 +13838,35 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+var _intersection = _interopRequireDefault(require("../intersection/intersection.service"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 class ParticleComponent {
   constructor(node) {
     this.node = node;
     node.setAttribute('class', 'coriander');
-    this.init();
-    this.animate();
+    const props = this.props = {
+      pow: 0
+    };
+
+    _intersection.default.observe(node, intersect => {
+      if (intersect) {
+        this.init();
+        this.animate();
+      } else {
+        TweenMax.killTweensOf(props);
+      }
+    });
   }
 
   init() {
     const node = this.node;
+    const props = this.props;
+    props.pow = 0;
     TweenMax.set(node, {
       scale: 0.4 + Math.random() * 0.6,
-      opacity: 0,
+      opacity: 1,
       x: 0,
       y: 0
     });
@@ -13794,9 +13874,7 @@ class ParticleComponent {
 
   animate() {
     const node = this.node;
-    const props = {
-      pow: 0
-    };
+    const props = this.props;
     let vx = -10 + Math.random() * 20;
     let vy = -3 - Math.random() * 4;
     let vr = -3 + Math.random() * 6;
@@ -13808,7 +13886,7 @@ class ParticleComponent {
       onUpdate: () => {
         // console.log(props.pow);
         TweenMax.set(node, {
-          opacity: props.pow,
+          opacity: (1 - props.pow) * (1 - props.pow),
           rotation: `+=${vr}deg`,
           x: `+=${vx}`,
           y: `+=${vy}`
@@ -13834,12 +13912,14 @@ class ParticleComponent {
 
 exports.default = ParticleComponent;
 
-},{}],6:[function(require,module,exports){
+},{"../intersection/intersection.service":4}],7:[function(require,module,exports){
 "use strict";
 
 var _locomotiveScroll = _interopRequireDefault(require("locomotive-scroll"));
 
 var _swiper = _interopRequireDefault(require("swiper"));
+
+var _intersection = _interopRequireDefault(require("./intersection/intersection.service"));
 
 var _painter = _interopRequireDefault(require("./painter/painter.component"));
 
@@ -13851,17 +13931,38 @@ const TWEEN = true;
 
 class SplendidiSplendenti {
   constructor() {
-    this.initSpazzolino();
-    this.initNonSolo();
-    this.initBanners();
-    this.initCoriander();
-    this.initMouths();
-    this.initPainter();
-    this.initEmergency();
-    this.initEmoji();
+    this.scrollCallbacks = [];
+    this.addScrollCallback(this.initSpazzolino());
+    this.addScrollCallback(this.initNonSolo());
+    this.addScrollCallback(this.initBanners());
+    this.addScrollCallback(this.initCoriander());
+    this.addScrollCallback(this.initMouths());
+    this.addScrollCallback(this.initPainter());
+    this.addScrollCallback(this.initEmergency());
+    this.addScrollCallback(this.initEmoji());
     setTimeout(() => {
       const scroll = this.getLocomotiveScroll();
+
+      if (scroll) {
+        scroll.on("scroll", instance => {
+          this.onPageDidScroll(instance.scroll.y);
+        });
+      } else {
+        window.addEventListener("scroll", () => {
+          this.onPageDidScroll(window.pageYOffset);
+        });
+      }
     }, 500);
+  }
+
+  addScrollCallback(callback) {
+    if (typeof callback === 'function') {
+      this.scrollCallbacks.push(callback);
+    }
+  }
+
+  onPageDidScroll(y) {
+    this.scrollCallbacks.forEach(callback => callback(y));
   }
 
   initSpazzolino() {
@@ -13894,6 +13995,18 @@ class SplendidiSplendenti {
 
       section.classList.add(`slide-${swiper.realIndex}`); // console.log(swiper, swiper.realIndex);
     });
+    const picture = section.querySelector('.picture');
+    const bullets = section.querySelector('.swiper-pagination-bullets');
+    const professional = section.querySelector('.ico-professional-27');
+    return y => {
+      y = Math.min(y, picture.offsetTop + picture.offsetHeight - professional.offsetTop);
+      TweenMax.set(bullets, {
+        y: y
+      });
+      TweenMax.set(professional, {
+        y: y
+      });
+    };
   }
 
   initNonSolo() {
@@ -13985,6 +14098,8 @@ class SplendidiSplendenti {
 
   initBanners() {
     const banners = [].slice.call(document.querySelectorAll('.banner')).forEach(element => {
+      const outer = element.querySelector('.outer');
+      const direction = outer ? parseInt(outer.getAttribute('data-scroll-speed') / Math.abs(outer.getAttribute('data-scroll-speed'))) : 1;
       const inner = element.querySelector('.inner');
       const span = inner.querySelector('span');
       const width = span.offsetWidth;
@@ -13996,15 +14111,19 @@ class SplendidiSplendenti {
         inner.appendChild(node);
       }
 
-      if (TWEEN) {
-        TweenMax.fromTo(inner, width / 50, {
-          x: 0
-        }, {
-          x: -width,
-          ease: Linear.easeNone,
-          repeat: -1
-        });
-      }
+      _intersection.default.observe(element, intersect => {
+        if (intersect) {
+          TweenMax.fromTo(inner, width / 50, {
+            x: 0
+          }, {
+            x: width * direction * -1,
+            ease: Linear.easeNone,
+            repeat: -1
+          });
+        } else {
+          TweenMax.killTweensOf(inner);
+        }
+      });
 
       element.classList.add('init');
     });
@@ -14066,10 +14185,14 @@ class SplendidiSplendenti {
           });
         };
 
-        tweenFlash();
+        _intersection.default.observe(flash, intersect => {
+          if (intersect) {
+            tweenFlash();
+          } else {
+            TweenMax.killTweensOf(flash);
+          }
+        });
       }
-
-      const img = element.querySelector('img');
     });
   }
 
@@ -14079,32 +14202,37 @@ class SplendidiSplendenti {
 
   initEmoji() {
     const emoji = [].slice.call(document.querySelectorAll('.emoji')).forEach(element => {
-      if (TWEEN) {
-        const r = -10 + Math.floor(Math.random() * 20);
+      const r = -10 + Math.floor(Math.random() * 20);
 
-        const randomRotate = () => {
-          TweenMax.fromTo(element, 2, {
-            rotation: `${r}deg`
-          }, {
-            rotation: `${r * -1}deg`,
-            ease: Elastic.easeOut.config(1, 0.3),
-            delay: Math.random(),
-            repeat: -1
-          });
-        };
-
-        randomRotate();
-        element.addEventListener('click', () => {
-          TweenMax.to(element, 1, {
-            rotation: '+=90deg',
-            ease: Elastic.easeOut.config(1, 0.3),
-            overwrite: 'all',
-            onComplete: () => {
-              randomRotate();
-            }
-          });
+      const randomRotate = () => {
+        TweenMax.fromTo(element, 2, {
+          rotation: `${r}deg`
+        }, {
+          rotation: `${r * -1}deg`,
+          ease: Elastic.easeOut.config(1, 0.3),
+          delay: Math.random(),
+          repeat: -1
         });
-      }
+      };
+
+      _intersection.default.observe(element, intersect => {
+        if (intersect) {
+          randomRotate();
+        } else {
+          TweenMax.killTweensOf(element);
+        }
+      });
+
+      element.addEventListener('click', () => {
+        TweenMax.to(element, 1, {
+          rotation: '+=90deg',
+          ease: Elastic.easeOut.config(1, 0.3),
+          overwrite: 'all',
+          onComplete: () => {
+            randomRotate();
+          }
+        });
+      });
     });
   }
 
@@ -14131,5 +14259,5 @@ class SplendidiSplendenti {
 
 const splendidiSplendenti = new SplendidiSplendenti();
 
-},{"./painter/painter.component":4,"./particle/particle.component":5,"locomotive-scroll":1,"swiper":2}]},{},[6]);
+},{"./intersection/intersection.service":4,"./painter/painter.component":5,"./particle/particle.component":6,"locomotive-scroll":1,"swiper":2}]},{},[7]);
 //# sourceMappingURL=splendidi-splendenti.js.map

@@ -4,7 +4,7 @@ const BUTTON = 0b01;
 
 export default class PainterComponent {
 
-	constructor(canvas, colour = '#ffcc00', strokeWidth = 30, varyBrightness = 5) {
+	constructor(canvas, colour = '#0b0c11', strokeWidth = 10, varyBrightness = 5) {
 		// Brush colour and size
 		this.colour = colour;
 		this.strokeWidth = strokeWidth;

@@ -1,0 +1,159 @@
+.splendidi-splendenti {
+
+	header {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: calc(100% - 60px);
+		margin: 30px;
+		z-index: 100;
+
+		.container {
+			max-width: 1024px;
+			margin: 0 auto;
+			padding: 15px;
+			background: white;
+			border: solid 3px #0b0c11;
+			box-shadow: 0 10px 0 -5px rgba(0, 0, 0, 1);
+
+			.row {
+				width: 100%;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+		}
+
+		.col-menu {
+			ul.menu {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				display: flex;
+				align-items: center;
+
+				li {
+					margin: 0 10px;
+				}
+			}
+		}
+
+		.col-logo {
+			a {
+				display: block;
+				font-size: 0;
+			}
+		}
+
+		.col-cta {
+			display: flex;
+			align-items: center;
+		}
+
+		.main-search {
+			margin-right: 15px;
+			font-size: 0;
+
+			.icon--search {
+				width: 19px;
+				height: 18px;
+			}
+
+		}
+
+		.btn--secondary {
+			display: inline-block;
+			outline: none;
+			padding: 10px;
+			font-size: 14px;
+			font-weight: 600;
+			letter-spacing: 0.05em;
+			line-height: 1;
+			text-align: center;
+			border: solid 3px #0b0c11;
+			text-decoration: none;
+			box-shadow: 0 10px 0 -5px rgba(0, 0, 0, 1);
+
+			&,
+			&:link,
+			&:active,
+			&:visited,
+			&:hover {
+				background: #e01e25;
+				color: #fff;
+			}
+
+			&:hover {
+				transform: translateY(5px);
+				box-shadow: 0 7px 0 -5px rgba(0, 0, 0, 1);
+			}
+		}
+
+	}
+
+	ul.menu {
+		li {
+			a {
+				display: block;
+				font-size: 15px;
+				font-weight: 600;
+				line-height: 1;
+				letter-spacing: 0.05em;
+				text-decoration: none;
+				text-transform: uppercase;
+
+				&,
+				&:link,
+				&:active,
+				&:visited,
+				&:hover {
+					color: #0b0c11;
+				}
+
+			}
+		}
+	}
+
+	@media (min-width: 940px) {
+		header {
+			.hamburger {
+				display: none;
+			}
+
+			.mobile-menu {
+				display: none;
+			}
+		}
+	}
+
+	@media (max-width: 939px) {
+		header {
+			width: calc(100% - 30px);
+			margin: 15px;
+
+			.col-menu {
+				display: none;
+			}
+
+			.col-logo {
+				img {
+					width: 152px;
+				}
+			}
+
+			.col-cta {
+				.dove-acquistare {
+					display: none;
+				}
+			}
+
+			.hamburger {
+				display: block;
+			}
+
+			.mobile-menu {
+				display: none;
+			}
+		}
+	}
+}

@@ -1,5 +1,6 @@
 import LocomotiveScroll from 'locomotive-scroll';
 import Swiper from 'swiper';
+import IntersectionService from './intersection/intersection.service';
 import PainterComponent from './painter/painter.component';
 import ParticleComponent from './particle/particle.component';
 
@@ -8,19 +9,37 @@ const TWEEN = true;
 class SplendidiSplendenti {
 
 	constructor() {
-		this.initSpazzolino();
-		this.initNonSolo();
-		this.initBanners();
-		this.initCoriander();
-		this.initMouths();
-		this.initPainter();
-		this.initEmergency();
-		this.initEmoji();
-
+		this.scrollCallbacks = [];
+		this.addScrollCallback(this.initSpazzolino());
+		this.addScrollCallback(this.initNonSolo());
+		this.addScrollCallback(this.initBanners());
+		this.addScrollCallback(this.initCoriander());
+		this.addScrollCallback(this.initMouths());
+		this.addScrollCallback(this.initPainter());
+		this.addScrollCallback(this.initEmergency());
+		this.addScrollCallback(this.initEmoji());
 		setTimeout(() => {
 			const scroll = this.getLocomotiveScroll();
+			if (scroll) {
+				scroll.on("scroll", instance => {
+					this.onPageDidScroll(instance.scroll.y);
+				});
+			} else {
+				window.addEventListener("scroll", () => {
+					this.onPageDidScroll(window.pageYOffset);
+				});
+			}
 		}, 500);
+	}
 
+	addScrollCallback(callback) {
+		if (typeof callback === 'function') {
+			this.scrollCallbacks.push(callback);
+		}
+	}
+
+	onPageDidScroll(y) {
+		this.scrollCallbacks.forEach(callback => callback(y));
 	}
 
 	initSpazzolino() {
@@ -53,6 +72,14 @@ class SplendidiSplendenti {
 			section.classList.add(`slide-${swiper.realIndex}`);
 			// console.log(swiper, swiper.realIndex);
 		});
+		const picture = section.querySelector('.picture');
+		const bullets = section.querySelector('.swiper-pagination-bullets');
+		const professional = section.querySelector('.ico-professional-27');
+		return (y) => {
+			y = Math.min(y, picture.offsetTop + picture.offsetHeight - professional.offsetTop);
+			TweenMax.set(bullets, { y: y });
+			TweenMax.set(professional, { y: y });
+		}
 	}
 
 	initNonSolo() {
@@ -138,6 +165,8 @@ class SplendidiSplendenti {
 
 	initBanners() {
 		const banners = [].slice.call(document.querySelectorAll('.banner')).forEach(element => {
+			const outer = element.querySelector('.outer');
+			const direction = outer ? parseInt(outer.getAttribute('data-scroll-speed') / Math.abs(outer.getAttribute('data-scroll-speed'))) : 1;
 			const inner = element.querySelector('.inner');
 			const span = inner.querySelector('span');
 			const width = span.offsetWidth;
@@ -147,9 +176,13 @@ class SplendidiSplendenti {
 				node.innerHTML = span.innerHTML;
 				inner.appendChild(node);
 			}
-			if (TWEEN) {
-				TweenMax.fromTo(inner, width / 50, { x: 0 }, { x: -width, ease: Linear.easeNone, repeat: -1 });
-			}
+			IntersectionService.observe(element, (intersect) => {
+				if (intersect) {
+					TweenMax.fromTo(inner, width / 50, { x: 0 }, { x: width * direction * -1, ease: Linear.easeNone, repeat: -1 });
+				} else {
+					TweenMax.killTweensOf(inner);
+				}
+			});
 			element.classList.add('init');
 		});
 	}
@@ -208,9 +241,14 @@ class SplendidiSplendenti {
 						},
 					});
 				}
-				tweenFlash();
+				IntersectionService.observe(flash, (intersect) => {
+					if (intersect) {
+						tweenFlash();
+					} else {
+						TweenMax.killTweensOf(flash);
+					}
+				});
 			}
-			const img = element.querySelector('img');
 		});
 	}
 
@@ -220,30 +258,34 @@ class SplendidiSplendenti {
 
 	initEmoji() {
 		const emoji = [].slice.call(document.querySelectorAll('.emoji')).forEach(element => {
-			if (TWEEN) {
-				const r = (-10 + Math.floor(Math.random() * 20));
-				const randomRotate = () => {
-					TweenMax.fromTo(element, 2, {
-						rotation: `${r}deg`
-					}, {
-						rotation: `${r * -1}deg`,
-						ease: Elastic.easeOut.config(1, 0.3),
-						delay: Math.random(),
-						repeat: -1
-					});
-				};
-				randomRotate();
-				element.addEventListener('click', () => {
-					TweenMax.to(element, 1, {
-						rotation: '+=90deg',
-						ease: Elastic.easeOut.config(1, 0.3),
-						overwrite: 'all',
-						onComplete: () => {
-							randomRotate();
-						}
-					});
+			const r = (-10 + Math.floor(Math.random() * 20));
+			const randomRotate = () => {
+				TweenMax.fromTo(element, 2, {
+					rotation: `${r}deg`
+				}, {
+					rotation: `${r * -1}deg`,
+					ease: Elastic.easeOut.config(1, 0.3),
+					delay: Math.random(),
+					repeat: -1
 				});
-			}
+			};
+			IntersectionService.observe(element, (intersect) => {
+				if (intersect) {
+					randomRotate();
+				} else {
+					TweenMax.killTweensOf(element);
+				}
+			});
+			element.addEventListener('click', () => {
+				TweenMax.to(element, 1, {
+					rotation: '+=90deg',
+					ease: Elastic.easeOut.config(1, 0.3),
+					overwrite: 'all',
+					onComplete: () => {
+						randomRotate();
+					}
+				});
+			});
 		});
 	}
 
