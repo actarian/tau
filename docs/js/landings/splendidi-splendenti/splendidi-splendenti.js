@@ -14000,19 +14000,22 @@ class SplendidiSplendenti {
     this.addScrollCallback(this.initPopup());
     this.addScrollCallback(this.initEmoji());
     this.initPointer();
-    setTimeout(() => {
-      const scroll = this.getLocomotiveScroll();
 
-      if (scroll) {
-        scroll.on("scroll", instance => {
-          this.onPageDidScroll(instance.scroll.y);
-        });
-      } else {
-        window.addEventListener("scroll", () => {
-          this.onPageDidScroll(window.pageYOffset);
-        });
-      }
-    }, 500);
+    window.onload = () => {
+      setTimeout(() => {
+        const scroll = this.getLocomotiveScroll();
+
+        if (scroll) {
+          scroll.on("scroll", instance => {
+            this.onPageDidScroll(instance.scroll.y);
+          });
+        } else {
+          window.addEventListener("scroll", () => {
+            this.onPageDidScroll(window.pageYOffset);
+          });
+        }
+      }, 1); // 500
+    };
   }
 
   addScrollCallback(callback) {
