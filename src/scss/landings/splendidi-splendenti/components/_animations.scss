@@ -1,0 +1,61 @@
+%ring {
+	animation: ring 20s linear infinite;
+}
+
+@keyframes ring {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(-360deg);
+	}
+}
+
+%pulse {
+	animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+	0% {
+		transform: scale(1.0, 1.0);
+	}
+
+	50% {
+		transform: scale(1.1, 1.1);
+	}
+
+	100% {
+		transform: scale(1.0, 1.0);
+	}
+}
+
+%popup-enter {
+	animation: popup-enter 0.35s cubic-bezier(0.680, -0.550, 0.265, 1.550) forwards;
+}
+
+@keyframes popup-enter {
+	0% {
+		transform: scale(0.5);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}
+
+%popup-exit {
+	animation: popup-exit 0.35s cubic-bezier(0.680, -0.550, 0.265, 1.550) forwards;
+}
+
+@keyframes popup-exit {
+	0% {
+		transform: scale(1);
+		opacity: 1;
+	}
+
+	100% {
+		transform: scale(0.5);
+		opacity: 0;
+	}
+}

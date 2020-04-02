@@ -5,6 +5,7 @@
 @import 'components/base';
 @import 'components/header';
 @import 'components/footer';
+@import 'components/animations';
 
 .splendidi-splendenti {
 
@@ -30,28 +31,48 @@
 			transition: background-color ease-in-out 600ms;
 		}
 
+		/*
+		Giallo: #fdf06f
+		Rosa: #cf2f89
+		Arancio: #ff9966
+		Azzurro: #96d0ff
+		Viola: #9357a9
+		*/
+
 		&,
 		&.slide-0 {
-			background: #0090d4;
+			background: #9257a9;
 
 			&:before {
-				background: #0090d4;
+				background: #9257a9;
+			}
+
+			.ss-professional-27-ring-setole {
+				fill: #fdf06f;
 			}
 		}
 
 		&.slide-1 {
-			background: #ffc403;
+			background: #ff9604;
 
 			&:before {
-				background: #ffc403;
+				background: #ff9604;
+			}
+
+			.ss-professional-27-ring-setole {
+				fill: #cf2f89;
 			}
 		}
 
 		&.slide-2 {
-			background: #9357a9;
+			background: #008fd3;
 
 			&:before {
-				background: #9357a9;
+				background: #008fd3;
+			}
+
+			.ss-professional-27-ring-setole {
+				fill: #ff9966;
 			}
 		}
 
@@ -61,13 +82,21 @@
 			&:before {
 				background: #cf2f89;
 			}
+
+			.ss-professional-27-ring-setole {
+				fill: #96d0ff;
+			}
 		}
 
 		&.slide-4 {
-			background: #3d6d4f;
+			background: #ffc404;
 
 			&:before {
-				background: #3d6d4f;
+				background: #ffc404;
+			}
+
+			.ss-professional-27-ring-setole {
+				fill: #9357a9;
 			}
 		}
 
@@ -81,6 +110,7 @@
 
 			.picture {
 				width: 100vw;
+				padding-bottom: 30px;
 				display: flex;
 				justify-content: center;
 
@@ -122,8 +152,8 @@
 			}
 		}
 
-		$s1: 183px;
-		$s2: 77px;
+		$s1: 209px;
+		$s2: 81px;
 		$scale: 0.7;
 
 		.ico-professional-27 {
@@ -142,14 +172,19 @@
 				height: $s2 * $scale;
 				left: ($s1 - $s2) / 2 * $scale;
 				top: ($s1 - $s2) / 2 * $scale;
-				animation: pulse 1s ease-in-out infinite;
+				// @extend %pulse;
 			}
 
-			.ss-professional-27-ring {
+			.ss-professional-27-ring,
+			.ss-professional-27-ring-setole {
 				position: absolute;
 				width: $s1 * $scale;
 				height: $s1 * $scale;
-				animation: ring 20s linear infinite;
+				@extend %ring;
+			}
+
+			.ss-professional-27-ring-setole {
+				transition: fill ease-in-out 600ms;
 			}
 		}
 	}
@@ -356,7 +391,6 @@
 			display: flex;
 			align-items: center;
 			padding: 15px;
-			min-width: 260px;
 
 			&,
 			&:link,
@@ -371,6 +405,7 @@
 			}
 
 			.icon {
+				position: absolute;
 				width: 1.5em;
 				height: 1.5em;
 				display: inline-block;
@@ -385,6 +420,73 @@
 
 			&.facebook {
 				background: #4360b5;
+			}
+		}
+
+	}
+
+	@media (min-width: 940px) {
+
+		.section--dove,
+		.section--follow {
+			.btn--cta {
+				min-width: 335px;
+			}
+		}
+
+		a,
+		span,
+		button,
+		div {
+			outline: none;
+			cursor: none !important;
+		}
+
+		.pointer {
+			position: fixed;
+			top: 0;
+			left: 0;
+			z-index: 100000;
+			// mix-blend-mode: hard-light;
+			pointer-events: none;
+			transform-origin: 0 0;
+			visibility: hidden;
+
+			&.init {
+				visibility: visible;
+			}
+
+			&:after {
+				content: '';
+				position: absolute;
+				width: 2px;
+				height: 2px;
+				background: red;
+				display: none; // !!!
+			}
+
+			img {
+				position: absolute;
+				width: 80px;
+				height: 80px;
+				display: none;
+			}
+
+			.point,
+			.click {
+				transform: translateX(-20%) translateY(-8%);
+			}
+
+			&:not(.down) {
+				.point {
+					display: block;
+				}
+			}
+
+			&.down {
+				.click {
+					display: block;
+				}
 			}
 		}
 
@@ -420,86 +522,18 @@
 			}
 		}
 
-	}
-
-	a,
-	span,
-	button,
-	div {
-		outline: none;
-		cursor: none !important;
-	}
-
-	.pointer {
-		position: fixed;
-		top: 0;
-		left: 0;
-		z-index: 100000;
-		// mix-blend-mode: hard-light;
-		pointer-events: none;
-		transform-origin: 0 0;
-		visibility: hidden;
-
-		&.init {
-			visibility: visible;
+		.section--dove,
+		.section--follow {
+			.btn--cta {
+				display: flex;
+				min-width: 100%;
+			}
 		}
 
-		&:after {
-			content: '';
-			position: absolute;
-			width: 2px;
-			height: 2px;
-			background: red;
-			display: none; // !!!
-		}
-
-		img {
-			position: absolute;
-			width: 80px;
-			height: 80px;
+		.pointer {
 			display: none;
 		}
 
-		.point,
-		.click {
-			transform: translateX(-20%) translateY(-8%);
-		}
-
-		&:not(.down) {
-			.point {
-				display: block;
-			}
-		}
-
-		&.down {
-			.click {
-				display: block;
-			}
-		}
 	}
 
-}
-
-@keyframes ring {
-	from {
-		transform: rotate(0deg);
-	}
-
-	to {
-		transform: rotate(-360deg);
-	}
-}
-
-@keyframes pulse {
-	0% {
-		transform: scale(1.0, 1.0);
-	}
-
-	50% {
-		transform: scale(1.1, 1.1);
-	}
-
-	100% {
-		transform: scale(1.0, 1.0);
-	}
 }

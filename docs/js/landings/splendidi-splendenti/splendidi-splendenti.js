@@ -13989,6 +13989,7 @@ const TWEEN = true;
 class SplendidiSplendenti {
   constructor() {
     this.scrollCallbacks = [];
+    this.addScrollCallback(this.initHeader());
     this.addScrollCallback(this.initSpazzolino());
     this.addScrollCallback(this.initNonSolo());
     this.addScrollCallback(this.initBanners());
@@ -13996,6 +13997,7 @@ class SplendidiSplendenti {
     this.addScrollCallback(this.initMouths());
     this.addScrollCallback(this.initPainter());
     this.addScrollCallback(this.initEmergency());
+    this.addScrollCallback(this.initPopup());
     this.addScrollCallback(this.initEmoji());
     this.initPointer();
     setTimeout(() => {
@@ -14023,13 +14025,31 @@ class SplendidiSplendenti {
     this.scrollCallbacks.forEach(callback => callback(y));
   }
 
+  initHeader() {
+    const header = document.querySelector('header');
+    const toggler = document.querySelector('.navbar-toggler');
+    toggler.addEventListener('click', () => {
+      if (header.classList.contains('opened')) {
+        header.classList.remove('opened');
+      } else {
+        header.classList.add('opened');
+      }
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 940) {
+        header.classList.remove('opened');
+      }
+    });
+  }
+
   initSpazzolino() {
-    const section = document.querySelector('.section--spazzolino');
-    const swiper = new _swiper.default(section.querySelector('.swiper-container'), {
+    const section = document.querySelector('.section--spazzolino'); // const container = section.querySelector('.swiper-container');
+
+    const swiper = new _swiper.default('.section--spazzolino .swiper-container', {
       slidesPerView: 1,
       spaceBetween: 0,
       loop: true,
-      effect: 'fade',
+      // effect: 'fade',
       speed: 1000,
       autoplay: {
         delay: 2500,
@@ -14038,7 +14058,7 @@ class SplendidiSplendenti {
       keyboardControl: true,
       mousewheelControl: false,
       pagination: {
-        el: '.swiper-pagination',
+        el: '.section--spazzolino .swiper-pagination',
         clickable: true
       },
       keyboard: {
@@ -14057,7 +14077,7 @@ class SplendidiSplendenti {
     const bullets = section.querySelector('.swiper-pagination-bullets');
     const professional = section.querySelector('.ico-professional-27');
     return y => {
-      y = Math.min(y, picture.offsetTop + picture.offsetHeight - professional.offsetTop);
+      y = Math.min(y, picture.offsetTop + picture.offsetHeight - professional.offsetTop - 30);
       TweenMax.set(bullets, {
         y: y
       });
@@ -14068,8 +14088,9 @@ class SplendidiSplendenti {
   }
 
   initNonSolo() {
-    const section = document.querySelector('.section--nonsolo');
-    const swiper = new _swiper.default(section.querySelector('.swiper-container'), {
+    // const section = document.querySelector('.section--nonsolo');
+    // const container = section.querySelector('.swiper-container');
+    const swiper = new _swiper.default('.section--nonsolo .swiper-container', {
       slidesPerView: 1,
       spaceBetween: 0,
       loop: true,
@@ -14082,7 +14103,7 @@ class SplendidiSplendenti {
       keyboardControl: true,
       mousewheelControl: false,
       pagination: {
-        el: '.swiper-pagination',
+        el: '.section--nonsolo .swiper-pagination',
         clickable: true
       },
       keyboard: {
@@ -14092,7 +14113,7 @@ class SplendidiSplendenti {
     });
   }
 
-  initEmergency() {
+  initEmergency__old() {
     const emergencies = [].slice.call(document.querySelectorAll('[emergency]')).forEach(element => {
       let i = 0;
 
@@ -14149,9 +14170,129 @@ class SplendidiSplendenti {
           event.stopImmediatePropagation();
         } else {
           console.log('open link!');
+          const popupNode = document.querySelector(element.getAttribute('emergency'));
+
+          if (popupNode) {
+            this.openPopup(popupNode);
+          }
+
+          event.preventDefault();
+          event.stopImmediatePropagation();
         }
       });
     });
+  }
+
+  initEmergency() {
+    const emergencies = [].slice.call(document.querySelectorAll('[emergency]')).forEach(element => {
+      let i = 0;
+
+      const setClass = () => {
+        for (let j = 0; j < 5; j++) {
+          element.classList.remove(`step-${j}`);
+        }
+
+        element.classList.add(`step-${i}`);
+      };
+
+      element.addEventListener('click', event => {
+        const openPopup = () => {
+          console.log('open link!');
+          const popupNode = document.querySelector(element.getAttribute('emergency'));
+
+          if (popupNode) {
+            this.openPopup(popupNode);
+          }
+        };
+
+        if (i < 4) {
+          i++;
+          setClass();
+          TweenMax.to(element, 1, {
+            scale: '-=0.01',
+            rotation: `+=${-2 + Math.random() * 4}deg`,
+            ease: Elastic.easeOut.config(1, 0.3),
+            overwrite: 'all',
+            onComplete: () => {
+              if (i < 4) {
+                i = 0;
+                setClass();
+              } else {
+                openPopup();
+              }
+
+              TweenMax.to(element, 1.5, {
+                scale: 1,
+                rotation: 0,
+                ease: Elastic.easeOut.config(1, 0.3)
+              });
+            }
+          });
+        } else {
+          openPopup();
+        }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      });
+    });
+  }
+
+  initPopup() {
+    const popups = Array.prototype.slice.call(document.querySelectorAll('.group--popup')).map(node => {
+      function Popup() {
+        this.node = node;
+        const body = document.querySelector('body');
+        const close = node.querySelector('.btn--close');
+
+        this.open = () => {
+          node.classList.add('active');
+          body.classList.add('popup--active');
+          setTimeout(() => {
+            node.classList.remove('exit');
+            node.classList.add('enter');
+          }, 1);
+        };
+
+        this.close = () => {
+          node.classList.remove('enter');
+          node.classList.add('exit');
+          setTimeout(() => {
+            node.classList.remove('active');
+            node.classList.remove('exit');
+            body.classList.remove('popup--active');
+          }, 400);
+        };
+
+        const onClose = () => {
+          this.close();
+        };
+
+        if (close) {
+          close.addEventListener('click', onClose);
+        }
+      }
+
+      const popup = new Popup();
+      return popup;
+    });
+    this.popups = popups;
+
+    this.openPopup = node => {
+      const popup = popups.find(x => x.node === node);
+
+      if (popup) {
+        popup.open();
+      }
+    };
+
+    return y => {
+      popups.forEach(popup => {
+        TweenMax.set(popup.node, {
+          y: y
+        });
+      });
+    };
   }
 
   initBanners() {
@@ -14189,9 +14330,12 @@ class SplendidiSplendenti {
 
   initCoriander() {
     const container = document.querySelector('.corianders');
-    const corianders = new Array(50).fill(0).map(() => new _particle.default(document.createElement("div"))).map(particle => {
-      container.appendChild(particle.node);
-    });
+
+    if (container) {
+      const corianders = new Array(50).fill(0).map(() => new _particle.default(document.createElement("div"))).map(particle => {
+        container.appendChild(particle.node);
+      });
+    }
   }
 
   initMouths() {
