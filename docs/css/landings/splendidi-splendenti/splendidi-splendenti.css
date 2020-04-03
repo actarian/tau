@@ -1101,24 +1101,24 @@ html.has-scroll-dragging {
         border-color: #0b0c11; }
   .splendidi-splendenti .section--spazzolino .ico-professional-27 {
     position: fixed;
-    width: 146.3px;
-    height: 146.3px;
-    margin-right: -73.15px;
-    margin-top: -73.15px;
+    width: 146px;
+    height: 146px;
+    margin-right: -73px;
+    margin-top: -73px;
     right: 25vw;
     top: 75vh;
     text-align: left; }
     .splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27 {
       position: absolute;
-      width: 56.7px;
-      height: 56.7px;
-      left: 44.8px;
-      top: 44.8px; }
+      width: 73px;
+      height: 73px;
+      left: 36.5px;
+      top: 36.5px; }
     .splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27-ring,
     .splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27-ring-setole {
       position: absolute;
-      width: 146.3px;
-      height: 146.3px; }
+      width: 146px;
+      height: 146px; }
     .splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27-ring-setole {
       -webkit-transition: fill ease-in-out 600ms;
       transition: fill ease-in-out 600ms; }

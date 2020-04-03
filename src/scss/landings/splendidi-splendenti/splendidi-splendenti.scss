@@ -152,34 +152,33 @@
 			}
 		}
 
-		$s1: 209px;
-		$s2: 81px;
-		$scale: 0.7;
+		$s1: 146px;
+		$s2: 73px;
 
 		.ico-professional-27 {
 			position: fixed;
-			width: $s1 * $scale;
-			height: $s1 * $scale;
-			margin-right: -$s1 * $scale / 2;
-			margin-top: -$s1 * $scale / 2;
+			width: $s1;
+			height: $s1;
+			margin-right: -$s1 / 2;
+			margin-top: -$s1 / 2;
 			right: 25vw;
 			top: 75vh;
 			text-align: left;
 
 			.ss-professional-27 {
 				position: absolute;
-				width: $s2 * $scale;
-				height: $s2 * $scale;
-				left: ($s1 - $s2) / 2 * $scale;
-				top: ($s1 - $s2) / 2 * $scale;
+				width: $s2;
+				height: $s2;
+				left: ($s1 - $s2) / 2;
+				top: ($s1 - $s2) / 2;
 				// @extend %pulse;
 			}
 
 			.ss-professional-27-ring,
 			.ss-professional-27-ring-setole {
 				position: absolute;
-				width: $s1 * $scale;
-				height: $s1 * $scale;
+				width: $s1;
+				height: $s1;
 				@extend %ring;
 			}
 
