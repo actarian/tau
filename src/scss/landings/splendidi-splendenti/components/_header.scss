@@ -61,6 +61,15 @@
 				height: 18px;
 			}
 
+			@media (min-width: 930px) {
+				margin-right: 20px;
+
+				.icon--search {
+					width: 23px;
+					height: 22px;
+				}
+			}
+
 		}
 
 		.btn--secondary {

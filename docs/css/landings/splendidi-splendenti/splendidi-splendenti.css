@@ -171,12 +171,16 @@ html.has-scroll-dragging {
         font-size: 7vh; }
     .splendidi-splendenti .banner.banner--mouths {
       top: 0.1em; }
-      .splendidi-splendenti .banner.banner--mouths span img {
-        width: 3.525em; }
+      .splendidi-splendenti .banner.banner--mouths span {
+        padding: 0; }
+        .splendidi-splendenti .banner.banner--mouths span img {
+          width: 3.525em; }
     .splendidi-splendenti .banner.banner--diamonds {
       top: 0.3em; }
-      .splendidi-splendenti .banner.banner--diamonds span img {
-        width: 12.6125em; }
+      .splendidi-splendenti .banner.banner--diamonds span {
+        padding: 0; }
+        .splendidi-splendenti .banner.banner--diamonds span img {
+          width: 12.6125em; }
   .splendidi-splendenti .picture,
   .splendidi-splendenti img,
   .splendidi-splendenti svg {
@@ -309,8 +313,23 @@ html.has-scroll-dragging {
         height: 23px; }
     .splendidi-splendenti .group--popup .title {
       color: white; }
-    .splendidi-splendenti .group--popup .listing--hints > .card--hint + .card--hint {
-      margin-top: 20px; }
+    @media (min-width: 940px) {
+      .splendidi-splendenti .group--popup .listing--hints {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-pack: center;
+            -ms-flex-pack: center;
+                justify-content: center;
+        -webkit-box-align: stretch;
+            -ms-flex-align: stretch;
+                align-items: stretch;
+        margin: auto 0; }
+        .splendidi-splendenti .group--popup .listing--hints .card--hint + .card--hint {
+          margin-left: 30px; } }
+    @media (max-width: 939px) {
+      .splendidi-splendenti .group--popup .listing--hints > .card--hint + .card--hint {
+        margin-top: 20px; } }
   .splendidi-splendenti .card--hint {
     background: white;
     border: 6px solid #030409;
@@ -349,7 +368,7 @@ html.has-scroll-dragging {
     .splendidi-splendenti .card--hint {
       max-width: 480px; }
       .splendidi-splendenti .card--hint__title, .splendidi-splendenti .card--hint__abstract {
-        font-size: 30px; } }
+        font-size: 24px; } }
   @media (min-width: 1440px) {
     .splendidi-splendenti .title {
       font-size: 60px; }
@@ -362,7 +381,7 @@ html.has-scroll-dragging {
     .splendidi-splendenti .card--hint {
       max-width: 640px; }
       .splendidi-splendenti .card--hint__title, .splendidi-splendenti .card--hint__abstract {
-        font-size: 40px; } }
+        font-size: 30px; } }
   @media (min-height: 790px) {
     .splendidi-splendenti .banner {
       font-size: 32px; }
@@ -492,6 +511,12 @@ html.has-scroll-dragging {
     .splendidi-splendenti header .main-search .icon--search {
       width: 19px;
       height: 18px; }
+    @media (min-width: 930px) {
+      .splendidi-splendenti header .main-search {
+        margin-right: 20px; }
+        .splendidi-splendenti header .main-search .icon--search {
+          width: 23px;
+          height: 22px; } }
   .splendidi-splendenti header .btn--secondary {
     display: inline-block;
     outline: none;
@@ -1214,6 +1239,17 @@ html.has-scroll-dragging {
 
 .splendidi-splendenti .section--consigli .title {
   margin-bottom: 1em; }
+
+@media (min-width: 940px) {
+  .splendidi-splendenti .section--consigli .group--popup .container {
+    max-width: calc(100% - 60px);
+    height: 100%; }
+  .splendidi-splendenti .section--consigli .group--popup .title {
+    margin-bottom: 0; } }
+
+@media (min-width: 1440px) {
+  .splendidi-splendenti .section--consigli .group--popup .container {
+    max-width: calc(100% - 80px); } }
 
 .splendidi-splendenti .section--dove .container {
   max-width: 680px;

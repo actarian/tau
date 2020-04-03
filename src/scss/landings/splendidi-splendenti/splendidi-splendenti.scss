@@ -348,6 +348,26 @@
 			margin-bottom: 1em;
 		}
 
+		@media (min-width: 940px) {
+			.group--popup {
+				.container {
+					max-width: calc(100% - 60px);
+					height: 100%;
+				}
+
+				.title {
+					margin-bottom: 0;
+				}
+			}
+		}
+
+		@media (min-width: 1440px) {
+			.group--popup {
+				.container {
+					max-width: calc(100% - 80px);
+				}
+			}
+		}
 	}
 
 	.section--dove {

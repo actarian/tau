@@ -149,6 +149,8 @@
 			top: 0.1em;
 
 			span {
+				padding: 0;
+
 				img {
 					width: 3.525em;
 				}
@@ -159,6 +161,8 @@
 			top: 0.3em;
 
 			span {
+				padding: 0;
+
 				img {
 					width: 12.6125em;
 				}
@@ -400,9 +404,26 @@
 			color: white;
 		}
 
-		.listing--hints {
-			&>.card--hint+.card--hint {
-				margin-top: 20px;
+		@media (min-width: 940px) {
+			.listing--hints {
+				display: flex;
+				justify-content: center;
+				align-items: stretch;
+				margin: auto 0;
+
+				& .card--hint+.card--hint {
+					margin-left: 30px;
+				}
+			}
+		}
+
+		@media (min-width: 1440px) {}
+
+		@media (max-width: 939px) {
+			.listing--hints {
+				&>.card--hint+.card--hint {
+					margin-top: 20px;
+				}
 			}
 		}
 	}
@@ -469,7 +490,7 @@
 
 			&__title,
 			&__abstract {
-				font-size: 30px;
+				font-size: 24px;
 			}
 		}
 	}
@@ -498,7 +519,7 @@
 
 			&__title,
 			&__abstract {
-				font-size: 40px;
+				font-size: 30px;
 			}
 		}
 	}
