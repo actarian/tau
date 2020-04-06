@@ -1327,13 +1327,34 @@ html.has-scroll-dragging {
       width: 80px;
       height: 80px;
       display: none; }
-    .splendidi-splendenti .pointer .point,
-    .splendidi-splendenti .pointer .click {
+    .splendidi-splendenti .pointer .hand-point,
+    .splendidi-splendenti .pointer .hand-click,
+    .splendidi-splendenti .pointer .pen,
+    .splendidi-splendenti .pointer .hammer {
+      display: none; }
+    .splendidi-splendenti .pointer .hand-point,
+    .splendidi-splendenti .pointer .hand-click {
       -webkit-transform: translateX(-20%) translateY(-8%);
               transform: translateX(-20%) translateY(-8%); }
-    .splendidi-splendenti .pointer:not(.down) .point {
+    .splendidi-splendenti .pointer .pen {
+      -webkit-transform: translateX(-16%) translateY(-85%);
+              transform: translateX(-16%) translateY(-85%); }
+    .splendidi-splendenti .pointer .hammer {
+      -webkit-transform: translateX(-22%) translateY(-56%) scale(1.4, 1.4);
+              transform: translateX(-22%) translateY(-56%) scale(1.4, 1.4); }
+    .splendidi-splendenti .pointer.down .pen {
+      -webkit-transform: translateX(-10%) translateY(-80%) rotate(10deg);
+              transform: translateX(-10%) translateY(-80%) rotate(10deg); }
+    .splendidi-splendenti .pointer.down .hammer {
+      -webkit-transform: translateX(-22%) translateY(-56%) scale(1.4, 1.4) rotate(-15deg);
+              transform: translateX(-22%) translateY(-56%) scale(1.4, 1.4) rotate(-15deg); }
+    .splendidi-splendenti .pointer.hand-point .hand-point {
       display: block; }
-    .splendidi-splendenti .pointer.down .click {
+    .splendidi-splendenti .pointer.hand-click .hand-click {
+      display: block; }
+    .splendidi-splendenti .pointer.pen .pen {
+      display: block; }
+    .splendidi-splendenti .pointer.hammer .hammer {
       display: block; } }
 
 @media (max-width: 939px) {

@@ -1,7 +1,33 @@
+const PointerModes = {
+	HandPoint: 'hand-point',
+	HandClick: 'hand-click',
+	Pen: 'pen',
+	Hammer: 'hammer',
+};
+
 export default class PointerComponent {
+
+	set mode(mode) {
+		if (this.mode_ !== mode) {
+			this.mode_ = mode;
+			Object.keys(PointerModes).forEach(x => {
+				const key = PointerModes[x];
+				key === mode ? this.node.classList.add(key) : this.node.classList.remove(key);
+			});
+		}
+	}
+
+	get mode() {
+		return this.mode_;
+	}
+
 	constructor(node) {
 		this.node = node;
+		this.mode_ = PointerModes.HandPoint;
 		this.ro_ = this.ro = 0;
+		this.triggers = Array.prototype.slice.call(document.querySelectorAll('[pointer]')).map(node => {
+			return { node, mode: node.getAttribute('pointer') };
+		});
 		this.addEventListener();
 		this.animate();
 	}
@@ -25,10 +51,16 @@ export default class PointerComponent {
 
 	onDown(event) {
 		this.node.classList.add('down');
+		if (this.mode_ === PointerModes.HandPoint) {
+			this.mode = PointerModes.HandClick;
+		}
 	}
 
 	onUp(event) {
 		this.node.classList.remove('down');
+		if (this.mode_ === PointerModes.HandClick) {
+			this.mode = PointerModes.HandPoint;
+		}
 	}
 
 	addEventListener() {
@@ -39,5 +71,15 @@ export default class PointerComponent {
 		window.addEventListener('mousemove', this.onMove, false);
 		window.addEventListener('mousedown', this.onDown, false);
 		window.addEventListener('mouseup', this.onUp, false);
+		this.triggers.forEach(x => {
+			x.node.addEventListener('mouseenter', () => {
+				if (!x.node.classList.contains('step-4')) {
+					this.mode = x.mode;
+				}
+			}, false);
+			x.node.addEventListener('mouseleave', () => {
+				this.mode = PointerModes.HandPoint;
+			}, false);
+		});
 	}
 }

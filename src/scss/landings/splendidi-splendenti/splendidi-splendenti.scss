@@ -491,22 +491,60 @@
 				display: none;
 			}
 
-			.point,
-			.click {
+			.hand-point,
+			.hand-click,
+			.pen,
+			.hammer {
+				display: none;
+			}
+
+			.hand-point,
+			.hand-click {
 				transform: translateX(-20%) translateY(-8%);
 			}
 
-			&:not(.down) {
-				.point {
+			.pen {
+				transform: translateX(-16%) translateY(-85%);
+			}
+
+			.hammer {
+				transform: translateX(-22%) translateY(-56%) scale(1.4, 1.4);
+			}
+
+			&.down {
+				.pen {
+					transform: translateX(-10%) translateY(-80%) rotate(10deg);
+				}
+
+				.hammer {
+					transform: translateX(-22%) translateY(-56%) scale(1.4, 1.4) rotate(-15deg);
+				}
+			}
+
+			&.hand-point {
+				.hand-point {
 					display: block;
 				}
 			}
 
-			&.down {
-				.click {
+			&.hand-click {
+				.hand-click {
 					display: block;
 				}
 			}
+
+			&.pen {
+				.pen {
+					display: block;
+				}
+			}
+
+			&.hammer {
+				.hammer {
+					display: block;
+				}
+			}
+
 		}
 
 	}
