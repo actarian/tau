@@ -239,43 +239,9 @@ html.has-scroll-dragging {
     bottom: -15vw;
     height: calc(100% + 30vw);
     cursor: none; }
-  .page-template-splendidi-splendenti [emergency_old] {
-    position: relative;
-    max-width: 400px;
-    cursor: none; }
-    .page-template-splendidi-splendenti [emergency_old] img {
-      width: 100%; }
-    .page-template-splendidi-splendenti [emergency_old] .document,
-    .page-template-splendidi-splendenti [emergency_old] .glass {
-      position: absolute;
-      top: 0;
-      left: 0; }
-    .page-template-splendidi-splendenti [emergency_old] .glass {
-      mix-blend-mode: screen;
-      opacity: 0.4; }
-    .page-template-splendidi-splendenti [emergency_old] .title--small {
-      position: absolute;
-      top: 6%;
-      width: 84%;
-      left: 8%;
-      color: white;
-      text-align: center;
-      line-height: 1; }
-    .page-template-splendidi-splendenti [emergency_old] .glass, .page-template-splendidi-splendenti [emergency_old].step-0 .glass {
-      opacity: 0.9; }
-    .page-template-splendidi-splendenti [emergency_old].step-1 .glass {
-      opacity: 0.7; }
-    .page-template-splendidi-splendenti [emergency_old].step-2 .glass {
-      opacity: 0.5; }
-    .page-template-splendidi-splendenti [emergency_old].step-3 .glass {
-      opacity: 0.3; }
-    .page-template-splendidi-splendenti [emergency_old].step-4 .glass {
-      opacity: 0.1; }
-    .page-template-splendidi-splendenti [emergency_old].step-5 .glass {
-      opacity: 0.0; }
   .page-template-splendidi-splendenti [emergency] {
     position: relative;
-    max-width: 400px;
+    max-width: 320px;
     cursor: none; }
     .page-template-splendidi-splendenti [emergency] img {
       width: 100%; }
@@ -408,6 +374,9 @@ html.has-scroll-dragging {
       max-width: 480px; }
       .page-template-splendidi-splendenti .card--hint__title, .page-template-splendidi-splendenti .card--hint__abstract {
         font-size: 24px; } }
+  @media (min-width: 1600px) {
+    .page-template-splendidi-splendenti [emergency] {
+      max-width: 400px; } }
   @media (min-width: 1440px) {
     .page-template-splendidi-splendenti .title {
       font-size: 60px; }
@@ -1382,8 +1351,8 @@ html.has-scroll-dragging {
   .page-template-splendidi-splendenti .section--nonsolo .swiper-slide,
   .page-template-splendidi-splendenti .section--nonsolo .picture,
   .page-template-splendidi-splendenti .section--nonsolo .picture img {
-    width: 8vh;
-    height: 80vh; }
+    width: 70px;
+    height: 720px; }
   .page-template-splendidi-splendenti .section--nonsolo .swiper-slide {
     opacity: 0 !important; }
     .page-template-splendidi-splendenti .section--nonsolo .swiper-slide-active {
