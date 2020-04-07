@@ -14088,6 +14088,27 @@ class SplendidiSplendenti {
         header.classList.remove('opened');
       }
     });
+    const search = document.querySelector('.section--search');
+    const searchTogglers = Array.prototype.slice.call(document.querySelectorAll('.main-search, .close-search'));
+    searchTogglers.forEach(x => {
+      x.addEventListener('click', () => {
+        console.log('click', x);
+
+        if (search.classList.contains('show')) {
+          search.classList.remove('show');
+        } else {
+          search.classList.add('show');
+        }
+      });
+    });
+
+    if (search) {
+      return y => {
+        TweenMax.set(search, {
+          y: y
+        });
+      };
+    }
   }
 
   initSpazzolino() {
@@ -14096,7 +14117,27 @@ class SplendidiSplendenti {
     const swiper = new _swiper.default('.section--spazzolino .swiper-container', {
       slidesPerView: 1,
       spaceBetween: 0,
-      loop: true,
+      centeredSlides: true,
+      breakpoints: {
+        // when window width is >= 100px
+        100: {
+          slidesPerView: 1
+        },
+        // when window width is >= 768px
+        768: {
+          slidesPerView: 2.5
+        }
+      },
+      on: {
+        init: function () {
+          setTimeout(() => {
+            this.update();
+          }, 1);
+        }
+      },
+      // slidesPerView: 1,
+      // spaceBetween: 0,
+      // loop: true,
       // effect: 'fade',
       speed: 1000,
       autoplay: {
@@ -14361,9 +14402,9 @@ class SplendidiSplendenti {
       _intersection.default.observe(element, intersect => {
         if (intersect) {
           TweenMax.fromTo(inner, width / 50, {
-            x: 0
+            x: -width
           }, {
-            x: width * direction * -1,
+            x: -width + width * direction * -1,
             ease: Linear.easeNone,
             repeat: -1
           });
@@ -14487,12 +14528,14 @@ class SplendidiSplendenti {
   }
 
   initPointer() {
-    const pointer = new _pointer.default(document.querySelector('.pointer'));
+    setTimeout(() => {
+      const pointer = new _pointer.default(document.querySelector('.pointer'));
+    }, 1);
   }
 
   getLocomotiveScroll() {
     const scroll = new _locomotiveScroll.default({
-      el: document.querySelector("#js-scroll"),
+      el: document.querySelector("#locomotive-scroll"),
       smooth: true,
       getSpeed: true,
       getDirection: false,

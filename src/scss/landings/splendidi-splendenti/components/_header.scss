@@ -1,6 +1,6 @@
 @import './vars';
 
-.splendidi-splendenti {
+.page-template-splendidi-splendenti {
 
 	header {
 		position: absolute;
@@ -157,6 +157,10 @@
 			.mobile-menu {
 				display: block;
 			}
+		}
+
+		.section--header-topbar {
+			display: none;
 		}
 	}
 
@@ -349,4 +353,133 @@
 		}
 
 	}
+
+	.section--search {
+		position: fixed;
+		display: none;
+		height: 100vh;
+		background: #fff;
+		position: relative;
+		left: 0;
+		top: 0;
+		width: 100%;
+		z-index: 200;
+
+		.container {
+			padding: 0;
+		}
+
+		&.show {
+			display: block;
+		}
+
+		.close-search {
+			position: absolute;
+			right: 20px;
+			top: 20px;
+			cursor: pointer;
+
+			i {
+				font-size: 24px;
+				color: red;
+				cursor: pointer;
+			}
+
+			.icon--times {
+				width: 20px;
+				height: 20px;
+				cursor: pointer;
+			}
+		}
+
+		.btn--primary {
+			display: inline-block;
+			padding: 0;
+			border: none;
+			outline: none;
+			appearance: none;
+
+			&:hover,
+			&:focus {
+
+				span {
+					color: #fff;
+					border-color: #e01e25;
+					background: #e01e25;
+					transition: all ease-in-out .2s;
+				}
+			}
+
+			span {
+				display: inline-block;
+				padding: 15px 50px;
+				text-transform: uppercase;
+				font-size: 13px;
+				font-weight: 600;
+				color: #e01e25;
+				border: 2px solid #e01e25;
+				border-radius: 500px;
+				transition: all ease-in-out .2s;
+			}
+
+			@media (max-width: 939px) {
+				display: block;
+			}
+		}
+
+		.search-group {
+			height: 100vh;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+
+			@media (max-width: 939px) {
+				flex-direction: column;
+			}
+
+			form {
+				@media (max-width: 939px) {
+					width: 100%;
+				}
+			}
+
+			input {
+				border: 0;
+				padding: 20px;
+				font-size: 16px;
+				width: 500px;
+				border-bottom: 1px dashed #ccc;
+
+				@media (max-width: 939px) {
+					width: 100%;
+				}
+
+				&:hover,
+				&:focus {
+					outline: none;
+				}
+			}
+
+			.btn {
+
+				@media (max-width: 939px) {
+					margin-top: 20px;
+					width: 100%;
+				}
+
+				span {
+
+					@media (max-width: 939px) {
+						width: 100%;
+						text-align: center;
+					}
+				}
+			}
+
+			button {
+				background: none;
+			}
+		}
+	}
+
 }

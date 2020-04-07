@@ -1,6 +1,6 @@
 @import './vars';
 
-.splendidi-splendenti {
+.page-template-splendidi-splendenti {
 	margin: 0;
 	font-family: 'Marker Felt', sans-serif;
 	background: #fff;
@@ -21,6 +21,45 @@
 		}
 	}
 
+	.section--diagonal {
+		&:before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: calc(100% - 5px);
+			transform: skewY(-15deg);
+			border-bottom: 6px solid #030409;
+		}
+
+		&:not(.section--spazzolino) {
+			&:before {
+				border-top: 6px solid #030409;
+			}
+		}
+
+		&:nth-child(2) {
+			z-index: 2;
+		}
+
+		&:nth-child(3) {
+			z-index: 3;
+		}
+
+		&:nth-child(4) {
+			z-index: 4;
+		}
+
+		&:nth-child(5) {
+			z-index: 5;
+		}
+	}
+
+	.section--diagonal+.section--diagonal {
+		margin-top: -5px;
+	}
+
 	.container {
 		position: relative;
 		display: flex;
@@ -28,7 +67,7 @@
 		justify-content: center;
 		align-items: center;
 		text-align: center;
-		padding: 15vw 0;
+		padding: 6vw 0;
 	}
 
 	.title {
@@ -100,7 +139,6 @@
 	.banner {
 		position: absolute;
 		white-space: nowrap;
-		font-size: 4vh;
 		line-height: 1;
 		visibility: hidden;
 
@@ -111,7 +149,6 @@
 		span {
 			display: inline-block;
 			padding: 0 0.2em;
-			font-size: 4vh;
 			line-height: 1;
 			letter-spacing: 0.05em;
 			font-weight: 500;
@@ -135,14 +172,6 @@
 		&.banner--limited-edition {
 			transform: none;
 			top: 150px;
-		}
-
-		&.banner--img {
-			font-size: 7vh;
-
-			span {
-				font-size: 7vh;
-			}
 		}
 
 		&.banner--mouths {
@@ -461,6 +490,27 @@
 			font-size: 27px;
 		}
 
+		.banner {
+			font-size: 5vh;
+
+			span {
+				font-size: 5vh;
+			}
+
+			&.banner--limited-edition {
+				transform: none;
+				top: 150px;
+			}
+
+			&.banner--img {
+				font-size: 9vh;
+
+				span {
+					font-size: 9vh;
+				}
+			}
+		}
+
 		.group--row {
 			display: flex;
 			width: 100%;
@@ -469,6 +519,10 @@
 				flex: 1 1 50%;
 
 				.container {
+					display: flex;
+					flex-direction: column;
+					justify-content: center;
+					height: 100%;
 					padding-left: 40px;
 					padding-right: 40px;
 				}
@@ -575,6 +629,14 @@
 
 			&.banner--limited-edition {
 				top: 100px;
+			}
+
+			&.banner--img {
+				font-size: 40px;
+
+				span {
+					font-size: 40px;
+				}
 			}
 		}
 

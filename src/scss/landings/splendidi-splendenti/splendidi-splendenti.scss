@@ -7,21 +7,7 @@
 @import 'components/footer';
 @import 'components/animations';
 
-.splendidi-splendenti {
-
-	.section--diagonal {
-		&:before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: calc(100% - 5px);
-			transform: skewY(-15deg);
-			border-bottom: 6px solid #030409;
-		}
-
-	}
+.page-template-splendidi-splendenti {
 
 	.section--spazzolino {
 		color: #fff;
@@ -38,6 +24,61 @@
 		Azzurro: #96d0ff
 		Viola: #9357a9
 		*/
+		.picture {
+			position: relative;
+
+			&:before {
+				content: '';
+				position: absolute;
+				left: 0;
+				top: -50%;
+				height: 200%;
+				width: 100%;
+				z-index: -1;
+			}
+		}
+
+		.swiper-slide {
+			&:nth-child(1) {
+				.picture {
+					&:before {
+						background: #9257a9;
+					}
+				}
+			}
+
+			&:nth-child(2) {
+				.picture {
+					&:before {
+						background: #ff9604;
+					}
+				}
+			}
+
+			&:nth-child(3) {
+				.picture {
+					&:before {
+						background: #008fd3;
+					}
+				}
+			}
+
+			&:nth-child(4) {
+				.picture {
+					&:before {
+						background: #cf2f89;
+					}
+				}
+			}
+
+			&:nth-child(5) {
+				.picture {
+					&:before {
+						background: #ffc404;
+					}
+				}
+			}
+		}
 
 		&,
 		&.slide-0 {
@@ -53,10 +94,12 @@
 		}
 
 		&.slide-1 {
-			background: #ff9604;
+			// background: #ff9604;
+			background: #9257a9;
 
 			&:before {
-				background: #ff9604;
+				// background: #ff9604;
+				background: #9257a9;
 			}
 
 			.ss-professional-27-ring-setole {
@@ -65,10 +108,10 @@
 		}
 
 		&.slide-2 {
-			background: #008fd3;
+			// background: #008fd3;
 
 			&:before {
-				background: #008fd3;
+				// background: #008fd3;
 			}
 
 			.ss-professional-27-ring-setole {
@@ -77,10 +120,12 @@
 		}
 
 		&.slide-3 {
-			background: #cf2f89;
+			// background: #cf2f89;
+			background: #ffc404;
 
 			&:before {
-				background: #cf2f89;
+				// background: #cf2f89;
+				background: #ffc404;
 			}
 
 			.ss-professional-27-ring-setole {
@@ -102,17 +147,22 @@
 
 		.container {
 			width: 100vw;
-			padding: 27vh 0 80px 0;
+			padding: 27vh 0 100px 0;
+		}
+
+		.swiper-container {
+			width: 100%;
+			overflow: visible;
 		}
 
 		.swiper-slide {
-			width: 100vw;
+			// width: 100vw;
 
 			.picture {
-				width: 100vw;
 				padding-bottom: 30px;
 				display: flex;
 				justify-content: center;
+				border-radius: 60px;
 
 				img {
 					max-height: 130vh;
@@ -161,9 +211,10 @@
 			height: $s1;
 			margin-right: -$s1 / 2;
 			margin-top: -$s1 / 2;
-			right: 25vw;
+			right: 40vw;
 			top: 75vh;
 			text-align: left;
+			z-index: 2;
 
 			.ss-professional-27 {
 				position: absolute;
@@ -185,6 +236,10 @@
 			.ss-professional-27-ring-setole {
 				transition: fill ease-in-out 600ms;
 			}
+		}
+
+		.banner {
+			z-index: 2;
 		}
 	}
 
@@ -302,9 +357,15 @@
 		}
 
 		.title {
+			margin-bottom: 1em;
+		}
+
+		/*
+		.title {
 			font-size: 72px;
 			margin-bottom: 1em;
 		}
+		*/
 
 		.picture {
 			display: flex;
@@ -315,7 +376,8 @@
 		.swiper-slide,
 		.picture,
 		.picture img {
-			width: 90px;
+			width: 7vh;
+			height: 70vh;
 		}
 
 		.swiper-slide {
@@ -446,6 +508,23 @@
 
 	@media (min-width: 940px) {
 
+		.section--ottimista,
+		.section--eclettico,
+		.section--stile {
+			.container {
+				padding: 9vw 0 8vw 0;
+			}
+
+			.title {
+				font-size: 70px;
+			}
+
+			.title--small {
+				font-size: 35px;
+			}
+
+		}
+
 		.section--dove,
 		.section--follow {
 			.btn--cta {
@@ -498,6 +577,16 @@
 				display: none;
 			}
 
+			.pen {
+				width: 120px;
+				height: 120px;
+			}
+
+			.hammer {
+				width: 224px;
+				height: 224px;
+			}
+
 			.hand-point,
 			.hand-click {
 				transform: translateX(-20%) translateY(-8%);
@@ -508,7 +597,7 @@
 			}
 
 			.hammer {
-				transform: translateX(-22%) translateY(-56%) scale(1.4, 1.4);
+				transform: translateX(-22%) translateY(-56%);
 			}
 
 			&.down {
@@ -517,7 +606,7 @@
 				}
 
 				.hammer {
-					transform: translateX(-22%) translateY(-56%) scale(1.4, 1.4) rotate(-15deg);
+					transform: translateX(-22%) translateY(-56%) rotate(-15deg);
 				}
 			}
 
@@ -551,6 +640,12 @@
 
 	@media (max-width: 939px) {
 
+		.section--spazzolino {
+			.ico-professional-27 {
+				right: 25vw;
+			}
+		}
+
 		.section--designer {
 			.picture {
 				max-width: calc(100vw - 40px);
@@ -566,9 +661,11 @@
 				}
 			}
 
+			/*
 			.title {
 				font-size: 36px;
 			}
+			*/
 
 			.swiper-container,
 			.swiper-slide,
