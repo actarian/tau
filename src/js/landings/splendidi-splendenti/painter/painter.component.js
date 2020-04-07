@@ -158,7 +158,7 @@ export default class PainterComponent {
 		if (this.drawing) {
 			return;
 		}
-		event.preventDefault();
+		// event.preventDefault();
 		this.canvas.addEventListener('mousemove', this.mouseMove, false);
 		this.startStroke([event.offsetX, event.offsetY]);
 	}

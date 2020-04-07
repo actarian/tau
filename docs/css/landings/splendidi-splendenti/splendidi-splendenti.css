@@ -254,7 +254,8 @@ html.has-scroll-dragging {
       left: 8%;
       color: white;
       text-align: center;
-      line-height: 1; }
+      line-height: 1;
+      font-size: 21px; }
     .page-template-splendidi-splendenti [emergency].step-0 .box--0 {
       display: block; }
     .page-template-splendidi-splendenti [emergency].step-1 .box--1 {
@@ -427,9 +428,9 @@ html.has-scroll-dragging {
       .page-template-splendidi-splendenti .banner.banner--limited-edition {
         top: 100px; }
       .page-template-splendidi-splendenti .banner.banner--img {
-        font-size: 40px; }
+        font-size: 50px; }
         .page-template-splendidi-splendenti .banner.banner--img span {
-          font-size: 40px; }
+          font-size: 50px; }
     .page-template-splendidi-splendenti [mouth] img {
       max-width: 100%; }
     .page-template-splendidi-splendenti [emergency] .title--small {
@@ -1542,19 +1543,8 @@ html.has-scroll-dragging {
     font-size: 38px; }
   .page-template-splendidi-splendenti .section--designer .picture {
     max-width: calc(100vw - 40px); }
-  .page-template-splendidi-splendenti .section--nonsolo {
-    /*
-			.title {
-				font-size: 36px;
-			}
-			*/ }
-    .page-template-splendidi-splendenti .section--nonsolo .row .col:last-child {
-      padding-right: 0; }
-    .page-template-splendidi-splendenti .section--nonsolo .swiper-container,
-    .page-template-splendidi-splendenti .section--nonsolo .swiper-slide,
-    .page-template-splendidi-splendenti .section--nonsolo .picture,
-    .page-template-splendidi-splendenti .section--nonsolo .picture img {
-      width: 50px; }
+  .page-template-splendidi-splendenti .section--nonsolo .row .col:last-child {
+    padding-right: 0; }
   .page-template-splendidi-splendenti .section--dove .btn--cta,
   .page-template-splendidi-splendenti .section--follow .btn--cta {
     display: -webkit-box;
