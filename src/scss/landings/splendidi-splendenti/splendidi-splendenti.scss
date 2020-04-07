@@ -376,8 +376,8 @@
 		.swiper-slide,
 		.picture,
 		.picture img {
-			width: 7vh;
-			height: 70vh;
+			width: 8vh;
+			height: 80vh;
 		}
 
 		.swiper-slide {
@@ -512,7 +512,7 @@
 		.section--eclettico,
 		.section--stile {
 			.container {
-				padding: 12vw 0 8vw 0;
+				padding: 12vw 0 12vw 0;
 			}
 
 			.title {
@@ -521,6 +521,13 @@
 
 			.title--small {
 				font-size: 35px;
+				margin-top: 30px;
+			}
+		}
+
+		.section--designer {
+			.container {
+				padding: 12vw 0 8vw 0;
 			}
 		}
 
@@ -650,13 +657,60 @@
 
 	@media (max-width: 939px) {
 
-		.section--spazzolino {
-			.ico-professional-27 {
-				right: 25vw;
+		.section--ottimista,
+		.section--eclettico,
+		.section--stile {
+			.title {
+				font-size: 60px;
 			}
 		}
 
+		.section--nonsolo,
+		.section--consigli,
+		.section--dove,
+		.section--follow {
+			.title {
+				font-size: 45px;
+			}
+		}
+
+		.section--spazzolino {
+			$s1: 117px;
+			$s2: 58px;
+
+			.ico-professional-27 {
+				right: 25vw;
+				width: $s1;
+				height: $s1;
+				margin-right: -$s1 / 2;
+				margin-top: -$s1 / 2;
+
+				.ss-professional-27 {
+					width: $s2;
+					height: $s2;
+					left: ($s1 - $s2) / 2;
+					top: ($s1 - $s2) / 2;
+				}
+
+				.ss-professional-27-ring,
+				.ss-professional-27-ring-setole {
+					position: absolute;
+					width: $s1;
+					height: $s1;
+				}
+			}
+
+		}
+
 		.section--designer {
+			.title--small {
+				font-size: 18px;
+			}
+
+			.title {
+				font-size: 38px;
+			}
+
 			.picture {
 				max-width: calc(100vw - 40px);
 			}

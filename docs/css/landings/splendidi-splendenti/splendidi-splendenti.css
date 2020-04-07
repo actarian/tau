@@ -219,7 +219,7 @@ html.has-scroll-dragging {
     -o-user-drag: none; }
   .page-template-splendidi-splendenti [mouth] {
     position: relative;
-    margin: 100px 0 30px 0;
+    margin: 50px 0 30px 0;
     cursor: none; }
     .page-template-splendidi-splendenti [mouth] img {
       max-width: 380px; }
@@ -361,8 +361,6 @@ html.has-scroll-dragging {
       padding: 15vw 0; }
     .page-template-splendidi-splendenti .title {
       font-size: 45px; }
-    .page-template-splendidi-splendenti .section--nonsolo .title {
-      font-size: 54px; }
     .page-template-splendidi-splendenti .title--small {
       font-size: 22px; }
     .page-template-splendidi-splendenti .abstract {
@@ -435,9 +433,9 @@ html.has-scroll-dragging {
     .page-template-splendidi-splendenti .title {
       font-size: 38px; }
     .page-template-splendidi-splendenti .title--small {
-      font-size: 16px; }
+      font-size: 24px; }
     .page-template-splendidi-splendenti .abstract {
-      font-size: 18px; }
+      font-size: 21px; }
     .page-template-splendidi-splendenti .btn--cta {
       padding: 15px 20px;
       font-size: 18px; }
@@ -1384,8 +1382,8 @@ html.has-scroll-dragging {
   .page-template-splendidi-splendenti .section--nonsolo .swiper-slide,
   .page-template-splendidi-splendenti .section--nonsolo .picture,
   .page-template-splendidi-splendenti .section--nonsolo .picture img {
-    width: 7vh;
-    height: 70vh; }
+    width: 8vh;
+    height: 80vh; }
   .page-template-splendidi-splendenti .section--nonsolo .swiper-slide {
     opacity: 0 !important; }
     .page-template-splendidi-splendenti .section--nonsolo .swiper-slide-active {
@@ -1457,7 +1455,7 @@ html.has-scroll-dragging {
   .page-template-splendidi-splendenti .section--ottimista .container,
   .page-template-splendidi-splendenti .section--eclettico .container,
   .page-template-splendidi-splendenti .section--stile .container {
-    padding: 12vw 0 8vw 0; }
+    padding: 12vw 0 12vw 0; }
   .page-template-splendidi-splendenti .section--ottimista .title,
   .page-template-splendidi-splendenti .section--eclettico .title,
   .page-template-splendidi-splendenti .section--stile .title {
@@ -1465,7 +1463,10 @@ html.has-scroll-dragging {
   .page-template-splendidi-splendenti .section--ottimista .title--small,
   .page-template-splendidi-splendenti .section--eclettico .title--small,
   .page-template-splendidi-splendenti .section--stile .title--small {
-    font-size: 35px; }
+    font-size: 35px;
+    margin-top: 30px; }
+  .page-template-splendidi-splendenti .section--designer .container {
+    padding: 12vw 0 8vw 0; }
   .page-template-splendidi-splendenti .section--nonsolo .container,
   .page-template-splendidi-splendenti .section--consigli .container {
     padding: 15vw 0 6vw 0; }
@@ -1541,8 +1542,35 @@ html.has-scroll-dragging {
       display: block; } }
 
 @media (max-width: 939px) {
+  .page-template-splendidi-splendenti .section--ottimista .title,
+  .page-template-splendidi-splendenti .section--eclettico .title,
+  .page-template-splendidi-splendenti .section--stile .title {
+    font-size: 60px; }
+  .page-template-splendidi-splendenti .section--nonsolo .title,
+  .page-template-splendidi-splendenti .section--consigli .title,
+  .page-template-splendidi-splendenti .section--dove .title,
+  .page-template-splendidi-splendenti .section--follow .title {
+    font-size: 45px; }
   .page-template-splendidi-splendenti .section--spazzolino .ico-professional-27 {
-    right: 25vw; }
+    right: 25vw;
+    width: 117px;
+    height: 117px;
+    margin-right: -58.5px;
+    margin-top: -58.5px; }
+    .page-template-splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27 {
+      width: 58px;
+      height: 58px;
+      left: 29.5px;
+      top: 29.5px; }
+    .page-template-splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27-ring,
+    .page-template-splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27-ring-setole {
+      position: absolute;
+      width: 117px;
+      height: 117px; }
+  .page-template-splendidi-splendenti .section--designer .title--small {
+    font-size: 18px; }
+  .page-template-splendidi-splendenti .section--designer .title {
+    font-size: 38px; }
   .page-template-splendidi-splendenti .section--designer .picture {
     max-width: calc(100vw - 40px); }
   .page-template-splendidi-splendenti .section--nonsolo {

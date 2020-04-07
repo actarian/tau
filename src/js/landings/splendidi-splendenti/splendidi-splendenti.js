@@ -461,22 +461,24 @@ class SplendidiSplendenti {
 	}
 
 	getLocomotiveScroll() {
-		const scroll = new LocomotiveScroll({
-			el: document.querySelector("#locomotive-scroll"),
-			smooth: true,
-			getSpeed: true,
-			getDirection: false,
-			useKeyboard: true,
-			smoothMobile: true,
-			inertia: 1,
-			class: "is-inview",
-			scrollbarClass: "c-scrollbar",
-			scrollingClass: "has-scroll-scrolling",
-			draggingClass: "has-scroll-dragging",
-			smoothClass: "has-scroll-smooth",
-			initClass: "has-scroll-init"
-		});
-		return scroll;
+		if (window.innerWidth >= 768) {
+			const scroll = new LocomotiveScroll({
+				el: document.querySelector("#locomotive-scroll"),
+				smooth: true,
+				getSpeed: true,
+				getDirection: false,
+				useKeyboard: true,
+				smoothMobile: true,
+				inertia: 1,
+				class: "is-inview",
+				scrollbarClass: "c-scrollbar",
+				scrollingClass: "has-scroll-scrolling",
+				draggingClass: "has-scroll-dragging",
+				smoothClass: "has-scroll-smooth",
+				initClass: "has-scroll-init"
+			});
+			return scroll;
+		}
 	}
 
 }
