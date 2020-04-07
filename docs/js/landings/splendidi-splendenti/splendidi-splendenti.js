@@ -14551,6 +14551,8 @@ class SplendidiSplendenti {
         initClass: "has-scroll-init"
       });
       return scroll;
+    } else {
+      document.querySelector('html').classList.add('has-scroll-init');
     }
   }
 
