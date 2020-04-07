@@ -17,13 +17,6 @@
 			transition: background-color ease-in-out 600ms;
 		}
 
-		/*
-		Giallo: #fdf06f
-		Rosa: #cf2f89
-		Arancio: #ff9966
-		Azzurro: #96d0ff
-		Viola: #9357a9
-		*/
 		.picture {
 			position: relative;
 
@@ -682,8 +675,17 @@
 			$s1: 117px;
 			$s2: 47px;
 
+			.swiper-pagination-bullets {
+				position: absolute;
+				bottom: auto;
+				top: calc(100vh - 220px)
+			}
+
 			.ico-professional-27 {
-				right: 25vw;
+				position: absolute;
+				right: auto;
+				left: 60vw;
+				top: 78vh;
 				width: $s1;
 				height: $s1;
 				margin-right: -$s1 / 2;

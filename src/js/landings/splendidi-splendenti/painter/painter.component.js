@@ -182,7 +182,7 @@ export default class PainterComponent {
 		if (this.drawing) {
 			return;
 		}
-		event.preventDefault();
+		// event.preventDefault();
 		this.startStroke(this.getTouchPoint(event));
 	}
 

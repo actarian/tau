@@ -13779,9 +13779,9 @@ class PainterComponent {
   touchStart(event) {
     if (this.drawing) {
       return;
-    }
+    } // event.preventDefault();
 
-    event.preventDefault();
+
     this.startStroke(this.getTouchPoint(event));
   }
 
@@ -14057,7 +14057,7 @@ class SplendidiSplendenti {
         } else {
           window.addEventListener("scroll", () => {
             this.onPageDidScroll(window.pageYOffset);
-          });
+          }, true);
         }
       }, 1); // 500
     };
@@ -14168,15 +14168,14 @@ class SplendidiSplendenti {
     const bullets = section.querySelector('.swiper-pagination-bullets');
     const professional = section.querySelector('.ico-professional-27');
     return y => {
-      if (window.innerWidth >= 768) {
-        y = Math.min(y, picture.offsetTop + picture.offsetHeight - professional.offsetTop - 30);
-        TweenMax.set(bullets, {
-          y: y
-        });
-        TweenMax.set(professional, {
-          y: y
-        });
-      }
+      // if (window.innerWidth >= 768) {
+      y = Math.min(y, picture.offsetTop + picture.offsetHeight - professional.offsetTop - 30);
+      TweenMax.set(bullets, {
+        y: y
+      });
+      TweenMax.set(professional, {
+        y: y
+      }); // }
     };
   }
 
@@ -14540,7 +14539,7 @@ class SplendidiSplendenti {
   }
 
   getLocomotiveScroll() {
-    if (window.innerWidth >= 768) {
+    if (document.querySelector("#locomotive-scroll").offsetWidth >= 768) {
       const scroll = new _locomotiveScroll.default({
         el: document.querySelector("#locomotive-scroll"),
         smooth: true,

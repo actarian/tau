@@ -13,11 +13,21 @@ html {
 	&.has-scroll-dragging {
 		user-select: none;
 	}
+
+	@media (max-width:767px) {
+		max-width: 100%;
+		overflow-x: hidden;
+	}
 }
 
 body {
 	.has-scroll-smooth & {
 		overflow: hidden;
+	}
+
+	@media (max-width:767px) {
+		max-width: 100%;
+		overflow-x: hidden;
 	}
 }
 

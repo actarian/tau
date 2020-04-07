@@ -15,8 +15,18 @@ html.has-scroll-dragging {
       -ms-user-select: none;
           user-select: none; }
 
+@media (max-width: 767px) {
+  html {
+    max-width: 100%;
+    overflow-x: hidden; } }
+
 .has-scroll-smooth body {
   overflow: hidden; }
+
+@media (max-width: 767px) {
+  body {
+    max-width: 100%;
+    overflow-x: hidden; } }
 
 .o-scroll {
   -webkit-box-sizing: border-box;
@@ -1109,14 +1119,7 @@ html.has-scroll-dragging {
 .page-template-splendidi-splendenti .section--spazzolino {
   color: #fff;
   -webkit-transition: background-color ease-in-out 600ms;
-  transition: background-color ease-in-out 600ms;
-  /*
-		Giallo: #fdf06f
-		Rosa: #cf2f89
-		Arancio: #ff9966
-		Azzurro: #96d0ff
-		Viola: #9357a9
-		*/ }
+  transition: background-color ease-in-out 600ms; }
   .page-template-splendidi-splendenti .section--spazzolino:before {
     -webkit-transition: background-color ease-in-out 600ms;
     transition: background-color ease-in-out 600ms; }
@@ -1526,8 +1529,15 @@ html.has-scroll-dragging {
   .page-template-splendidi-splendenti .section--dove .title,
   .page-template-splendidi-splendenti .section--follow .title {
     font-size: 45px; }
+  .page-template-splendidi-splendenti .section--spazzolino .swiper-pagination-bullets {
+    position: absolute;
+    bottom: auto;
+    top: calc(100vh - 220px); }
   .page-template-splendidi-splendenti .section--spazzolino .ico-professional-27 {
-    right: 25vw;
+    position: absolute;
+    right: auto;
+    left: 60vw;
+    top: 78vh;
     width: 117px;
     height: 117px;
     margin-right: -58.5px;
