@@ -1229,10 +1229,10 @@ html.has-scroll-dragging {
     z-index: 2; }
     .page-template-splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27 {
       position: absolute;
-      width: 73px;
-      height: 73px;
-      left: 36.5px;
-      top: 36.5px; }
+      width: 58px;
+      height: 58px;
+      left: 44px;
+      top: 44px; }
     .page-template-splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27-ring,
     .page-template-splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27-ring-setole {
       position: absolute;
@@ -1516,6 +1516,11 @@ html.has-scroll-dragging {
   .page-template-splendidi-splendenti .section--eclettico .title,
   .page-template-splendidi-splendenti .section--stile .title {
     font-size: 60px; }
+  .page-template-splendidi-splendenti .section--nonsolo .container,
+  .page-template-splendidi-splendenti .section--consigli .container,
+  .page-template-splendidi-splendenti .section--dove .container,
+  .page-template-splendidi-splendenti .section--follow .container {
+    padding: 125px 20px; }
   .page-template-splendidi-splendenti .section--nonsolo .title,
   .page-template-splendidi-splendenti .section--consigli .title,
   .page-template-splendidi-splendenti .section--dove .title,
@@ -1528,10 +1533,10 @@ html.has-scroll-dragging {
     margin-right: -58.5px;
     margin-top: -58.5px; }
     .page-template-splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27 {
-      width: 58px;
-      height: 58px;
-      left: 29.5px;
-      top: 29.5px; }
+      width: 47px;
+      height: 47px;
+      left: 35px;
+      top: 35px; }
     .page-template-splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27-ring,
     .page-template-splendidi-splendenti .section--spazzolino .ico-professional-27 .ss-professional-27-ring-setole {
       position: absolute;

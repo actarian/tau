@@ -203,7 +203,7 @@
 		}
 
 		$s1: 146px;
-		$s2: 73px;
+		$s2: 58px;
 
 		.ico-professional-27 {
 			position: fixed;
@@ -669,6 +669,10 @@
 		.section--consigli,
 		.section--dove,
 		.section--follow {
+			.container {
+				padding: 125px 20px;
+			}
+
 			.title {
 				font-size: 45px;
 			}
@@ -676,7 +680,7 @@
 
 		.section--spazzolino {
 			$s1: 117px;
-			$s2: 58px;
+			$s2: 47px;
 
 			.ico-professional-27 {
 				right: 25vw;
