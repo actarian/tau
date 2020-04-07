@@ -512,7 +512,7 @@
 		.section--eclettico,
 		.section--stile {
 			.container {
-				padding: 9vw 0 8vw 0;
+				padding: 12vw 0 8vw 0;
 			}
 
 			.title {
@@ -522,11 +522,21 @@
 			.title--small {
 				font-size: 35px;
 			}
+		}
 
+		.section--nonsolo,
+		.section--consigli {
+			.container {
+				padding: 15vw 0 6vw 0;
+			}
 		}
 
 		.section--dove,
 		.section--follow {
+			.container {
+				padding: 6vw 0 6vw 0;
+			}
+
 			.btn--cta {
 				min-width: 335px;
 			}
