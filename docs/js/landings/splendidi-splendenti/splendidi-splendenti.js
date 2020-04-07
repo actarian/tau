@@ -14104,9 +14104,11 @@ class SplendidiSplendenti {
 
     if (search) {
       return y => {
-        TweenMax.set(search, {
-          y: y
-        });
+        if (window.innerWidth >= 768) {
+          TweenMax.set(search, {
+            y: y
+          });
+        }
       };
     }
   }
@@ -14166,13 +14168,15 @@ class SplendidiSplendenti {
     const bullets = section.querySelector('.swiper-pagination-bullets');
     const professional = section.querySelector('.ico-professional-27');
     return y => {
-      y = Math.min(y, picture.offsetTop + picture.offsetHeight - professional.offsetTop - 30);
-      TweenMax.set(bullets, {
-        y: y
-      });
-      TweenMax.set(professional, {
-        y: y
-      });
+      if (window.innerWidth >= 768) {
+        y = Math.min(y, picture.offsetTop + picture.offsetHeight - professional.offsetTop - 30);
+        TweenMax.set(bullets, {
+          y: y
+        });
+        TweenMax.set(professional, {
+          y: y
+        });
+      }
     };
   }
 
@@ -14376,11 +14380,13 @@ class SplendidiSplendenti {
     };
 
     return y => {
-      popups.forEach(popup => {
-        TweenMax.set(popup.node, {
-          y: y
+      if (window.innerWidth >= 768) {
+        popups.forEach(popup => {
+          TweenMax.set(popup.node, {
+            y: y
+          });
         });
-      });
+      }
     };
   }
 
