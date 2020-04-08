@@ -14114,8 +14114,6 @@ class SplendidiSplendenti {
     const searchTogglers = Array.prototype.slice.call(document.querySelectorAll('.main-search, .close-search'));
     searchTogglers.forEach(x => {
       x.addEventListener('click', () => {
-        console.log('click', x);
-
         if (search.classList.contains('show')) {
           search.classList.remove('show');
         } else {
@@ -14184,7 +14182,7 @@ class SplendidiSplendenti {
         section.classList.remove(`slide-${i}`);
       }
 
-      section.classList.add(`slide-${swiper.realIndex}`); // console.log(swiper, swiper.realIndex);
+      section.classList.add(`slide-${swiper.realIndex}`);
     });
     const picture = section.querySelector('.picture');
     const bullets = section.querySelector('.swiper-pagination-bullets');
@@ -14283,7 +14281,6 @@ class SplendidiSplendenti {
           event.preventDefault();
           event.stopImmediatePropagation();
         } else {
-          console.log('open link!');
           const popupNode = document.querySelector(element.getAttribute('emergency'));
 
           if (popupNode) {
@@ -14311,7 +14308,6 @@ class SplendidiSplendenti {
 
       element.addEventListener('click', event => {
         const openPopup = () => {
-          console.log('open link!');
           const popupNode = document.querySelector(element.getAttribute('emergency'));
 
           if (popupNode) {

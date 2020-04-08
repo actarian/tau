@@ -327,11 +327,10 @@
 			background: #e11820;
 			border: 6px solid #030409;
 			@extend %scrollbar;
-		}
 
-		.container {
-			padding-top: 30px;
-			padding-bottom: 30px;
+			&>.container {
+				padding: 40px 15px !important;
+			}
 		}
 
 		&.active {

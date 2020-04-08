@@ -292,9 +292,8 @@ html.has-scroll-dragging {
       overflow-y: auto;
       background: #e11820;
       border: 6px solid #030409; }
-    .page-template-splendidi-splendenti .group--popup .container {
-      padding-top: 30px;
-      padding-bottom: 30px; }
+      .page-template-splendidi-splendenti .group--popup__inner > .container {
+        padding: 40px 15px !important; }
     .page-template-splendidi-splendenti .group--popup.active {
       display: block;
       pointer-events: all; }
