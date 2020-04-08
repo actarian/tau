@@ -164,8 +164,8 @@ export default class PainterComponent {
 			return;
 		}
 		// event.preventDefault();
-		this.canvas.addEventListener('mousemove', this.mouseMove, false);
-		this.canvas.addEventListener('mouseup', this.mouseUp, false);
+		document.addEventListener('mousemove', this.mouseMove, false);
+		document.addEventListener('mouseup', this.mouseUp, false);
 		this.canvas.addEventListener('mouseout', this.mouseUp, false);
 		this.startStroke([event.offsetX, event.offsetY]);
 	}
@@ -182,8 +182,8 @@ export default class PainterComponent {
 			return;
 		}
 		this.drawing = false;
-		this.canvas.removeEventListener('mousemove', this.mouseMove, false);
-		this.canvas.removeEventListener('mouseup', this.mouseUp, false);
+		document.removeEventListener('mousemove', this.mouseMove, false);
+		document.removeEventListener('mouseup', this.mouseUp, false);
 		this.canvas.removeEventListener('mouseout', this.mouseUp, false);
 	}
 
@@ -191,7 +191,6 @@ export default class PainterComponent {
 		if (this.drawing) {
 			return;
 		}
-		// event.preventDefault();
 		this.canvas.addEventListener('touchend', this.touchEnd, false);
 		this.canvas.addEventListener('touchcancel', this.touchEnd, false);
 		this.canvas.addEventListener('touchmove', this.touchMove, false);
@@ -203,12 +202,17 @@ export default class PainterComponent {
 			return;
 		}
 		this.continueStroke(this.getTouchPoint(event));
+	}
+
+	documentTouchMove(event) {
 		if (this.lock) {
 			event.preventDefault();
+			event.stopImmediatePropagation();
 		}
 	}
 
 	touchEnd(event) {
+		this.lock = false;
 		this.drawing = false;
 		this.canvas.removeEventListener('touchmove', this.touchMove, false);
 		this.canvas.removeEventListener('touchend', this.touchEnd, false);
@@ -216,8 +220,10 @@ export default class PainterComponent {
 	}
 
 	onResize(event) {
-		this.canvas.width = this.canvas.offsetWidth;
-		this.canvas.height = this.canvas.offsetHeight;
+		if (this.canvas.width !== this.canvas.offsetWidth || this.canvas.height !== this.canvas.offsetHeight) {
+			this.canvas.width = this.canvas.offsetWidth;
+			this.canvas.height = this.canvas.offsetHeight;
+		}
 	}
 
 	addEventListeners() {
@@ -229,17 +235,14 @@ export default class PainterComponent {
 		this.mouseMove = this.mouseMove.bind(this);
 		this.mouseUp = this.mouseUp.bind(this);
 		this.mouseEnter = this.mouseEnter.bind(this);
+		this.documentTouchMove = this.documentTouchMove.bind(this);
 		this.onResize = this.onResize.bind(this);
 		const canvas = this.canvas;
 		canvas.addEventListener('touchstart', this.touchStart, false);
-		// canvas.addEventListener('touchend', this.touchEnd, false);
-		// canvas.addEventListener('touchcancel', this.touchEnd, false);
-		// canvas.addEventListener('touchmove', this.touchMove, false);
 		canvas.addEventListener('mousedown', this.mouseDown, false);
-		// canvas.addEventListener('mouseup', this.mouseUp, false);
-		// canvas.addEventListener('mouseout', this.mouseUp, false);
 		canvas.addEventListener('mouseenter', this.mouseEnter, false);
 		window.addEventListener('resize', this.onResize, false);
+		document.addEventListener('touchmove', this.documentTouchMove, { passive: false });
 	}
 
 }
