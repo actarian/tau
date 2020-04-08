@@ -1560,6 +1560,12 @@ html.has-scroll-dragging {
     max-width: calc(100vw - 40px); }
   .page-template-splendidi-splendenti .section--nonsolo .row .col:last-child {
     padding-right: 0; }
+  .page-template-splendidi-splendenti .section--nonsolo .swiper-container,
+  .page-template-splendidi-splendenti .section--nonsolo .swiper-slide,
+  .page-template-splendidi-splendenti .section--nonsolo .picture,
+  .page-template-splendidi-splendenti .section--nonsolo .picture img {
+    width: 62px;
+    height: 630px; }
   .page-template-splendidi-splendenti .section--dove .btn--cta,
   .page-template-splendidi-splendenti .section--follow .btn--cta {
     display: -webkit-box;

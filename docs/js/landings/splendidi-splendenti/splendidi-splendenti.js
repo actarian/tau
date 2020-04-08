@@ -13710,20 +13710,26 @@ class PainterComponent {
     });
   }
 
-  continueStroke(newPoint) {
-    const newAngle = this.getNewAngle(this.latestPoint, newPoint, this.currentAngle);
-    this.drawStroke(this.currentBrush, this.latestPoint, newPoint, this.currentAngle, newAngle);
-    this.currentAngle = newAngle % (Math.PI * 2);
-    this.latestPoint = newPoint;
-  }
-
   startStroke(point) {
     const colour = this.colour; // colour = document.getElementById('colourInput').value;
 
     this.currentAngle = undefined;
     this.currentBrush = this.makeBrush(this.strokeWidth);
+    this.lock = false;
     this.drawing = true;
+    this.downPoint = point;
     this.latestPoint = point;
+  }
+
+  continueStroke(newPoint) {
+    const newAngle = this.getNewAngle(this.latestPoint, newPoint, this.currentAngle);
+    this.drawStroke(this.currentBrush, this.latestPoint, newPoint, this.currentAngle, newAngle);
+    this.currentAngle = newAngle % (Math.PI * 2);
+    this.latestPoint = newPoint;
+
+    if (Math.abs(this.downPoint[0] - this.latestPoint[0]) > 30) {
+      this.lock = true;
+    }
   }
 
   getTouchPoint(event) {
@@ -13756,6 +13762,8 @@ class PainterComponent {
 
 
     this.canvas.addEventListener('mousemove', this.mouseMove, false);
+    this.canvas.addEventListener('mouseup', this.mouseUp, false);
+    this.canvas.addEventListener('mouseout', this.mouseUp, false);
     this.startStroke([event.offsetX, event.offsetY]);
   }
 
@@ -13767,13 +13775,15 @@ class PainterComponent {
     this.mouseDown(event);
   }
 
-  endStroke(event) {
+  mouseUp(event) {
     if (!this.drawing) {
       return;
     }
 
     this.drawing = false;
-    event.currentTarget.removeEventListener('mousemove', this.mouseMove, false);
+    this.canvas.removeEventListener('mousemove', this.mouseMove, false);
+    this.canvas.removeEventListener('mouseup', this.mouseUp, false);
+    this.canvas.removeEventListener('mouseout', this.mouseUp, false);
   }
 
   touchStart(event) {
@@ -13782,6 +13792,9 @@ class PainterComponent {
     } // event.preventDefault();
 
 
+    this.canvas.addEventListener('touchend', this.touchEnd, false);
+    this.canvas.addEventListener('touchcancel', this.touchEnd, false);
+    this.canvas.addEventListener('touchmove', this.touchMove, false);
     this.startStroke(this.getTouchPoint(event));
   }
 
@@ -13791,10 +13804,17 @@ class PainterComponent {
     }
 
     this.continueStroke(this.getTouchPoint(event));
+
+    if (this.lock) {
+      event.preventDefault();
+    }
   }
 
   touchEnd(event) {
     this.drawing = false;
+    this.canvas.removeEventListener('touchmove', this.touchMove, false);
+    this.canvas.removeEventListener('touchend', this.touchEnd, false);
+    this.canvas.removeEventListener('touchcancel', this.touchEnd, false);
   }
 
   onResize(event) {
@@ -13806,22 +13826,20 @@ class PainterComponent {
     // Register event handlers
     this.touchStart = this.touchStart.bind(this);
     this.touchEnd = this.touchEnd.bind(this);
-    this.touchEnd = this.touchEnd.bind(this);
     this.touchMove = this.touchMove.bind(this);
     this.mouseDown = this.mouseDown.bind(this);
     this.mouseMove = this.mouseMove.bind(this);
-    this.endStroke = this.endStroke.bind(this);
-    this.endStroke = this.endStroke.bind(this);
+    this.mouseUp = this.mouseUp.bind(this);
     this.mouseEnter = this.mouseEnter.bind(this);
     this.onResize = this.onResize.bind(this);
     const canvas = this.canvas;
-    canvas.addEventListener('touchstart', this.touchStart, false);
-    canvas.addEventListener('touchend', this.touchEnd, false);
-    canvas.addEventListener('touchcancel', this.touchEnd, false);
-    canvas.addEventListener('touchmove', this.touchMove, false);
-    canvas.addEventListener('mousedown', this.mouseDown, false);
-    canvas.addEventListener('mouseup', this.endStroke, false);
-    canvas.addEventListener('mouseout', this.endStroke, false);
+    canvas.addEventListener('touchstart', this.touchStart, false); // canvas.addEventListener('touchend', this.touchEnd, false);
+    // canvas.addEventListener('touchcancel', this.touchEnd, false);
+    // canvas.addEventListener('touchmove', this.touchMove, false);
+
+    canvas.addEventListener('mousedown', this.mouseDown, false); // canvas.addEventListener('mouseup', this.mouseUp, false);
+    // canvas.addEventListener('mouseout', this.mouseUp, false);
+
     canvas.addEventListener('mouseenter', this.mouseEnter, false);
     window.addEventListener('resize', this.onResize, false);
   }
