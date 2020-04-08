@@ -499,6 +499,17 @@
 
 	}
 
+	@media (min-width: 1440px) {
+
+		.section--ottimista,
+		.section--eclettico,
+		.section--stile {
+			.container {
+				min-height: 830px;
+			}
+		}
+	}
+
 	@media (min-width: 940px) {
 
 		.section--ottimista,

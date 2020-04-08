@@ -484,6 +484,10 @@
 	@media (min-width: 1600px) {
 		[emergency] {
 			max-width: 400px;
+
+			.title--small {
+				font-size: 28px;
+			}
 		}
 	}
 
@@ -502,7 +506,7 @@
 
 		[emergency] {
 			.title--small {
-				font-size: 28px;
+				font-size: 21px;
 			}
 		}
 

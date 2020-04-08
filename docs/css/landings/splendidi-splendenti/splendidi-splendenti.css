@@ -386,7 +386,9 @@ html.has-scroll-dragging {
         font-size: 24px; } }
   @media (min-width: 1600px) {
     .page-template-splendidi-splendenti [emergency] {
-      max-width: 400px; } }
+      max-width: 400px; }
+      .page-template-splendidi-splendenti [emergency] .title--small {
+        font-size: 28px; } }
   @media (min-width: 1440px) {
     .page-template-splendidi-splendenti .title {
       font-size: 60px; }
@@ -395,7 +397,7 @@ html.has-scroll-dragging {
     .page-template-splendidi-splendenti .abstract {
       font-size: 30px; }
     .page-template-splendidi-splendenti [emergency] .title--small {
-      font-size: 28px; }
+      font-size: 21px; }
     .page-template-splendidi-splendenti .card--hint {
       max-width: 640px; }
       .page-template-splendidi-splendenti .card--hint__title, .page-template-splendidi-splendenti .card--hint__abstract {
@@ -1422,6 +1424,12 @@ html.has-scroll-dragging {
     background: linear-gradient(331deg, #ef001c 0%, #b700b6 48%, #2b00c8 100%); }
   .page-template-splendidi-splendenti .section--follow .btn--cta.facebook {
     background: #4360b5; }
+
+@media (min-width: 1440px) {
+  .page-template-splendidi-splendenti .section--ottimista .container,
+  .page-template-splendidi-splendenti .section--eclettico .container,
+  .page-template-splendidi-splendenti .section--stile .container {
+    min-height: 830px; } }
 
 @media (min-width: 940px) {
   .page-template-splendidi-splendenti .section--ottimista .container,
