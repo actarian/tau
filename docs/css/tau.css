@@ -4249,9 +4249,12 @@ header {
 footer {
   background: #e10000;
   padding: 50px 0 0; }
+  @media (max-width: 1023.98px) {
+    footer .col-12 {
+      margin-left: 0; } }
   @media (max-width: 859.98px) {
-    footer {
-      padding: 50px 0 0; } }
+    footer .col-12 {
+      margin-left: 0; } }
   footer .pre-footer {
     padding: 0 0 50px;
     border-bottom: 1px solid #fff;
@@ -4277,9 +4280,10 @@ footer {
         display: inline-block;
         color: #fff;
         margin-right: 20px;
-        font-weight: 500;
+        font-weight: 600;
         margin-top: 0;
-        margin-bottom: 0; }
+        margin-bottom: 0;
+        font-size: 1.17em; }
       footer .pre-footer form input[type="email"] {
         padding: 20px;
         border-radius: 500px;
@@ -4304,9 +4308,9 @@ footer {
         border-radius: 500px;
         text-align: center;
         padding: 10px 20px;
-        font-family: "Sofia Pro", sans-serif;
+        font-family: "sofia-pro", sans-serif;
         text-transform: uppercase;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
         -webkit-transition: all ease-in-out .2s;
         transition: all ease-in-out .2s;
@@ -4320,22 +4324,38 @@ footer {
         @media (max-width: 1023.98px) {
           footer .pre-footer form input[type="submit"] {
             width: 100%; } }
+  @media (max-width: 859.98px) {
+    footer {
+      padding: 50px 0 0; } }
   footer .back-to-top {
-    width: 60px;
-    height: 60px;
-    border: 2px solid #fff;
-    padding: 20px;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    background: #000;
+    padding: 10px;
     border-radius: 100%;
     -webkit-transition: all ease-in-out .3s;
-    transition: all ease-in-out .3s; }
+    transition: all ease-in-out .3s;
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    opacity: 0;
+    z-index: 100;
+    -webkit-box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); }
+    footer .back-to-top.show {
+      opacity: 0.5;
+      visibility: visible; }
+      footer .back-to-top.show:hover, footer .back-to-top.show:focus {
+        opacity: 1; }
     footer .back-to-top .icon--arrow {
       -webkit-transform: rotate(-90deg);
               transform: rotate(-90deg);
-      width: 15px;
-      height: 15px;
+      width: 10px;
+      height: 10px;
       position: relative;
       top: -7px;
-      left: 1px;
+      left: 5px;
       fill: #fff; }
     footer .back-to-top:hover .icon--arrow, footer .back-to-top:focus .icon--arrow {
       -webkit-animation: icon-bounce-top 1s infinite;
@@ -4355,36 +4375,42 @@ footer {
       width: 50%; }
     footer .footer-menu .right {
       width: 50%; }
-    footer .footer-menu a {
-      display: block;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 500;
-      letter-spacing: 2px;
-      padding: 20px 0; }
-      @media (max-width: 859.98px) {
-        footer .footer-menu a {
-          font-size: 14px;
-          padding: 5px 0;
-          letter-spacing: 0.5px; } }
-  footer .payoff {
-    height: 19px;
-    width: 219px;
-    fill: #fff;
-    display: block; }
-  @media (max-width: 859.98px) {
-    footer .logo-alfasigma {
-      display: none; } }
-  footer .logo-alfasigma img {
-    max-width: 100%; }
+    footer .footer-menu ul {
+      margin: 0;
+      padding: 0;
+      list-style: none; }
+      footer .footer-menu ul li a {
+        display: block;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 500;
+        letter-spacing: 2px;
+        padding: 20px 0; }
+        @media (max-width: 859.98px) {
+          footer .footer-menu ul li a {
+            font-size: 14px;
+            padding: 5px 0;
+            letter-spacing: 0.5px; } }
+  footer .logo-alfasigma {
+    color: #fff; }
+    @media (max-width: 859.98px) {
+      footer .logo-alfasigma {
+        display: none; } }
+    footer .logo-alfasigma img {
+      max-width: 100%; }
+    footer .logo-alfasigma span {
+      display: block; }
   footer .logo-alfasigma-mobile {
     display: none; }
     @media (max-width: 859.98px) {
       footer .logo-alfasigma-mobile {
         display: block; } }
   footer .social-footer {
-    margin-top: 20px;
-    margin-bottom: 40px; }
+    text-align: center; }
+    @media (max-width: 859.98px) {
+      footer .social-footer {
+        text-align: left;
+        margin-top: 20px; } }
     footer .social-footer ul {
       list-style: none;
       padding: 0;
@@ -4400,20 +4426,20 @@ footer {
         @media (max-width: 859.98px) {
           footer .social-footer ul li {
             padding: 0 10px; } }
-    footer .social-footer .icon--instagram,
-    footer .social-footer .icon--facebook,
-    footer .social-footer .icon--linkedin {
-      width: 18px;
-      height: 18px;
-      fill: #fff; }
-    footer .social-footer .icon--youtube {
-      width: 24px;
-      height: 18px;
-      fill: #fff; }
+        footer .social-footer ul li .icon--instagram,
+        footer .social-footer ul li .icon--facebook,
+        footer .social-footer ul li .icon--linkedin {
+          width: 18px;
+          height: 18px;
+          fill: #fff; }
+        footer .social-footer ul li .icon--youtube {
+          width: 24px;
+          height: 18px;
+          fill: #fff; }
   footer .nl-footer h3 {
     color: #fff;
     font-size: 18px;
-    font-weight: 500;
+    font-weight: 600;
     margin: 0; }
   footer .nl-footer form {
     color: #fff;
@@ -4437,9 +4463,9 @@ footer {
       border-radius: 500px;
       text-align: center;
       padding: 10px 20px;
-      font-family: "Sofia Pro", sans-serif;
+      font-family: "sofia-pro", sans-serif;
       text-transform: uppercase;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       -webkit-transition: all ease-in-out .2s;
       transition: all ease-in-out .2s;
@@ -4467,7 +4493,7 @@ footer {
       -ms-flex-wrap: wrap;
           flex-wrap: wrap; }
       footer .copy-footer .wrap .left {
-        width: 50%; }
+        width: 33.3333%; }
         @media (max-width: 859.98px) {
           footer .copy-footer .wrap .left {
             width: 100%; } }
@@ -4489,8 +4515,10 @@ footer {
               font-size: 12px;
               font-weight: 600;
               letter-spacing: 1px; }
+      footer .copy-footer .wrap .center {
+        width: 33.3333%; }
       footer .copy-footer .wrap .right {
-        width: 50%; }
+        width: 33.3333%; }
         @media (max-width: 859.98px) {
           footer .copy-footer .wrap .right {
             width: 100%; } }
@@ -4499,10 +4527,13 @@ footer {
           color: #fff;
           font-size: 12px;
           font-weight: 500;
-          letter-spacing: 1px; }
+          letter-spacing: 1px;
+          margin-top: 1rem; }
           @media (max-width: 859.98px) {
             footer .copy-footer .wrap .right p {
               text-align: left; } }
+  footer .pay-off-text {
+    color: #fff; }
 
 @-webkit-keyframes icon-bounce-top {
   0% {

@@ -2,11 +2,16 @@ footer {
 	background: $foreground-primary;
 	padding: 50px 0 0;
 
-	@include media-breakpoint-down(xs) {
-		padding: 50px 0 0;
+	.col-12 {
+		@include media-breakpoint-down(sm) {
+			margin-left: 0;
+		}
+
+		@include media-breakpoint-down(xs) {
+			margin-left: 0;
+		}
 	}
 
-	//pre-footer
 	.pre-footer {
 		padding: 0 0 50px;
 		border-bottom: 1px solid #fff;
@@ -26,16 +31,17 @@ footer {
 				display: inline-block;
 				color: #fff;
 				margin-right: 20px;
-				font-weight: 500;
+				font-weight: 600;
 				margin-top: 0;
 				margin-bottom: 0;
+				font-size: 1.17em;
 			}
 
 			input[type="email"] {
 				padding: 20px;
 				border-radius: 500px;
 				border: 1px solid #ddd;
-				background: rgba(255,255,255,1);
+				background: rgba(255, 255, 255, 1);
 				margin-top: 10px;
 				width: 300px;
 				line-height: 20px;
@@ -43,7 +49,7 @@ footer {
 				margin-right: 20px;
 
 				&:focus {
-					background: rgba(255,255,255,1);
+					background: rgba(255, 255, 255, 1);
 				}
 
 				@include media-breakpoint-down(sm) {
@@ -60,15 +66,16 @@ footer {
 				border-radius: 500px;
 				text-align: center;
 				padding: 10px 20px;
-				font-family: "Sofia Pro", sans-serif;
+				font-family: "sofia-pro", sans-serif;
 				text-transform: uppercase;
-				font-weight: 600;
+				font-weight: 700;
 				cursor: pointer;
 				transition: all ease-in-out .2s;
 				margin-top: 10px;
 				line-height: 20px;
 
-				&:hover, &:focus {
+				&:hover,
+				&:focus {
 					background: #fff;
 					color: $foreground-primary;
 					transition: all ease-in-out .2s;
@@ -80,33 +87,59 @@ footer {
 			}
 		}
 	}
-	
+
+	@include media-breakpoint-down(xs) {
+		padding: 50px 0 0;
+	}
+
 	//Back to top
 	.back-to-top {
-		width: 60px;
-		height: 60px;
-		border: 2px solid #fff;
-		padding: 20px;
+		width: 40px;
+		height: 40px;
+		border: 0;
+		background: #000;
+		padding: 10px;
 		border-radius: 100%;
 		transition: all ease-in-out .3s;
+		position: fixed;
+		right: 20px;
+		bottom: 20px;
+		opacity: 0;
+		z-index: 100;
+		box-shadow: 0 10px 20px rgba(0, 0, 0, .5);
+
+		&.show {
+			opacity: 0.5;
+			visibility: visible;
+
+			&:hover,
+			&:focus {
+				opacity: 1;
+			}
+		}
 
 		.icon--arrow {
 			transform: rotate(-90deg);
-			width: 15px;
-			height: 15px;
+			width: 10px;
+			height: 10px;
 			position: relative;
 			top: -7px;
-			left: 1px;
+			left: 5px;
 			fill: #fff;
 		}
 
-		&:hover, &:focus {
-					
+		&:hover,
+		&:focus {
+
 			.icon--arrow {
-				-webkit-animation: icon-bounce-top 1s infinite; /* Safari 4+ */
-				-moz-animation:    icon-bounce-top 1s infinite; /* Fx 5+ */
-				-o-animation:      icon-bounce-top 1s infinite; /* Opera 12+ */
-				animation:         icon-bounce-top 1s infinite; /* IE 10+, Fx 29+ */
+				-webkit-animation: icon-bounce-top 1s infinite;
+				/* Safari 4+ */
+				-moz-animation: icon-bounce-top 1s infinite;
+				/* Fx 5+ */
+				-o-animation: icon-bounce-top 1s infinite;
+				/* Opera 12+ */
+				animation: icon-bounce-top 1s infinite;
+				/* IE 10+, Fx 29+ */
 			}
 		}
 	}
@@ -127,32 +160,34 @@ footer {
 			width: 50%;
 		}
 
-		a {
-			display: block;
-			color: #fff;
-			font-size: 16px;
-			font-weight: $font-medium;
-			letter-spacing: 2px;
-			padding: 20px 0;
+		ul {
+			margin: 0;
+			padding: 0;
+			list-style: none;
 
-			@include media-breakpoint-down(xs) {
-				font-size: 14px;
-				padding: 5px 0;
-				letter-spacing: 0.5px;
+			li {
+				a {
+					display: block;
+					color: #fff;
+					font-size: 16px;
+					font-weight: $font-medium;
+					letter-spacing: 2px;
+					padding: 20px 0;
+
+					@include media-breakpoint-down(xs) {
+						font-size: 14px;
+						padding: 5px 0;
+						letter-spacing: 0.5px;
+					}
+				}
 			}
 		}
-	}
 
-	//payoff
-	.payoff {
-		height: 19px;
-		width: 219px;
-		fill: #fff;
-		display: block;
 	}
 
 	//Logo Alfasigma
 	.logo-alfasigma {
+		color: #fff;
 
 		@include media-breakpoint-down(xs) {
 			display: none;
@@ -160,6 +195,10 @@ footer {
 
 		img {
 			max-width: 100%;
+		}
+
+		span {
+			display: block;
 		}
 	}
 
@@ -173,8 +212,12 @@ footer {
 
 	//Social Footer
 	.social-footer {
-		margin-top: 20px;
-		margin-bottom: 40px;
+		text-align: center;
+
+		@include media-breakpoint-down(xs) {
+			text-align: left;
+			margin-top: 20px;
+		}
 
 		ul {
 			list-style: none;
@@ -196,21 +239,21 @@ footer {
 				@include media-breakpoint-down(xs) {
 					padding: 0 10px;
 				}
+
+				.icon--instagram,
+				.icon--facebook,
+				.icon--linkedin {
+					width: 18px;
+					height: 18px;
+					fill: #fff;
+				}
+
+				.icon--youtube {
+					width: 24px;
+					height: 18px;
+					fill: #fff;
+				}
 			}
-		}
-
-		.icon--instagram,
-		.icon--facebook,
-		.icon--linkedin {
-			width: 18px;
-			height: 18px;
-			fill: #fff;
-		}
-
-		.icon--youtube {
-			width: 24px;
-			height: 18px;
-			fill: #fff;
 		}
 	}
 
@@ -220,7 +263,7 @@ footer {
 		h3 {
 			color: #fff;
 			font-size: 18px;
-			font-weight: 500;
+			font-weight: 600;
 			margin: 0;
 		}
 
@@ -251,15 +294,16 @@ footer {
 				border-radius: 500px;
 				text-align: center;
 				padding: 10px 20px;
-				font-family: "Sofia Pro", sans-serif;
+				font-family: "sofia-pro", sans-serif;
 				text-transform: uppercase;
-				font-weight: 600;
+				font-weight: 700;
 				cursor: pointer;
 				transition: all ease-in-out .2s;
 				margin-top: 10px;
 				line-height: 20px;
 
-				&:hover, &:focus {
+				&:hover,
+				&:focus {
 					background: #fff;
 					color: $foreground-primary;
 					transition: all ease-in-out .2s;
@@ -282,9 +326,9 @@ footer {
 			display: flex;
 			align-items: center;
 			flex-wrap: wrap;
-			
+
 			.left {
-				width: 50%;
+				width: 33.3333%;
 
 				@include media-breakpoint-down(xs) {
 					width: 100%;
@@ -320,20 +364,25 @@ footer {
 					}
 				}
 			}
-			
+
+			.center {
+				width: 33.3333%;
+			}
+
 			.right {
-				width: 50%;
+				width: 33.3333%;
 
 				@include media-breakpoint-down(xs) {
 					width: 100%;
 				}
-				
+
 				p {
 					text-align: right;
 					color: #fff;
 					font-size: 12px;
 					font-weight: $font-medium;
 					letter-spacing: 1px;
+					margin-top: 1rem;
 
 					@include media-breakpoint-down(xs) {
 						text-align: left;
@@ -344,25 +393,53 @@ footer {
 	}
 
 	//Cols
+	.col-footer-menu {}
 
 	@include media-breakpoint-up(sm) {}
 
 	@include media-breakpoint-down(xs) {}
+
+	.pay-off-text {
+		color: #fff;
+	}
 }
 
 @-webkit-keyframes icon-bounce-top {
-	0%   { transform: translateY(0) rotate(-90deg); }
-	100% { transform: translateY(-5px) rotate(-90deg); }
+	0% {
+		transform: translateY(0) rotate(-90deg);
+	}
+
+	100% {
+		transform: translateY(-5px) rotate(-90deg);
+	}
 }
+
 @-moz-keyframes icon-bounce-top {
-	0%   { transform: translateY(0) rotate(-90deg); }
-	100% { transform: translateY(-5px) rotate(-90deg); }
+	0% {
+		transform: translateY(0) rotate(-90deg);
+	}
+
+	100% {
+		transform: translateY(-5px) rotate(-90deg);
+	}
 }
+
 @-o-keyframes icon-bounce-top {
-	0%   { transform: translateY(0) rotate(-90deg); }
-	100% { transform: translateY(-5px) rotate(-90deg); }
+	0% {
+		transform: translateY(0) rotate(-90deg);
+	}
+
+	100% {
+		transform: translateY(-5px) rotate(-90deg);
+	}
 }
+
 @keyframes icon-bounce-top {
-	0%   { transform: translateY(0) rotate(-90deg); }
-	100% { transform: translateY(-5px) rotate(-90deg); }
+	0% {
+		transform: translateY(0) rotate(-90deg);
+	}
+
+	100% {
+		transform: translateY(-5px) rotate(-90deg);
+	}
 }

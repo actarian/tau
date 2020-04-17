@@ -60,13 +60,25 @@
 		margin-top: -5px;
 	}
 
-	.container {
-		position: relative;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		text-align: center;
+	.section--header,
+	.section {
+		.container {
+			position: relative;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			text-align: center;
+		}
+	}
+
+	footer {
+		font-family: $font-primary;
+		font-weight: $font-light;
+
+		.back-to-top {
+			display: none !important;
+		}
 	}
 
 	.title {
@@ -86,6 +98,22 @@
 	.abstract {
 		font-size: 36px;
 		line-height: 2;
+	}
+
+	.abstract--list {
+		font-size: 36px;
+		line-height: 2;
+
+		div {
+			display: flex;
+			align-items: center;
+			line-height: 1;
+			margin-bottom: 1em;
+
+			.emoji {
+				margin-right: 0.75em;
+			}
+		}
 	}
 
 	.emoji {
@@ -213,10 +241,8 @@
 		-ms-user-select: none;
 		/* Internet Explorer/Edge*/
 		user-select: none;
-		/* Non-prefixed version, currently
-											not supported by any browser */
-		/* Disables the drag event
-		  (mostly used for images) */
+		/* Non-prefixed version, currently not supported by any browser */
+		/* Disables the drag event (mostly used for images) */
 		-webkit-user-drag: none;
 		-khtml-user-drag: none;
 		-moz-user-drag: none;
@@ -405,8 +431,11 @@
 	}
 
 	@media (min-width: 940px) {
-		.container {
-			padding: 15vw 0;
+
+		.section {
+			.container {
+				padding: 15vw 0;
+			}
 		}
 
 		.title {
@@ -418,6 +447,10 @@
 		}
 
 		.abstract {
+			font-size: 27px;
+		}
+
+		.abstract--list {
 			font-size: 27px;
 		}
 
@@ -504,6 +537,10 @@
 			font-size: 30px;
 		}
 
+		.abstract--list {
+			font-size: 30px;
+		}
+
 		[emergency] {
 			.title--small {
 				font-size: 21px;
@@ -532,8 +569,11 @@
 	}
 
 	@media (max-width: 939px) {
-		.container {
-			padding: 150px 20px;
+
+		.section {
+			.container {
+				padding: 150px 20px;
+			}
 		}
 
 		.title {
@@ -545,6 +585,10 @@
 		}
 
 		.abstract {
+			font-size: 21px;
+		}
+
+		.abstract--list {
 			font-size: 21px;
 		}
 
@@ -570,7 +614,7 @@
 			}
 
 			&.banner--limited-edition {
-				top: 100px;
+				top: 140px;
 			}
 
 			&.banner--img {

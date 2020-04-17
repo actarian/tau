@@ -2,7 +2,7 @@
 
 .page-template-splendidi-splendenti {
 	footer {
-		background: red;
+		background: #e01e25;
 		padding: 50px 0 0;
 
 		@media (max-width: 939px) {
@@ -74,7 +74,7 @@
 					&:hover,
 					&:focus {
 						background: #fff;
-						color: red;
+						color: #e01e25;
 						transition: all ease-in-out .2s;
 					}
 
@@ -267,7 +267,7 @@
 					&:hover,
 					&:focus {
 						background: #fff;
-						color: red;
+						color: #e01e25;
 						transition: all ease-in-out .2s;
 					}
 				}

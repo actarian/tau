@@ -1,10 +1,22 @@
+@import '../../_variables/tau';
+@import '../../_variables/shared';
+@import '../../_variables/grid';
+@import '../../mixins';
+
+@import '../../components/reset';
+@import '../../components/base';
+@import 'components/buttons';
+@import '../../components/typography';
+@import '../../components/grid';
+
 @import '../../mixins';
 @import '../../components/reset';
 @import 'components/vars';
 @import 'components/locomotive';
 @import 'components/base';
 @import 'components/header';
-@import 'components/footer';
+@import '../../pages/footer';
+// @import 'components/footer';
 @import 'components/animations';
 
 .page-template-splendidi-splendenti {
@@ -340,7 +352,7 @@
 
 				&:last-child {
 					flex: 1 1 70%;
-					padding-right: 10vw;
+					padding-right: 4vw;
 				}
 			}
 		}
@@ -686,10 +698,14 @@
 			$s1: 117px;
 			$s2: 47px;
 
+			.container {
+				padding: 180px 0 100px 0;
+			}
+
 			.swiper-pagination-bullets {
 				position: absolute;
 				bottom: auto;
-				top: calc(100vh - 220px)
+				top: calc(100vh - 180px)
 			}
 
 			.ico-professional-27 {

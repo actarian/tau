@@ -17,7 +17,7 @@ class SplendidiSplendenti {
 		this.addScrollCallback(this.initBanners());
 		this.addScrollCallback(this.initCoriander());
 		this.addScrollCallback(this.initMouths());
-		this.addScrollCallback(this.initPainter());
+		// this.addScrollCallback(this.initPainter());
 		this.addScrollCallback(this.initEmergency());
 		this.addScrollCallback(this.initPopup());
 		this.addScrollCallback(this.initEmoji());
