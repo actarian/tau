@@ -12,6 +12,7 @@
 
 		.section--header-topbar {
 			// display: none;
+			position: relative;
 			font-family: $font-primary;
 			font-weight: $font-light;
 			background: #e10000;
@@ -22,6 +23,14 @@
 			line-height: 20px;
 			padding: 10px;
 			margin: -30px -30px 15px -30px;
+
+			.close-top-header {
+				padding: 13px 15px 0 0;
+				position: absolute;
+				top: 0;
+				right: 0;
+				cursor: pointer;
+			}
 		}
 
 		.container {
@@ -37,6 +46,7 @@
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
+				margin: 0 !important;
 			}
 		}
 
