@@ -475,7 +475,7 @@ export default class Canvas extends Emittable {
 				toothbrush.position.set(cm(-1), cm(3), cm(-1));
 			}
 			target.add(toothbrush);
-			TweenMax.to(controller.material, 0.4, {
+			gsap.to(controller.material, 0.4, {
 				opacity: 0.0,
 				ease: Power2.easeInOut,
 			});
@@ -493,7 +493,7 @@ export default class Canvas extends Emittable {
 			toothbrush.position.set(position.x, position.y, position.z);
 			target.add(toothbrush);
 			toothbrush.unfreeze();
-			TweenMax.to(controller.material, 0.4, {
+			gsap.to(controller.material, 0.4, {
 				opacity: 1.0,
 				ease: Power2.easeInOut
 			});
@@ -601,28 +601,28 @@ export default class Canvas extends Emittable {
 		const toothbrush = this.toothbrush;
 		const quaternion = this.getQuaternionFromArray(rotation);
 		if (toothbrush) {
-			TweenMax.to(toothbrush.position, 0.8, {
+			gsap.to(toothbrush.position, 0.8, {
 				x: position[0],
 				y: position[1],
 				z: position[2],
 				ease: Power2.easeInOut,
 			});
 			/*
-			TweenMax.to(toothbrush.rotation, 1.2, {
+			gsap.to(toothbrush.rotation, 1.2, {
 				x: rotation[0],
 				y: rotation[1],
 				z: rotation[2],
 				ease: Power2.easeInOut,
 			});
 			*/
-			TweenMax.to(toothbrush.quaternion, 1.2, {
+			gsap.to(toothbrush.quaternion, 1.2, {
 				x: quaternion.x,
 				y: quaternion.y,
 				z: quaternion.z,
 				w: quaternion.w,
 				ease: Power2.easeInOut,
 			});
-			TweenMax.to(this.camera, 0.6, {
+			gsap.to(this.camera, 0.6, {
 				zoom: this.zoom,
 				ease: Power2.easeInOut,
 				onUpdate: () => {
@@ -631,7 +631,7 @@ export default class Canvas extends Emittable {
 			});
 		}
 		if (this.controls && this.camera.position.x !== 0) {
-			TweenMax.to(this.camera.position, 0.6, {
+			gsap.to(this.camera.position, 0.6, {
 				x: 0,
 				y: 0,
 				z: CAMERA_DISTANCE,
@@ -659,7 +659,7 @@ export default class Canvas extends Emittable {
 	tweenColor(material, colorValue) {
 		const from = new THREE.Color(material.color.getHex());
 		const to = new THREE.Color(colorValue);
-		TweenLite.to(from, 0.4, {
+		gsap.to(from, 0.4, {
 			r: to.r,
 			g: to.g,
 			b: to.b,
@@ -836,7 +836,7 @@ export default class Canvas extends Emittable {
 		if (this.container.parentNode.classList.contains('interactive')) {
 			const sm = this.container.offsetWidth < 768;
 			this.zoom_ = sm ? 0.6 : 0.2;
-			TweenMax.to(this.camera, 0.6, {
+			gsap.to(this.camera, 0.6, {
 				zoom: this.zoom,
 				ease: Power2.easeInOut,
 				onUpdate: () => {
@@ -850,7 +850,7 @@ export default class Canvas extends Emittable {
 		if (this.container.parentNode.classList.contains('interactive')) {
 			const sm = this.container.offsetWidth < 768;
 			this.zoom_ = sm ? -0.2 : 0;
-			TweenMax.to(this.camera, 0.6, {
+			gsap.to(this.camera, 0.6, {
 				zoom: this.zoom,
 				ease: Power2.easeInOut,
 				onUpdate: () => {

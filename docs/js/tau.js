@@ -16131,7 +16131,7 @@ class RootCtrl {
     this.$timeout(() => {
       this.init = true;
       const view = document.querySelector('.view');
-      TweenMax.to(view, 0.6, {
+      gsap.to(view, 0.6, {
         opacity: 1,
         delay: 0,
         overwrite: 'all'
@@ -16191,15 +16191,15 @@ class RootCtrl {
     // console.log('onDroppedOut', node);
     if (node) {
       if (this.droppinIn) {
-        TweenMax.set(node, {
+        gsap.set(node, {
           height: 0
         });
         return Promise.resolve();
       } else {
-        TweenMax.set(node, {
+        gsap.set(node, {
           overflow: 'hidden'
         });
-        TweenMax.to(node, 0.6, {
+        gsap.to(node, 0.6, {
           height: 0,
           ease: Expo.easeOut,
           overwrite: 'all',
@@ -16216,12 +16216,12 @@ class RootCtrl {
     return new Promise((resolve, reject) => {
     	if (node) {
     		const items = [].slice.call(node.querySelectorAll('.submenu__item'));
-    		TweenMax.staggerTo(items.reverse(), 0.25, {
+    		gsap.staggerTo(items.reverse(), 0.25, {
     			opacity: 0,
     			stagger: 0.05,
     			delay: 0.0,
     			onComplete: () => {
-    				TweenMax.to(node, 0.2, {
+    				gsap.to(node, 0.2, {
     					maxHeight: 0,
     					ease: Expo.easeOut,
     					delay: 0.0,
@@ -16244,27 +16244,27 @@ class RootCtrl {
     return new Promise((resolve, reject) => {
       this.droppinIn = true;
       const items = [].slice.call(node.querySelectorAll('.submenu__item'));
-      TweenMax.set(items, {
+      gsap.set(items, {
         opacity: 0
       });
-      TweenMax.set(node, {
+      gsap.set(node, {
         height: 'auto'
       });
       const mh = node.offsetHeight;
-      TweenMax.set(node, {
+      gsap.set(node, {
         height: 0,
         overflow: 'hidden'
       });
-      TweenMax.to(node, 0.8, {
+      gsap.to(node, 0.8, {
         height: mh,
         ease: Expo.easeOut,
         delay: 0.0,
         overwrite: 'all',
         onComplete: () => {
           delete node.style.overflow;
-          TweenMax.set(node, {
+          gsap.set(node, {
             height: 'auto'
-          }); // TweenMax.set(node, { clearProps: 'all' });
+          }); // gsap.set(node, { clearProps: 'all' });
 
           if (items.length === 0) {
             this.droppinIn = false;
@@ -16273,7 +16273,7 @@ class RootCtrl {
       });
 
       if (items.length) {
-        TweenMax.staggerTo(items, 0.35, {
+        gsap.staggerTo(items, 0.35, {
           opacity: 1,
           stagger: 0.07,
           delay: 0.5,
@@ -18010,7 +18010,7 @@ class Canvas extends _emittable.default {
       }
 
       target.add(toothbrush);
-      TweenMax.to(controller.material, 0.4, {
+      gsap.to(controller.material, 0.4, {
         opacity: 0.0,
         ease: Power2.easeInOut
       });
@@ -18029,7 +18029,7 @@ class Canvas extends _emittable.default {
       toothbrush.position.set(position.x, position.y, position.z);
       target.add(toothbrush);
       toothbrush.unfreeze();
-      TweenMax.to(controller.material, 0.4, {
+      gsap.to(controller.material, 0.4, {
         opacity: 1.0,
         ease: Power2.easeInOut
       });
@@ -18164,14 +18164,14 @@ class Canvas extends _emittable.default {
     const quaternion = this.getQuaternionFromArray(rotation);
 
     if (toothbrush) {
-      TweenMax.to(toothbrush.position, 0.8, {
+      gsap.to(toothbrush.position, 0.8, {
         x: position[0],
         y: position[1],
         z: position[2],
         ease: Power2.easeInOut
       });
       /*
-      TweenMax.to(toothbrush.rotation, 1.2, {
+      gsap.to(toothbrush.rotation, 1.2, {
       	x: rotation[0],
       	y: rotation[1],
       	z: rotation[2],
@@ -18179,14 +18179,14 @@ class Canvas extends _emittable.default {
       });
       */
 
-      TweenMax.to(toothbrush.quaternion, 1.2, {
+      gsap.to(toothbrush.quaternion, 1.2, {
         x: quaternion.x,
         y: quaternion.y,
         z: quaternion.z,
         w: quaternion.w,
         ease: Power2.easeInOut
       });
-      TweenMax.to(this.camera, 0.6, {
+      gsap.to(this.camera, 0.6, {
         zoom: this.zoom,
         ease: Power2.easeInOut,
         onUpdate: () => {
@@ -18196,7 +18196,7 @@ class Canvas extends _emittable.default {
     }
 
     if (this.controls && this.camera.position.x !== 0) {
-      TweenMax.to(this.camera.position, 0.6, {
+      gsap.to(this.camera.position, 0.6, {
         x: 0,
         y: 0,
         z: CAMERA_DISTANCE,
@@ -18224,7 +18224,7 @@ class Canvas extends _emittable.default {
   tweenColor(material, colorValue) {
     const from = new THREE.Color(material.color.getHex());
     const to = new THREE.Color(colorValue);
-    TweenLite.to(from, 0.4, {
+    gsap.to(from, 0.4, {
       r: to.r,
       g: to.g,
       b: to.b,
@@ -18413,7 +18413,7 @@ class Canvas extends _emittable.default {
     if (this.container.parentNode.classList.contains('interactive')) {
       const sm = this.container.offsetWidth < 768;
       this.zoom_ = sm ? 0.6 : 0.2;
-      TweenMax.to(this.camera, 0.6, {
+      gsap.to(this.camera, 0.6, {
         zoom: this.zoom,
         ease: Power2.easeInOut,
         onUpdate: () => {
@@ -18427,7 +18427,7 @@ class Canvas extends _emittable.default {
     if (this.container.parentNode.classList.contains('interactive')) {
       const sm = this.container.offsetWidth < 768;
       this.zoom_ = sm ? -0.2 : 0;
-      TweenMax.to(this.camera, 0.6, {
+      gsap.to(this.camera, 0.6, {
         zoom: this.zoom,
         ease: Power2.easeInOut,
         onUpdate: () => {
@@ -20038,14 +20038,14 @@ class Controller extends _emittable.default {
   }
 
   press(index) {
-    TweenMax.to(this.buttons[index], 0.3, {
+    gsap.to(this.buttons[index], 0.3, {
       value: 1,
       ease: Power2.easeOut
     });
   }
 
   release(index) {
-    TweenMax.to(this.buttons[index], 0.3, {
+    gsap.to(this.buttons[index], 0.3, {
       value: 0,
       ease: Power2.easeOut
     });

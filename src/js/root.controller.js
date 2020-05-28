@@ -55,7 +55,7 @@ class RootCtrl {
 		this.$timeout(() => {
 			this.init = true;
 			const view = document.querySelector('.view');
-			TweenMax.to(view, 0.6, {
+			gsap.to(view, 0.6, {
 				opacity: 1,
 				delay: 0,
 				overwrite: 'all'
@@ -110,11 +110,11 @@ class RootCtrl {
 		// console.log('onDroppedOut', node);
 		if (node) {
 			if (this.droppinIn) {
-				TweenMax.set(node, { height: 0 });
+				gsap.set(node, { height: 0 });
 				return Promise.resolve();
 			} else {
-				TweenMax.set(node, { overflow: 'hidden' });
-				TweenMax.to(node, 0.6, {
+				gsap.set(node, { overflow: 'hidden' });
+				gsap.to(node, 0.6, {
 					height: 0,
 					ease: Expo.easeOut,
 					overwrite: 'all',
@@ -131,12 +131,12 @@ class RootCtrl {
 		return new Promise((resolve, reject) => {
 			if (node) {
 				const items = [].slice.call(node.querySelectorAll('.submenu__item'));
-				TweenMax.staggerTo(items.reverse(), 0.25, {
+				gsap.staggerTo(items.reverse(), 0.25, {
 					opacity: 0,
 					stagger: 0.05,
 					delay: 0.0,
 					onComplete: () => {
-						TweenMax.to(node, 0.2, {
+						gsap.to(node, 0.2, {
 							maxHeight: 0,
 							ease: Expo.easeOut,
 							delay: 0.0,
@@ -158,26 +158,26 @@ class RootCtrl {
 		return new Promise((resolve, reject) => {
 			this.droppinIn = true;
 			const items = [].slice.call(node.querySelectorAll('.submenu__item'));
-			TweenMax.set(items, { opacity: 0 });
-			TweenMax.set(node, { height: 'auto' });
+			gsap.set(items, { opacity: 0 });
+			gsap.set(node, { height: 'auto' });
 			const mh = node.offsetHeight;
-			TweenMax.set(node, { height: 0, overflow: 'hidden' });
-			TweenMax.to(node, 0.8, {
+			gsap.set(node, { height: 0, overflow: 'hidden' });
+			gsap.to(node, 0.8, {
 				height: mh,
 				ease: Expo.easeOut,
 				delay: 0.0,
 				overwrite: 'all',
 				onComplete: () => {
 					delete node.style.overflow;
-					TweenMax.set(node, { height: 'auto' });
-					// TweenMax.set(node, { clearProps: 'all' });
+					gsap.set(node, { height: 'auto' });
+					// gsap.set(node, { clearProps: 'all' });
 					if (items.length === 0) {
 						this.droppinIn = false;
 					}
 				}
 			});
 			if (items.length) {
-				TweenMax.staggerTo(items, 0.35, {
+				gsap.staggerTo(items, 0.35, {
 					opacity: 1,
 					stagger: 0.07,
 					delay: 0.5,

@@ -1,120 +1,133 @@
 ﻿{
 	"targets": {
 		"browser": {
-			"compile": [{
-				"input": "src/scss/tau.scss",
-				"output": "docs/css/tau.css",
-				"minify": false
-			}, {
-				"input": "src/js/app.bootstrap.js",
-				"output": "docs/js/tau.js",
-				"minify": false
-			}, {
-				"input": "src/scss/landings/splendidi-splendenti/splendidi-splendenti.scss",
-				"output": "docs/css/landings/splendidi-splendenti/splendidi-splendenti.css",
-				"minify": false
-			}, {
-				"input": "src/js/landings/splendidi-splendenti/splendidi-splendenti.js",
-				"output": "docs/js/landings/splendidi-splendenti/splendidi-splendenti.js",
-				"minify": false
-			}],
-			"bundle": [{
-				"input": [
-					"src/js/main.js"
-				],
-				"output": "docs/js/main.js",
-				"minify": false
-			}, {
-				"input": [
-					"node_modules/ammo.js/builds/ammo.js"
-				],
-				"output": "docs/js/ammo.js",
-				"minify": false
-			}, {
-				"input": [
-					"node_modules/ammo.js/builds/ammo.wasm.js"
-				],
-				"output": "docs/js/ammo.wasm.js",
-				"minify": false
-			}, {
-				"input": [
-					"node_modules/ammo.js/builds/ammo.wasm.wasm"
-				],
-				"output": "docs/js"
-			}, {
-				"input": [
-					"src/js/threejs/physics/worker.wasm.js"
-				],
-				"output": "docs/js/worker.wasm.js",
-				"minify": false
-			}, {
-				"input": [
-					"node_modules/whatwg-fetch/dist/fetch.umd.js",
-					"node_modules/promise-polyfill/dist/polyfill.js",
-					"src/polyfills/polyfills.js"
-				],
-				"output": "docs/js/polyfills.js",
-				"minify": false
-			}, {
-				"input": [
-					"node_modules/angular/angular.js",
-					"node_modules/angular-messages/angular-messages.js",
-					"node_modules/angular-sanitize/angular-sanitize.js",
-
-					"node_modules/gsap/src/uncompressed/easing/EasePack.js",
-					"node_modules/gsap/src/uncompressed/TweenMax.js",
-					"node_modules/three/build/three.js",
-					"node_modules/three/examples/js/vr/WebVR.js",
-					"node_modules/three/examples/js/modifiers/SubdivisionModifier.js",
-
-					"node_modules/three/examples/js/loaders/MTLLoader.js",
-					"node_modules/three/examples/js/loaders/OBJLoader.js",
-					"node_modules/three/examples/js/loaders/FBXLoader.js",
-					"node_modules/three/examples/js/libs/inflate.min.js",
-
-					"node_modules/three/examples/js/controls/OrbitControls.js",
-					"node_modules/three/examples/js/loaders/EquirectangularToCubeGenerator.js",
-					"node_modules/three/examples/js/loaders/RGBELoader.js",
-					"node_modules/three/examples/js/utils/BufferGeometryUtils.js",
-
-					"src/js/math/SimplexNoise.js",
-					"node_modules/three/examples/js/postprocessing/EffectComposer.js",
-					"node_modules/three/examples/js/postprocessing/RenderPass.js",
-					"node_modules/three/examples/js/postprocessing/ShaderPass.js",
-					"node_modules/three/examples/js/postprocessing/SAOPass.js",
-					"node_modules/three/examples/js/postprocessing/SSAOPass.js",
-					"node_modules/three/examples/js/shaders/CopyShader.js",
-					"node_modules/three/examples/js/shaders/SAOShader.js",
-					"node_modules/three/examples/js/shaders/SSAOShader.js",
-					"node_modules/three/examples/js/shaders/DepthLimitedBlurShader.js",
-					"node_modules/three/examples/js/shaders/UnpackDepthRGBAShader.js",
-					"node_modules/three/examples/js/postprocessing/SSAARenderPass.js",
-					"node_modules/three/examples/js/postprocessing/TAARenderPass.js"
-				],
-				"output": "docs/js/vendors.js",
-				"minify": false
-			}, {
-				"input": [
-					"node_modules/gsap/src/uncompressed/easing/EasePack.js",
-					"node_modules/gsap/src/uncompressed/TweenMax.js",
-					"node_modules/locomotive-scroll/dist/locomotive-scroll.js"
-				],
-				"output": "docs/js/landings/splendidi-splendenti/vendors.js",
-				"minify": false
-			}, {
-				"input": [
-					"node_modules/locomotive-scroll/dist/locomotive-scroll.css",
-					"node_modules/swiper/css/swiper.css"
-				],
-				"output": "docs/css/landings/splendidi-splendenti/vendors.css",
-				"minify": false
-			}],
-			"resource": [{
-				"input": [
-					"node_modules/ammo.js/builds/ammo.wasm.wasm"
-				],
-				"output": "docs/js"
-			}]
+			"compile": [
+				{
+					"input": "src/scss/tau.scss",
+					"output": "docs/css/tau.css",
+					"minify": false
+				},
+				{
+					"input": "src/js/app.bootstrap.js",
+					"output": "docs/js/tau.js",
+					"minify": false
+				},
+				{
+					"input": "src/scss/landings/splendidi-splendenti/splendidi-splendenti.scss",
+					"output": "docs/css/landings/splendidi-splendenti/splendidi-splendenti.css",
+					"minify": false
+				},
+				{
+					"input": "src/js/landings/splendidi-splendenti/splendidi-splendenti.js",
+					"output": "docs/js/landings/splendidi-splendenti/splendidi-splendenti.js",
+					"minify": false
+				}
+			],
+			"bundle": [
+				{
+					"input": [
+						"src/js/main.js"
+					],
+					"output": "docs/js/main.js",
+					"minify": false
+				},
+				{
+					"input": [
+						"node_modules/ammo.js/builds/ammo.js"
+					],
+					"output": "docs/js/ammo.js",
+					"minify": false
+				},
+				{
+					"input": [
+						"node_modules/ammo.js/builds/ammo.wasm.js"
+					],
+					"output": "docs/js/ammo.wasm.js",
+					"minify": false
+				},
+				{
+					"input": [
+						"node_modules/ammo.js/builds/ammo.wasm.wasm"
+					],
+					"output": "docs/js"
+				},
+				{
+					"input": [
+						"src/js/threejs/physics/worker.wasm.js"
+					],
+					"output": "docs/js/worker.wasm.js",
+					"minify": false
+				},
+				{
+					"input": [
+						"node_modules/whatwg-fetch/dist/fetch.umd.js",
+						"node_modules/promise-polyfill/dist/polyfill.js",
+						"src/polyfills/polyfills.js"
+					],
+					"output": "docs/js/polyfills.js",
+					"minify": false
+				},
+				{
+					"input": [
+						"node_modules/angular/angular.js",
+						"node_modules/angular-messages/angular-messages.js",
+						"node_modules/angular-sanitize/angular-sanitize.js",
+						"node_modules/gsap/dist/EasePack.js",
+						"node_modules/gsap/dist/gsap.js",
+						"node_modules/three/build/three.js",
+						"node_modules/three/examples/js/vr/WebVR.js",
+						"node_modules/three/examples/js/modifiers/SubdivisionModifier.js",
+						"node_modules/three/examples/js/loaders/MTLLoader.js",
+						"node_modules/three/examples/js/loaders/OBJLoader.js",
+						"node_modules/three/examples/js/loaders/FBXLoader.js",
+						"node_modules/three/examples/js/libs/inflate.min.js",
+						"node_modules/three/examples/js/controls/OrbitControls.js",
+						"node_modules/three/examples/js/loaders/EquirectangularToCubeGenerator.js",
+						"node_modules/three/examples/js/loaders/RGBELoader.js",
+						"node_modules/three/examples/js/utils/BufferGeometryUtils.js",
+						"src/js/math/SimplexNoise.js",
+						"node_modules/three/examples/js/postprocessing/EffectComposer.js",
+						"node_modules/three/examples/js/postprocessing/RenderPass.js",
+						"node_modules/three/examples/js/postprocessing/ShaderPass.js",
+						"node_modules/three/examples/js/postprocessing/SAOPass.js",
+						"node_modules/three/examples/js/postprocessing/SSAOPass.js",
+						"node_modules/three/examples/js/shaders/CopyShader.js",
+						"node_modules/three/examples/js/shaders/SAOShader.js",
+						"node_modules/three/examples/js/shaders/SSAOShader.js",
+						"node_modules/three/examples/js/shaders/DepthLimitedBlurShader.js",
+						"node_modules/three/examples/js/shaders/UnpackDepthRGBAShader.js",
+						"node_modules/three/examples/js/postprocessing/SSAARenderPass.js",
+						"node_modules/three/examples/js/postprocessing/TAARenderPass.js"
+					],
+					"output": "docs/js/vendors.js",
+					"minify": false
+				},
+				{
+					"input": [
+						"node_modules/gsap/dist/EasePack.js",
+						"node_modules/gsap/dist/gsap.js",
+						"node_modules/locomotive-scroll/dist/locomotive-scroll.js"
+					],
+					"output": "docs/js/landings/splendidi-splendenti/vendors.js",
+					"minify": false
+				},
+				{
+					"input": [
+						"node_modules/locomotive-scroll/dist/locomotive-scroll.css",
+						"node_modules/swiper/css/swiper.css"
+					],
+					"output": "docs/css/landings/splendidi-splendenti/vendors.css",
+					"minify": false
+				}
+			],
+			"resource": [
+				{
+					"input": [
+						"node_modules/ammo.js/builds/ammo.wasm.wasm"
+					],
+					"output": "docs/js"
+				}
+			]
 		}
 	},
 	"options": {

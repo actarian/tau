@@ -1,6 +1,3 @@
-/* jshint esversion: 6 */
-/* global window, document, TweenMax, ThreeJs */
-
 export function RoundBoxGeometry(width, height, depth, radius, widthSegments, heightSegments, depthSegments, radiusSegments) {
 	width = width || 1;
 	height = height || 1;

@@ -34,7 +34,7 @@ export default class PointerComponent {
 
 	animate() {
 		this.ro_ += (this.ro - this.ro_) / 8;
-		TweenMax.set(this.node, {
+		gsap.set(this.node, {
 			rotation: `${this.ro_ * 3600}deg`,
 			x: this.mx,
 			y: this.my,

@@ -13542,6 +13542,2134 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+var _vector = _interopRequireDefault(require("./geometry/vector2"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class Canvas {
+  constructor(width, height) {
+    const canvas = this.canvas = document.querySelector('.game .canvas');
+    width = width || canvas.offsetWidth;
+    height = height || canvas.offsetHeight;
+    const size = this.size = new _vector.default(width, height);
+    canvas.width = size.x;
+    canvas.height = size.y;
+    this.ctx = canvas.getContext('2d');
+  }
+
+  update() {
+    const size = this.size;
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, size.x, size.y);
+  }
+
+  drawPoint(p) {
+    const ctx = this.ctx;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, 2 * Math.PI);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "red";
+    ctx.stroke();
+  }
+
+  drawSegment(s) {
+    const ctx = this.ctx;
+    ctx.beginPath();
+    ctx.moveTo(s.a.x, s.a.y);
+    ctx.lineTo(s.b.x, s.b.y);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "white";
+    ctx.stroke();
+  }
+
+  drawImage(image, x, y, scale, rotation) {
+    const ctx = this.ctx;
+    ctx.setTransform(scale, 0, 0, scale, x, y); // sets scale and origin
+
+    ctx.rotate(rotation);
+    ctx.drawImage(image, -image.naturalWidth / 2, -image.naturalWidth / 2);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  drawImageCenter(image, x, y, cx, cy, scale, rotation) {
+    const ctx = this.ctx;
+    ctx.setTransform(scale, 0, 0, scale, x, y); // sets scale and origin
+
+    ctx.rotate(rotation);
+    ctx.drawImage(image, -cx, -cy);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+  /*
+  resize() {
+  	const canvas = this.canvas;
+  	const rect = this.rect;
+  	rect.width = canvas.offsetWidth;
+  	rect.height = canvas.offsetHeight;
+  	canvas.width = rect.width;
+  	canvas.height = rect.height;
+  }
+  */
+
+
+}
+
+exports.default = Canvas;
+
+},{"./geometry/vector2":11}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _polygon = _interopRequireDefault(require("./geometry/polygon"));
+
+var _segment = _interopRequireDefault(require("./geometry/segment"));
+
+var _vector = _interopRequireDefault(require("./geometry/vector2"));
+
+var _state = require("./state");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class Cut extends _polygon.default {
+  constructor() {
+    super();
+    this.direction = new _vector.default();
+    this.start = new _vector.default();
+    this.end = new _vector.default();
+  }
+
+  move(actor) {
+    let segment;
+
+    if (!this.segments.length) {
+      this.start.copy(actor.position);
+      segment = new _segment.default(actor.position.x, actor.position.y, actor.nx, actor.ny);
+      this.segments.push(segment);
+    } else if (Math.abs(this.direction.x) !== Math.abs(actor.direction.x)) {
+      // direction changed
+      const s = this.segments[this.segments.length - 1];
+      segment = new _segment.default(s.b.x, s.b.y, actor.nx, actor.ny);
+      this.segments.push(segment);
+    } else {
+      segment = this.segments[this.segments.length - 1];
+      segment.b.x = actor.nx;
+      segment.b.y = actor.ny;
+    }
+
+    this.end.x = segment.b.x;
+    this.end.y = segment.b.y;
+    this.direction.x = actor.direction.x;
+    this.direction.y = actor.direction.y;
+  }
+
+  close(actor) {
+    this.segments = [];
+  }
+
+  reset(actor) {
+    actor.position.copy(this.start);
+    this.direction.x = 0;
+    this.direction.y = 0;
+    this.segments = [];
+  }
+
+  draw() {
+    const canvas = _state.State.canvas;
+    const ctx = canvas.ctx;
+    ctx.beginPath();
+    const t = this.segments.length;
+
+    for (let i = 0; i < t; i++) {
+      const s = this.segments[i];
+
+      if (i === 0) {
+        ctx.moveTo(s.a.x, s.a.y);
+      } else {
+        ctx.lineTo(s.a.x, s.a.y);
+      }
+
+      if (i === t - 1) {
+        ctx.lineTo(s.b.x, s.b.y);
+      }
+    }
+
+    ctx.lineWidth = "7";
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+    ctx.lineWidth = "3";
+    ctx.strokeStyle = "white";
+    ctx.stroke();
+  }
+
+}
+
+exports.default = Cut;
+
+},{"./geometry/polygon":8,"./geometry/segment":10,"./geometry/vector2":11,"./state":15}],6:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _segment = _interopRequireDefault(require("./geometry/segment"));
+
+var _vector = _interopRequireDefault(require("./geometry/vector2"));
+
+var _state = require("./state");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class Enemy {
+  get nx() {
+    return this.position.x + this.direction.x * this.speed;
+  }
+
+  get ny() {
+    return this.position.y + this.direction.y * this.speed;
+  }
+
+  constructor() {
+    this.position = new _vector.default();
+    this.getRandomPosition();
+    /*
+    if (State.enemies && State.enemies.length) {
+    	this.getRandomPosition();
+    } else {
+    	this.getCenterPosition();
+    }
+    */
+
+    this.getRandomDirection();
+    this.speed = 3; // 2 + Math.random() * 2;
+
+    this.segment = new _segment.default();
+  }
+
+  getCenterPosition() {
+    const ground = _state.State.ground;
+    this.position.x = ground.x(0.5);
+    this.position.y = ground.y(0.5);
+  }
+
+  getRandomPosition() {
+    const ground = _state.State.ground;
+    this.position.x = ground.x(Math.random());
+    this.position.y = ground.y(Math.random());
+
+    if (!ground.isInside(this)) {
+      this.getRandomPosition();
+    }
+  }
+
+  getRandomDirection() {
+    this.direction = new _vector.default(0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1), 0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1)).normalize();
+  }
+
+  update() {
+    if (!this.checkCollision()) {
+      this.move();
+    }
+
+    this.draw();
+  }
+
+  draw() {
+    const canvas = _state.State.canvas;
+    const ctx = canvas.ctx;
+
+    const mouth = _state.State.resources.get(_state.State.assets.mouth);
+
+    ctx.drawImage(mouth, this.position.x - mouth.naturalWidth / 2, this.position.y - mouth.naturalHeight / 2);
+    /*
+    ctx.beginPath();
+    ctx.strokeStyle = "black";
+    ctx.arc(this.position.x, this.position.y, 5, 0, 2 * Math.PI, true);
+    ctx.stroke();
+    ctx.fillStyle = "red";
+    ctx.fill();
+    */
+  }
+
+  checkCollision() {
+    const ground = _state.State.ground;
+    const cut = _state.State.cut;
+    const nx = this.nx;
+    const ny = this.ny;
+
+    const mouth = _state.State.resources.get(_state.State.assets.mouth);
+
+    const segment = this.segment;
+    segment.a.set(this.position.x, this.position.y);
+    segment.b.set(this.position.x + this.direction.x * (mouth.naturalHeight / 2 + this.speed), this.position.y + this.direction.y * (mouth.naturalHeight / 2 + this.speed));
+
+    if (cut.hit(this, mouth.naturalHeight / 2)) {
+      const player = _state.State.player;
+      cut.reset(player);
+    }
+
+    const bounce = ground.bounce(segment);
+
+    if (bounce) {
+      // this.position.copy(bounce.r);
+      // this.direction.x *= -1;
+      // this.direction.y *= -1;
+      this.direction.copy(bounce.d);
+    }
+    /*
+    else if (Math.random() * 100 < 1) {
+    	this.getRandomDirection();
+    }
+    */
+
+
+    return bounce;
+  }
+
+  move() {
+    this.position.x = this.nx;
+    this.position.y = this.ny;
+  }
+
+}
+
+exports.default = Enemy;
+
+},{"./geometry/segment":10,"./geometry/vector2":11,"./state":15}],7:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _canvas = _interopRequireDefault(require("./canvas"));
+
+var _cut = _interopRequireDefault(require("./cut"));
+
+var _enemy = _interopRequireDefault(require("./enemy"));
+
+var _ground = _interopRequireDefault(require("./ground"));
+
+var _player = _interopRequireDefault(require("./player"));
+
+var _resources = _interopRequireDefault(require("./resources"));
+
+var _state = require("./state");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class Game {
+  constructor() {
+    const canvas = this.canvas = _state.State.canvas = new _canvas.default(750, 750);
+    const ground = this.ground = _state.State.ground = new _ground.default();
+    const cut = this.cut = _state.State.cut = new _cut.default();
+    const enemies = _state.State.enemies = new Array(_state.State.minEnemies).fill(0).map(x => new _enemy.default());
+    const player = _state.State.player = new _player.default();
+    const assets = _state.State.assets = {
+      designer: './img/landings/splendidi-splendenti/game/designer.jpg',
+      packaging: './img/landings/splendidi-splendenti/game/packaging.jpg',
+      mouth: './img/landings/splendidi-splendenti/game/mouth.png',
+      diamond: './img/landings/splendidi-splendenti/game/diamond.png'
+    };
+    const resources = _state.State.resources = _resources.default;
+
+    _resources.default.onReady(() => {
+      this.init();
+      this.loop();
+    });
+
+    _resources.default.loadAssets(assets);
+
+    this.intro();
+  }
+
+  init() {
+    this.loop = this.loop.bind(this);
+    this.onKeydown = this.onKeydown.bind(this);
+    this.onKeyup = this.onKeyup.bind(this);
+    this.start = this.start.bind(this);
+    this.restart = this.restart.bind(this);
+    this.onTouchStart = this.onTouchStart.bind(this);
+    this.onTouchMove = this.onTouchMove.bind(this);
+    this.onTouchEnd = this.onTouchEnd.bind(this);
+    _state.State.addEnemy = this.addEnemy.bind(this);
+    _state.State.removeEnemy = this.removeEnemy.bind(this);
+    _state.State.addScore = this.addScore.bind(this);
+    _state.State.addEnemyScore = this.addEnemyScore.bind(this);
+    _state.State.onPlayerCut = this.onPlayerCut.bind(this);
+    _state.State.onPlayerReset = this.onPlayerReset.bind(this);
+    document.addEventListener("keydown", this.onKeydown);
+    document.addEventListener("keyup", this.onKeyup);
+    const start = document.querySelector('.btn--start');
+    start.addEventListener("click", this.start);
+    const restart = document.querySelector('.btn--restart');
+    restart.addEventListener("click", this.restart);
+    const arrows = this.arrows = document.querySelector('.game-container .arrows');
+    arrows.addEventListener('touchstart', this.onTouchStart);
+  }
+
+  intro() {
+    _state.State.intro = true;
+    _state.State.rules = false;
+    _state.State.paused = true;
+    _state.State.game = false;
+    _state.State.ended = false;
+    const title = document.querySelector('.group--intro__title');
+    const mouth = document.querySelector('.group--intro__mouth');
+    gsap.set(title, {
+      opacity: 0,
+      rotate: '10deg'
+    });
+    gsap.set(mouth, {
+      opacity: 0
+    });
+    gsap.to(title, 2.5, {
+      delay: 0.2,
+      ease: Elastic.easeOut.config(1, 0.3),
+      opacity: 1,
+      rotate: '0deg'
+    });
+    gsap.to(mouth, 0.6, {
+      delay: 1,
+      ease: Power1.easeInOut,
+      opacity: 1,
+      x: '-100%',
+      y: '30%',
+      onComplete: () => {
+        gsap.to(mouth, 0.6, {
+          delay: 0.1,
+          ease: Power1.easeInOut,
+          opacity: 1,
+          x: '100%',
+          y: '-30%',
+          onComplete: () => {
+            gsap.to(mouth, 0.6, {
+              delay: 0.1,
+              ease: Power1.easeInOut,
+              opacity: 1,
+              x: '0%',
+              y: '30%',
+              onComplete: () => {
+                setTimeout(() => {
+                  this.rules();
+                }, 1000);
+              }
+            });
+          }
+        });
+      }
+    });
+    this.updateStateClasses();
+  }
+
+  rules() {
+    _state.State.intro = false;
+    _state.State.rules = true;
+    _state.State.paused = true;
+    _state.State.game = false;
+    _state.State.ended = false;
+    gsap.set('.group--rule', {
+      opacity: 0,
+      y: 20
+    });
+    gsap.to('.group--rule', {
+      duration: 0.3,
+      opacity: 1,
+      y: 0,
+      ease: Power1.easeInOut,
+      stagger: 0.1
+    });
+    this.updateStateClasses();
+  }
+
+  start() {
+    console.log('start');
+    _state.State.area = 0;
+    _state.State.intro = false;
+    _state.State.rules = false;
+    _state.State.ended = false;
+    _state.State.paused = false;
+    _state.State.game = true;
+
+    _state.State.addEnemy();
+
+    this.updateStateClasses();
+  }
+
+  end() {
+    _state.State.intro = false;
+    _state.State.rules = false;
+    _state.State.paused = false;
+    _state.State.game = true;
+    _state.State.ended = true; // State.percent = 100;
+
+    _state.State.ended = true;
+    _state.State.won = true;
+    this.updateStateClasses();
+  }
+
+  restart() {
+    _state.State.ground = new _ground.default();
+    _state.State.cut = new _cut.default();
+    _state.State.enemies = new Array(_state.State.minEnemies).fill(0).map(x => new _enemy.default());
+    _state.State.player = new _player.default();
+    _state.State.area = 0;
+    _state.State.percent = 0;
+    _state.State.score = 0;
+    _state.State.paused = false;
+    _state.State.ended = false;
+    _state.State.won = false;
+    _state.State.lost = false;
+
+    _state.State.addEnemy();
+
+    this.setPercent();
+    this.updateStateClasses();
+  }
+
+  addTouchListeners() {
+    document.addEventListener("touchmove", this.onTouchMove);
+    document.addEventListener("touchend", this.onTouchEnd);
+  }
+
+  removeTouchListeners() {
+    document.removeEventListener("touchmove", this.onTouchMove);
+    document.removeEventListener("touchend", this.onTouchEnd);
+  }
+
+  onPlayerCut() {
+    const ground = _state.State.ground;
+    const cut = _state.State.cut; // update score and enemies
+
+    const deads = _state.State.enemies.filter(enemy => !ground.isInside(enemy));
+
+    deads.forEach(enemy => {
+      _state.State.removeEnemy(enemy);
+
+      _state.State.addEnemyScore(enemy);
+    });
+
+    if (_state.State.enemies.length === 0) {
+      _state.State.enemies = new Array(_state.State.minEnemies).fill(0).map(x => new _enemy.default());
+    }
+
+    _state.State.area = ground.getArea();
+    _state.State.percent = Math.round((_state.State.totalArea - _state.State.area) / _state.State.totalArea * 100);
+
+    if (_state.State.percent >= _state.State.minNeededScore) {
+      this.end();
+    }
+
+    this.setPercent();
+    const area = cut.getArea();
+    const score = Math.round(Math.sqrt(area));
+
+    _state.State.addScore(score);
+  }
+
+  setPercent() {
+    const percent = `${_state.State.percent}%`; // console.log('State', State.area, State.percent);
+
+    const bar = document.querySelector('.group--progress__bar');
+    gsap.set(bar, {
+      width: percent
+    });
+    const progress = document.querySelector('.group--progress .percent');
+    progress.innerText = percent;
+  }
+
+  onPlayerReset() {
+    _state.State.keys.space = _state.State.keys.shift = false;
+  }
+
+  addEnemy() {
+    if (this.to) {
+      clearTimeout(this.to);
+    }
+
+    const add = () => {
+      console.log('addEnemy');
+
+      if (!_state.State.ended && !_state.State.paused) {
+        if (_state.State.enemies.length < _state.State.maxEnemies) {
+          _state.State.enemies.push(new _enemy.default());
+        }
+
+        this.addEnemy();
+      }
+    };
+
+    this.to = setTimeout(add, 10000);
+  }
+
+  removeEnemy(enemy) {
+    console.log('removeEnemy', enemy);
+
+    const index = _state.State.enemies.indexOf(enemy);
+
+    if (index !== -1) {
+      _state.State.enemies.splice(index, 1);
+    }
+  }
+
+  addEnemyScore(enemy) {
+    _state.State.score += 500;
+    console.log('addEnemyScore', enemy, _state.State.score);
+  }
+
+  addScore(score) {
+    _state.State.score += score; // console.log('addScore', score);
+  }
+
+  loop() {
+    if (!_state.State.paused) {
+      if (!_state.State.ended) {
+        _state.State.canvas.update();
+
+        _state.State.ground.update();
+
+        _state.State.cut.update();
+
+        _state.State.enemies.forEach(x => x.update());
+
+        _state.State.player.update();
+      } else {
+        _state.State.canvas.update();
+
+        _state.State.ground.draw();
+
+        if (_state.State.won) {} else {}
+      }
+    }
+
+    requestAnimationFrame(this.loop);
+  }
+
+  toggle() {
+    if (_state.State.paused) {
+      _state.State.paused = false;
+      this.loop();
+      this.addEnemy();
+    } else {
+      _state.State.paused = true;
+    }
+  }
+
+  handleKeyCode(event) {
+    let keyCode = 'unknown';
+
+    switch (event.keyCode) {
+      case 32:
+        // space
+        event.preventDefault();
+        keyCode = 'space';
+        break;
+
+      case 37:
+        // left
+        event.preventDefault();
+        keyCode = 'left';
+        break;
+
+      case 38:
+        // up
+        event.preventDefault();
+        keyCode = 'up';
+        break;
+
+      case 39:
+        // right
+        event.preventDefault();
+        keyCode = 'right';
+        break;
+
+      case 40:
+        // down
+        event.preventDefault();
+        keyCode = 'down';
+        break;
+    }
+
+    return keyCode;
+  }
+
+  onKeydown(event) {
+    const keys = _state.State.keys;
+    event = event || window.event; // to deal with IE
+
+    keys.shift = event.shiftKey;
+
+    switch (event.keyCode) {
+      case 112: // f1
+
+      case 80:
+        // p
+        this.toggle();
+        break;
+
+      default:
+        keys[this.handleKeyCode(event)] = event.type == 'keydown';
+    }
+
+    if (keys.space) {
+      if (_state.State.intro) {
+        this.rules();
+      } else if (_state.State.debug) {
+        if (_state.State.rules) {
+          this.start();
+        } else if (!_state.State.ended) {
+          this.end();
+        } else {
+          this.intro();
+        }
+      }
+    }
+  }
+
+  updateStateClasses() {
+    const container = document.querySelector('.game-container');
+    container.classList.remove('game-container--intro', 'game-container--rules', 'game-container--game', 'game-container--ended');
+
+    if (_state.State.intro) {
+      container.classList.add('game-container--intro');
+    } else if (_state.State.rules) {
+      container.classList.add('game-container--rules');
+    } else if (_state.State.ended) {
+      container.classList.add('game-container--ended');
+    } else if (_state.State.game) {
+      container.classList.add('game-container--game');
+    }
+  }
+
+  onKeyup(event) {
+    const keys = _state.State.keys;
+    event = event || window.event; // to deal with IE
+
+    keys.shift = event.shiftKey;
+    keys[this.handleKeyCode(event)] = event.type == 'keydown';
+  }
+
+  onHandleTouches(event) {
+    const touches = event.touches;
+    const touch = touches[0];
+    const arrows = this.arrows;
+    const ww = window.innerWidth;
+    const wh = window.innerHeight;
+    const aw = arrows.offsetWidth;
+    const ah = arrows.offsetHeight; // console.log(touch.pageX, aw, ww, ww / 2 - aw / 6);
+
+    _state.State.keys.left = touch.pageX < ww / 2 - aw / 6;
+    _state.State.keys.right = touch.pageX > ww / 2 + aw / 6;
+    _state.State.keys.up = touch.pageY < arrows.offsetTop + ah / 2;
+    _state.State.keys.down = touch.pageY > arrows.offsetTop + ah / 2;
+    _state.State.keys.space = true; // console.log(State.keys);
+  }
+
+  onTouchStart(event) {
+    // console.log('onTouchStart', event);
+    this.addTouchListeners();
+    this.onHandleTouches(event);
+  }
+
+  onTouchMove(event) {
+    // console.log('onTouchMove', event);
+    this.onHandleTouches(event);
+  }
+
+  onTouchEnd(event) {
+    // console.log('onTouchEnd', event);
+    this.removeTouchListeners();
+    _state.State.keys.space = false;
+    _state.State.keys.left = false;
+    _state.State.keys.up = false;
+    _state.State.keys.right = false;
+    _state.State.keys.down = false;
+  }
+
+}
+
+exports.default = Game;
+
+},{"./canvas":4,"./cut":5,"./enemy":6,"./ground":12,"./player":13,"./resources":14,"./state":15}],8:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _state = require("../state");
+
+var _segment = _interopRequireDefault(require("./segment"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class Polygon {
+  constructor(points) {
+    this.segments = [];
+
+    if (points && points.length > 1) {
+      points.forEach((p, i) => {
+        if (i < points.length - 2) {
+          this.segments.push(new _segment.default(p[0], p[1], points[i + 1][0], points[i + 1][1]));
+        }
+      });
+    }
+  }
+
+  getArea() {
+    const points = this.getPoints();
+    return this.getAreaFromPoints(points);
+  }
+
+  getAreaFromPoints(points) {
+    let area = 0;
+
+    for (let i = 0, l = points.length; i < l; i++) {
+      const addX = points[i].x;
+      const addY = points[i == l - 1 ? 0 : i + 1].y;
+      const subX = points[i == l - 1 ? 0 : i + 1].x;
+      const subY = points[i].y;
+      area += addX * addY * 0.5;
+      area -= subX * subY * 0.5;
+    }
+
+    return Math.abs(area);
+  }
+
+  rebuild(points) {
+    const segments = [];
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const p = points[i];
+      segments.push(new _segment.default(p.x, p.y, points[i + 1].x, points[i + 1].y));
+    }
+
+    this.segments = segments; // console.log('segments', segments);
+  }
+
+  hit(actor, tolerance) {
+    for (let i = 0; i < this.segments.length; i++) {
+      const s = this.segments[i].hit(actor, tolerance);
+
+      if (s) {
+        return s;
+      }
+    }
+    /*
+    return this.segments.reduce((p, c) => {
+    	return p || c.hit(actor, tolerance);
+    }, false);
+    */
+
+  }
+
+  hitSegments(actor, tolerance) {
+    for (let i = 0; i < this.segments.length - 1; i++) {
+      const s = this.segments[i].hit(actor, tolerance);
+
+      if (s) {
+        return s;
+      }
+    }
+  }
+
+  intersect(actor) {
+    return this.segments.reduce((p, c) => {
+      return p || c.intersect(actor.segment);
+    }, false);
+  }
+
+  isInside(actor) {
+    const points = this.getPoints();
+    return this.isPointInside(actor.position, points);
+  }
+
+  willBeInside(actor) {
+    const points = this.getPoints();
+    return this.isPointInside(actor.segment.b, points);
+  }
+
+  bounce(segment) {
+    for (let i = 0; i < this.segments.length; i++) {
+      const bounce = this.segments[i].bounce(segment);
+
+      if (bounce) {
+        return bounce;
+      }
+    }
+  }
+
+  update() {
+    this.draw();
+  }
+
+  draw() {
+    const canvas = _state.State.canvas;
+    const ctx = canvas.ctx;
+    ctx.beginPath();
+    ctx.lineWidth = "5";
+    ctx.strokeStyle = "green";
+    ctx.fillStyle = "black";
+    const t = this.segments.length;
+
+    for (let i = 0; i < t; i++) {
+      const s = this.segments[i];
+
+      if (i === 0) {
+        ctx.moveTo(s.a.x, s.a.y);
+      } else {
+        ctx.lineTo(s.a.x, s.a.y);
+      }
+
+      if (i === t - 1) {
+        ctx.lineTo(s.b.x, s.b.y);
+      }
+    }
+
+    ctx.stroke();
+    ctx.fill();
+  }
+
+  getPoints(closed) {
+    const points = [];
+
+    for (let i = 0; i < this.segments.length; i++) {
+      const s = this.segments[i];
+      points.push(s.a);
+    }
+
+    if (this.segments.length && closed) {
+      points.push(this.segments[this.segments.length - 1].b);
+    }
+
+    return points;
+  }
+
+  IsClockwise(points) {
+    let sum = 0;
+
+    for (let i = 0; i < points.length; i++) {
+      const a = points[i];
+      const b = points[(i + 1) % points.length];
+      sum += (b.x - a.x) * (b.y + a.y);
+    }
+
+    return sum < 0;
+  }
+
+  isPointInside(p, points) {
+    let inside = false;
+    let minX = points[0].x,
+        maxX = points[0].x;
+    let minY = points[0].y,
+        maxY = points[0].y;
+
+    for (let n = 1; n < points.length; n++) {
+      const q = points[n];
+      minX = Math.min(q.x, minX);
+      maxX = Math.max(q.x, maxX);
+      minY = Math.min(q.y, minY);
+      maxY = Math.max(q.y, maxY);
+    }
+
+    if (p.x < minX || p.x > maxX || p.y < minY || p.y > maxY) {
+      return false;
+    }
+
+    let i = 0,
+        j = points.length - 1;
+
+    for (i, j; i < points.length; j = i++) {
+      if (points[i].y > p.y != points[j].y > p.y && p.x < (points[j].x - points[i].x) * (p.y - points[i].y) / (points[j].y - points[i].y) + points[i].x) {
+        inside = !inside;
+      }
+    }
+
+    return inside;
+  }
+
+}
+
+exports.default = Polygon;
+
+},{"../state":15,"./segment":10}],9:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+class Rect {
+  constructor(x, y, width, height) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.set();
+  }
+
+  set() {
+    this.top = this.y;
+    this.left = this.x;
+    this.right = this.left + this.width;
+    this.bottom = this.top + this.height;
+    this.setCenter();
+  }
+
+  static contains(rect, left, top) {
+    return rect.top <= top && top <= rect.bottom && rect.left <= left && left <= rect.right;
+  }
+
+  static intersectRect(r1, r2) {
+    return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
+  }
+
+  static fromNode(node) {
+    if (!node) {
+      return;
+    }
+
+    const rect = node.rect_ || (node.rect_ = new Rect());
+    const rects = node.getClientRects();
+
+    if (!rects.length) {
+      // console.log(rects, node);
+      return rect;
+    }
+
+    const boundingRect = node.getBoundingClientRect(); // rect.top: boundingRect.top + defaultView.pageYOffset,
+    // rect.left: boundingRect.left + defaultView.pageXOffset,
+
+    rect.x = boundingRect.left;
+    rect.y = boundingRect.top;
+    rect.top = boundingRect.top;
+    rect.left = boundingRect.left;
+    rect.width = boundingRect.width;
+    rect.height = boundingRect.height;
+    rect.right = rect.left + rect.width;
+    rect.bottom = rect.top + rect.height;
+    rect.setCenter();
+    return rect;
+  }
+
+  setSize(w, h) {
+    this.width = w;
+    this.height = h;
+    this.right = this.left + this.width;
+    this.bottom = this.top + this.height;
+    this.setCenter(); // console.log(w, h);
+  }
+
+  setCenter() {
+    const center = this.center || (this.center = {});
+    center.top = this.top + this.height / 2;
+    center.left = this.left + this.width / 2;
+    center.x = center.left;
+    center.y = center.top;
+  }
+
+  contains(left, top) {
+    return Rect.contains(this, left, top);
+  }
+
+  intersect(rect) {
+    return Rect.intersectRect(this, rect);
+  }
+
+  intersection(rect) {
+    const intersection = this.intersection_ || (this.intersection_ = {
+      left: 0,
+      top: 0,
+      width: 0,
+      height: 0,
+      x: 0,
+      y: 0,
+      pow: {
+        x: -1,
+        y: -1
+      },
+      offset: function (offset) {
+        offset = offset || 0;
+        const pow = (this.top - this.rect.height / 2 + offset) / -this.height;
+        return pow;
+      },
+      scroll: function (offset) {
+        offset = offset || 0;
+        const pow = (this.top - this.rect.height / 2 + offset) / -this.height;
+        return pow;
+      }
+    });
+    intersection.left = this.left;
+    intersection.top = this.top;
+    intersection.width = this.width;
+    intersection.height = this.height;
+    intersection.x = this.left + this.width / 2;
+    intersection.y = this.top + this.height / 2;
+    intersection.rect = rect;
+    const pow = intersection.offset(0);
+    intersection.pow.y = pow;
+    return intersection;
+  }
+
+}
+
+exports.default = Rect;
+
+},{}],10:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _vector = _interopRequireDefault(require("./vector2"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class Segment {
+  get ax() {
+    return this.a.x;
+  }
+
+  set ax(x) {
+    this.a.x = x;
+  }
+
+  get ay() {
+    return this.a.y;
+  }
+
+  set ay(y) {
+    this.a.y = y;
+  }
+
+  get bx() {
+    return this.b.x;
+  }
+
+  set bx(x) {
+    this.b.x = x;
+  }
+
+  get by() {
+    return this.b.y;
+  }
+
+  set by(y) {
+    this.b.y = y;
+  }
+
+  constructor(ax = 0, ay = 0, bx = 0, by = 0) {
+    this.a = new _vector.default(ax, ay);
+    this.b = new _vector.default(bx, by);
+  }
+
+  draw() {
+    drawSegment(this);
+  }
+
+  update() {
+    this.draw();
+  }
+
+  bounce(s) {
+    const i = this.intersect(s);
+
+    if (i) {
+      const r = this.reflect(i, s.b);
+      const d = new _vector.default(r.x - i.x, r.y - i.y).normalize();
+      return {
+        r,
+        d
+      };
+    }
+  }
+
+  intersect(s) {
+    const i = this.getIntersection(s);
+
+    if (i && i.intersectA && i.intersectB) {
+      return i;
+    }
+  }
+
+  reflect(intersection, rayTip) {
+    const n = this.normal();
+    const v = new _vector.default(rayTip.x - intersection.x, rayTip.y - intersection.y);
+    const d = n.dot(v);
+    const dotNormal = new _vector.default(d * n.x, d * n.y);
+    const reflection = new _vector.default(rayTip.x - dotNormal.x * 2, rayTip.y - dotNormal.y * 2); // console.log(dotNormal, intersection, rayTip);
+
+    return reflection; // console.log(direction);
+  }
+
+  normal(p) {
+    const dx = this.b.x - this.a.x;
+    const dy = this.b.y - this.a.y; // const n = new Vector2(-dy, dx); // then the normals are (-dy, dx) and (dy, -dx).
+
+    const n = new _vector.default(dy, -dx);
+    return n.normalize();
+  }
+
+  vector(iX, iY, rayTipX, rayTipY) {
+    const rayX = rayTipX - iX;
+    const rayY = rayTipY - iY;
+    return new _vector.default(rayX, rayY);
+  }
+
+  getIntersection(s) {
+    // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
+    let denominator,
+        a,
+        b,
+        numerator1,
+        numerator2,
+        result = new _vector.default();
+    /*
+    {
+    	x: null,
+    	y: null,
+    	intersectA: false,
+    	intersectB: false
+    };
+    */
+
+    denominator = (this.b.y - this.a.y) * (s.b.x - s.a.x) - (this.b.x - this.a.x) * (s.b.y - s.a.y);
+
+    if (denominator === 0) {
+      return result;
+    }
+
+    a = s.a.y - this.a.y;
+    b = s.a.x - this.a.x;
+    numerator1 = (this.b.x - this.a.x) * a - (this.b.y - this.a.y) * b;
+    numerator2 = (s.b.x - s.a.x) * a - (s.b.y - s.a.y) * b;
+    a = numerator1 / denominator;
+    b = numerator2 / denominator; // if we cast these lines infinitely in both directions, they intersect here:
+
+    result.x = s.a.x + a * (s.b.x - s.a.x);
+    result.y = s.a.y + a * (s.b.y - s.a.y);
+    /*
+    // it is worth noting that this should be the same as:
+    x = this.a.x + (b * (this.b.x - this.a.x));
+    y = this.a.x + (b * (this.b.y - this.a.y));
+    */
+    // if line1 is a segment and line2 is infinite, they intersect if:
+
+    if (a > 0 && a < 1) {
+      result.intersectA = true;
+    } // if line2 is a segment and line1 is infinite, they intersect if:
+
+
+    if (b > 0 && b < 1) {
+      result.intersectB = true;
+    } // if line1 and line2 are segments, they intersect if both of the above are true
+
+
+    return result;
+  }
+
+  hit(actor, tolerance) {
+    const hit = Segment.calcIsInsideThickLineSegment(actor.segment.b.x, actor.segment.b.y, this.ax, this.ay, this.bx, this.by, tolerance);
+
+    if (hit) {
+      return this;
+    }
+  } // The most useful function. Returns bool true, if the mouse point is actually inside the (finite) line, given a line thickness from the theoretical line away. It also assumes that the line end points are circular, not square.
+
+
+  static calcIsInsideThickLineSegment(px, py, ax, ay, bx, by, tolerance = 0.1) {
+    const L2 = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
+    if (L2 == 0) return false;
+    const r = ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / L2; // Assume line thickness is circular
+
+    if (r < 0) {
+      // Outside a
+      return Math.sqrt((ax - px) * (ax - px) + (ay - py) * (ay - py)) <= tolerance;
+    } else if (0 <= r && r <= 1) {
+      // On the line segment
+      var s = ((ay - py) * (bx - ax) - (ax - px) * (by - ay)) / L2;
+      return Math.abs(s) * Math.sqrt(L2) <= tolerance;
+    } else {
+      // Outside b
+      return Math.sqrt((bx - px) * (bx - px) + (by - py) * (by - py)) <= tolerance;
+    }
+  }
+
+}
+
+exports.default = Segment;
+
+},{"./vector2":11}],11:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+class Vector2 {
+  constructor(x = 0, y = 0) {
+    this.x = x;
+    this.y = y;
+  }
+
+  set(x, y) {
+    this.x = x;
+    this.y = y;
+    return this;
+  }
+
+  setScalar(scalar) {
+    this.x = scalar;
+    this.y = scalar;
+    return this;
+  }
+
+  setX(x) {
+    this.x = x;
+    return this;
+  }
+
+  setY(y) {
+    this.y = y;
+    return this;
+  }
+
+  setComponent(index, value) {
+    switch (index) {
+      case 0:
+        this.x = value;
+        break;
+
+      case 1:
+        this.y = value;
+        break;
+
+      default:
+        throw new Error('index is out of range: ' + index);
+    }
+
+    return this;
+  }
+
+  getComponent(index) {
+    switch (index) {
+      case 0:
+        return this.x;
+
+      case 1:
+        return this.y;
+
+      default:
+        throw new Error('index is out of range: ' + index);
+    }
+  }
+
+  clone() {
+    return new this.constructor(this.x, this.y);
+  }
+
+  copy(v) {
+    this.x = v.x;
+    this.y = v.y;
+    return this;
+  }
+
+  add(v, w) {
+    if (w !== undefined) {
+      console.warn('THREE.Vector2: .add() now only accepts one argument. Use .addVectors( a, b ) instead.');
+      return this.addVectors(v, w);
+    }
+
+    this.x += v.x;
+    this.y += v.y;
+    return this;
+  }
+
+  addScalar(s) {
+    this.x += s;
+    this.y += s;
+    return this;
+  }
+
+  addVectors(a, b) {
+    this.x = a.x + b.x;
+    this.y = a.y + b.y;
+    return this;
+  }
+
+  addScaledVector(v, s) {
+    this.x += v.x * s;
+    this.y += v.y * s;
+    return this;
+  }
+
+  sub(v, w) {
+    if (w !== undefined) {
+      console.warn('THREE.Vector2: .sub() now only accepts one argument. Use .subVectors( a, b ) instead.');
+      return this.subVectors(v, w);
+    }
+
+    this.x -= v.x;
+    this.y -= v.y;
+    return this;
+  }
+
+  subScalar(s) {
+    this.x -= s;
+    this.y -= s;
+    return this;
+  }
+
+  subVectors(a, b) {
+    this.x = a.x - b.x;
+    this.y = a.y - b.y;
+    return this;
+  }
+
+  multiply(v) {
+    this.x *= v.x;
+    this.y *= v.y;
+    return this;
+  }
+
+  multiplyScalar(scalar) {
+    this.x *= scalar;
+    this.y *= scalar;
+    return this;
+  }
+
+  divide(v) {
+    this.x /= v.x;
+    this.y /= v.y;
+    return this;
+  }
+
+  divideScalar(scalar) {
+    return this.multiplyScalar(1 / scalar);
+  }
+
+  applyMatrix3(m) {
+    var x = this.x,
+        y = this.y;
+    var e = m.elements;
+    this.x = e[0] * x + e[3] * y + e[6];
+    this.y = e[1] * x + e[4] * y + e[7];
+    return this;
+  }
+
+  min(v) {
+    this.x = Math.min(this.x, v.x);
+    this.y = Math.min(this.y, v.y);
+    return this;
+  }
+
+  max(v) {
+    this.x = Math.max(this.x, v.x);
+    this.y = Math.max(this.y, v.y);
+    return this;
+  }
+
+  clamp(min, max) {
+    // assumes min < max, componentwise
+    this.x = Math.max(min.x, Math.min(max.x, this.x));
+    this.y = Math.max(min.y, Math.min(max.y, this.y));
+    return this;
+  }
+
+  clampScalar(minVal, maxVal) {
+    this.x = Math.max(minVal, Math.min(maxVal, this.x));
+    this.y = Math.max(minVal, Math.min(maxVal, this.y));
+    return this;
+  }
+
+  clampLength(min, max) {
+    var length = this.length();
+    return this.divideScalar(length || 1).multiplyScalar(Math.max(min, Math.min(max, length)));
+  }
+
+  floor() {
+    this.x = Math.floor(this.x);
+    this.y = Math.floor(this.y);
+    return this;
+  }
+
+  ceil() {
+    this.x = Math.ceil(this.x);
+    this.y = Math.ceil(this.y);
+    return this;
+  }
+
+  round() {
+    this.x = Math.round(this.x);
+    this.y = Math.round(this.y);
+    return this;
+  }
+
+  roundToZero() {
+    this.x = this.x < 0 ? Math.ceil(this.x) : Math.floor(this.x);
+    this.y = this.y < 0 ? Math.ceil(this.y) : Math.floor(this.y);
+    return this;
+  }
+
+  negate() {
+    this.x = -this.x;
+    this.y = -this.y;
+    return this;
+  }
+
+  dot(v) {
+    return this.x * v.x + this.y * v.y;
+  }
+
+  cross(v) {
+    return this.x * v.y - this.y * v.x;
+  }
+
+  lengthSq() {
+    return this.x * this.x + this.y * this.y;
+  }
+
+  length() {
+    return Math.sqrt(this.x * this.x + this.y * this.y);
+  }
+
+  manhattanLength() {
+    return Math.abs(this.x) + Math.abs(this.y);
+  }
+
+  normalize() {
+    return this.divideScalar(this.length() || 1);
+  }
+
+  angle() {
+    // computes the angle in radians with respect to the positive x-axis
+    var angle = Math.atan2(-this.y, -this.x) + Math.PI;
+    return angle;
+  }
+
+  distanceTo(v) {
+    return Math.sqrt(this.distanceToSquared(v));
+  }
+
+  distanceToSquared(v) {
+    var dx = this.x - v.x,
+        dy = this.y - v.y;
+    return dx * dx + dy * dy;
+  }
+
+  manhattanDistanceTo(v) {
+    return Math.abs(this.x - v.x) + Math.abs(this.y - v.y);
+  }
+
+  setLength(length) {
+    return this.normalize().multiplyScalar(length);
+  }
+
+  lerp(v, alpha) {
+    this.x += (v.x - this.x) * alpha;
+    this.y += (v.y - this.y) * alpha;
+    return this;
+  }
+
+  lerpVectors(v1, v2, alpha) {
+    return this.subVectors(v2, v1).multiplyScalar(alpha).add(v1);
+  }
+
+  equals(v) {
+    return v.x === this.x && v.y === this.y;
+  }
+
+  fromArray(array, offset) {
+    if (offset === undefined) offset = 0;
+    this.x = array[offset];
+    this.y = array[offset + 1];
+    return this;
+  }
+
+  toArray(array, offset) {
+    if (array === undefined) array = [];
+    if (offset === undefined) offset = 0;
+    array[offset] = this.x;
+    array[offset + 1] = this.y;
+    return array;
+  }
+
+  fromBufferAttribute(attribute, index, offset) {
+    if (offset !== undefined) {
+      console.warn('THREE.Vector2: offset has been removed from .fromBufferAttribute().');
+    }
+
+    this.x = attribute.getX(index);
+    this.y = attribute.getY(index);
+    return this;
+  }
+
+  rotateAround(center, angle) {
+    var c = Math.cos(angle),
+        s = Math.sin(angle);
+    var x = this.x - center.x;
+    var y = this.y - center.y;
+    this.x = x * c - y * s + center.x;
+    this.y = x * s + y * c + center.y;
+    return this;
+  }
+
+  random() {
+    this.x = Math.random();
+    this.y = Math.random();
+    return this;
+  }
+
+}
+
+exports.default = Vector2;
+
+},{}],12:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _polygon = _interopRequireDefault(require("./geometry/polygon"));
+
+var _rect = _interopRequireDefault(require("./geometry/rect"));
+
+var _segment = _interopRequireDefault(require("./geometry/segment"));
+
+var _state = require("./state");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class Ground extends _polygon.default {
+  constructor() {
+    super();
+    const canvas = _state.State.canvas;
+    this.rect = new _rect.default(50, 50, canvas.size.x - 100, canvas.size.y - 100);
+    this.init();
+  }
+
+  init() {
+    const rect = this.rect;
+    this.segments = [new _segment.default(rect.left, rect.top, rect.right, rect.top), // top
+    new _segment.default(rect.right, rect.top, rect.right, rect.bottom), // right
+    new _segment.default(rect.right, rect.bottom, rect.left, rect.bottom), // bottom
+    new _segment.default(rect.left, rect.bottom, rect.left, rect.top) // left
+    ];
+    _state.State.totalArea = this.getArea(); // console.log('State.totalArea', State.totalArea);
+  }
+
+  remove(polygon, firstSegment, lastSegment) {
+    if (polygon.segments.length) {
+      const cutPoints = polygon.getPoints(true);
+      const isClockWise = firstSegment === lastSegment && polygon.IsClockwise(cutPoints.slice());
+      const forwardPoints = this.getForwardPoints(cutPoints, firstSegment, lastSegment, isClockWise);
+      const backwardPoints = this.getBackwardPoints(cutPoints, firstSegment, lastSegment, isClockWise);
+      const a1 = this.getAreaFromPoints(forwardPoints);
+      const a2 = this.getAreaFromPoints(backwardPoints);
+
+      if (a1 > a2) {
+        this.rebuild(forwardPoints);
+      } else {
+        this.rebuild(backwardPoints);
+      }
+    }
+  }
+
+  getForwardPoints(cutPoints, firstSegment, lastSegment, isClockWise) {
+    let s1, s2;
+
+    if (isClockWise) {
+      cutPoints.reverse();
+      s1 = lastSegment;
+      s2 = firstSegment;
+    } else {
+      s1 = firstSegment;
+      s2 = lastSegment;
+    }
+
+    const i1 = this.segments.indexOf(s1);
+    const i2 = this.segments.indexOf(s2);
+    const points = [s1.a];
+    points.push.apply(points, cutPoints);
+    const from = i2 + 1;
+    const to = i1;
+    const t = this.segments.length;
+
+    for (let j = from; j < from + t; j++) {
+      const i = j % t;
+      points.push(this.segments[i].a);
+
+      if (i === to) {
+        break;
+      }
+    }
+
+    return points;
+  }
+
+  getBackwardPoints(cutPoints, firstSegment, lastSegment, isClockWise) {
+    let s1, s2;
+
+    if (isClockWise) {
+      s1 = lastSegment;
+      s2 = firstSegment;
+    } else {
+      cutPoints.reverse();
+      s1 = firstSegment;
+      s2 = lastSegment;
+    }
+
+    const i1 = this.segments.indexOf(s1);
+    const i2 = this.segments.indexOf(s2);
+    const points = cutPoints.slice();
+
+    if (i1 !== i2) {
+      const from = i1;
+      const to = i2;
+      const t = this.segments.length;
+
+      for (let j = from; j < from + t; j++) {
+        const i = j % t;
+
+        if (i === to) {
+          break;
+        }
+
+        points.push(this.segments[i].b);
+      }
+    }
+
+    points.push(points[0]);
+    return points;
+  }
+
+  draw() {
+    const canvas = _state.State.canvas;
+    const ctx = canvas.ctx;
+
+    const packaging = _state.State.resources.get(_state.State.assets.packaging);
+
+    ctx.drawImage(packaging, 0, 0, packaging.naturalWidth, packaging.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+    ctx.lineWidth = "3";
+    ctx.strokeStyle = "black";
+
+    if (!_state.State.ended) {
+      ctx.beginPath();
+      const t = this.segments.length;
+
+      for (let i = 0; i < t; i++) {
+        const s = this.segments[i];
+
+        if (i === 0) {
+          ctx.moveTo(s.a.x, s.a.y);
+        } else {
+          ctx.lineTo(s.a.x, s.a.y);
+        }
+        /*
+        if (i === t - 1) {
+        	ctx.lineTo(s.b.x, s.b.y);
+        }
+        */
+
+      }
+
+      ctx.closePath();
+      ctx.save();
+      ctx.clip();
+
+      const designer = _state.State.resources.get(_state.State.assets.designer);
+
+      ctx.drawImage(designer, 0, 0, designer.naturalWidth, designer.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+      ctx.restore();
+      ctx.stroke();
+    }
+
+    ctx.strokeRect(this.rect.x, this.rect.y, this.rect.width, this.rect.height); // ctx.fill();
+  }
+
+  x(x) {
+    return this.rect.left + x * this.rect.width;
+  }
+
+  y(y) {
+    return this.rect.top + y * this.rect.height;
+  }
+  /*
+  remove_b(polygon, firstSegment, lastSegment) {
+  	if (polygon.segments.length) {
+  		const cutPoints = polygon.getPoints(true);
+  		let checkPoints = cutPoints.slice();
+  		if (checkPoints.length === 2) {
+  			const last = checkPoints[checkPoints.length - 1];
+  			if (lastSegment.a.distanceTo(last) < lastSegment.b.distanceTo(last)) {
+  				checkPoints.push(lastSegment.a);
+  			} else {
+  				checkPoints.push(lastSegment.b);
+  			}
+  		}
+  		const isClockWise = polygon.IsClockwise(checkPoints);
+  		let s1, s2;
+  		if (isClockWise) {
+  			cutPoints.reverse();
+  			s1 = lastSegment;
+  			s2 = firstSegment;
+  		} else {
+  			s1 = firstSegment;
+  			s2 = lastSegment;
+  		}
+  		const i1 = this.segments.indexOf(s1);
+  		const i2 = this.segments.indexOf(s2);
+  		// console.log(s1, s2);
+  		// console.log('close!', i1, i2);
+  		// console.log('cutPoints.length', cutPoints.length, polygon.segments.length);
+  		const points = [s1.a];
+  		points.push.apply(points, cutPoints);
+  		const from = i2 + 1;
+  		const to = i1; // i1 === i2 ? i1 + 1 : i1;
+  		const t = this.segments.length;
+  		console.log(from, to, i1, i2, t, isClockWise);
+  		for (let j = from; j < from + t; j++) {
+  			const i = j % t;
+  			points.push(this.segments[i].a);
+  			if (i === to) {
+  				break;
+  			}
+  		}
+  		this.rebuild(points);
+  	}
+  }
+  	remove_c(polygon, firstSegment, lastSegment) {
+  	if (polygon.segments.length) {
+  		// console.log(firstSegment, lastSegment);
+  		const i1 = this.segments.indexOf(firstSegment);
+  		const i2 = this.segments.indexOf(lastSegment);
+  		if (i1 !== -1 && i2 !== -1) {
+  			// console.log('close!', i1, i2);
+  			const cutPoints = polygon.getPoints(true);
+  			// console.log('cutPoints.length', cutPoints.length, polygon.segments.length);
+  			const min = Math.min(i1, i2);
+  			const max = Math.max(i1, i2);
+  			const points = [];
+  			for (let i = 0; i <= min; i++) {
+  				const s = this.segments[i];
+  				points.push(s.a);
+  			}
+  			const first = cutPoints[0];
+  			const last = cutPoints[cutPoints.length - 1];
+  			if (last.distanceTo(points[points.length - 1]) < first.distanceTo(points[points.length - 1])) {
+  				cutPoints.reverse();
+  			}
+  			points.push.apply(points, cutPoints);
+  			for (let i = max + 1; i < this.segments.length; i++) {
+  				const s = this.segments[i];
+  				points.push(s.a);
+  			}
+  			points.push(points[0]);
+  			this.rebuild(points);
+  		}
+  	}
+  }
+  */
+
+
+}
+
+exports.default = Ground;
+
+},{"./geometry/polygon":8,"./geometry/rect":9,"./geometry/segment":10,"./state":15}],13:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _segment = _interopRequireDefault(require("./geometry/segment"));
+
+var _vector = _interopRequireDefault(require("./geometry/vector2"));
+
+var _state = require("./state");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+class Player {
+  get nx() {
+    return this.position.x + this.direction.x * this.speed;
+  }
+
+  get ny() {
+    return this.position.y + this.direction.y * this.speed;
+  }
+
+  constructor() {
+    const ground = _state.State.ground;
+    this.position = new _vector.default(ground.x(0.5), ground.y(1));
+    this.direction = new _vector.default(0, 0);
+    this.speed = 5;
+    this.segment = new _segment.default();
+    this.active = false;
+  }
+
+  update() {
+    this.checkDirection();
+    this.move();
+    this.draw();
+  }
+
+  draw() {
+    // const ground = State.ground;
+    const canvas = _state.State.canvas;
+
+    const diamond = _state.State.resources.get(_state.State.assets.diamond);
+    /*
+    const ctx = canvas.ctx;
+    ctx.save();
+    ctx.translate(this.position.x, this.position.y);
+    if (this.getOrientation() === 1) {
+    	ctx.rotate(Math.PI / 2);
+    }
+    ctx.drawImage(diamond, -diamond.naturalWidth / 2 + 100, -diamond.naturalHeight / 2);
+    ctx.restore();
+    */
+
+
+    canvas.drawImage(diamond, this.position.x, this.position.y, 1, this.getOrientation() === 0 ? Math.PI / 2 : 0);
+    /*
+    ctx.beginPath();
+    ctx.strokeStyle = "black";
+    ctx.arc(this.position.x, this.position.y, 5, 0, 2 * Math.PI, true);
+    ctx.stroke();
+    ctx.fillStyle = "green";
+    ctx.fill();
+    */
+  }
+
+  getOrientation() {
+    let o = 0;
+
+    if (this.currentSegment && Math.abs(this.currentSegment.a.x - this.currentSegment.b.x) < 1) {
+      o = 1;
+    }
+
+    return o;
+  }
+
+  checkDirection() {
+    this.active = _state.State.keys.shift || _state.State.keys.space;
+    const direction = this.direction;
+
+    if (_state.State.keys.left) {
+      direction.x = -1;
+      direction.y = 0;
+    } else if (_state.State.keys.right) {
+      direction.x = 1;
+      direction.y = 0;
+    } else if (_state.State.keys.up) {
+      direction.x = 0;
+      direction.y = -1;
+    } else if (_state.State.keys.down) {
+      direction.x = 0;
+      direction.y = 1;
+    } else {
+      direction.x = 0;
+      direction.y = 0;
+    }
+  }
+
+  move() {
+    const ground = _state.State.ground;
+    const cut = _state.State.cut;
+    let nx = this.nx;
+    let ny = this.ny;
+    const segment = this.segment;
+    segment.a.set(this.position.x, this.position.y);
+    segment.b.set(nx, ny);
+    let hitted;
+
+    if (this.active && (this.direction.x || this.direction.y)) {
+      if (hitted = ground.hit(this, 3)) {
+        if (hitted instanceof _segment.default && cut.segments.length) {
+          // console.log('close');
+          const i = hitted.getIntersection(this.segment);
+
+          if (i && (i.intersectA || i.intersectB)) {
+            this.position.x = i.x;
+            this.position.y = i.y;
+          }
+
+          const segment = cut.segments[cut.segments.length - 1];
+          segment.b.x = this.position.x;
+          segment.b.y = this.position.y;
+          this.lastSegment = hitted;
+          this.currentSegment = hitted;
+          this.direction.x = 0;
+          this.direction.y = 0; // console.log('cut.segments.length', cut.segments.length);
+
+          ground.remove(cut, this.firstSegment, this.lastSegment);
+
+          _state.State.onPlayerCut();
+
+          cut.segments = [];
+        } else {
+          this.firstSegment = hitted;
+          this.currentSegment = hitted;
+        }
+      } else if (cut.hitSegments(this, 3)) {
+        cut.reset(this);
+        this.direction.x = 0;
+        this.direction.y = 0;
+
+        _state.State.onPlayerReset();
+      } else if (!ground.willBeInside(this)) {
+        // console.log('outside');
+        this.direction.x = 0;
+        this.direction.y = 0;
+      } else {
+        // console.log('segment');
+        cut.move(this);
+        this.currentSegment = cut.segments[cut.segments.length - 1];
+      }
+    } else {
+      hitted = ground.hit(this, 3);
+
+      if (hitted) {
+        this.firstSegment = hitted;
+        this.currentSegment = hitted;
+      } else {
+        this.direction.x = 0;
+        this.direction.y = 0;
+      }
+    }
+
+    this.position.x = this.nx;
+    this.position.y = this.ny;
+  }
+
+}
+
+exports.default = Player;
+
+},{"./geometry/segment":10,"./geometry/vector2":11,"./state":15}],14:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+const cache = {};
+const callbacks = [];
+
+class Resources {
+  static loadAssets(assets) {
+    this.load(Object.keys(assets).map(k => assets[k]));
+  }
+
+  static load(urlOrArr) {
+    if (urlOrArr instanceof Array) {
+      urlOrArr.forEach(url => {
+        Resources.loadUrl(url);
+      });
+    } else {
+      Resources.loadUrl(urlOrArr);
+    }
+  }
+
+  static loadUrl(url) {
+    if (cache[url]) {
+      return cache[url];
+    } else {
+      var image = new Image();
+
+      image.onload = () => {
+        cache[url] = image;
+
+        if (Resources.isReady()) {
+          callbacks.forEach(callback => {
+            callback();
+          });
+        }
+      };
+
+      cache[url] = false;
+      image.src = url;
+    }
+  }
+
+  static get(url) {
+    return cache[url];
+  }
+
+  static isReady() {
+    var ready = true;
+
+    for (var k in cache) {
+      if (cache.hasOwnProperty(k) && !cache[k]) {
+        ready = false;
+      }
+    }
+
+    return ready;
+  }
+
+  static onReady(callback) {
+    callbacks.push(callback);
+  }
+
+}
+
+exports.default = Resources;
+
+},{}],15:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.State = void 0;
+const State = {
+  debug: false,
+  intro: true,
+  rules: false,
+  game: false,
+  paused: true,
+  ended: false,
+  won: false,
+  lost: false,
+  keys: {},
+  minNeededScore: 75,
+  score: 0,
+  area: 0,
+  minEnemies: 2,
+  maxEnemies: 6,
+  addEnemy: () => {},
+  removeEnemy: () => {},
+  addScore: () => {},
+  addEnemyScore: () => {},
+  onPlayerCut: () => {},
+  onPlayerReset: () => {}
+};
+exports.State = State;
+
+},{}],16:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
 class IntersectionService {
   static callbacks() {
     if (!this.callbacks_) {
@@ -13598,7 +15726,7 @@ class IntersectionService {
 
 exports.default = IntersectionService;
 
-},{}],5:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13852,7 +15980,7 @@ class PainterComponent {
 
 exports.default = PainterComponent;
 
-},{"tinycolor2":3}],6:[function(require,module,exports){
+},{"tinycolor2":3}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13877,7 +16005,7 @@ class ParticleComponent {
         this.init();
         this.animate();
       } else {
-        TweenMax.killTweensOf(props);
+        gsap.killTweensOf(props);
       }
     });
   }
@@ -13886,7 +16014,7 @@ class ParticleComponent {
     const node = this.node;
     const props = this.props;
     props.pow = 0;
-    TweenMax.set(node, {
+    gsap.set(node, {
       scale: 0.4 + Math.random() * 0.6,
       opacity: 1,
       x: 0,
@@ -13900,14 +16028,14 @@ class ParticleComponent {
     let vx = -10 + Math.random() * 20;
     let vy = -3 - Math.random() * 4;
     let vr = -3 + Math.random() * 6;
-    const tween = TweenMax.fromTo(props, 2.5, {
+    const tween = gsap.fromTo(props, 2.5, {
       pow: 0
     }, {
       pow: 1,
       overwrite: 'all',
       onUpdate: () => {
         // console.log(props.pow);
-        TweenMax.set(node, {
+        gsap.set(node, {
           opacity: (1 - props.pow) * (1 - props.pow),
           rotation: `+=${vr}deg`,
           x: `+=${vx}`,
@@ -13920,7 +16048,7 @@ class ParticleComponent {
         // console.log(props.pow);
         vx = -10 + Math.random() * 20;
         vy = -3 - Math.random() * 4;
-        TweenMax.set(node, {
+        gsap.set(node, {
           x: 0,
           y: 0
         });
@@ -13934,7 +16062,7 @@ class ParticleComponent {
 
 exports.default = ParticleComponent;
 
-},{"../intersection/intersection.service":4}],7:[function(require,module,exports){
+},{"../intersection/intersection.service":16}],19:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13979,7 +16107,7 @@ class PointerComponent {
 
   animate() {
     this.ro_ += (this.ro - this.ro_) / 8;
-    TweenMax.set(this.node, {
+    gsap.set(this.node, {
       rotation: `${this.ro_ * 3600}deg`,
       x: this.mx,
       y: this.my
@@ -14034,12 +16162,14 @@ class PointerComponent {
 
 exports.default = PointerComponent;
 
-},{}],8:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 "use strict";
 
 var _locomotiveScroll = _interopRequireDefault(require("locomotive-scroll"));
 
 var _swiper = _interopRequireDefault(require("swiper"));
+
+var _game = _interopRequireDefault(require("./game/game"));
 
 var _intersection = _interopRequireDefault(require("./intersection/intersection.service"));
 
@@ -14061,7 +16191,8 @@ class SplendidiSplendenti {
     this.addScrollCallback(this.initNonSolo());
     this.addScrollCallback(this.initBanners());
     this.addScrollCallback(this.initCoriander());
-    this.addScrollCallback(this.initMouths()); // this.addScrollCallback(this.initPainter());
+    this.addScrollCallback(this.initMouths());
+    this.addScrollCallback(this.initDesigner()); // this.addScrollCallback(this.initPainter());
 
     this.addScrollCallback(this.initEmergency());
     this.addScrollCallback(this.initPopup());
@@ -14125,7 +16256,7 @@ class SplendidiSplendenti {
     if (search) {
       return y => {
         if (window.innerWidth >= 768) {
-          TweenMax.set(search, {
+          gsap.set(search, {
             y: y
           });
         }
@@ -14190,10 +16321,10 @@ class SplendidiSplendenti {
     return y => {
       // if (window.innerWidth >= 768) {
       y = Math.min(y, picture.offsetTop + picture.offsetHeight - professional.offsetTop - 30);
-      TweenMax.set(bullets, {
+      gsap.set(bullets, {
         y: y
       });
-      TweenMax.set(professional, {
+      gsap.set(professional, {
         y: y
       }); // }
     };
@@ -14244,19 +16375,19 @@ class SplendidiSplendenti {
 
           if (i === 5) {
             const box = element.querySelector('.box');
-            TweenMax.to(box, 0.5, {
+            gsap.to(box, 0.5, {
               opacity: 0,
               ease: Quad.easeOut
             });
             const doc = element.querySelector('.document');
-            TweenMax.to(doc, 0.5, {
+            gsap.to(doc, 0.5, {
               scale: 1.2,
               rotation: '-10deg',
               ease: Elastic.easeOut.config(1, 0.3)
             });
           }
 
-          TweenMax.to(element, 1, {
+          gsap.to(element, 1, {
             scale: '-=0.01',
             rotation: `+=${-2 + Math.random() * 4}deg`,
             ease: Elastic.easeOut.config(1, 0.3),
@@ -14267,7 +16398,7 @@ class SplendidiSplendenti {
                 setClass();
               }
 
-              TweenMax.to(element, 1.5, {
+              gsap.to(element, 1.5, {
                 scale: 1,
                 rotation: 0,
                 ease: Elastic.easeOut.config(1, 0.3)
@@ -14318,7 +16449,7 @@ class SplendidiSplendenti {
         if (i < 4) {
           i++;
           setClass();
-          TweenMax.to(element, 1, {
+          gsap.to(element, 1, {
             scale: '-=0.01',
             rotation: `+=${-2 + Math.random() * 4}deg`,
             ease: Elastic.easeOut.config(1, 0.3),
@@ -14331,7 +16462,7 @@ class SplendidiSplendenti {
                 openPopup();
               }
 
-              TweenMax.to(element, 1.5, {
+              gsap.to(element, 1.5, {
                 scale: 1,
                 rotation: 0,
                 ease: Elastic.easeOut.config(1, 0.3)
@@ -14353,9 +16484,17 @@ class SplendidiSplendenti {
       function Popup() {
         this.node = node;
         const body = document.querySelector('body');
-        const close = node.querySelector('.btn--close');
+
+        const onClose = () => {
+          console.log('onClose', node);
+          const closeButtons = node.querySelectorAll('.btn--close');
+          Array.prototype.slice.call(closeButtons).forEach(button => button.removeEventListener('click', onClose));
+          this.close();
+        };
 
         this.open = () => {
+          const closeButtons = node.querySelectorAll('.btn--close');
+          Array.prototype.slice.call(closeButtons).forEach(button => button.addEventListener('click', onClose));
           node.classList.add('active');
           body.classList.add('popup--active');
           setTimeout(() => {
@@ -14373,14 +16512,6 @@ class SplendidiSplendenti {
             body.classList.remove('popup--active');
           }, 400);
         };
-
-        const onClose = () => {
-          this.close();
-        };
-
-        if (close) {
-          close.addEventListener('click', onClose);
-        }
       }
 
       const popup = new Popup();
@@ -14399,7 +16530,7 @@ class SplendidiSplendenti {
     return y => {
       if (window.innerWidth >= 768) {
         popups.forEach(popup => {
-          TweenMax.set(popup.node, {
+          gsap.set(popup.node, {
             y: y
           });
         });
@@ -14424,7 +16555,7 @@ class SplendidiSplendenti {
 
       _intersection.default.observe(element, intersect => {
         if (intersect) {
-          TweenMax.fromTo(inner, width / 50, {
+          gsap.fromTo(inner, width / 50, {
             x: -width
           }, {
             x: -width + width * direction * -1,
@@ -14432,7 +16563,7 @@ class SplendidiSplendenti {
             repeat: -1
           });
         } else {
-          TweenMax.killTweensOf(inner);
+          gsap.killTweensOf(inner);
         }
       });
 
@@ -14456,14 +16587,14 @@ class SplendidiSplendenti {
       element.addEventListener('click', () => {
         if (i < 5) {
           i++;
-          TweenMax.to(element, 1.5, {
+          gsap.to(element, 1.5, {
             scale: '+=0.1',
             rotation: `+=${-5 + Math.random() * 10}deg`,
             ease: Elastic.easeOut.config(1, 0.3),
             overwrite: 'all',
             onComplete: () => {
               i = 0;
-              TweenMax.to(element, 1.5, {
+              gsap.to(element, 1.5, {
                 scale: 1,
                 rotation: 0,
                 ease: Elastic.easeOut.config(1, 0.3)
@@ -14476,7 +16607,7 @@ class SplendidiSplendenti {
 
       if (flash) {
         const tweenFlash = () => {
-          TweenMax.fromTo(flash, 1, {
+          gsap.fromTo(flash, 1, {
             scale: 0.05,
             rotation: '0deg',
             opacity: 0
@@ -14486,7 +16617,7 @@ class SplendidiSplendenti {
             opacity: 1,
             ease: Quad.easeOut,
             onComplete: () => {
-              TweenMax.to(flash, 2, {
+              gsap.to(flash, 2, {
                 scale: 1,
                 rotation: '390deg',
                 opacity: 1,
@@ -14503,10 +16634,32 @@ class SplendidiSplendenti {
           if (intersect) {
             tweenFlash();
           } else {
-            TweenMax.killTweensOf(flash);
+            gsap.killTweensOf(flash);
           }
         });
       }
+    });
+  }
+
+  initDesigner() {
+    let game;
+    const button = document.querySelector('.section--designer .btn--cta');
+    button.addEventListener('click', event => {
+      const openPopup = () => {
+        const popupNode = document.querySelector('.section--designer .group--popup');
+
+        if (popupNode) {
+          this.openPopup(popupNode);
+
+          if (!game) {
+            game = new _game.default();
+          }
+        }
+      };
+
+      openPopup();
+      event.preventDefault();
+      event.stopImmediatePropagation();
     });
   }
 
@@ -14519,7 +16672,7 @@ class SplendidiSplendenti {
       const r = -10 + Math.floor(Math.random() * 20);
 
       const randomRotate = () => {
-        TweenMax.fromTo(element, 2, {
+        gsap.fromTo(element, 2, {
           rotation: `${r}deg`
         }, {
           rotation: `${r * -1}deg`,
@@ -14533,12 +16686,12 @@ class SplendidiSplendenti {
         if (intersect) {
           randomRotate();
         } else {
-          TweenMax.killTweensOf(element);
+          gsap.killTweensOf(element);
         }
       });
 
       element.addEventListener('click', () => {
-        TweenMax.to(element, 1, {
+        gsap.to(element, 1, {
           rotation: '+=90deg',
           ease: Elastic.easeOut.config(1, 0.3),
           overwrite: 'all',
@@ -14583,5 +16736,5 @@ class SplendidiSplendenti {
 
 const splendidiSplendenti = new SplendidiSplendenti();
 
-},{"./intersection/intersection.service":4,"./painter/painter.component":5,"./particle/particle.component":6,"./pointer/pointer":7,"locomotive-scroll":1,"swiper":2}]},{},[8]);
+},{"./game/game":7,"./intersection/intersection.service":16,"./painter/painter.component":17,"./particle/particle.component":18,"./pointer/pointer":19,"locomotive-scroll":1,"swiper":2}]},{},[20]);
 //# sourceMappingURL=splendidi-splendenti.js.map

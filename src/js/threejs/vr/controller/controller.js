@@ -156,14 +156,14 @@ export default class Controller extends EmittableGroup {
 	}
 
 	press(index) {
-		TweenMax.to(this.buttons[index], 0.3, {
+		gsap.to(this.buttons[index], 0.3, {
 			value: 1,
 			ease: Power2.easeOut,
 		});
 	}
 
 	release(index) {
-		TweenMax.to(this.buttons[index], 0.3, {
+		gsap.to(this.buttons[index], 0.3, {
 			value: 0,
 			ease: Power2.easeOut,
 		});

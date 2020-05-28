@@ -1,5 +1,6 @@
 import LocomotiveScroll from 'locomotive-scroll';
 import Swiper from 'swiper';
+import Game from "./game/game";
 import IntersectionService from './intersection/intersection.service';
 import PainterComponent from './painter/painter.component';
 import ParticleComponent from './particle/particle.component';
@@ -17,6 +18,7 @@ class SplendidiSplendenti {
 		this.addScrollCallback(this.initBanners());
 		this.addScrollCallback(this.initCoriander());
 		this.addScrollCallback(this.initMouths());
+		this.addScrollCallback(this.initDesigner());
 		// this.addScrollCallback(this.initPainter());
 		this.addScrollCallback(this.initEmergency());
 		this.addScrollCallback(this.initPopup());
@@ -77,7 +79,7 @@ class SplendidiSplendenti {
 		if (search) {
 			return (y) => {
 				if (window.innerWidth >= 768) {
-					TweenMax.set(search, { y: y });
+					gsap.set(search, { y: y });
 				}
 			}
 		}
@@ -139,8 +141,8 @@ class SplendidiSplendenti {
 		return (y) => {
 			// if (window.innerWidth >= 768) {
 			y = Math.min(y, picture.offsetTop + picture.offsetHeight - professional.offsetTop - 30);
-			TweenMax.set(bullets, { y: y });
-			TweenMax.set(professional, { y: y });
+			gsap.set(bullets, { y: y });
+			gsap.set(professional, { y: y });
 			// }
 		}
 	}
@@ -186,18 +188,18 @@ class SplendidiSplendenti {
 					setClass();
 					if (i === 5) {
 						const box = element.querySelector('.box');
-						TweenMax.to(box, 0.5, {
+						gsap.to(box, 0.5, {
 							opacity: 0,
 							ease: Quad.easeOut,
 						});
 						const doc = element.querySelector('.document');
-						TweenMax.to(doc, 0.5, {
+						gsap.to(doc, 0.5, {
 							scale: 1.2,
 							rotation: '-10deg',
 							ease: Elastic.easeOut.config(1, 0.3),
 						});
 					}
-					TweenMax.to(element, 1, {
+					gsap.to(element, 1, {
 						scale: '-=0.01',
 						rotation: `+=${-2 + Math.random() * 4}deg`,
 						ease: Elastic.easeOut.config(1, 0.3),
@@ -207,7 +209,7 @@ class SplendidiSplendenti {
 								i = 0;
 								setClass();
 							}
-							TweenMax.to(element, 1.5, {
+							gsap.to(element, 1.5, {
 								scale: 1,
 								rotation: 0,
 								ease: Elastic.easeOut.config(1, 0.3),
@@ -251,7 +253,7 @@ class SplendidiSplendenti {
 				if (i < 4) {
 					i++;
 					setClass();
-					TweenMax.to(element, 1, {
+					gsap.to(element, 1, {
 						scale: '-=0.01',
 						rotation: `+=${-2 + Math.random() * 4}deg`,
 						ease: Elastic.easeOut.config(1, 0.3),
@@ -263,7 +265,7 @@ class SplendidiSplendenti {
 							} else {
 								openPopup();
 							}
-							TweenMax.to(element, 1.5, {
+							gsap.to(element, 1.5, {
 								scale: 1,
 								rotation: 0,
 								ease: Elastic.easeOut.config(1, 0.3),
@@ -284,8 +286,15 @@ class SplendidiSplendenti {
 			function Popup() {
 				this.node = node;
 				const body = document.querySelector('body');
-				const close = node.querySelector('.btn--close');
+				const onClose = () => {
+					console.log('onClose', node);
+					const closeButtons = node.querySelectorAll('.btn--close');
+					Array.prototype.slice.call(closeButtons).forEach(button => button.removeEventListener('click', onClose));
+					this.close();
+				}
 				this.open = () => {
+					const closeButtons = node.querySelectorAll('.btn--close');
+					Array.prototype.slice.call(closeButtons).forEach(button => button.addEventListener('click', onClose));
 					node.classList.add('active');
 					body.classList.add('popup--active');
 					setTimeout(() => {
@@ -302,12 +311,6 @@ class SplendidiSplendenti {
 						body.classList.remove('popup--active');
 					}, 400);
 				}
-				const onClose = () => {
-					this.close();
-				}
-				if (close) {
-					close.addEventListener('click', onClose);
-				}
 			}
 			const popup = new Popup();
 			return popup;
@@ -322,7 +325,7 @@ class SplendidiSplendenti {
 		return (y) => {
 			if (window.innerWidth >= 768) {
 				popups.forEach(popup => {
-					TweenMax.set(popup.node, { y: y });
+					gsap.set(popup.node, { y: y });
 				});
 			}
 		}
@@ -343,9 +346,9 @@ class SplendidiSplendenti {
 			}
 			IntersectionService.observe(element, (intersect) => {
 				if (intersect) {
-					TweenMax.fromTo(inner, width / 50, { x: -width }, { x: -width + width * direction * -1, ease: Linear.easeNone, repeat: -1 });
+					gsap.fromTo(inner, width / 50, { x: -width }, { x: -width + width * direction * -1, ease: Linear.easeNone, repeat: -1 });
 				} else {
-					TweenMax.killTweensOf(inner);
+					gsap.killTweensOf(inner);
 				}
 			});
 			element.classList.add('init');
@@ -367,14 +370,14 @@ class SplendidiSplendenti {
 			element.addEventListener('click', () => {
 				if (i < 5) {
 					i++;
-					TweenMax.to(element, 1.5, {
+					gsap.to(element, 1.5, {
 						scale: '+=0.1',
 						rotation: `+=${-5 + Math.random() * 10}deg`,
 						ease: Elastic.easeOut.config(1, 0.3),
 						overwrite: 'all',
 						onComplete: () => {
 							i = 0;
-							TweenMax.to(element, 1.5, {
+							gsap.to(element, 1.5, {
 								scale: 1,
 								rotation: 0,
 								ease: Elastic.easeOut.config(1, 0.3),
@@ -386,7 +389,7 @@ class SplendidiSplendenti {
 			const flash = element.querySelector('.flash');
 			if (flash) {
 				const tweenFlash = () => {
-					TweenMax.fromTo(flash, 1, {
+					gsap.fromTo(flash, 1, {
 						scale: 0.05,
 						rotation: '0deg',
 						opacity: 0
@@ -396,7 +399,7 @@ class SplendidiSplendenti {
 						opacity: 1,
 						ease: Quad.easeOut,
 						onComplete: () => {
-							TweenMax.to(flash, 2, {
+							gsap.to(flash, 2, {
 								scale: 1,
 								rotation: '390deg',
 								opacity: 1,
@@ -412,10 +415,29 @@ class SplendidiSplendenti {
 					if (intersect) {
 						tweenFlash();
 					} else {
-						TweenMax.killTweensOf(flash);
+						gsap.killTweensOf(flash);
 					}
 				});
 			}
+		});
+	}
+
+	initDesigner() {
+		let game;
+		const button = document.querySelector('.section--designer .btn--cta')
+		button.addEventListener('click', (event) => {
+			const openPopup = () => {
+				const popupNode = document.querySelector('.section--designer .group--popup');
+				if (popupNode) {
+					this.openPopup(popupNode);
+					if (!game) {
+						game = new Game();
+					}
+				}
+			}
+			openPopup();
+			event.preventDefault();
+			event.stopImmediatePropagation();
 		});
 	}
 
@@ -427,7 +449,7 @@ class SplendidiSplendenti {
 		const emoji = [].slice.call(document.querySelectorAll('.emoji')).forEach(element => {
 			const r = (-10 + Math.floor(Math.random() * 20));
 			const randomRotate = () => {
-				TweenMax.fromTo(element, 2, {
+				gsap.fromTo(element, 2, {
 					rotation: `${r}deg`
 				}, {
 					rotation: `${r * -1}deg`,
@@ -440,11 +462,11 @@ class SplendidiSplendenti {
 				if (intersect) {
 					randomRotate();
 				} else {
-					TweenMax.killTweensOf(element);
+					gsap.killTweensOf(element);
 				}
 			});
 			element.addEventListener('click', () => {
-				TweenMax.to(element, 1, {
+				gsap.to(element, 1, {
 					rotation: '+=90deg',
 					ease: Elastic.easeOut.config(1, 0.3),
 					overwrite: 'all',

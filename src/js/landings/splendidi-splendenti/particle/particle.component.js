@@ -11,7 +11,7 @@ export default class ParticleComponent {
 				this.init();
 				this.animate();
 			} else {
-				TweenMax.killTweensOf(props);
+				gsap.killTweensOf(props);
 			}
 		});
 	}
@@ -20,7 +20,7 @@ export default class ParticleComponent {
 		const node = this.node;
 		const props = this.props;
 		props.pow = 0;
-		TweenMax.set(node, {
+		gsap.set(node, {
 			scale: 0.4 + Math.random() * 0.6,
 			opacity: 1,
 			x: 0,
@@ -34,14 +34,14 @@ export default class ParticleComponent {
 		let vx = -10 + Math.random() * 20;
 		let vy = -3 - Math.random() * 4;
 		let vr = -3 + Math.random() * 6;
-		const tween = TweenMax.fromTo(props, 2.5, {
+		const tween = gsap.fromTo(props, 2.5, {
 			pow: 0
 		}, {
 			pow: 1,
 			overwrite: 'all',
 			onUpdate: () => {
 				// console.log(props.pow);
-				TweenMax.set(node, {
+				gsap.set(node, {
 					opacity: (1 - props.pow) * (1 - props.pow),
 					rotation: `+=${vr}deg`,
 					x: `+=${vx}`,
@@ -54,7 +54,7 @@ export default class ParticleComponent {
 				// console.log(props.pow);
 				vx = -10 + Math.random() * 20;
 				vy = -3 - Math.random() * 4;
-				TweenMax.set(node, {
+				gsap.set(node, {
 					x: 0,
 					y: 0,
 				})
