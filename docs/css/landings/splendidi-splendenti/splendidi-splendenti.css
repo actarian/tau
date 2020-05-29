@@ -3474,6 +3474,9 @@ html.has-scroll-dragging {
     .page-template-splendidi-splendenti header ul.menu li a, .page-template-splendidi-splendenti header ul.menu li a:link, .page-template-splendidi-splendenti header ul.menu li a:active, .page-template-splendidi-splendenti header ul.menu li a:visited, .page-template-splendidi-splendenti header ul.menu li a:hover {
       color: #0b0c11; }
 
+.page-template-splendidi-splendenti.popup--active header {
+  display: none !important; }
+
 @media (min-width: 940px) {
   .page-template-splendidi-splendenti header .hamburger {
     display: none; }

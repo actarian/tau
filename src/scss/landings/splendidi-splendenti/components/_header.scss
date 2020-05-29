@@ -208,6 +208,12 @@
 
 	}
 
+	&.popup--active {
+		header {
+			display: none !important;
+		}
+	}
+
 	@media (min-width: 940px) {
 		header {
 			.hamburger {

@@ -78,7 +78,7 @@ class SplendidiSplendenti {
 		});
 		if (search) {
 			return (y) => {
-				if (window.innerWidth >= 768) {
+				if (true || window.innerWidth >= 768) {
 					gsap.set(search, { y: y });
 				}
 			}

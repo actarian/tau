@@ -13665,12 +13665,11 @@ class Cut extends _polygon.default {
     this.direction.y = actor.direction.y;
   }
 
-  close(actor) {
+  close() {
     this.segments = [];
   }
 
-  reset(actor) {
-    actor.position.copy(this.start);
+  reset() {
     this.direction.x = 0;
     this.direction.y = 0;
     this.segments = [];
@@ -13808,8 +13807,7 @@ class Enemy {
     segment.b.set(this.position.x + this.direction.x * (mouth.naturalHeight / 2 + this.speed), this.position.y + this.direction.y * (mouth.naturalHeight / 2 + this.speed));
 
     if (cut.hit(this, mouth.naturalHeight / 2)) {
-      const player = _state.State.player;
-      cut.reset(player);
+      _state.State.onPlayerReset(this);
     }
 
     const bounce = ground.bounce(segment);
@@ -14083,8 +14081,36 @@ class Game {
     progress.innerText = percent;
   }
 
-  onPlayerReset() {
+  onPlayerReset(enemy) {
     _state.State.keys.space = _state.State.keys.shift = false;
+
+    if (enemy) {
+      _state.State.paused = true;
+      const obj = {
+        scale: 1
+      };
+      gsap.to(obj, {
+        scale: 1.2,
+        duration: 0.2,
+        repeat: 5,
+        yoyo: true,
+        onUpdate: () => {
+          _state.State.player.scale = obj.scale;
+          this.draw();
+        },
+        onComplete: () => {
+          _state.State.player.position.copy(_state.State.cut.start);
+
+          _state.State.cut.reset();
+
+          _state.State.paused = false;
+        }
+      });
+    } else {
+      _state.State.player.position.copy(_state.State.cut.start);
+
+      _state.State.cut.reset();
+    }
   }
 
   addEnemy() {
@@ -14124,6 +14150,18 @@ class Game {
 
   addScore(score) {
     _state.State.score += score; // console.log('addScore', score);
+  }
+
+  draw() {
+    _state.State.canvas.update();
+
+    _state.State.ground.draw();
+
+    _state.State.cut.draw();
+
+    _state.State.enemies.forEach(x => x.draw());
+
+    _state.State.player.draw();
   }
 
   loop() {
@@ -15415,6 +15453,7 @@ class Player {
 
   constructor() {
     const ground = _state.State.ground;
+    this.scale = 1;
     this.position = new _vector.default(ground.x(0.5), ground.y(1));
     this.direction = new _vector.default(0, 0);
     this.speed = 5;
@@ -15445,7 +15484,7 @@ class Player {
     */
 
 
-    canvas.drawImage(diamond, this.position.x, this.position.y, 1, this.getOrientation() === 0 ? Math.PI / 2 : 0);
+    canvas.drawImage(diamond, this.position.x, this.position.y, this.scale, this.getOrientation() === 0 ? Math.PI / 2 : 0);
     /*
     ctx.beginPath();
     ctx.strokeStyle = "black";
@@ -16255,7 +16294,7 @@ class SplendidiSplendenti {
 
     if (search) {
       return y => {
-        if (window.innerWidth >= 768) {
+        if (true || window.innerWidth >= 768) {
           gsap.set(search, {
             y: y
           });
