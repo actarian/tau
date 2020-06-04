@@ -4962,7 +4962,8 @@ footer {
       border-bottom: 2px solid black; }
       .game-container .group--rules .group--rule__text {
         margin: 0 0 15px 0;
-        font-size: 16px; }
+        font-size: 16px;
+        text-align: center; }
       .game-container .group--rules .group--rule__infographic {
         margin: 0;
         min-width: 0;
@@ -4975,6 +4976,8 @@ footer {
                 flex-direction: column; }
         .game-container .group--rules .group--rule__infographic > img + img {
           margin: 15px 0 0 0; }
+      .game-container .group--rules .group--rule.group--rule--space {
+        display: none; }
     .game-container .group--rules .btn--space {
       min-width: 100%; }
     .game-container .group--rules .group--cta .btn--cta {

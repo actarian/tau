@@ -37,6 +37,12 @@ class SplendidiSplendenti {
 					}, true);
 				}
 			}, 1); // 500
+			setTimeout(() => {
+				if (location.search === '?game') {
+					this.openGamePopup();
+					window.dispatchEvent(new Event('resize'));
+				}
+			}, 1000);
 		};
 	}
 
@@ -423,22 +429,26 @@ class SplendidiSplendenti {
 	}
 
 	initDesigner() {
-		let game;
 		const button = document.querySelector('.section--designer .btn--cta')
 		button.addEventListener('click', (event) => {
-			const openPopup = () => {
-				const popupNode = document.querySelector('.section--designer .group--popup');
-				if (popupNode) {
-					this.openPopup(popupNode);
-					if (!game) {
-						game = new Game();
-					}
-				}
-			}
-			openPopup();
+			this.openGamePopup();
 			event.preventDefault();
 			event.stopImmediatePropagation();
 		});
+	}
+
+	openGamePopup() {
+		let game;
+		const openPopup = () => {
+			const popupNode = document.querySelector('.section--designer .group--popup');
+			if (popupNode) {
+				this.openPopup(popupNode);
+				if (!game) {
+					game = new Game();
+				}
+			}
+		}
+		openPopup();
 	}
 
 	initPainter() {
