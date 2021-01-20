@@ -27,7 +27,7 @@
     "angular-messages": "1.7.8",
     "angular-sanitize": "1.7.8",
     "dat.gui": "0.7.6",
-    "gsap": "~3.2.6",
+    "gsap": "~3.6.0",
     "locomotive-scroll": "^3.3.11",
     "promise-polyfill": "8.1.0",
     "rxjs": "6.4.0",
